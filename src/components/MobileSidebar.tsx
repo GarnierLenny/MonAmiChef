@@ -97,7 +97,10 @@ export function MobileSidebar({
             <div className="p-4 space-y-4">
               {/* New Chat Button */}
               <Button
-                onClick={onNewChat}
+                onClick={() => {
+                  onNewChat();
+                  onClose();
+                }}
                 variant="outline"
                 className="w-full justify-start gap-2 border-chef-orange/30 text-chef-brown hover:bg-chef-orange/10"
               >

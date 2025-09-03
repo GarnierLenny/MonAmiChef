@@ -175,7 +175,7 @@ export default function ChatInterface({
                     : "bg-gray-100 text-gray-900"
                 }`}
               >
-                {message.role === "assistant" && (
+                {message.role === "model" && (
                   <div className="flex items-center space-x-2 mb-2">
                     <Sparkles className="w-4 h-4 text-orange-500" />
                     <span className="text-sm font-medium text-orange-600">
@@ -186,7 +186,7 @@ export default function ChatInterface({
 
                 {message.role === "user" ? (
                   <div className="font-sans">
-                    <ReactMarkdown>{message.content}</ReactMarkdown>
+                    <ReactMarkdown>{message.text}</ReactMarkdown>
                   </div>
                 ) : (
                   <div className="font-sans">
@@ -223,7 +223,7 @@ export default function ChatInterface({
                         ),
                       }}
                     >
-                      {message.content}
+                      {message.text}
                     </ReactMarkdown>
                   </div>
                 )}

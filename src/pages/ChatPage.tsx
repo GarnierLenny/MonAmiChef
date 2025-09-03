@@ -20,8 +20,8 @@ const initialAIText = (max: number): string =>
 
 const buildAiGreeting = (): ChatMessage => ({
   id: "initial",
-  role: "assistant",
-  content: initialAIText(MAX_CHARACTERS),
+  role: "model",
+  text: initialAIText(MAX_CHARACTERS),
   timestamp: new Date(),
 });
 
@@ -43,7 +43,6 @@ function ChatPage() {
     meat: [],
     vegetables: [],
     servings: null,
-    cooks: null,
   });
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -262,6 +261,7 @@ function ChatPage() {
       conversationId: chatId,
     };
 
+    console.log('test', payload);
     try {
       const res = await fetch(`${API_URL}/chat/ask`, {
         method: "POST",
