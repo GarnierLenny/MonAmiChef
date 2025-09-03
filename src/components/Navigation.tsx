@@ -54,7 +54,7 @@ const Navigation = () => {
               
               <div className="flex-1 p-4">
                 <div className="space-y-1">
-                  {menuItems.map((item, index) => (
+                  {menuItems.map((item) => (
                     <Button
                       key={item.text}
                       variant="ghost"
@@ -70,7 +70,7 @@ const Navigation = () => {
                 <div className="border-t my-4 border-chef-brown/20"></div>
                 
                 <div className="space-y-1">
-                  {secondaryItems.map((item, index) => (
+                  {secondaryItems.map((item) => (
                     <Button
                       key={item.text}
                       variant="ghost"

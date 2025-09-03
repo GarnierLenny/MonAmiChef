@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Clock, Users, Copy, Share2, Save, CheckCircle, X } from "lucide-react";
 
 interface Recipe {

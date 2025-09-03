@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { X, Check, Loader2, Crown, Sparkles } from "lucide-react";
 import { products, type Product } from "../stripe-config";
 import { supabase } from "../lib/supabase";

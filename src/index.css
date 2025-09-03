@@ -1,86 +1,94 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-@layer base {
-  :root {
-    --background: 0 0% 100%;
-    --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 240 10% 3.9%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
-    --primary: 24 9.8% 10%;
-    --primary-foreground: 60 9.1% 97.8%;
-    --secondary: 60 4.8% 95.9%;
-    --secondary-foreground: 24 9.8% 10%;
-    --muted: 60 4.8% 95.9%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 60 4.8% 95.9%;
-    --accent-foreground: 24 9.8% 10%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 60 9.1% 97.8%;
-    --border: 240 5.9% 90%;
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
-    --radius: 0.5rem;
-    
-    --sidebar-width: 280px;
-    --sidebar-width-mobile: 260px;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+@theme {
+  /* Colors */
+  --color-border: oklch(0.922 0 0);
+  --color-input: oklch(0.922 0 0);
+  --color-ring: oklch(0.708 0 0);
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.145 0 0);
+  --color-primary: oklch(0.205 0 0);
+  --color-primary-foreground: oklch(0.985 0 0);
+  --color-secondary: oklch(0.97 0 0);
+  --color-secondary-foreground: oklch(0.205 0 0);
+  --color-destructive: oklch(0.577 0.245 27.325);
+  --color-muted: oklch(0.97 0 0);
+  --color-muted-foreground: oklch(0.556 0 0);
+  --color-accent: oklch(0.97 0 0);
+  --color-accent-foreground: oklch(0.205 0 0);
+  --color-popover: oklch(1 0 0);
+  --color-popover-foreground: oklch(0.145 0 0);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.145 0 0);
 
-    --chef-orange: 25 95% 53%;
-    --chef-yellow: 48 96% 53%;
-    --chef-green: 142 76% 36%;
-    --chef-brown: 25 52% 25%;
-    --chef-cream: 48 60% 95%;
-  }
+  /* Dark mode colors */
+  --color-*-dark: initial;
+  --color-background-dark: oklch(0.145 0 0);
+  --color-foreground-dark: oklch(0.985 0 0);
+  --color-card-dark: oklch(0.205 0 0);
+  --color-card-foreground-dark: oklch(0.985 0 0);
+  --color-popover-dark: oklch(0.205 0 0);
+  --color-popover-foreground-dark: oklch(0.985 0 0);
+  --color-primary-dark: oklch(0.922 0 0);
+  --color-primary-foreground-dark: oklch(0.205 0 0);
+  --color-secondary-dark: oklch(0.269 0 0);
+  --color-secondary-foreground-dark: oklch(0.985 0 0);
+  --color-muted-dark: oklch(0.269 0 0);
+  --color-muted-foreground-dark: oklch(0.708 0 0);
+  --color-accent-dark: oklch(0.269 0 0);
+  --color-accent-foreground-dark: oklch(0.985 0 0);
+  --color-destructive-dark: oklch(0.704 0.191 22.216);
+  --color-border-dark: oklch(1 0 0 / 10%);
+  --color-input-dark: oklch(1 0 0 / 15%);
+  --color-ring-dark: oklch(0.556 0 0);
 
-  .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 60 9.1% 97.8%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 60 9.1% 97.8%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 60 9.1% 97.8%;
-    --primary: 60 9.1% 97.8%;
-    --primary-foreground: 24 9.8% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 60 9.1% 97.8%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 60 9.1% 97.8%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 60 9.1% 97.8%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
-    
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
+  /* Sidebar colors */
+  --color-sidebar-background: oklch(0.985 0 0);
+  --color-sidebar-foreground: oklch(0.145 0 0);
+  --color-sidebar-primary: oklch(0.205 0 0);
+  --color-sidebar-primary-foreground: oklch(0.985 0 0);
+  --color-sidebar-accent: oklch(0.97 0 0);
+  --color-sidebar-accent-foreground: oklch(0.205 0 0);
+  --color-sidebar-border: oklch(0.922 0 0);
+  --color-sidebar-ring: oklch(0.708 0 0);
+  
+  --color-sidebar-background-dark: oklch(0.205 0 0);
+  --color-sidebar-foreground-dark: oklch(0.985 0 0);
+  --color-sidebar-primary-dark: oklch(0.488 0.243 264.376);
+  --color-sidebar-primary-foreground-dark: oklch(0.985 0 0);
+  --color-sidebar-accent-dark: oklch(0.269 0 0);
+  --color-sidebar-accent-foreground-dark: oklch(0.985 0 0);
+  --color-sidebar-border-dark: oklch(1 0 0 / 10%);
+  --color-sidebar-ring-dark: oklch(0.556 0 0);
+
+  /* Chef theme colors */
+  --color-chef-orange: oklch(0.646 0.222 41.116);
+  --color-chef-yellow: oklch(0.828 0.189 84.429);
+  --color-chef-green: oklch(0.769 0.188 70.08);
+  --color-chef-brown: oklch(0.398 0.07 227.392);
+  --color-chef-cream: oklch(0.985 0.02 85);
+
+  /* Chart colors */
+  --color-chart-1: oklch(0.646 0.222 41.116);
+  --color-chart-2: oklch(0.6 0.118 184.704);
+  --color-chart-3: oklch(0.398 0.07 227.392);
+  --color-chart-4: oklch(0.828 0.189 84.429);
+  --color-chart-5: oklch(0.769 0.188 70.08);
+
+  --color-chart-1-dark: oklch(0.488 0.243 264.376);
+  --color-chart-2-dark: oklch(0.696 0.17 162.48);
+  --color-chart-3-dark: oklch(0.769 0.188 70.08);
+  --color-chart-4-dark: oklch(0.627 0.265 303.9);
+  --color-chart-5-dark: oklch(0.645 0.246 16.439);
+
+  /* Radius */
+  --radius: 0.625rem;
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-  body {
-    @apply bg-background text-foreground;
+@layer components {
+  .markdown-content p,
+  .markdown-content ul,
+  .markdown-content ol {
+    margin-bottom: 0.5rem;
   }
 }
-

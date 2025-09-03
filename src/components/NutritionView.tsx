@@ -5,17 +5,10 @@ import {
   FileText,
   Mail,
   Download,
-  TrendingUp,
-  PieChart,
-  Calculator,
-  User,
-  Ruler,
-  Weight,
-  Activity,
-  Bookmark,
   Clock,
-  Trash2,
-  ChefHat,
+  Calculator,
+  Weight,
+  Bookmark,
   Eye,
   Users,
 } from "lucide-react";
@@ -37,7 +30,6 @@ interface NutritionViewProps {
 
 export default function NutritionView({
   currentSubView,
-  recipe,
 }: NutritionViewProps) {
   const [bmiData, setBmiData] = React.useState<BMIData>({
     age: 25,
@@ -438,7 +430,7 @@ export default function NutritionView({
           </div>
 
           <div className="space-y-3">
-            {savedRecipes.map((recipe, index) => (
+            {savedRecipes.map((recipe) => (
               <div
                 key={recipe.id}
                 className="group flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-orange-50/30 rounded-lg border border-gray-200 hover:border-orange-300 hover:shadow-md transition-all duration-200"

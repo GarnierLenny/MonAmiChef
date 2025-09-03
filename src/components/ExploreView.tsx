@@ -1,4 +1,3 @@
-import React from "react";
 import { Compass, TrendingUp, Star, Clock, Users, Heart } from "lucide-react";
 
 export default function ExploreView() {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   Beef,
@@ -6,21 +6,13 @@ import {
   Apple,
   Salad,
   Fish,
-  Egg,
-  Milk,
   Carrot,
-  MapPin,
   Users,
   ChefHat,
   Globe,
-  Mountain,
-  Waves,
-  Sun,
-  Snowflake,
-  Coffee,
-  Pizza,
   UtensilsCrossed,
-  Soup,
+  Snowflake,
+  Sun,
   Sunrise,
   Clock,
   Moon,
@@ -417,7 +409,6 @@ export default function PreferenceSidebar({
   }, [chatId]);
 
   const servingOptions = [2, 3, 4, 5, 6, 8, 10, 12];
-  const cookOptions = [2, 3, 4, 5];
 
   const handleChipClick = (category: string, value: string | number) => {
     if (category === "servings" || category === "cooks") {
