@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, Plus, MoreHorizontal, Edit, Trash, Share } from "lucide-react";
+import { Plus, MoreHorizontal, Edit, Trash, Share } from "lucide-react";
 import { ChatItem, Preferences } from "@/types/types";
 import PreferencesSidebar from "./PreferenceSidebar";
 

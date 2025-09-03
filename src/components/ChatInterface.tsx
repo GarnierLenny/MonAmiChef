@@ -253,7 +253,7 @@ export default function ChatInterface({
         </div>
 
         {/* Input - Now sticky at bottom */}
-        <div className="flex-shrink-0 background-transparent backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="flex-shrink-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
           <div className="p-3">
           {/* Selected Preferences Tags */}
           {selectedTags.length > 0 && (
