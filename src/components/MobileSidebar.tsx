@@ -181,7 +181,7 @@ export function MobileSidebar({
               </div>
             </div>
           ) : (
-            <div className="h-full overflow-y-auto">
+            <div className="flex-1 min-h-0">
               <PreferencesSidebar
                 preferences={preferences}
                 onPreferenceChange={onPreferenceChange}
