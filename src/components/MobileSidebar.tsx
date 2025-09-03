@@ -60,9 +60,6 @@ export function MobileSidebar({
               alt="Chef Logo" 
               className="h-8 w-auto"
             />
-            <Button variant="ghost" size="icon" onClick={onClose}>
-              <X className="h-5 w-5" />
-            </Button>
           </div>
         </div>
 
