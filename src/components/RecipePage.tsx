@@ -349,7 +349,7 @@ export default function RecipePage() {
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-2 pr-2">
-              {recipe.ingredients.map((ingredient, index) => (
+              {recipe.ingredients.map((ingredient: string, index: number) => (
                 <div
                   key={index}
                   className="group flex items-start space-x-3 p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg border border-emerald-200 hover:from-emerald-100 hover:to-teal-100 transition-all duration-300 hover:shadow-md transform hover:-translate-y-0.5"
@@ -459,7 +459,7 @@ export default function RecipePage() {
             </div>
 
             <div className="flex-1 overflow-y-auto space-y-3 pr-2">
-              {recipe.instructions.map((instruction, index) => (
+              {recipe.instructions.map((instruction: string, index: number) => (
                 <div
                   key={index}
                   className={`group flex items-start space-x-3 p-4 rounded-xl transition-all duration-500 border-2 hover:shadow-lg transform hover:-translate-y-1 ${

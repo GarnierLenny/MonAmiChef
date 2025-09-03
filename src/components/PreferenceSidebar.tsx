@@ -408,7 +408,7 @@ export default function PreferenceSidebar({
           });
         } else if (value !== null) {
           // for servings/cooks (numbers)
-          onPreferenceChange(category, value, "set");
+          onPreferenceChange(category, value as string | number, "set");
         }
       });
     } catch (err) {

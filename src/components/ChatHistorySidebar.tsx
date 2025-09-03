@@ -1,4 +1,3 @@
-import React, { useEffect, useState, useCallback } from "react";
 import {
   MessageSquare,
   X,
@@ -6,24 +5,20 @@ import {
   MoreHorizontal,
   Edit3,
   Trash2,
-  Share2,
   Plus,
   Sparkles,
 } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import Cookies from "universal-cookie";
 import type { ChatItem } from "../types/types";
-
-const cookies = new Cookies(null, { path: "/" });
 
 interface ChatHistorySidebarProps {
   chats: ChatItem[];
   isOpen: boolean;
   onClose: () => void;
   onNewChat: () => void;
-  handleDropdownAction: () => void;
-  activeDropdown: boolean;
-  setActiveDropdown: () => void;
+  handleDropdownAction: (action: "rename" | "delete" | "share", chatId: string) => void;
+  activeDropdown: string | null;
+  setActiveDropdown: (chatId: string | null) => void;
   renamingId: string | null;
   setRenamingId: (newId: string | null) => void;
   renameValue: string;
@@ -35,20 +30,7 @@ interface ChatHistorySidebarProps {
   cancelDelete: () => void;
 }
 
-// Title helpers
-const toTitleCase = (s: string) =>
-  s
-    .toLowerCase()
-    .split(/\s+/)
-    .map((w) => (w.length ? w[0].toUpperCase() + w.slice(1) : w))
-    .join(" ");
-const stripNoise = (s: string) =>
-  s
-    .replace(/[`*_#>~]/g, "")
-    .replace(/\s+/g, " ")
-    .trim();
-const smartTruncate = (s: string, max = 60) =>
-  s.length <= max ? s : s.slice(0, max - 1).trimEnd() + "…";
+// Title helpers (currently unused but may be needed for chat functionality)
 
 export default function ChatHistorySidebar({
   chats,
@@ -59,7 +41,7 @@ export default function ChatHistorySidebar({
   activeDropdown,
   setActiveDropdown,
   renamingId,
-  setRenamingId,
+  // setRenamingId, // Currently managed by parent component
   renameValue,
   setRenameValue,
   cancelRename,
@@ -70,7 +52,6 @@ export default function ChatHistorySidebar({
 }: ChatHistorySidebarProps) {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const currentChatId = searchParams.get("c");
 
   const formatTimestamp = (date: Date) => {
     const now = new Date();
@@ -183,11 +164,11 @@ export default function ChatHistorySidebar({
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
 
-                      {activeDropdown === chat.id && (
+                  {activeDropdown === chat.id && (
                         <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
                           <button
                             onClick={() =>
-                              handleDropdownAction("rename", chat.id)
+                            handleDropdownAction("rename", chat.id)
                             }
                             className="w-full flex items-center space-x-2 px-3 py-2 text-left text-gray-700 hover:bg-gray-50 transition-colors text-sm"
                           >
@@ -203,7 +184,7 @@ export default function ChatHistorySidebar({
                           </button>*/}
                           <button
                             onClick={() =>
-                              handleDropdownAction("delete", chat.id)
+                            handleDropdownAction("delete", chat.id)
                             }
                             className="w-full flex items-center space-x-2 px-3 py-2 text-left text-red-600 hover:bg-red-50 transition-colors text-sm"
                           >
@@ -303,7 +284,7 @@ export default function ChatHistorySidebar({
       {activeDropdown && (
         <div
           className="fixed inset-0 z-40"
-          onClick={() => setActiveDropdown(null)}
+              onClick={() => setActiveDropdown(null)}
         />
       )}
     </div>

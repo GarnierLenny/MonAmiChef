@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import type { Preferences, ChatItem, ChatMessage } from "../types/types";
 import PreferencesSidebar from "../components/PreferenceSidebar";
 import ChatInterface from "../components/ChatInterface";
@@ -123,7 +123,7 @@ function ChatPage() {
         const result = await query.json();
         const tmpChats: ChatItem[] = [];
 
-        result.forEach((chat, index) => {
+        result.forEach((chat: any) => {
           tmpChats.push({
             title: chat.title,
             id: chat.id,
@@ -167,7 +167,7 @@ function ChatPage() {
 
   // Clear all preferences
   function clearAllPreferences() {
-    Object.keys(preferences).forEach((category, index) => {
+    Object.keys(preferences).forEach((category) => {
       if (category === "servings") {
         handlePreferenceChange(category, 0, "remove");
       } else {
@@ -361,6 +361,7 @@ function ChatPage() {
           onClose={() => setIsSidebarOpen(false)}
           onNewChat={handleNewChat}
           handleDropdownAction={handleDropdownAction}
+          activeDropdown={activeDropdown}
           setActiveDropdown={setActiveDropdown}
           renamingId={renamingId}
           setRenamingId={setRenamingId}

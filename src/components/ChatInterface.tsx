@@ -48,7 +48,7 @@ export default function ChatInterface({
   onInputChange,
   onPreferenceChange,
   messages,
-  remainingCharacters,
+  // remainingCharacters, // Available for character count display
   isOverLimit,
   maxCharacters,
   hasSelectedPreferences,
