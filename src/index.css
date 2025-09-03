@@ -8,26 +8,41 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 45 100% 98%;
+    --foreground: 25 20% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 25 20% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 25 20% 15%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 35 95% 60%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 120 60% 50%;
+    --secondary-foreground: 0 0% 100%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 45 50% 95%;
+    --muted-foreground: 25 15% 50%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 25 75% 35%;
+    --accent-foreground: 0 0% 100%;
+
+    /* Custom chef theme colors */
+    --chef-orange: 35 95% 60%;
+    --chef-yellow: 45 95% 70%;
+    --chef-green: 120 60% 50%;
+    --chef-brown: 25 75% 35%;
+    --chef-cream: 45 50% 95%;
+    
+    /* Gradients */
+    --gradient-chef: linear-gradient(135deg, hsl(var(--chef-orange)), hsl(var(--chef-yellow)));
+    --gradient-subtle: linear-gradient(180deg, hsl(var(--background)), hsl(var(--chef-cream)));
+    
+    /* Shadows */
+    --shadow-warm: 0 4px 20px -8px hsl(var(--chef-orange) / 0.3);
+    --shadow-elegant: 0 10px 30px -10px hsl(var(--chef-brown) / 0.2);
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;

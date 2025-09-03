@@ -61,6 +61,13 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				chef: {
+					orange: 'hsl(var(--chef-orange))',
+					yellow: 'hsl(var(--chef-yellow))',
+					green: 'hsl(var(--chef-green))',
+					brown: 'hsl(var(--chef-brown))',
+					cream: 'hsl(var(--chef-cream))'
 				}
 			},
 			borderRadius: {
