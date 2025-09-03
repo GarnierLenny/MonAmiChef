@@ -1,0 +1,1156 @@
+import React from "react";
+import {
+  Target,
+  Zap,
+  FileText,
+  Mail,
+  Download,
+  TrendingUp,
+  PieChart,
+  Calculator,
+  User,
+  Ruler,
+  Weight,
+  Activity,
+  Bookmark,
+  Clock,
+  Trash2,
+  ChefHat,
+  Eye,
+  Users,
+} from "lucide-react";
+
+interface BMIData {
+  age: number;
+  height: number;
+  weight: number;
+  gender: "male" | "female";
+  activityLevel: string;
+  heightUnit: "cm" | "ft";
+  weightUnit: "kg" | "lbs";
+}
+
+interface NutritionViewProps {
+  currentSubView: string;
+  recipe: any;
+}
+
+export default function NutritionView({
+  currentSubView,
+  recipe,
+}: NutritionViewProps) {
+  const [bmiData, setBmiData] = React.useState<BMIData>({
+    age: 25,
+    height: 170,
+    weight: 70,
+    gender: "male",
+    activityLevel: "moderate",
+    heightUnit: "cm",
+    weightUnit: "kg",
+  });
+
+  const [calculatedData, setCalculatedData] = React.useState<{
+    bmi: number;
+    bmr: number;
+    dailyCalories: number;
+    bmiCategory: string;
+    macros: {
+      protein: number;
+      carbs: number;
+      fat: number;
+    };
+  } | null>(null);
+
+  const resultsRef = React.useRef<HTMLDivElement>(null);
+
+  const activityLevels = [
+    {
+      id: "sedentary",
+      label: "Sedentary",
+      description: "Little to no exercise",
+      multiplier: 1.2,
+    },
+    {
+      id: "light",
+      label: "Lightly Active",
+      description: "Light exercise 1-3 days/week",
+      multiplier: 1.375,
+    },
+    {
+      id: "moderate",
+      label: "Moderately Active",
+      description: "Moderate exercise 3-5 days/week",
+      multiplier: 1.55,
+    },
+    {
+      id: "very",
+      label: "Very Active",
+      description: "Hard exercise 6-7 days/week",
+      multiplier: 1.725,
+    },
+    {
+      id: "extra",
+      label: "Extra Active",
+      description: "Very hard exercise, physical job",
+      multiplier: 1.9,
+    },
+  ];
+
+  const convertHeight = (height: number, unit: "cm" | "ft") => {
+    return unit === "cm" ? height : height * 30.48; // Convert feet to cm
+  };
+
+  const convertWeight = (weight: number, unit: "kg" | "lbs") => {
+    return unit === "kg" ? weight : weight * 0.453592; // Convert lbs to kg
+  };
+
+  const formatHeight = (heightInCm: number, unit: "cm" | "ft") => {
+    if (unit === "cm") {
+      return `${Math.round(heightInCm)} cm`;
+    } else {
+      const feet = Math.floor(heightInCm / 30.48);
+      const inches = Math.round((heightInCm / 30.48 - feet) * 12);
+      return `${feet}'${inches}"`;
+    }
+  };
+
+  const formatWeight = (weightInKg: number, unit: "kg" | "lbs") => {
+    if (unit === "kg") {
+      return `${Math.round(weightInKg * 10) / 10} kg`;
+    } else {
+      return `${Math.round(weightInKg * 2.20462 * 10) / 10} lbs`;
+    }
+  };
+
+  const calculateBMI = () => {
+    const heightInCm = convertHeight(bmiData.height, bmiData.heightUnit);
+    const weightInKg = convertWeight(bmiData.weight, bmiData.weightUnit);
+    const heightInM = heightInCm / 100;
+
+    const bmi = weightInKg / (heightInM * heightInM);
+
+    let bmiCategory = "";
+    if (bmi < 18.5) bmiCategory = "Underweight";
+    else if (bmi < 25) bmiCategory = "Normal weight";
+    else if (bmi < 30) bmiCategory = "Overweight";
+    else bmiCategory = "Obese";
+
+    // Calculate BMR using Mifflin-St Jeor Equation
+    let bmr;
+    if (bmiData.gender === "male") {
+      bmr = 10 * weightInKg + 6.25 * heightInCm - 5 * bmiData.age + 5;
+    } else {
+      bmr = 10 * weightInKg + 6.25 * heightInCm - 5 * bmiData.age - 161;
+    }
+
+    const activityMultiplier =
+      activityLevels.find((level) => level.id === bmiData.activityLevel)
+        ?.multiplier || 1.55;
+    const dailyCalories = bmr * activityMultiplier;
+
+    // Calculate recommended macros (protein: 25%, carbs: 45%, fat: 30%)
+    const proteinCalories = dailyCalories * 0.25;
+    const carbCalories = dailyCalories * 0.45;
+    const fatCalories = dailyCalories * 0.3;
+
+    const macros = {
+      protein: Math.round(proteinCalories / 4), // 4 calories per gram of protein
+      carbs: Math.round(carbCalories / 4), // 4 calories per gram of carbs
+      fat: Math.round(fatCalories / 9), // 9 calories per gram of fat
+    };
+    setCalculatedData({
+      bmi: Math.round(bmi * 10) / 10,
+      bmr: Math.round(bmr),
+      dailyCalories: Math.round(dailyCalories),
+      bmiCategory,
+      macros,
+    });
+
+    // Scroll to results after a short delay to allow state update
+    setTimeout(() => {
+      resultsRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
+  };
+
+  const handleInputChange = (field: keyof BMIData, value: any) => {
+    setBmiData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const renderSavedRecipesList = () => {
+    // Get saved recipes from localStorage
+    const getSavedRecipes = () => {
+      try {
+        // Add some dummy data for demonstration
+        const dummyRecipes = [
+          {
+            id: "dummy-1",
+            title: "Mediterranean Quinoa Bowl",
+            ingredients: [
+              "quinoa",
+              "cherry tomatoes",
+              "cucumber",
+              "feta cheese",
+              "olive oil",
+              "lemon juice",
+            ],
+            instructions: [
+              "Cook quinoa according to package directions",
+              "Chop vegetables",
+              "Mix everything together",
+              "Drizzle with olive oil and lemon",
+            ],
+            prepTime: 15,
+            cookTime: 20,
+            servings: 4,
+            nutrition: {
+              calories: 320,
+              protein: 12,
+              carbs: 45,
+              fat: 8,
+              fiber: 6,
+            },
+            createdAt: new Date(
+              Date.now() - 2 * 24 * 60 * 60 * 1000,
+            ).toISOString(), // 2 days ago
+          },
+          {
+            id: "dummy-2",
+            title: "Spicy Korean BBQ Tacos",
+            ingredients: [
+              "beef bulgogi",
+              "corn tortillas",
+              "kimchi",
+              "sriracha mayo",
+              "green onions",
+              "sesame seeds",
+            ],
+            instructions: [
+              "Marinate beef in bulgogi sauce",
+              "Grill beef until caramelized",
+              "Warm tortillas",
+              "Assemble tacos with toppings",
+            ],
+            prepTime: 25,
+            cookTime: 15,
+            servings: 6,
+            nutrition: {
+              calories: 285,
+              protein: 18,
+              carbs: 22,
+              fat: 12,
+              fiber: 3,
+            },
+            createdAt: new Date(
+              Date.now() - 5 * 24 * 60 * 60 * 1000,
+            ).toISOString(), // 5 days ago
+          },
+          {
+            id: "dummy-3",
+            title: "Creamy Mushroom Risotto",
+            ingredients: [
+              "arborio rice",
+              "mixed mushrooms",
+              "vegetable broth",
+              "white wine",
+              "parmesan cheese",
+              "butter",
+            ],
+            instructions: [
+              "Sauté mushrooms until golden",
+              "Toast rice with onions",
+              "Add wine and broth gradually",
+              "Stir in cheese and butter",
+            ],
+            prepTime: 10,
+            cookTime: 35,
+            servings: 4,
+            nutrition: {
+              calories: 380,
+              protein: 14,
+              carbs: 52,
+              fat: 16,
+              fiber: 4,
+            },
+            createdAt: new Date(
+              Date.now() - 7 * 24 * 60 * 60 * 1000,
+            ).toISOString(), // 1 week ago
+          },
+          {
+            id: "dummy-4",
+            title: "Thai Green Curry with Chicken",
+            ingredients: [
+              "chicken breast",
+              "green curry paste",
+              "coconut milk",
+              "thai basil",
+              "bell peppers",
+              "jasmine rice",
+            ],
+            instructions: [
+              "Cut chicken into bite-sized pieces",
+              "Fry curry paste until fragrant",
+              "Add coconut milk and chicken",
+              "Simmer with vegetables and basil",
+            ],
+            prepTime: 20,
+            cookTime: 25,
+            servings: 5,
+            nutrition: {
+              calories: 420,
+              protein: 28,
+              carbs: 35,
+              fat: 18,
+              fiber: 5,
+            },
+            createdAt: new Date(
+              Date.now() - 10 * 24 * 60 * 60 * 1000,
+            ).toISOString(), // 10 days ago
+          },
+          {
+            id: "dummy-5",
+            title: "Classic Caesar Salad",
+            ingredients: [
+              "romaine lettuce",
+              "parmesan cheese",
+              "croutons",
+              "caesar dressing",
+              "anchovies",
+              "lemon",
+            ],
+            instructions: [
+              "Wash and chop romaine lettuce",
+              "Make caesar dressing from scratch",
+              "Toss lettuce with dressing",
+              "Top with croutons and parmesan",
+            ],
+            prepTime: 15,
+            cookTime: 0,
+            servings: 3,
+            nutrition: {
+              calories: 180,
+              protein: 8,
+              carbs: 12,
+              fat: 14,
+              fiber: 4,
+            },
+            createdAt: new Date(
+              Date.now() - 14 * 24 * 60 * 60 * 1000,
+            ).toISOString(), // 2 weeks ago
+          },
+        ];
+
+        // Store dummy recipes in localStorage if they don't exist
+        dummyRecipes.forEach((recipe) => {
+          const key = `recipe-${recipe.id}`;
+          if (!localStorage.getItem(key)) {
+            localStorage.setItem(key, JSON.stringify(recipe));
+          }
+        });
+
+        const keys = Object.keys(localStorage).filter((key) =>
+          key.startsWith("recipe-"),
+        );
+        const recipes = keys
+          .map((key) => {
+            try {
+              return JSON.parse(localStorage.getItem(key) || "{}");
+            } catch {
+              return null;
+            }
+          })
+          .filter(Boolean);
+
+        // Sort by creation date (newest first)
+        return recipes.sort((a, b) => {
+          const dateA = new Date(a.createdAt || 0).getTime();
+          const dateB = new Date(b.createdAt || 0).getTime();
+          return dateB - dateA;
+        });
+      } catch {
+        return [];
+      }
+    };
+
+    const savedRecipes = getSavedRecipes();
+
+    const removeRecipe = (recipeId: string) => {
+      try {
+        localStorage.removeItem(`recipe-${recipeId}`);
+        // Force re-render by updating a state or triggering parent re-render
+        window.location.reload();
+      } catch (error) {
+        console.error("Failed to remove recipe:", error);
+      }
+    };
+
+    const openRecipe = (recipeId: string) => {
+      window.open(`/recipe/${recipeId}`, "_blank");
+    };
+
+    if (savedRecipes.length === 0) {
+      return (
+        <div className="text-center py-16">
+          <div className="relative mb-8">
+            <div className="absolute inset-0 bg-gradient-to-r from-orange-400 to-pink-500 rounded-full blur-xl opacity-20 animate-pulse"></div>
+            <div className="relative bg-gradient-to-br from-orange-100 to-pink-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto border-4 border-white shadow-xl">
+              <Bookmark className="w-12 h-12 text-orange-500" />
+            </div>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 mb-3">
+            No Saved Recipes Yet
+          </h3>
+          <p className="text-gray-600 text-lg max-w-md mx-auto leading-relaxed">
+            You haven't saved any recipes yet — start by saving one in chat!
+          </p>
+          <div className="mt-8">
+            <button
+              onClick={() => (window.location.href = "/")}
+              className="px-8 py-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl hover:from-orange-600 hover:to-pink-600 transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-1 text-lg"
+            >
+              🍳 Start Cooking
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="space-y-6">
+        <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-3">
+              <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-2 rounded-lg">
+                <Bookmark className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900">
+                  Your Saved Recipes
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  {savedRecipes.length} recipe
+                  {savedRecipes.length !== 1 ? "s" : ""} saved
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            {savedRecipes.map((recipe, index) => (
+              <div
+                key={recipe.id}
+                className="group flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-orange-50/30 rounded-lg border border-gray-200 hover:border-orange-300 hover:shadow-md transition-all duration-200"
+              >
+                {/* Left side - Recipe info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center space-x-4">
+                    {/* Recipe title and basic info */}
+                    <div className="flex-1 min-w-0">
+                      <h4 className="text-lg font-bold text-gray-900 truncate group-hover:text-orange-700 transition-colors">
+                        {recipe.title}
+                      </h4>
+                      <div className="flex items-center space-x-4 mt-1">
+                        <div className="flex items-center space-x-1 text-sm text-gray-600">
+                          <Clock className="w-4 h-4 text-orange-500" />
+                          <span className="font-medium">
+                            {(recipe.prepTime || 0) + (recipe.cookTime || 0)}{" "}
+                            min
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-1 text-sm text-gray-600">
+                          <Zap className="w-4 h-4 text-green-500" />
+                          <span className="font-medium">
+                            {recipe.nutrition?.calories || 0} cal
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-1 text-sm text-gray-600">
+                          <Users className="w-4 h-4 text-blue-500" />
+                          <span className="font-medium">
+                            Serves {recipe.servings || 1}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Macros section */}
+                    <div className="hidden md:flex items-center space-x-3">
+                      <div className="flex items-center space-x-1 bg-red-100 px-2 py-1 rounded-full">
+                        <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                        <span className="text-xs font-medium text-red-700">
+                          {recipe.nutrition?.protein || 0}g protein
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-1 bg-green-100 px-2 py-1 rounded-full">
+                        <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <span className="text-xs font-medium text-green-700">
+                          {recipe.nutrition?.carbs || 0}g carbs
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-1 bg-yellow-100 px-2 py-1 rounded-full">
+                        <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                        <span className="text-xs font-medium text-yellow-700">
+                          {recipe.nutrition?.fat || 0}g fat
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-1 bg-purple-100 px-2 py-1 rounded-full">
+                        <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                        <span className="text-xs font-medium text-purple-700">
+                          {recipe.nutrition?.fiber || 0}g fiber
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Mobile macros - shown on smaller screens */}
+                  <div className="md:hidden mt-3 flex flex-wrap gap-2">
+                    <div className="flex items-center space-x-1 bg-red-100 px-2 py-1 rounded-full">
+                      <div className="w-2 h-2 bg-red-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-red-700">
+                        {recipe.nutrition?.protein || 0}g protein
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1 bg-green-100 px-2 py-1 rounded-full">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-green-700">
+                        {recipe.nutrition?.carbs || 0}g carbs
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1 bg-yellow-100 px-2 py-1 rounded-full">
+                      <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-yellow-700">
+                        {recipe.nutrition?.fat || 0}g fat
+                      </span>
+                    </div>
+                    <div className="flex items-center space-x-1 bg-purple-100 px-2 py-1 rounded-full">
+                      <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
+                      <span className="text-xs font-medium text-purple-700">
+                        {recipe.nutrition?.fiber || 0}g fiber
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right side - Action buttons */}
+                <div className="flex items-center space-x-2 ml-4">
+                  <button
+                    onClick={() => openRecipe(recipe.id)}
+                    className="p-2 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-all duration-200 hover:scale-105"
+                    title="View recipe"
+                  >
+                    <Eye className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      removeRecipe(recipe.id);
+                    }}
+                    className="p-2 bg-orange-100 hover:bg-red-100 text-orange-600 hover:text-red-600 rounded-lg transition-all duration-200 hover:scale-105"
+                    title="Remove from saved recipes"
+                  >
+                    <Bookmark className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderBMICalculator = () => (
+    <div className="mt-8 space-y-8">
+      {/* BMI Calculator Form */}
+      <div className="bg-gradient-to-br from-orange-50 to-pink-50 p-8 rounded-xl border border-orange-200">
+        <div className="flex items-center space-x-3 mb-8">
+          <Calculator className="w-6 h-6 text-orange-600" />
+          <h3 className="text-xl font-bold text-gray-900">
+            BMI & Calorie Calculator
+          </h3>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Personal Information */}
+          <div className="space-y-6">
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">
+              Personal Information
+            </h4>
+
+            {/* Metric Selector */}
+            <div className="mb-6 p-4 bg-white rounded-xl border border-orange-200">
+              <h5 className="text-sm font-semibold text-gray-700 mb-3">
+                Measurement System
+              </h5>
+              <div className="flex space-x-3">
+                <button
+                  onClick={() => {
+                    handleInputChange("heightUnit", "cm");
+                    handleInputChange("weightUnit", "kg");
+                  }}
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm ${
+                    bmiData.heightUnit === "cm" && bmiData.weightUnit === "kg"
+                      ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  Metric (kg/cm)
+                </button>
+                <button
+                  onClick={() => {
+                    handleInputChange("heightUnit", "ft");
+                    handleInputChange("weightUnit", "lbs");
+                  }}
+                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm ${
+                    bmiData.heightUnit === "ft" && bmiData.weightUnit === "lbs"
+                      ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }`}
+                >
+                  Imperial (lbs/ft)
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Age
+                </label>
+                <input
+                  type="number"
+                  value={bmiData.age}
+                  onChange={(e) =>
+                    handleInputChange("age", Number(e.target.value))
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-lg"
+                  min="10"
+                  max="100"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Gender
+                </label>
+                <select
+                  value={bmiData.gender}
+                  onChange={(e) => handleInputChange("gender", e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-lg"
+                >
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Height
+                </label>
+                <input
+                  type="number"
+                  value={bmiData.height}
+                  onChange={(e) =>
+                    handleInputChange("height", Number(e.target.value))
+                  }
+                  placeholder={
+                    bmiData.heightUnit === "cm"
+                      ? "Height in cm"
+                      : "Height in feet"
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-lg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Weight
+                </label>
+                <input
+                  type="number"
+                  value={bmiData.weight}
+                  onChange={(e) =>
+                    handleInputChange("weight", Number(e.target.value))
+                  }
+                  placeholder={
+                    bmiData.weightUnit === "kg"
+                      ? "Weight in kg"
+                      : "Weight in lbs"
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-lg"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Activity Level */}
+          <div className="space-y-6">
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">
+              Activity Level
+            </h4>
+            <div className="space-y-3">
+              {activityLevels.map((level) => (
+                <label
+                  key={level.id}
+                  className={`flex items-start space-x-4 p-4 rounded-lg cursor-pointer transition-all duration-200 ${
+                    bmiData.activityLevel === level.id
+                      ? "bg-gradient-to-r from-orange-100 to-pink-100 border-2 border-orange-300 shadow-sm"
+                      : "bg-white border-2 border-gray-200 hover:border-orange-200 hover:bg-orange-50"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="activityLevel"
+                    value={level.id}
+                    checked={bmiData.activityLevel === level.id}
+                    onChange={(e) =>
+                      handleInputChange("activityLevel", e.target.value)
+                    }
+                    className="mt-1 text-orange-600 focus:ring-orange-500"
+                  />
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-900">
+                      {level.label}
+                    </div>
+                    <div className="text-sm text-gray-600 mt-1">
+                      {level.description}
+                    </div>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-8 text-center">
+          <button
+            onClick={calculateBMI}
+            className="px-8 py-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 transition-all duration-200 text-lg shadow-lg hover:shadow-xl"
+          >
+            Calculate BMI & Daily Calories
+          </button>
+        </div>
+      </div>
+
+      {/* Results Section */}
+      {calculatedData && (
+        <div
+          ref={resultsRef}
+          className="bg-white p-8 rounded-xl shadow-lg border border-gray-200"
+        >
+          <div className="flex items-center space-x-3 mb-6">
+            <Target className="w-6 h-6 text-green-600" />
+            <h3 className="text-xl font-bold text-gray-900">
+              Your Personalized Results
+            </h3>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="bg-gradient-to-br from-orange-100 to-pink-100 p-6 rounded-xl text-center">
+              <div className="text-3xl font-bold text-orange-600 mb-2">
+                {calculatedData.bmi}
+              </div>
+              <div className="text-sm font-medium text-gray-700 mb-1">
+                BMI Score
+              </div>
+              <div className="text-xs text-gray-600">
+                {calculatedData.bmiCategory}
+              </div>
+              <div className="text-xs text-gray-500 mt-2">
+                {formatHeight(
+                  convertHeight(bmiData.height, bmiData.heightUnit),
+                  bmiData.heightUnit,
+                )}{" "}
+                •{" "}
+                {formatWeight(
+                  convertWeight(bmiData.weight, bmiData.weightUnit),
+                  bmiData.weightUnit,
+                )}
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-blue-100 to-cyan-100 p-6 rounded-xl text-center">
+              <div className="text-3xl font-bold text-blue-600 mb-2">
+                {calculatedData.bmr}
+              </div>
+              <div className="text-sm font-medium text-gray-700 mb-1">BMR</div>
+              <div className="text-xs text-gray-600">Calories at rest</div>
+              <div className="text-xs text-gray-500 mt-2">
+                {bmiData.gender === "male" ? "Male" : "Female"} • {bmiData.age}{" "}
+                years
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-100 to-emerald-100 p-6 rounded-xl text-center">
+              <div className="text-3xl font-bold text-green-600 mb-2">
+                {calculatedData.dailyCalories}
+              </div>
+              <div className="text-sm font-medium text-gray-700 mb-1">
+                Daily Calories
+              </div>
+              <div className="text-xs text-gray-600">To maintain weight</div>
+              <div className="text-xs text-gray-500 mt-2">
+                {
+                  activityLevels.find(
+                    (level) => level.id === bmiData.activityLevel,
+                  )?.label
+                }
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-purple-100 to-pink-100 p-6 rounded-xl">
+              <div className="text-sm font-medium text-gray-700 mb-3">
+                Weight Goals
+              </div>
+              <div className="space-y-2 text-xs text-gray-600">
+                <div className="flex justify-between">
+                  <span>Lose 1 lb/week:</span>
+                  <span className="font-semibold">
+                    {calculatedData.dailyCalories - 500}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Gain 1 lb/week:</span>
+                  <span className="font-semibold">
+                    {calculatedData.dailyCalories + 500}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Daily Macro Recommendations */}
+          <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200 mb-6">
+            <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+              <Target className="w-5 h-5 mr-2 text-green-600" />
+              Recommended Daily Macros
+            </h4>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="bg-white p-4 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">
+                    Protein
+                  </span>
+                  <span className="text-xs text-gray-500">25%</span>
+                </div>
+                <div className="text-2xl font-bold text-orange-600 mb-1">
+                  {calculatedData.macros.protein}g
+                </div>
+                <div className="text-xs text-gray-600">
+                  {Math.round(calculatedData.macros.protein * 4)} calories
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">
+                    Carbohydrates
+                  </span>
+                  <span className="text-xs text-gray-500">45%</span>
+                </div>
+                <div className="text-2xl font-bold text-green-600 mb-1">
+                  {calculatedData.macros.carbs}g
+                </div>
+                <div className="text-xs text-gray-600">
+                  {Math.round(calculatedData.macros.carbs * 4)} calories
+                </div>
+              </div>
+
+              <div className="bg-white p-4 rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">
+                    Fats
+                  </span>
+                  <span className="text-xs text-gray-500">30%</span>
+                </div>
+                <div className="text-2xl font-bold text-amber-600 mb-1">
+                  {calculatedData.macros.fat}g
+                </div>
+                <div className="text-xs text-gray-600">
+                  {Math.round(calculatedData.macros.fat * 9)} calories
+                </div>
+              </div>
+            </div>
+            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
+              <p className="text-sm text-blue-800">
+                <strong>Tip:</strong> These macros are based on a balanced diet
+                approach (25% protein, 45% carbs, 30% fat). Adjust based on your
+                specific goals and dietary preferences.
+              </p>
+            </div>
+          </div>
+
+          {/* Weight Goals Section */}
+          <div className="bg-gradient-to-br from-purple-50 to-indigo-50 p-6 rounded-xl border border-purple-200 mb-6">
+            <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+              <Weight className="w-5 h-5 mr-2 text-purple-600" />
+              Weight Goals & Calorie Targets (
+              {bmiData.weightUnit === "kg" ? "kg" : "lbs"})
+            </h4>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+              {/* Aggressive Weight Loss */}
+              <div className="bg-white p-4 rounded-lg border border-red-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-red-700">
+                    Aggressive Loss
+                  </span>
+                  <span className="text-xs bg-red-100 text-red-600 px-2 py-1 rounded-full">
+                    -{bmiData.weightUnit === "kg" ? "0.9 kg" : "2 lbs"}/week
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-red-600 mb-1">
+                  {calculatedData.dailyCalories - 1000}
+                </div>
+                <div className="text-xs text-gray-600 mb-2">calories/day</div>
+                <div className="text-xs text-red-600">
+                  <strong>Deficit:</strong> -1000 cal/day
+                </div>
+              </div>
+
+              {/* Moderate Weight Loss */}
+              <div className="bg-white p-4 rounded-lg border border-orange-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-orange-700">
+                    Moderate Loss
+                  </span>
+                  <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-full">
+                    -{bmiData.weightUnit === "kg" ? "0.45 kg" : "1 lb"}/week
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-orange-600 mb-1">
+                  {calculatedData.dailyCalories - 500}
+                </div>
+                <div className="text-xs text-gray-600 mb-2">calories/day</div>
+                <div className="text-xs text-orange-600">
+                  <strong>Deficit:</strong> -500 cal/day
+                </div>
+              </div>
+
+              {/* Slow Weight Loss */}
+              <div className="bg-white p-4 rounded-lg border border-yellow-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-yellow-700">
+                    Slow Loss
+                  </span>
+                  <span className="text-xs bg-yellow-100 text-yellow-600 px-2 py-1 rounded-full">
+                    -{bmiData.weightUnit === "kg" ? "0.23 kg" : "0.5 lb"}/week
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-yellow-600 mb-1">
+                  {calculatedData.dailyCalories - 250}
+                </div>
+                <div className="text-xs text-gray-600 mb-2">calories/day</div>
+                <div className="text-xs text-yellow-600">
+                  <strong>Deficit:</strong> -250 cal/day
+                </div>
+              </div>
+
+              {/* Maintenance */}
+              <div className="bg-white p-4 rounded-lg border border-green-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-green-700">
+                    Maintenance
+                  </span>
+                  <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
+                    0 {bmiData.weightUnit}/week
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-green-600 mb-1">
+                  {calculatedData.dailyCalories}
+                </div>
+                <div className="text-xs text-gray-600 mb-2">calories/day</div>
+                <div className="text-xs text-green-600">
+                  <strong>Balance:</strong> Maintain current weight
+                </div>
+              </div>
+
+              {/* Slow Weight Gain */}
+              <div className="bg-white p-4 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-blue-700">
+                    Slow Gain
+                  </span>
+                  <span className="text-xs bg-blue-100 text-blue-600 px-2 py-1 rounded-full">
+                    +{bmiData.weightUnit === "kg" ? "0.23 kg" : "0.5 lb"}/week
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-blue-600 mb-1">
+                  {calculatedData.dailyCalories + 250}
+                </div>
+                <div className="text-xs text-gray-600 mb-2">calories/day</div>
+                <div className="text-xs text-blue-600">
+                  <strong>Surplus:</strong> +250 cal/day
+                </div>
+              </div>
+
+              {/* Moderate Weight Gain */}
+              <div className="bg-white p-4 rounded-lg border border-indigo-200">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-semibold text-indigo-700">
+                    Moderate Gain
+                  </span>
+                  <span className="text-xs bg-indigo-100 text-indigo-600 px-2 py-1 rounded-full">
+                    +{bmiData.weightUnit === "kg" ? "0.45 kg" : "1 lb"}/week
+                  </span>
+                </div>
+                <div className="text-2xl font-bold text-indigo-600 mb-1">
+                  {calculatedData.dailyCalories + 500}
+                </div>
+                <div className="text-xs text-gray-600 mb-2">calories/day</div>
+                <div className="text-xs text-indigo-600">
+                  <strong>Surplus:</strong> +500 cal/day
+                </div>
+              </div>
+            </div>
+
+            {/* Weight Goals Information */}
+            <div className="bg-white p-4 rounded-lg">
+              <h5 className="text-sm font-semibold text-gray-900 mb-3">
+                Understanding Weight Goals
+              </h5>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-gray-600">
+                <div>
+                  <p className="mb-2">
+                    <strong>Weight Loss:</strong>
+                  </p>
+                  <ul className="space-y-1 ml-4">
+                    <li>
+                      • 1 {bmiData.weightUnit === "kg" ? "kg" : "pound"} ={" "}
+                      {bmiData.weightUnit === "kg" ? "7,700" : "3,500"} calories
+                    </li>
+                    <li>
+                      • Safe loss:{" "}
+                      {bmiData.weightUnit === "kg" ? "0.45-0.9 kg" : "1-2 lbs"}{" "}
+                      per week
+                    </li>
+                    <li>• Combine diet + exercise for best results</li>
+                    <li>
+                      • Minimum: 1,200 cal/day (women) or 1,500 cal/day (men)
+                    </li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="mb-2">
+                    <strong>Weight Gain:</strong>
+                  </p>
+                  <ul className="space-y-1 ml-4">
+                    <li>• Focus on lean muscle gain</li>
+                    <li>• Combine with strength training</li>
+                    <li>• Choose nutrient-dense foods</li>
+                    <li>• Monitor body composition, not just weight</li>
+                  </ul>
+                </div>
+              </div>
+              <div className="mt-4 p-3 bg-purple-50 rounded-lg">
+                <p className="text-xs text-purple-800">
+                  <strong>Important:</strong> These are general guidelines.
+                  Individual results may vary based on metabolism, genetics,
+                  medical conditions, and activity level. Consult a healthcare
+                  provider before starting any weight management program.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className="mt-6 p-4 bg-gradient-to-r from-orange-50 to-pink-50 rounded-lg border border-orange-200">
+            <div className="text-sm text-gray-700">
+              <strong>Note:</strong> These calculations are estimates based on
+              standard formulas. For personalized nutrition advice, consult with
+              a healthcare professional or registered dietitian.
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderCalorieEstimates = () => (
+    <div className="max-w-6xl mx-auto p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="flex items-center space-x-3 mb-8">
+          <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-xl">
+            <Calculator className="w-8 h-8 text-white" />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">
+              Calorie Calculator
+            </h2>
+            <p className="text-gray-600">
+              Calculate your daily caloric needs and BMI
+            </p>
+          </div>
+        </div>
+        {renderBMICalculator()}
+      </div>
+    </div>
+  );
+
+  const renderMacroBreakdown = () => (
+    <div className="max-w-6xl mx-auto p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="flex items-center space-x-3 mb-8">
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-3 rounded-xl">
+            <Bookmark className="w-8 h-8 text-white" />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">Saved Recipes</h2>
+            <p className="text-gray-600">Your collection of favorite recipes</p>
+          </div>
+        </div>
+
+        {renderSavedRecipesList()}
+      </div>
+    </div>
+  );
+
+  const renderExportOptions = () => (
+    <div className="max-w-4xl mx-auto p-6">
+      <div className="bg-white rounded-2xl shadow-lg p-8">
+        <div className="flex items-center space-x-3 mb-8">
+          <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-3 rounded-xl">
+            <Download className="w-8 h-8 text-white" />
+          </div>
+          <div>
+            <h2 className="text-3xl font-bold text-gray-900">Export Options</h2>
+            <p className="text-gray-600">Share and save your recipes</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <button className="bg-gradient-to-r from-orange-100 to-red-100 p-8 rounded-xl hover:from-orange-200 hover:to-red-200 transition-all duration-200 text-left">
+            <FileText className="w-12 h-12 text-orange-600 mb-4" />
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Export to PDF
+            </h3>
+            <p className="text-gray-600">
+              Download a beautifully formatted PDF of your recipe
+            </p>
+          </button>
+
+          <button className="bg-gradient-to-r from-green-100 to-emerald-100 p-8 rounded-xl hover:from-green-200 hover:to-emerald-200 transition-all duration-200 text-left">
+            <Mail className="w-12 h-12 text-green-600 mb-4" />
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              Email Recipe
+            </h3>
+            <p className="text-gray-600">
+              Send the recipe directly to your email or share with friends
+            </p>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
+  switch (currentSubView) {
+    case "macros":
+      return renderMacroBreakdown();
+    case "calories":
+      return renderCalorieEstimates();
+    case "export-pdf":
+    case "export-email":
+      return renderExportOptions();
+    default:
+      return renderMacroBreakdown();
+  }
+}
