@@ -97,7 +97,7 @@ function ChatPage() {
   };
 
   const saveRename = async () => {
-    const query = await fetch(
+    await fetch(
       `${API_URL}/chat/user/${userId}/${renamingId}/rename`,
       {
         method: "POST",

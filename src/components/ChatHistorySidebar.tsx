@@ -51,7 +51,7 @@ export default function ChatHistorySidebar({
   cancelDelete,
 }: ChatHistorySidebarProps) {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  // const [searchParams] = useSearchParams(); // Currently unused
 
   const formatTimestamp = (date: Date) => {
     const now = new Date();
