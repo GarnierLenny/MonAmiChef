@@ -333,76 +333,21 @@ function ChatPage() {
   }, [preferences]);
 
   return (
-    <div className="flex flex-col h-full">
-      {/* Mobile Top Bar */}
-      {isMobile && (
-        <MobileTopBar onMenuClick={() => setIsMobileSidebarOpen(true)} />
-      )}
-      
-      {/* Mobile Sidebar */}
-      {isMobile && (
-        <MobileSidebar
-          isOpen={isMobileSidebarOpen}
-          onClose={() => setIsMobileSidebarOpen(false)}
-          chats={chats}
-          onNewChat={handleNewChat}
-          handleDropdownAction={handleDropdownAction}
-          activeDropdown={activeDropdown}
-          setActiveDropdown={setActiveDropdown}
-          renamingId={renamingId}
-          renameValue={renameValue}
-          setRenameValue={setRenameValue}
-          cancelRename={cancelRename}
-          saveRename={saveRename}
-          confirmDeleteId={confirmDeleteId}
-          confirmDelete={confirmDelete}
-          cancelDelete={cancelDelete}
-          preferences={preferences}
-          onPreferenceChange={(category: string, value: string | number, action: "add" | "remove" | "set") => 
-            handlePreferenceChange(category as ArrayKeys | NumberKeys, value, action as "add" | "remove" | "set" | "clear")
-          }
-          clearAllPreferences={clearAllPreferences}
-        />
-      )}
-
-      <div className="flex flex-1">
-        <div className="hidden md:block">
-          <PreferencesSidebar
-            preferences={preferences}
-            onPreferenceChange={(category: string, value: string | number, action: "add" | "remove" | "set") => 
-              handlePreferenceChange(category as ArrayKeys | NumberKeys, value, action as "add" | "remove" | "set" | "clear")
-            }
-            clearAllPreferences={clearAllPreferences}
-          />
-        </div>
-        <ChatInterface
-          preferences={preferences}
-          inputValue={inputValue}
-          onInputChange={setInputValue}
-          onPreferenceChange={(category: string, value: string | number, action: "add" | "remove" | "set") => 
-            handlePreferenceChange(category as ArrayKeys | NumberKeys, value, action as "add" | "remove" | "set" | "clear")
-          }
-          messages={messages}
-          remainingCharacters={remainingCharacters}
-          isOverLimit={isOverLimit}
-          maxCharacters={MAX_CHARACTERS}
-          hasSelectedPreferences={hasSelectedPreferences}
-          handleSubmit={handleSubmit}
-          isGenerating={isGenerating}
-          clearAllPreferences={clearAllPreferences}
-          inputRef={inputRef}
-        />
-        <div className="hidden md:block">
-          <ChatHistorySidebar
+    <>
+      {/* Mobile-only UI */}
+      {isMobile ? (
+        <div className="flex flex-col h-screen">
+          <MobileTopBar onMenuClick={() => setIsMobileSidebarOpen(true)} />
+          
+          <MobileSidebar
+            isOpen={isMobileSidebarOpen}
+            onClose={() => setIsMobileSidebarOpen(false)}
             chats={chats}
-            isOpen={isSidebarOpen}
-            onClose={() => setIsSidebarOpen(false)}
             onNewChat={handleNewChat}
             handleDropdownAction={handleDropdownAction}
             activeDropdown={activeDropdown}
             setActiveDropdown={setActiveDropdown}
             renamingId={renamingId}
-            setRenamingId={setRenamingId}
             renameValue={renameValue}
             setRenameValue={setRenameValue}
             cancelRename={cancelRename}
@@ -410,10 +355,85 @@ function ChatPage() {
             confirmDeleteId={confirmDeleteId}
             confirmDelete={confirmDelete}
             cancelDelete={cancelDelete}
+            preferences={preferences}
+            onPreferenceChange={(category: string, value: string | number, action: "add" | "remove" | "set") => 
+              handlePreferenceChange(category as ArrayKeys | NumberKeys, value, action as "add" | "remove" | "set" | "clear")
+            }
+            clearAllPreferences={clearAllPreferences}
           />
+
+          <div className="flex-1 overflow-hidden">
+            <ChatInterface
+              preferences={preferences}
+              inputValue={inputValue}
+              onInputChange={setInputValue}
+              onPreferenceChange={(category: string, value: string | number, action: "add" | "remove" | "set") => 
+                handlePreferenceChange(category as ArrayKeys | NumberKeys, value, action as "add" | "remove" | "set" | "clear")
+              }
+              messages={messages}
+              remainingCharacters={remainingCharacters}
+              isOverLimit={isOverLimit}
+              maxCharacters={MAX_CHARACTERS}
+              hasSelectedPreferences={hasSelectedPreferences}
+              handleSubmit={handleSubmit}
+              isGenerating={isGenerating}
+              clearAllPreferences={clearAllPreferences}
+              inputRef={inputRef}
+            />
+          </div>
         </div>
-      </div>
-    </div>
+      ) : (
+        // Desktop-only UI (original layout)
+        <div className="flex flex-1">
+          <div className="hidden md:block">
+            <PreferencesSidebar
+              preferences={preferences}
+              onPreferenceChange={(category: string, value: string | number, action: "add" | "remove" | "set") => 
+                handlePreferenceChange(category as ArrayKeys | NumberKeys, value, action as "add" | "remove" | "set" | "clear")
+              }
+              clearAllPreferences={clearAllPreferences}
+            />
+          </div>
+          <ChatInterface
+            preferences={preferences}
+            inputValue={inputValue}
+            onInputChange={setInputValue}
+            onPreferenceChange={(category: string, value: string | number, action: "add" | "remove" | "set") => 
+              handlePreferenceChange(category as ArrayKeys | NumberKeys, value, action as "add" | "remove" | "set" | "clear")
+            }
+            messages={messages}
+            remainingCharacters={remainingCharacters}
+            isOverLimit={isOverLimit}
+            maxCharacters={MAX_CHARACTERS}
+            hasSelectedPreferences={hasSelectedPreferences}
+            handleSubmit={handleSubmit}
+            isGenerating={isGenerating}
+            clearAllPreferences={clearAllPreferences}
+            inputRef={inputRef}
+          />
+          <div className="hidden md:block">
+            <ChatHistorySidebar
+              chats={chats}
+              isOpen={isSidebarOpen}
+              onClose={() => setIsSidebarOpen(false)}
+              onNewChat={handleNewChat}
+              handleDropdownAction={handleDropdownAction}
+              activeDropdown={activeDropdown}
+              setActiveDropdown={setActiveDropdown}
+              renamingId={renamingId}
+              setRenamingId={setRenamingId}
+              renameValue={renameValue}
+              setRenameValue={setRenameValue}
+              cancelRename={cancelRename}
+              saveRename={saveRename}
+              confirmDeleteId={confirmDeleteId}
+              confirmDelete={confirmDelete}
+              cancelDelete={cancelDelete}
+            />
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
