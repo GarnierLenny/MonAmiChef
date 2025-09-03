@@ -231,7 +231,8 @@ function ChatPage() {
     | "vegetables";
   type NumberKeys = "servings" | "cooks";
 
-  const handleSubmit = () => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     const text = inputValue.trim();
     handleSubmitMessage(text);
   };
