@@ -29,7 +29,7 @@ export function MobileTopBar({ onMenuClick }: MobileTopBarProps) {
               alt="Chef Logo" 
               className="h-7 w-auto"
             />
-            <span className="text-foreground font-medium text-lg tracking-wide">Mon Ami Chef</span>
+            <span className="text-foreground font-medium text-base tracking-wide">Mon Ami Chef</span>
           </div>
 
           {/* Right spacer for balance */}
