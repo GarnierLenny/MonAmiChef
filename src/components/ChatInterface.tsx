@@ -159,8 +159,8 @@ export default function ChatInterface({
   const canSend = inputValue.trim() !== "" || hasSelectedPreferences;
 
   return (
-    <div className="flex-1 flex">
-      <div className="flex-1 flex flex-col">
+    <div className="flex-1 flex flex-col h-full">
+      <div className="flex-1 flex flex-col min-h-0">
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {messages.map((message, index) => (
@@ -252,8 +252,9 @@ export default function ChatInterface({
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
-        <div className="m-3">
+        {/* Input - Now sticky at bottom */}
+        <div className="flex-shrink-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+          <div className="p-3">
           {/* Selected Preferences Tags */}
           {selectedTags.length > 0 && (
             <div className="mb-4">
@@ -333,6 +334,7 @@ export default function ChatInterface({
               <Send className="w-4 h-4" />
             </button>
           </form>
+          </div>
         </div>
       </div>
     </div>

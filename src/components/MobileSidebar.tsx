@@ -51,7 +51,7 @@ export function MobileSidebar({
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="left" className="w-80 p-0 bg-gradient-to-b from-chef-cream to-background">
+      <SheetContent side="left" className="w-80 p-0 bg-gradient-to-b from-chef-cream to-background animate-slide-in-right">
         {/* Header */}
         <div className="p-4 border-b border-chef-orange/20 bg-gradient-to-r from-chef-orange/10 to-chef-yellow/10">
           <div className="flex items-center justify-between">
@@ -184,7 +184,7 @@ export function MobileSidebar({
               </div>
             </div>
           ) : (
-            <div className="h-full">
+            <div className="h-full overflow-y-auto">
               <PreferencesSidebar
                 preferences={preferences}
                 onPreferenceChange={onPreferenceChange}
