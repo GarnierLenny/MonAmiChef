@@ -3,18 +3,19 @@ import {
   X,
   Mail,
   Lock,
-  User,
+  User as UserIcon,
   Eye,
   EyeOff,
   AlertCircle,
   CheckCircle,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
+import { User } from "../types/types";
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAuthenticate: (user: { email: string; name: string }) => void;
+  onAuthenticate: (user: User) => void;
 }
 
 export default function AuthModal({
@@ -54,6 +55,7 @@ export default function AuthModal({
 
         if (data.user) {
           onAuthenticate({
+            id: data.user.id,
             email: data.user.email || "",
             name: data.user.user_metadata?.name || email.split("@")[0],
           });
@@ -77,6 +79,7 @@ export default function AuthModal({
 
         if (data.user) {
           onAuthenticate({
+            id: data.user.id,
             email: data.user.email || "",
             name: name || email.split("@")[0],
           });
@@ -132,7 +135,7 @@ export default function AuthModal({
                 Full Name
               </label>
               <div className="relative">
-                <User className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
+                <UserIcon className="w-5 h-5 text-gray-400 absolute left-3 top-3" />
                 <input
                   type="text"
                   value={name}

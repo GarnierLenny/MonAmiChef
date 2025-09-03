@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useMemo, useRef } from "react";
-import type { Preferences, ChatItem } from "../types/types";
+import type { Preferences, ChatItem, ChatMessage } from "../types/types";
 import PreferencesSidebar from "../components/PreferenceSidebar";
 import ChatInterface from "../components/ChatInterface";
 import ChatHistorySidebar from "../components/ChatHistorySidebar";
 import Cookies from "universal-cookie";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import Box from "@mui/meterials/Box";
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8888";
 
@@ -13,19 +12,14 @@ const MAX_CHARACTERS = 150;
 
 const cookies = new Cookies(null, { path: "/" });
 
-const initialAIText = (max: number): ChatMessage =>
+const initialAIText = (max: number): string =>
   `Hi! I'm your AI cooking assistant. Tell me what ingredients you have (max ${max} characters) and I'll create a personalized recipe for you based on your preferences!`;
 
-interface ChatMessage {
-  role: "user" | "model";
-  text: string;
-  //timestamp: Date;
-}
-
 const buildAiGreeting = (): ChatMessage => ({
-  role: "model",
-  text: initialAIText(MAX_CHARACTERS),
-  //timestamp: new Date(),
+  id: "initial",
+  role: "assistant",
+  content: initialAIText(MAX_CHARACTERS),
+  timestamp: new Date(),
 });
 
 function ChatPage() {
@@ -46,6 +40,7 @@ function ChatPage() {
     meat: [],
     vegetables: [],
     servings: null,
+    cooks: null,
   });
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -77,7 +72,10 @@ function ChatPage() {
       setRenamingId(dropdownChatId);
     } else if (action === "delete") {
       setConfirmDeleteId(dropdownChatId);
-    } else if (action === "share") onAction({ type: "share", chatId });
+    } else if (action === "share") {
+      // Handle share action - placeholder
+      console.log("Share action for chat:", dropdownChatId);
+    }
   };
 
   const cancelDelete = () => {
@@ -173,7 +171,7 @@ function ChatPage() {
       if (category === "servings") {
         handlePreferenceChange(category, 0, "remove");
       } else {
-        handlePreferenceChange(category, "", "clear");
+        handlePreferenceChange(category as ArrayKeys, "", "clear");
       }
     });
   }
@@ -204,7 +202,7 @@ function ChatPage() {
         console.log("loaded messages", result);
         setMessages(result.messages.messages);
       } catch (err) {
-        if (err?.name !== "AbortError") {
+        if (err && typeof err === 'object' && 'name' in err && err.name !== "AbortError") {
           console.error("Failed to load chat: ", err);
           setMessages([buildAiGreeting()]);
         }
@@ -227,11 +225,12 @@ function ChatPage() {
     | "vegetables";
   type NumberKeys = "servings" | "cooks";
 
-  // Submit chat message handler
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+  const handleSubmit = () => {
     const text = inputValue.trim();
+    handleSubmitMessage(text);
+  };
+
+  const handleSubmitMessage = async (text: string) => {
 
     setInputValue("");
 
@@ -239,10 +238,10 @@ function ChatPage() {
     setMessages((m) => [
       ...m,
       {
+        id: `user-${Date.now()}`,
         role: "user",
-        text: text,
-        // Add a timestamp if you're tracking it
-        // timestamp: new Date(),
+        content: text,
+        timestamp: new Date(),
       },
     ]);
     setIsGenerating(true);
@@ -276,8 +275,10 @@ function ChatPage() {
       setMessages((m) => [
         ...m,
         {
-          role: "model",
-          text: json.reply ?? "",
+          id: `assistant-${Date.now()}`,
+          role: "assistant",
+          content: json.reply ?? "",
+          timestamp: new Date(),
         },
       ]);
       clearAllPreferences();
@@ -287,8 +288,9 @@ function ChatPage() {
       setMessages((m) => [
         ...m,
         {
-          role: "model",
-          text: "Oops, something went wrong.",
+          id: `error-${Date.now()}`,
+          role: "assistant",
+          content: "Oops, something went wrong.",
           timestamp: new Date(),
         },
       ]);
@@ -329,7 +331,9 @@ function ChatPage() {
       <div className="hidden md:block">
         <PreferencesSidebar
           preferences={preferences}
-          onPreferenceChange={handlePreferenceChange}
+          onPreferenceChange={(category: string, value: string | number, action: "add" | "remove" | "set") => 
+            handlePreferenceChange(category as ArrayKeys | NumberKeys, value, action as "add" | "remove" | "set" | "clear")
+          }
           clearAllPreferences={clearAllPreferences}
         />
       </div>
@@ -337,7 +341,9 @@ function ChatPage() {
         preferences={preferences}
         inputValue={inputValue}
         onInputChange={setInputValue}
-        onPreferenceChange={handlePreferenceChange}
+        onPreferenceChange={(category: string, value: string | number, action: "add" | "remove" | "set") => 
+          handlePreferenceChange(category as ArrayKeys | NumberKeys, value, action as "add" | "remove" | "set" | "clear")
+        }
         messages={messages}
         remainingCharacters={remainingCharacters}
         isOverLimit={isOverLimit}
@@ -355,10 +361,9 @@ function ChatPage() {
           onClose={() => setIsSidebarOpen(false)}
           onNewChat={handleNewChat}
           handleDropdownAction={handleDropdownAction}
-          activeDropdown={activeDropdown}
           setActiveDropdown={setActiveDropdown}
           renamingId={renamingId}
-          setRenamingId={renamingId}
+          setRenamingId={setRenamingId}
           renameValue={renameValue}
           setRenameValue={setRenameValue}
           cancelRename={cancelRename}

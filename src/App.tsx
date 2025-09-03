@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import RecipeDisplay from "./components/RecipeDisplay";
 import NutritionView from "./components/NutritionView";
 import CookingToolsView from "./components/CookingToolsView";
 import MealPlanningView from "./components/MealPlanningView";
@@ -15,6 +14,7 @@ import UserProfile from "./components/UserProfile";
 import { supabase } from "./lib/supabase";
 import { getProductByPriceId } from "./stripe-config";
 import ChatPage from "./pages/ChatPage";
+import { User } from "./types/types";
 
 function App() {
   const navigate = useNavigate();
@@ -37,6 +37,7 @@ function App() {
     } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === "SIGNED_IN" && session?.user) {
         setUser({
+          id: session.user.id,
           email: session.user.email || "",
           name:
             session.user.user_metadata?.name ||
@@ -60,6 +61,7 @@ function App() {
       } = await supabase.auth.getSession();
       if (session?.user) {
         setUser({
+          id: session.user.id,
           email: session.user.email || "",
           name:
             session.user.user_metadata?.name ||
@@ -162,12 +164,12 @@ function App() {
           <Route path="/" element={<ChatPage />} />
           <Route
             path="/macros"
-            element={<NutritionView currentSubView="macros" />}
+            element={<NutritionView currentSubView="macros" recipe={null} />}
           />
           <Route path="/recipe/:id" element={<RecipePage />} />
           <Route
             path="/calories"
-            element={<NutritionView currentSubView="calories" />}
+            element={<NutritionView currentSubView="calories" recipe={null} />}
           />
           <Route
             path="/timer"

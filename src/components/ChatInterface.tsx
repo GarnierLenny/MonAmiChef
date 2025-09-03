@@ -1,16 +1,14 @@
-import React, {
+import {
   useLayoutEffect,
   useEffect,
   useRef,
-  useMemo,
-  useState,
 } from "react";
-import { Send, Loader2, ChefHat, Sparkles, X } from "lucide-react";
-import RecipeCard from "./RecipeCard";
+import { Send, Loader2, Sparkles, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import { useLocation } from "react-router-dom";
+import { ChatMessage } from "../types/types";
 
 interface ChatInterfaceProps {
   preferences: {
@@ -41,7 +39,7 @@ interface ChatInterfaceProps {
   handleSubmit: () => void;
   isGenerating: boolean;
   clearAllPreferences: () => void;
-  inputRef: HTMLInputElement;
+  inputRef: React.RefObject<HTMLInputElement>;
 }
 
 export default function ChatInterface({
@@ -177,7 +175,7 @@ export default function ChatInterface({
                     : "bg-gray-100 text-gray-900"
                 }`}
               >
-                {message.role === "model" && (
+                {message.role === "assistant" && (
                   <div className="flex items-center space-x-2 mb-2">
                     <Sparkles className="w-4 h-4 text-orange-500" />
                     <span className="text-sm font-medium text-orange-600">
@@ -188,7 +186,7 @@ export default function ChatInterface({
 
                 {message.role === "user" ? (
                   <div className="font-sans">
-                    <ReactMarkdown>{message.text}</ReactMarkdown>
+                    <ReactMarkdown>{message.content}</ReactMarkdown>
                   </div>
                 ) : (
                   <div className="font-sans">
@@ -225,7 +223,7 @@ export default function ChatInterface({
                         ),
                       }}
                     >
-                      {message.text}
+                      {message.content}
                     </ReactMarkdown>
                   </div>
                 )}

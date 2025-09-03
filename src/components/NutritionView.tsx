@@ -32,7 +32,7 @@ interface BMIData {
 
 interface NutritionViewProps {
   currentSubView: string;
-  recipe: any;
+  recipe?: any;
 }
 
 export default function NutritionView({
