@@ -1,60 +1,49 @@
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import Drawer from '@mui/material/Drawer';
-import Button from '@mui/material/Button';
-import List from '@mui/material/List';
-import Divider from '@mui/material/Divider';
-import ListItem from '@mui/material/ListItem';
-import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
-import ListItemText from '@mui/material/ListItemText';
-import InboxIcon from '@mui/icons-material/MoveToInbox';
-import MailIcon from '@mui/icons-material/Mail';
+import React from 'react';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
+import { Home, Search, Calendar, Settings } from "lucide-react";
 
-export default function MenuSidebar() {
-  const [open, setOpen] = React.useState(false);
+interface MenuSidebarProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
 
-  const toggleDrawer = (newOpen: boolean) => () => {
-    setOpen(newOpen);
-  };
-
-  const DrawerList = (
-    <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
-      <List>
-        {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-      <Divider />
-      <List>
-        {['All mail', 'Trash', 'Spam'].map((text, index) => (
-          <ListItem key={text} disablePadding>
-            <ListItemButton>
-              <ListItemIcon>
-                {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-              </ListItemIcon>
-              <ListItemText primary={text} />
-            </ListItemButton>
-          </ListItem>
-        ))}
-      </List>
-    </Box>
-  );
+export function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
+  const menuItems = [
+    { icon: Home, label: 'Home', value: 'home' },
+    { icon: Search, label: 'Explore', value: 'explore' },
+    { icon: Calendar, label: 'Meal Planning', value: 'meal-planning' },
+    { icon: Settings, label: 'Settings', value: 'settings' },
+  ];
 
   return (
-    <div>
-      <Button onClick={toggleDrawer(true)}>Open drawer</Button>
-      <Drawer open={open} onClose={toggleDrawer(false)}>
-        {DrawerList}
-      </Drawer>
-    </div>
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent side="left" className="w-[280px]">
+        <SheetHeader>
+          <SheetTitle>Menu</SheetTitle>
+        </SheetHeader>
+        <div className="mt-6 flex flex-col space-y-2">
+          {menuItems.map((item) => (
+            <Button
+              key={item.value}
+              variant="ghost"
+              className="justify-start w-full"
+              onClick={onClose}
+            >
+              <item.icon className="mr-3 h-5 w-5" />
+              {item.label}
+            </Button>
+          ))}
+        </div>
+      </SheetContent>
+    </Sheet>
   );
 }
+
+export default MenuSidebar;
 

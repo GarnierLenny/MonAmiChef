@@ -13,10 +13,23 @@ export interface Preferences {
   cooks: number | null;
 }
 
-interface ChatItem {
+export interface ChatItem {
   id: string;
   title: string;
   //lastMessage: string;
+  timestamp: Date;
+}
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  content: string;
+  role: 'user' | 'assistant';
   timestamp: Date;
 }
 
