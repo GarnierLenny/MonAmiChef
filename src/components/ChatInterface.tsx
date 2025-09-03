@@ -252,8 +252,8 @@ export default function ChatInterface({
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input - Now sticky at bottom */}
-        <div className="flex-shrink-0 border-t bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        {/* Input - Now sticky at bottom dont put border-t */}
+        <div className="flex-shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
           <div className="p-3">
           {/* Selected Preferences Tags */}
           {selectedTags.length > 0 && (
