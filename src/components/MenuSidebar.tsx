@@ -14,10 +14,10 @@ interface MenuSidebarProps {
 
 export function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
   const menuItems = [
-    { icon: Home, label: 'Home', value: 'home' },
-    { icon: Search, label: 'Explore', value: 'explore' },
-    { icon: Calendar, label: 'Meal Planning', value: 'meal-planning' },
-    { icon: Settings, label: 'Settings', value: 'settings' },
+    { icon: Home, label: "Home", value: "home" },
+    { icon: Search, label: "Explore", value: "explore" },
+    { icon: Calendar, label: "Meal Planning", value: "meal-planning" },
+    { icon: Settings, label: "Settings", value: "settings" },
   ];
 
   return (
@@ -45,4 +45,3 @@ export function MenuSidebar({ isOpen, onClose }: MenuSidebarProps) {
 }
 
 export default MenuSidebar;
-

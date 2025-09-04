@@ -1,5 +1,5 @@
-import { Menu } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Menu } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface MobileTopBarProps {
   onMenuClick: () => void;
@@ -24,12 +24,14 @@ export function MobileTopBar({ onMenuClick }: MobileTopBarProps) {
 
           {/* Brand with logo */}
           <div className="flex items-center gap-2">
-            <img 
-              src="/lovable-uploads/2db14320-f76b-4b9d-978c-1761722e2695.png" 
-              alt="Chef Logo" 
+            <img
+              src="/lovable-uploads/2db14320-f76b-4b9d-978c-1761722e2695.png"
+              alt="Chef Logo"
               className="h-7 w-auto"
             />
-            <span className="text-foreground font-medium text-base tracking-wide">Mon Ami Chef</span>
+            <span className="text-foreground font-medium text-base tracking-wide">
+              Mon Ami Chef
+            </span>
           </div>
 
           {/* Right spacer for balance */}

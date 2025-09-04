@@ -11,7 +11,10 @@ interface MobileSidebarProps {
   onClose: () => void;
   chats: ChatItem[];
   onNewChat: () => void;
-  handleDropdownAction: (action: "rename" | "delete" | "share", chatId: string) => void;
+  handleDropdownAction: (
+    action: "rename" | "delete" | "share",
+    chatId: string,
+  ) => void;
   activeDropdown: string | null;
   setActiveDropdown: (id: string | null) => void;
   renamingId: string | null;
@@ -23,7 +26,11 @@ interface MobileSidebarProps {
   confirmDelete: () => void;
   cancelDelete: () => void;
   preferences: Preferences;
-  onPreferenceChange: (category: string, value: string | number, action: "add" | "remove" | "set") => void;
+  onPreferenceChange: (
+    category: string,
+    value: string | number,
+    action: "add" | "remove" | "set",
+  ) => void;
   clearAllPreferences: () => void;
 }
 
@@ -45,23 +52,27 @@ export function MobileSidebar({
   cancelDelete,
   preferences,
   onPreferenceChange,
-  clearAllPreferences
+  clearAllPreferences,
 }: MobileSidebarProps) {
-  const [activeTab, setActiveTab] = useState<'history' | 'preferences'>('history');
+  const [activeTab, setActiveTab] = useState<"history" | "preferences">(
+    "history",
+  );
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <SheetContent side="left" className="w-80 p-0 flex flex-col h-full bg-gradient-to-b from-chef-cream to-background data-[state=open]:animate-slide-in-right"
+      <SheetContent
+        side="left"
+        className="w-80 p-0 flex flex-col h-full bg-gradient-to-b from-chef-cream to-background data-[state=open]:animate-slide-in-right"
         style={{
-          animation: "slide-in-right 0.3s ease-out"
+          animation: "slide-in-right 0.3s ease-out",
         }}
       >
         {/* Header */}
         <div className="p-4 border-b border-chef-orange/20 bg-gradient-to-r from-chef-orange/10 to-chef-yellow/10">
           <div className="flex items-center justify-between">
-            <img 
-              src="/lovable-uploads/2db14320-f76b-4b9d-978c-1761722e2695.png" 
-              alt="Chef Logo" 
+            <img
+              src="/lovable-uploads/2db14320-f76b-4b9d-978c-1761722e2695.png"
+              alt="Chef Logo"
               className="h-8 w-auto"
             />
           </div>
@@ -70,21 +81,21 @@ export function MobileSidebar({
         {/* Tab Navigation */}
         <div className="flex border-b border-chef-orange/20 bg-white/50">
           <button
-            onClick={() => setActiveTab('history')}
+            onClick={() => setActiveTab("history")}
             className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-              activeTab === 'history' 
-                ? 'text-chef-brown border-b-2 border-chef-orange bg-chef-orange/5' 
-                : 'text-chef-brown/60 hover:text-chef-brown'
+              activeTab === "history"
+                ? "text-chef-brown border-b-2 border-chef-orange bg-chef-orange/5"
+                : "text-chef-brown/60 hover:text-chef-brown"
             }`}
           >
             Chat History
           </button>
           <button
-            onClick={() => setActiveTab('preferences')}
+            onClick={() => setActiveTab("preferences")}
             className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
-              activeTab === 'preferences' 
-                ? 'text-chef-brown border-b-2 border-chef-orange bg-chef-orange/5' 
-                : 'text-chef-brown/60 hover:text-chef-brown'
+              activeTab === "preferences"
+                ? "text-chef-brown border-b-2 border-chef-orange bg-chef-orange/5"
+                : "text-chef-brown/60 hover:text-chef-brown"
             }`}
           >
             Preferences
@@ -93,7 +104,7 @@ export function MobileSidebar({
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
-          {activeTab === 'history' ? (
+          {activeTab === "history" ? (
             <div className="p-4 space-y-4">
               {/* New Chat Button */}
               <Button
@@ -123,18 +134,32 @@ export function MobileSidebar({
                         <Button size="sm" onClick={saveRename} variant="ghost">
                           ✓
                         </Button>
-                        <Button size="sm" onClick={cancelRename} variant="ghost">
+                        <Button
+                          size="sm"
+                          onClick={cancelRename}
+                          variant="ghost"
+                        >
                           ✕
                         </Button>
                       </div>
                     ) : confirmDeleteId === chat.id ? (
                       <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                        <p className="text-sm text-red-700 mb-2">Delete this chat?</p>
+                        <p className="text-sm text-red-700 mb-2">
+                          Delete this chat?
+                        </p>
                         <div className="flex gap-2">
-                          <Button size="sm" onClick={confirmDelete} variant="destructive">
+                          <Button
+                            size="sm"
+                            onClick={confirmDelete}
+                            variant="destructive"
+                          >
                             Delete
                           </Button>
-                          <Button size="sm" onClick={cancelDelete} variant="outline">
+                          <Button
+                            size="sm"
+                            onClick={cancelDelete}
+                            variant="outline"
+                          >
                             Cancel
                           </Button>
                         </div>
@@ -151,29 +176,39 @@ export function MobileSidebar({
                           variant="ghost"
                           size="icon"
                           className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() => setActiveDropdown(activeDropdown === chat.id ? null : chat.id)}
+                          onClick={() =>
+                            setActiveDropdown(
+                              activeDropdown === chat.id ? null : chat.id,
+                            )
+                          }
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
-                        
+
                         {activeDropdown === chat.id && (
                           <div className="absolute right-0 top-full mt-1 bg-white border border-chef-orange/20 rounded-lg shadow-lg z-10 py-1 min-w-[120px]">
                             <button
-                              onClick={() => handleDropdownAction("rename", chat.id)}
+                              onClick={() =>
+                                handleDropdownAction("rename", chat.id)
+                              }
                               className="w-full px-3 py-2 text-left text-sm hover:bg-chef-orange/5 flex items-center gap-2"
                             >
                               <Edit className="h-3 w-3" />
                               Rename
                             </button>
                             <button
-                              onClick={() => handleDropdownAction("share", chat.id)}
+                              onClick={() =>
+                                handleDropdownAction("share", chat.id)
+                              }
                               className="w-full px-3 py-2 text-left text-sm hover:bg-chef-orange/5 flex items-center gap-2"
                             >
                               <Share className="h-3 w-3" />
                               Share
                             </button>
                             <button
-                              onClick={() => handleDropdownAction("delete", chat.id)}
+                              onClick={() =>
+                                handleDropdownAction("delete", chat.id)
+                              }
                               className="w-full px-3 py-2 text-left text-sm hover:bg-red-50 text-red-600 flex items-center gap-2"
                             >
                               <Trash className="h-3 w-3" />

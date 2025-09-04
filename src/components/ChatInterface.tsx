@@ -1,8 +1,4 @@
-import {
-  useLayoutEffect,
-  useEffect,
-  useRef,
-} from "react";
+import { useLayoutEffect, useEffect, useRef } from "react";
 import { Send, Loader2, Sparkles, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -255,40 +251,40 @@ export default function ChatInterface({
         {/* Input - Now sticky at bottom dont put border-t */}
         <div className="flex-shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
           <div className="p-3">
-          {/* Selected Preferences Tags */}
-          {selectedTags.length > 0 && (
-            <div className="mb-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-medium text-gray-700">
-                  Selected Preferences:
-                </span>
-                <button
-                  onClick={clearAllPreferences}
-                  className="text-xs text-gray-500 hover:text-red-600 transition-colors"
-                >
-                  Clear all
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
-                {selectedTags.map((tag, index) => (
-                  <div
-                    key={index}
-                    className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${tag.color} border border-current/20`}
+            {/* Selected Preferences Tags */}
+            {selectedTags.length > 0 && (
+              <div className="mb-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-sm font-medium text-gray-700">
+                    Selected Preferences:
+                  </span>
+                  <button
+                    onClick={clearAllPreferences}
+                    className="text-xs text-gray-500 hover:text-red-600 transition-colors"
                   >
-                    <span>{tag.label}</span>
-                    <button
-                      onClick={() => handleRemoveTag(tag.category, tag.value)}
-                      className="hover:bg-current/20 rounded-full p-0.5 transition-colors"
+                    Clear all
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
+                  {selectedTags.map((tag, index) => (
+                    <div
+                      key={index}
+                      className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${tag.color} border border-current/20`}
                     >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
+                      <span>{tag.label}</span>
+                      <button
+                        onClick={() => handleRemoveTag(tag.category, tag.value)}
+                        className="hover:bg-current/20 rounded-full p-0.5 transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {/*<div className="hidden md:block flex justify-between items-center">
+            {/*<div className="hidden md:block flex justify-between items-center">
             <span
               className={`text-sm font-medium ${
                 isOverLimit
@@ -302,38 +298,38 @@ export default function ChatInterface({
             </span>
           </div>*/}
 
-          <form
-            onSubmit={handleSubmit}
-            className={`flex items-center gap-4 mb-2 p-2 pl-5 bg-white flex-1 shadow-lg shadow-orange-500/30 border rounded-full transition-colors
+            <form
+              onSubmit={handleSubmit}
+              className={`flex items-center gap-4 mb-2 p-2 pl-5 bg-white flex-1 shadow-lg shadow-orange-500/30 border rounded-full transition-colors
               ${
                 isOverLimit
                   ? "border-red-300 bg-red-50 focus-within:ring-2 focus-within:ring-red-500"
                   : "border-gray-300 focus-within:ring-2 focus-within:ring-orange-500"
               }
             `}
-          >
-            <input
-              ref={inputRef}
-              type="text"
-              value={inputValue}
-              onChange={(e) => onInputChange(e.target.value)}
-              placeholder="Tell me what you crave"
-              maxLength={maxCharacters}
-              disabled={isGenerating}
-              className="min-w-0 grow basis-0 bg-transparent outline-none focus:ring-0"
-            />
-            <button
-              type="submit"
-              disabled={!canSend || isGenerating || isOverLimit}
-              className={`shrink-0 rounded-full px-4 py-4 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 ${
-                isOverLimit
-                  ? "bg-gray-400"
-                  : "bg-orange-500 hover:bg-orange-600"
-              }`}
             >
-              <Send className="w-4 h-4" />
-            </button>
-          </form>
+              <input
+                ref={inputRef}
+                type="text"
+                value={inputValue}
+                onChange={(e) => onInputChange(e.target.value)}
+                placeholder="Tell me what you crave"
+                maxLength={maxCharacters}
+                disabled={isGenerating}
+                className="min-w-0 grow basis-0 bg-transparent outline-none focus:ring-0"
+              />
+              <button
+                type="submit"
+                disabled={!canSend || isGenerating || isOverLimit}
+                className={`shrink-0 rounded-full px-4 py-4 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 ${
+                  isOverLimit
+                    ? "bg-gray-400"
+                    : "bg-orange-500 hover:bg-orange-600"
+                }`}
+              >
+                <Send className="w-4 h-4" />
+              </button>
+            </form>
           </div>
         </div>
       </div>

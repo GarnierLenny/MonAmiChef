@@ -16,7 +16,10 @@ interface ChatHistorySidebarProps {
   isOpen: boolean;
   onClose: () => void;
   onNewChat: () => void;
-  handleDropdownAction: (action: "rename" | "delete" | "share", chatId: string) => void;
+  handleDropdownAction: (
+    action: "rename" | "delete" | "share",
+    chatId: string,
+  ) => void;
   activeDropdown: string | null;
   setActiveDropdown: (chatId: string | null) => void;
   renamingId: string | null;
@@ -164,11 +167,11 @@ export default function ChatHistorySidebar({
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
 
-                  {activeDropdown === chat.id && (
+                      {activeDropdown === chat.id && (
                         <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
                           <button
                             onClick={() =>
-                            handleDropdownAction("rename", chat.id)
+                              handleDropdownAction("rename", chat.id)
                             }
                             className="w-full flex items-center space-x-2 px-3 py-2 text-left text-gray-700 hover:bg-gray-50 transition-colors text-sm"
                           >
@@ -184,7 +187,7 @@ export default function ChatHistorySidebar({
                           </button>*/}
                           <button
                             onClick={() =>
-                            handleDropdownAction("delete", chat.id)
+                              handleDropdownAction("delete", chat.id)
                             }
                             className="w-full flex items-center space-x-2 px-3 py-2 text-left text-red-600 hover:bg-red-50 transition-colors text-sm"
                           >
@@ -284,7 +287,7 @@ export default function ChatHistorySidebar({
       {activeDropdown && (
         <div
           className="fixed inset-0 z-40"
-              onClick={() => setActiveDropdown(null)}
+          onClick={() => setActiveDropdown(null)}
         />
       )}
     </div>

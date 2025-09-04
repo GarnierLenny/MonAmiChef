@@ -1,5 +1,14 @@
+// src/App.tsx
 import { useState, useEffect } from "react";
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
+import type { Session } from "@supabase/supabase-js";
+
 import Navbar from "./components/Navbar";
 import NutritionView from "./components/NutritionView";
 import CookingToolsView from "./components/CookingToolsView";
@@ -11,16 +20,28 @@ import PricingModal from "./components/PricingModal";
 import SuccessPage from "./components/SuccessPage";
 import RecipePage from "./components/RecipePage";
 import UserProfile from "./components/UserProfile";
+import ChatPage from "./pages/ChatPage";
+
 import { supabase } from "./lib/supabase";
 import { getProductByPriceId } from "./stripe-config";
-import ChatPage from "./pages/ChatPage";
 import { User } from "./types/types";
+
+function RequireAuth({
+  session,
+  children,
+}: {
+  session: Session | null;
+  children: JSX.Element;
+}) {
+  return session ? children : <Navigate to="/" replace />;
+}
 
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const isRecipePage = location.pathname.startsWith("/recipe/");
 
+  const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
@@ -28,91 +49,103 @@ function App() {
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
   useEffect(() => {
-    // Check initial auth state
-    checkAuthState();
+    let isMounted = true;
 
-    // Listen for auth changes
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_IN" && session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email || "",
-          name:
-            session.user.user_metadata?.name ||
-            session.user.email?.split("@")[0] ||
-            "",
-        });
-        await fetchUserSubscription();
-      } else if (event === "SIGNED_OUT") {
-        setUser(null);
-        setUserSubscription(null);
+    (async () => {
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (!isMounted) return;
+        if (error) console.error("getSession error:", error);
+
+        const s = data?.session ?? null;
+        setSession(s);
+
+        if (s?.user) {
+          setUser({
+            id: s.user.id,
+            email: s.user.email || "",
+            name:
+              (s.user.user_metadata as any)?.name ||
+              s.user.email?.split("@")[0] ||
+              "",
+          });
+          fetchUserSubscription(s.user.id);
+        } else {
+          setUser(null);
+          setUserSubscription(null); // anonymous -> Free
+        }
+      } finally {
+        if (isMounted) setIsLoadingAuth(false);
       }
-    });
+    })();
 
-    return () => subscription.unsubscribe();
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      async (_event, newSession) => {
+        if (!isMounted) return;
+        setSession(newSession ?? null);
+
+        if (newSession?.user) {
+          setUser({
+            id: newSession.user.id,
+            email: newSession.user.email || "",
+            name:
+              (newSession.user.user_metadata as any)?.name ||
+              newSession.user.email?.split("@")[0] ||
+              "",
+          });
+          fetchUserSubscription(newSession.user.id);
+        } else {
+          setUser(null);
+          setUserSubscription(null); // back to Free
+        }
+      },
+    );
+
+    return () => {
+      isMounted = false;
+      listener.subscription.unsubscribe();
+    };
   }, []);
 
-  const checkAuthState = async () => {
+  async function fetchUserSubscription(userId: string) {
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
-      if (session?.user) {
-        setUser({
-          id: session.user.id,
-          email: session.user.email || "",
-          name:
-            session.user.user_metadata?.name ||
-            session.user.email?.split("@")[0] ||
-            "",
-        });
-        await fetchUserSubscription();
-      }
-    } catch (error) {
-      console.error("Error checking auth state:", error);
-    } finally {
-      setIsLoadingAuth(false);
-    }
-  };
-
-  const fetchUserSubscription = async () => {
-    try {
+      // IMPORTANT: filter by current user id to avoid RLS issues & wrong rows
       const { data, error } = await supabase
         .from("stripe_user_subscriptions")
         .select("*")
+        .eq("user_id", userId)
         .maybeSingle();
 
       if (error) {
-        console.error("Error fetching subscription:", error);
+        console.error("Subscription fetch error:", error);
+        setUserSubscription(null);
         return;
       }
-
-      setUserSubscription(data);
-    } catch (error) {
-      console.error("Error fetching subscription:", error);
+      setUserSubscription(data ?? null); // null => free
+    } catch (e) {
+      console.error("Subscription fetch threw:", e);
+      setUserSubscription(null);
     }
-  };
+  }
 
   const handleViewChange = (view: string) => {
     navigate(`/${view === "generator" ? "" : view}`);
   };
 
-  const handleAuthenticate = (userData: User) => {
-    setUser(userData);
+  const handleAuthenticate = (u: User) => {
+    setUser(u);
     setIsAuthModalOpen(false);
-    fetchUserSubscription();
+    void fetchUserSubscription();
   };
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
     setUser(null);
     setUserSubscription(null);
   };
 
-  // Get current view from URL
   const getCurrentView = () => {
-    const path = location.pathname.slice(1); // Remove leading slash
+    const path = location.pathname.slice(1);
     return path || "generator";
   };
 
@@ -123,12 +156,10 @@ function App() {
     ) {
       return "Free Plan";
     }
-
     if (userSubscription.price_id) {
       const product = getProductByPriceId(userSubscription.price_id);
       return product?.name || "Premium Plan";
     }
-
     return "Premium Plan";
   };
 
@@ -143,6 +174,7 @@ function App() {
     );
   }
 
+  // Anonymous-first: we do NOT block the app if not logged in.
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
       {!isRecipePage && (
@@ -150,17 +182,19 @@ function App() {
           <Navbar
             currentView={getCurrentView()}
             onViewChange={handleViewChange}
-            user={user}
+            user={user} // null if anonymous
             subscriptionPlan={getSubscriptionPlanName()}
             onAuthClick={() => setIsAuthModalOpen(true)}
             onPricingClick={() => setIsPricingModalOpen(true)}
           />
         </div>
       )}
+
       <div
         className={`flex ${isRecipePage ? "h-screen" : "flex-1"} overflow-y-auto`}
       >
         <Routes>
+          {/* Public routes (anonymous-friendly) */}
           <Route path="/" element={<ChatPage />} />
           <Route
             path="/macros"
@@ -190,26 +224,23 @@ function App() {
           <Route path="/explore" element={<ExploreView />} />
           <Route path="/coming-soon" element={<ComingSoonView />} />
           <Route path="/success" element={<SuccessPage />} />
+
+          {/* Private route(s) (gate only what must be authenticated) */}
           <Route
             path="/profile"
-            element={<UserProfile user={user} onSignOut={handleSignOut} />}
-          />
-          <Route
-            path="/pricing"
             element={
-              <div className="flex-1 flex items-center justify-center">
-                <button
-                  onClick={() => setIsPricingModalOpen(true)}
-                  className="px-6 py-3 bg-orange-500 text-white rounded-lg"
-                >
-                  View Pricing
-                </button>
-              </div>
+              <RequireAuth session={session}>
+                <UserProfile user={user} onSignOut={handleSignOut} />
+              </RequireAuth>
             }
           />
+
+          {/* Fallback */}
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
 
+      {/* Your custom email/password modal (optional auth) */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
@@ -219,7 +250,7 @@ function App() {
       <PricingModal
         isOpen={isPricingModalOpen}
         onClose={() => setIsPricingModalOpen(false)}
-        isAuthenticated={!!user}
+        isAuthenticated={!!session}
         onAuthRequired={() => {
           setIsPricingModalOpen(false);
           setIsAuthModalOpen(true);

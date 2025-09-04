@@ -54,7 +54,7 @@ function ChatPage() {
   const [renameValue, setRenameValue] = useState<string>("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  
+
   const isMobile = useIsMobile();
 
   const chatId = searchParams.get("c");
@@ -102,14 +102,11 @@ function ChatPage() {
   };
 
   const saveRename = async () => {
-    await fetch(
-      `${API_URL}/chat/user/${userId}/${renamingId}/rename`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ newTitle: renameValue }),
-      },
-    );
+    await fetch(`${API_URL}/chat/user/${userId}/${renamingId}/rename`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ newTitle: renameValue }),
+    });
     setRenamingId(null);
   };
 
@@ -207,7 +204,12 @@ function ChatPage() {
         console.log("loaded messages", result);
         setMessages(result.messages.messages);
       } catch (err) {
-        if (err && typeof err === 'object' && 'name' in err && err.name !== "AbortError") {
+        if (
+          err &&
+          typeof err === "object" &&
+          "name" in err &&
+          err.name !== "AbortError"
+        ) {
           console.error("Failed to load chat: ", err);
           setMessages([buildAiGreeting()]);
         }
@@ -237,7 +239,6 @@ function ChatPage() {
   };
 
   const handleSubmitMessage = async (text: string) => {
-
     setInputValue("");
 
     // optimistic user bubble
@@ -261,7 +262,7 @@ function ChatPage() {
       conversationId: chatId,
     };
 
-    console.log('test', payload);
+    console.log("test", payload);
     try {
       const res = await fetch(`${API_URL}/chat/ask`, {
         method: "POST",
@@ -339,7 +340,7 @@ function ChatPage() {
       {isMobile ? (
         <div className="flex flex-col h-screen">
           <MobileTopBar onMenuClick={() => setIsMobileSidebarOpen(true)} />
-          
+
           <MobileSidebar
             isOpen={isMobileSidebarOpen}
             onClose={() => setIsMobileSidebarOpen(false)}
@@ -357,8 +358,16 @@ function ChatPage() {
             confirmDelete={confirmDelete}
             cancelDelete={cancelDelete}
             preferences={preferences}
-            onPreferenceChange={(category: string, value: string | number, action: "add" | "remove" | "set") => 
-              handlePreferenceChange(category as ArrayKeys | NumberKeys, value, action as "add" | "remove" | "set" | "clear")
+            onPreferenceChange={(
+              category: string,
+              value: string | number,
+              action: "add" | "remove" | "set",
+            ) =>
+              handlePreferenceChange(
+                category as ArrayKeys | NumberKeys,
+                value,
+                action as "add" | "remove" | "set" | "clear",
+              )
             }
             clearAllPreferences={clearAllPreferences}
           />
@@ -368,8 +377,16 @@ function ChatPage() {
               preferences={preferences}
               inputValue={inputValue}
               onInputChange={setInputValue}
-              onPreferenceChange={(category: string, value: string | number, action: "add" | "remove" | "set") => 
-                handlePreferenceChange(category as ArrayKeys | NumberKeys, value, action as "add" | "remove" | "set" | "clear")
+              onPreferenceChange={(
+                category: string,
+                value: string | number,
+                action: "add" | "remove" | "set",
+              ) =>
+                handlePreferenceChange(
+                  category as ArrayKeys | NumberKeys,
+                  value,
+                  action as "add" | "remove" | "set" | "clear",
+                )
               }
               messages={messages}
               remainingCharacters={remainingCharacters}
@@ -389,8 +406,16 @@ function ChatPage() {
           <div className="hidden md:block">
             <PreferencesSidebar
               preferences={preferences}
-              onPreferenceChange={(category: string, value: string | number, action: "add" | "remove" | "set") => 
-                handlePreferenceChange(category as ArrayKeys | NumberKeys, value, action as "add" | "remove" | "set" | "clear")
+              onPreferenceChange={(
+                category: string,
+                value: string | number,
+                action: "add" | "remove" | "set",
+              ) =>
+                handlePreferenceChange(
+                  category as ArrayKeys | NumberKeys,
+                  value,
+                  action as "add" | "remove" | "set" | "clear",
+                )
               }
               clearAllPreferences={clearAllPreferences}
             />
@@ -399,8 +424,16 @@ function ChatPage() {
             preferences={preferences}
             inputValue={inputValue}
             onInputChange={setInputValue}
-            onPreferenceChange={(category: string, value: string | number, action: "add" | "remove" | "set") => 
-              handlePreferenceChange(category as ArrayKeys | NumberKeys, value, action as "add" | "remove" | "set" | "clear")
+            onPreferenceChange={(
+              category: string,
+              value: string | number,
+              action: "add" | "remove" | "set",
+            ) =>
+              handlePreferenceChange(
+                category as ArrayKeys | NumberKeys,
+                value,
+                action as "add" | "remove" | "set" | "clear",
+              )
             }
             messages={messages}
             remainingCharacters={remainingCharacters}

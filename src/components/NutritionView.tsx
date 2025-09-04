@@ -28,9 +28,7 @@ interface NutritionViewProps {
   recipe?: any;
 }
 
-export default function NutritionView({
-  currentSubView,
-}: NutritionViewProps) {
+export default function NutritionView({ currentSubView }: NutritionViewProps) {
   const [bmiData, setBmiData] = React.useState<BMIData>({
     age: 25,
     height: 170,
