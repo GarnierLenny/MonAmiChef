@@ -5,6 +5,7 @@ import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import { useLocation } from "react-router-dom";
 import { ChatMessage } from "../types/types";
+import { Separator } from "@/components/ui/separator";
 
 interface ChatInterfaceProps {
   preferences: {
@@ -253,7 +254,7 @@ export default function ChatInterface({
         </div>
 
         {/* Input - Now sticky at bottom dont put border-t */}
-        <div className="flex-shrink-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80">
+        <div className="flex-shrink-0">
           <div className="p-3">
             {/* Selected Preferences Tags */}
             {selectedTags.length > 0 && (
