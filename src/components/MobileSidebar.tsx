@@ -2,9 +2,12 @@ import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, MoreHorizontal, Edit, Trash, Share } from "lucide-react";
+import { Plus, Ellipsis, Edit, Trash, Share } from "lucide-react";
 import { ChatItem, Preferences } from "@/types/types";
 import PreferencesSidebar from "./PreferenceSidebar";
+import { formatTimestamp } from "../utils/format_timestamp.utils";
+import { Separator } from "@/components/ui/separator"
+import { useNavigate } from "react-router-dom";
 
 interface MobileSidebarProps {
   isOpen: boolean;
@@ -54,10 +57,15 @@ export function MobileSidebar({
   onPreferenceChange,
   clearAllPreferences,
 }: MobileSidebarProps) {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<"history" | "preferences">(
     "history",
   );
 
+  const handleChatClick = (chatId: string) => {
+    navigate(`/?c=${chatId}`, { replace: false });
+    onClose();
+  };
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
@@ -121,7 +129,7 @@ export function MobileSidebar({
 
               {/* Chat History */}
               <div className="space-y-2">
-                {chats.map((chat) => (
+                {chats.map((chat, index) => (
                   <div key={chat.id} className="group relative">
                     {renamingId === chat.id ? (
                       <div className="flex gap-2">
@@ -165,25 +173,19 @@ export function MobileSidebar({
                         </div>
                       </div>
                     ) : (
-                      <div className="flex items-center gap-2 p-2 rounded-lg hover:bg-chef-orange/5 transition-colors">
-                        <Button
-                          variant="ghost"
-                          className="flex-1 justify-start text-left text-sm h-auto p-2 truncate text-chef-brown hover:bg-transparent"
-                        >
+                      <div className="flex items-center justify-between gap-2 p-2 rounded-lg hover:bg-chef-orange/5 transition-colors">
+                        <div onClick={() => handleChatClick(chat.id)}>
                           {chat.title}
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                          onClick={() =>
+                          <p className="text-xs text-pink-600">
+                          {formatTimestamp(new Date(chat.timestamp)) ??
+                            "timestamp"}
+                          </p>
+                        </div>
+                        <Ellipsis className="h-4 w-4 bg-blue"  onClick={() =>
                             setActiveDropdown(
                               activeDropdown === chat.id ? null : chat.id,
                             )
-                          }
-                        >
-                          <MoreHorizontal className="h-4 w-4" />
-                        </Button>
+                          } />
 
                         {activeDropdown === chat.id && (
                           <div className="absolute right-0 top-full mt-1 bg-white border border-chef-orange/20 rounded-lg shadow-lg z-10 py-1 min-w-[120px]">
@@ -196,7 +198,7 @@ export function MobileSidebar({
                               <Edit className="h-3 w-3" />
                               Rename
                             </button>
-                            <button
+                            {/*<button
                               onClick={() =>
                                 handleDropdownAction("share", chat.id)
                               }
@@ -204,7 +206,7 @@ export function MobileSidebar({
                             >
                               <Share className="h-3 w-3" />
                               Share
-                            </button>
+                            </button>*/}
                             <button
                               onClick={() =>
                                 handleDropdownAction("delete", chat.id)
@@ -218,6 +220,7 @@ export function MobileSidebar({
                         )}
                       </div>
                     )}
+                  {index !== chats.length - 1 && <Separator orientation="horizontal" />}
                   </div>
                 ))}
               </div>
