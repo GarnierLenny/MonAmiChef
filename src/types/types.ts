@@ -28,8 +28,8 @@ export interface User {
 
 export interface ChatMessage {
   id: string;
-  content: string;
-  role: "user" | "assistant";
+  text: string;
+  role: "user" | "model";
   timestamp: Date;
 }
 

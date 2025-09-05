@@ -247,7 +247,7 @@ function ChatPage() {
       {
         id: `user-${Date.now()}`,
         role: "user",
-        content: text,
+        text: text,
         timestamp: new Date(),
       },
     ]);
@@ -262,7 +262,6 @@ function ChatPage() {
       conversationId: chatId,
     };
 
-    console.log("test", payload);
     try {
       const res = await fetch(`${API_URL}/chat/ask`, {
         method: "POST",
@@ -283,22 +282,24 @@ function ChatPage() {
       setMessages((m) => [
         ...m,
         {
-          id: `assistant-${Date.now()}`,
-          role: "assistant",
-          content: json.reply ?? "",
+          id: `model-${Date.now()}`,
+          role: "model",
+          text: json.reply ?? "",
           timestamp: new Date(),
         },
       ]);
       clearAllPreferences();
-      navigate(`?c=${encodeURIComponent(json.conversationId)}`);
+      if (!chatId) {
+        navigate(`?c=${encodeURIComponent(json.conversationId)}`);
+      }
     } catch (err) {
       console.error("Message sending failed:", err);
       setMessages((m) => [
         ...m,
         {
           id: `error-${Date.now()}`,
-          role: "assistant",
-          content: "Oops, something went wrong.",
+          role: "model",
+          text: "Oops, something went wrong.",
           timestamp: new Date(),
         },
       ]);

@@ -57,28 +57,16 @@ export default function Navbar({
       ],
     },
     {
-      id: "tools",
-      label: "Cooking Tools",
+      id: "timer",
+      label: "Cooking Timer",
       icon: Timer,
       color: "text-orange-600",
-      dropdown: [
-        { id: "timer", label: "Cooking Timer", icon: Clock },
-        { id: "notifications", label: "Push Notifications", icon: Bell },
-      ],
     },
     {
-      id: "planning",
+      id: "weekly-planner",
       label: "Meal Planning",
-      icon: Calendar,
+      icon: CalendarDays,
       color: "text-green-600",
-      dropdown: [
-        {
-          id: "weekly-planner",
-          label: "Weekly Meal Planner",
-          icon: CalendarDays,
-        },
-        { id: "plan-week", label: "Generate 7-Day Plan", icon: Utensils },
-      ],
     },
     {
       id: "explore",

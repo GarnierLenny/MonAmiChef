@@ -154,6 +154,10 @@ export default function ChatInterface({
 
   const canSend = inputValue.trim() !== "" || hasSelectedPreferences;
 
+  useEffect(() => {
+    console.log('CHANGE', messages);
+  }, [messages]);
+
   return (
     <div className="flex-1 flex flex-col h-full">
       <div className="flex-1 flex flex-col min-h-0">
