@@ -58,7 +58,6 @@ function ChatPage() {
   const isMobile = useIsMobile();
 
   const chatId = searchParams.get("c");
-  const userId = cookies.get("userId");
 
   // Derived values
   const remainingCharacters = useMemo(
@@ -92,7 +91,7 @@ function ChatPage() {
     if (confirmDeleteId === chatId) {
       handleNewChat();
     }
-    await fetch(`${API_URL}/chat/user/${userId}/${confirmDeleteId}/delete`, {
+    await fetch(`${API_URL}/chat/user/TODO/${confirmDeleteId}/delete`, {
       method: "DELETE",
     });
   };
@@ -102,7 +101,7 @@ function ChatPage() {
   };
 
   const saveRename = async () => {
-    await fetch(`${API_URL}/chat/user/${userId}/${renamingId}/rename`, {
+    await fetch(`${API_URL}/chat/user/TODO/${renamingId}/rename`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ newTitle: renameValue }),
@@ -113,28 +112,24 @@ function ChatPage() {
   // Load history chats
   useEffect(() => {
     (async () => {
-      const userId = cookies.get("userId");
+      const query = await fetch(
+        `${import.meta.env.VITE_API_URL}/chat/conversations`,
+        {
+          method: "GET",
+        },
+      );
+      const result = await query.json();
+      const tmpChats: ChatItem[] = [];
 
-      if (userId) {
-        const query = await fetch(
-          `${import.meta.env.VITE_API_URL}/chat/user/${userId}`,
-          {
-            method: "GET",
-          },
-        );
-        const result = await query.json();
-        const tmpChats: ChatItem[] = [];
-
-        result.forEach((chat: any) => {
-          tmpChats.push({
-            title: chat.title,
-            id: chat.id,
-            timestamp: chat.createdAt,
-          });
+      result.forEach((chat: any) => {
+        tmpChats.push({
+          title: chat.title,
+          id: chat.id,
+          timestamp: chat.createdAt,
         });
+      });
 
-        setChats(tmpChats);
-      }
+      setChats(tmpChats);
     })();
   }, [chatId, isSidebarOpen, saveRename]);
 
@@ -180,7 +175,7 @@ function ChatPage() {
 
   // Load current chat messages
   useEffect(() => {
-    if (!userId || !chatId) {
+    if (!chatId) {
       setMessages([buildAiGreeting()]);
       clearAllPreferences();
       return;
@@ -190,7 +185,7 @@ function ChatPage() {
 
     (async () => {
       try {
-        const query = await fetch(`${API_URL}/chat/user/${userId}/${chatId}`, {
+        const query = await fetch(`${API_URL}/chat/conversations/${chatId}/messages`, {
           method: "GET",
           headers: { "Content-Type": "application/json" },
           signal: ac.signal,
@@ -201,8 +196,7 @@ function ChatPage() {
         }
 
         const result = await query.json();
-        console.log("loaded messages", result);
-        setMessages(result.messages.messages);
+        setMessages(result.ChatMessage.messages);
       } catch (err) {
         if (
           err &&
@@ -217,7 +211,7 @@ function ChatPage() {
     })();
 
     return () => ac.abort();
-  }, [chatId, userId]);
+  }, [chatId]);
 
   type ArrayKeys =
     | "mealType"
@@ -253,20 +247,19 @@ function ChatPage() {
     ]);
     setIsGenerating(true);
 
-    const uid = cookies.get("userId") ?? null;
+    // TODO: handle without user id
 
     const payload = {
       userMessage: text,
       preferences: preferences,
-      userId: uid,
-      conversationId: chatId,
     };
 
     try {
-      const res = await fetch(`${API_URL}/chat/ask`, {
+      const res = await fetch(`${API_URL}/chat/conversations/${chatId ?? ""}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        credentials: 'include',
       });
 
       if (!res.ok) {
@@ -276,9 +269,7 @@ function ChatPage() {
       }
 
       const json = await res.json();
-      if (json?.userId) cookies.set("userId", json.userId, { path: "/" });
 
-      console.log("Success", json);
       setMessages((m) => [
         ...m,
         {
