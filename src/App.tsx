@@ -121,6 +121,9 @@ function App() {
     const { data: subscription } = supabase.auth.onAuthStateChange(
       (_event, newSession) => {
         void applySession(newSession ?? null);
+        if (_event === "SIGNED_IN") {
+          resetChats();
+        }
       },
     );
 

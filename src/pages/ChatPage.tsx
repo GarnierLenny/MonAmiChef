@@ -113,7 +113,7 @@ function ChatPage() {
     if (confirmDeleteId === chatId) {
       handleNewChat();
     }
-    await apiFetch(`/chat/conversations/${confirmDeleteId}`, { method: "DELETE" });
+    await apiFetch(`/chat/conversations/${confirmDeleteId}`, { auth: 'optional', method: "DELETE" });
     setConfirmDeleteId(null);
   };
 
@@ -127,6 +127,7 @@ function ChatPage() {
     if (!newTitle) return;
 
     await apiFetch(`/chat/conversations/${renamingId}`, {
+      auth: 'optional',
       method: "PATCH",
       body: JSON.stringify({ newTitle }),
     });
@@ -138,7 +139,7 @@ function ChatPage() {
   // Load history chats
   useEffect(() => {
     (async () => {
-      const result = await apiFetch("/chat/conversations");
+      const result = await apiFetch("/chat/conversations", { auth: 'optional' });
       const tmpChats: ChatItem[] = [];
       result.forEach((chat: any) => {
         tmpChats.push({
@@ -152,13 +153,7 @@ function ChatPage() {
   }, [chatId, isSidebarOpen, saveRename]);
 
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        if (event === "SIGNED_OUT" || event === "SIGNED_IN") {
-          window.location.reload();
-        }
-      },
-    );
+    const { data: authListener } = supabase.auth.onAuthStateChange();
 
     return () => {
       authListener.subscription.unsubscribe();
@@ -226,13 +221,16 @@ function ChatPage() {
         const result = await apiFetch(
           `/chat/conversations/${chatId}/messages`,
           {
+            auth: 'optional',
             method: "GET",
             headers: { "Content-Type": "application/json" },
             signal: ac.signal,
           },
         );
 
+        console.log('test', result, chatId);
         // Only apply if we're still on the same chat
+        // credentials: "include",
         if (latestChatIdRef.current !== startedFor) return;
 
         const msgs = result?.ChatMessage?.messages ?? [];
@@ -297,6 +295,7 @@ function ChatPage() {
         reply: string;
         conversationId: string;
       }>(path, {
+        auth: 'optional',
         method: "POST",
         body: JSON.stringify(payload),
       });
