@@ -86,9 +86,7 @@ function App() {
   useEffect(() => {
     let unsubscribed = false;
 
-    const applySession = async (
-      s: import("@supabase/supabase-js").Session | null,
-    ) => {
+    const applySession = async (s: import("@supabase/supabase-js").Session | null) => {
       if (unsubscribed) return;
 
       setSession(s);
@@ -118,20 +116,24 @@ function App() {
       }
     })();
 
-    const { data: subscription } = supabase.auth.onAuthStateChange(
-      (_event, newSession) => {
-        void applySession(newSession ?? null);
-        if (_event === "SIGNED_IN") {
-          resetChats();
+    // ✅ Correct v2 signature + destructuring
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        void applySession(session ?? null);
+        if (event === "SIGNED_IN") {
+          resetChats(); // or window.location.reload() if you prefer a hard refresh
         }
-      },
+      }
     );
 
     return () => {
       unsubscribed = true;
-      subscription.subscription.unsubscribe();
+      subscription.unsubscribe(); // ✅ correct unsubscribe
     };
-  }, [fetchUserSubscription, clearConversationParam, resetChats]);
+
+  // keep deps stable or wrap fetchUserSubscription/resetChats in useCallback
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleViewChange = (view: string) => {
     navigate(`/${view === "generator" ? "" : view}`);

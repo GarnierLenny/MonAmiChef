@@ -152,14 +152,6 @@ function ChatPage() {
     })();
   }, [chatId, isSidebarOpen, saveRename]);
 
-  useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange();
-
-    return () => {
-      authListener.subscription.unsubscribe();
-    };
-  }, []);
-
   const handlePreferenceChange = (
     category: ArrayKeys | NumberKeys,
     value: string | number,
