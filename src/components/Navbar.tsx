@@ -14,9 +14,11 @@ import {
   User,
   Crown,
   LogIn,
+  LogOut,
 } from "lucide-react";
 
 interface NavbarProps {
+  handleSignOut: () => void;
   currentView: string;
   onViewChange: (view: string) => void;
   user: { email: string; name: string } | null;
@@ -26,6 +28,7 @@ interface NavbarProps {
 }
 
 export default function Navbar({
+  handleSignOut,
   currentView,
   onViewChange,
   user,
@@ -228,6 +231,13 @@ export default function Navbar({
                       >
                         <Crown className="w-5 h-5 text-orange-500" />
                         <span>Upgrade Plan</span>
+                      </button>
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 transition-colors"
+                      >
+                        <LogOut className="w-5 h-5 text-red-500" />
+                        <span className="text-red-500">Sign out</span>
                       </button>
                     </div>
                   )}

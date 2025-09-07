@@ -6,7 +6,7 @@ import { Plus, Ellipsis, Edit, Trash, Share } from "lucide-react";
 import { ChatItem, Preferences } from "@/types/types";
 import PreferencesSidebar from "./PreferenceSidebar";
 import { formatTimestamp } from "../utils/format_timestamp.utils";
-import { Separator } from "@/components/ui/separator"
+import { Separator } from "@/components/ui/separator";
 import { useNavigate } from "react-router-dom";
 
 interface MobileSidebarProps {
@@ -177,15 +177,18 @@ export function MobileSidebar({
                         <div onClick={() => handleChatClick(chat.id)}>
                           {chat.title}
                           <p className="text-xs text-pink-600">
-                          {formatTimestamp(new Date(chat.timestamp)) ??
-                            "timestamp"}
+                            {formatTimestamp(new Date(chat.timestamp)) ??
+                              "timestamp"}
                           </p>
                         </div>
-                        <Ellipsis className="h-4 w-4 bg-blue"  onClick={() =>
+                        <Ellipsis
+                          className="h-4 w-4 bg-blue"
+                          onClick={() =>
                             setActiveDropdown(
                               activeDropdown === chat.id ? null : chat.id,
                             )
-                          } />
+                          }
+                        />
 
                         {activeDropdown === chat.id && (
                           <div className="absolute right-0 top-full mt-1 bg-white border border-chef-orange/20 rounded-lg shadow-lg z-10 py-1 min-w-[120px]">
@@ -220,7 +223,9 @@ export function MobileSidebar({
                         )}
                       </div>
                     )}
-                  {index !== chats.length - 1 && <Separator orientation="horizontal" />}
+                    {index !== chats.length - 1 && (
+                      <Separator orientation="horizontal" />
+                    )}
                   </div>
                 ))}
               </div>

@@ -8,4 +8,3 @@ export const formatTimestamp = (date: Date) => {
   if (diffHrs < 24) return `${diffHrs}h ago`;
   return `${diffDays}d ago`;
 };
-

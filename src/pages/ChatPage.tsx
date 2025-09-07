@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo, useRef } from "react";
+// src/pages/ChatPage.tsx
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 import type { Preferences, ChatItem, ChatMessage } from "../types/types";
 import PreferencesSidebar from "../components/PreferenceSidebar";
 import ChatInterface from "../components/ChatInterface";
@@ -7,10 +8,16 @@ import MobileTopBar from "../components/MobileTopBar";
 import MobileSidebar from "../components/MobileSidebar";
 import { useIsMobile } from "../hooks/use-mobile";
 import Cookies from "universal-cookie";
-import { useSearchParams, useNavigate } from "react-router-dom";
+import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
+import { createClient } from "@supabase/supabase-js";
+import { apiFetch } from "../lib/apiClient";
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY,
+);
 
 const API_URL = import.meta.env.VITE_API_URL ?? "http://localhost:8888";
-
 const MAX_CHARACTERS = 150;
 
 const cookies = new Cookies(null, { path: "/" });
@@ -31,6 +38,7 @@ function ChatPage() {
   const [inputValue, setInputValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
   const [preferences, setPreferences] = useState<Preferences>({
     mealType: [],
     mealOccasion: [],
@@ -44,6 +52,8 @@ function ChatPage() {
     vegetables: [],
     servings: null,
   });
+  const latestChatIdRef = useRef<string | null>(null);
+  const [isLoadingChat, setIsLoadingChat] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   // History sidebar
@@ -56,28 +66,41 @@ function ChatPage() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   const isMobile = useIsMobile();
-
   const chatId = searchParams.get("c");
+
+  // helpers to mutate ?c=
+  const setChatParam = (id: string, replace = true) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("c", id);
+    setSearchParams(params, { replace });
+  };
+  const clearChatParam = (replace = true) => {
+    const params = new URLSearchParams(searchParams);
+    if (params.has("c")) {
+      params.delete("c");
+      setSearchParams(params, { replace });
+    }
+  };
 
   // Derived values
   const remainingCharacters = useMemo(
     () => MAX_CHARACTERS - inputValue.length,
     [inputValue],
   );
-  const isOverLimit = remainingCharacters < 0; // kept even though maxLength prevents it
+  const isOverLimit = remainingCharacters < 0;
 
   // History chats actions
   const handleDropdownAction = async (
     action: "rename" | "delete" | "share",
     dropdownChatId: string,
   ) => {
+    console.log('id', dropdownChatId, action);
     setActiveDropdown(null);
     if (action === "rename") {
       setRenamingId(dropdownChatId);
     } else if (action === "delete") {
       setConfirmDeleteId(dropdownChatId);
     } else if (action === "share") {
-      // Handle share action - placeholder
       console.log("Share action for chat:", dropdownChatId);
     }
   };
@@ -87,51 +110,60 @@ function ChatPage() {
   };
 
   const confirmDelete = async () => {
-    setConfirmDeleteId(null);
     if (confirmDeleteId === chatId) {
       handleNewChat();
     }
-    await fetch(`${API_URL}/chat/user/TODO/${confirmDeleteId}/delete`, {
-      method: "DELETE",
-    });
+    await apiFetch(`/chat/conversations/${confirmDeleteId}`, { method: "DELETE" });
+    setConfirmDeleteId(null);
   };
 
   const cancelRename = () => {
     setRenamingId(null);
   };
 
-  const saveRename = async () => {
-    await fetch(`${API_URL}/chat/user/TODO/${renamingId}/rename`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ newTitle: renameValue }),
+  const saveRename = useCallback(async () => {
+    if (!renamingId) return;
+    const newTitle = renameValue.trim();
+    if (!newTitle) return;
+
+    await apiFetch(`/chat/conversations/${renamingId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ newTitle }),
     });
+
+    setChats(prev => prev.map(c => c.id === renamingId ? { ...c, title: newTitle } : c));
     setRenamingId(null);
-  };
+  }, [renamingId, renameValue]);
 
   // Load history chats
   useEffect(() => {
     (async () => {
-      const query = await fetch(
-        `${import.meta.env.VITE_API_URL}/chat/conversations`,
-        {
-          method: "GET",
-        },
-      );
-      const result = await query.json();
+      const result = await apiFetch("/chat/conversations");
       const tmpChats: ChatItem[] = [];
-
       result.forEach((chat: any) => {
         tmpChats.push({
           title: chat.title,
           id: chat.id,
-          timestamp: chat.createdAt,
+          timestamp: chat.created_at,
         });
       });
-
       setChats(tmpChats);
     })();
   }, [chatId, isSidebarOpen, saveRename]);
+
+  useEffect(() => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (event === "SIGNED_OUT" || event === "SIGNED_IN") {
+          window.location.reload();
+        }
+      },
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
+  }, []);
 
   const handlePreferenceChange = (
     category: ArrayKeys | NumberKeys,
@@ -175,37 +207,46 @@ function ChatPage() {
 
   // Load current chat messages
   useEffect(() => {
+    // New chat: keep greeting
     if (!chatId) {
       setMessages([buildAiGreeting()]);
       clearAllPreferences();
       return;
     }
 
+    // Mark this fetch as the latest
+    latestChatIdRef.current = chatId;
+
     const ac = new AbortController();
+    setIsLoadingChat(true);
 
     (async () => {
+      const startedFor = chatId; // capture
       try {
-        const query = await fetch(`${API_URL}/chat/conversations/${chatId}/messages`, {
-          method: "GET",
-          headers: { "Content-Type": "application/json" },
-          signal: ac.signal,
-        });
+        const result = await apiFetch(
+          `/chat/conversations/${chatId}/messages`,
+          {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            signal: ac.signal,
+          },
+        );
 
-        if (!query.ok) {
-          throw new Error(`HTTP ${query.status}`);
-        }
+        // Only apply if we're still on the same chat
+        if (latestChatIdRef.current !== startedFor) return;
 
-        const result = await query.json();
-        setMessages(result.ChatMessage.messages);
-      } catch (err) {
-        if (
-          err &&
-          typeof err === "object" &&
-          "name" in err &&
-          err.name !== "AbortError"
-        ) {
+        const msgs = result?.ChatMessage?.messages ?? [];
+        setMessages(
+          Array.isArray(msgs) && msgs.length ? msgs : [buildAiGreeting()],
+        );
+      } catch (err: any) {
+        if (err.name !== "AbortError") {
+          // Only log; keep previous messages to avoid flash
           console.error("Failed to load chat: ", err);
-          setMessages([buildAiGreeting()]);
+        }
+      } finally {
+        if (!ac.signal.aborted && latestChatIdRef.current === startedFor) {
+          setIsLoadingChat(false);
         }
       }
     })();
@@ -228,61 +269,53 @@ function ChatPage() {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isGenerating) return;
     const text = inputValue.trim();
-    handleSubmitMessage(text);
+    if (!text) return;
+    void handleSubmitMessage(text);
   };
 
   const handleSubmitMessage = async (text: string) => {
     setInputValue("");
 
     // optimistic user bubble
+    const now = new Date();
     setMessages((m) => [
       ...m,
-      {
-        id: `user-${Date.now()}`,
-        role: "user",
-        text: text,
-        timestamp: new Date(),
-      },
+      { id: `user-${now.getTime()}`, role: "user", text, timestamp: now },
     ]);
     setIsGenerating(true);
 
-    // TODO: handle without user id
-
-    const payload = {
-      userMessage: text,
-      preferences: preferences,
-    };
+    const payload = { userMessage: text, preferences };
 
     try {
-      const res = await fetch(`${API_URL}/chat/conversations/${chatId ?? ""}`, {
+      const path = chatId
+        ? `/chat/conversations/${chatId}`
+        : `/chat/conversations`;
+
+      const res = await apiFetch<{
+        reply: string;
+        conversationId: string;
+      }>(path, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
-        credentials: 'include',
       });
-
-      if (!res.ok) {
-        const errText = await res.text().catch(() => "");
-        console.error("Server 4xx/5xx:", res.status, errText);
-        throw new Error(`HTTP ${res.status}`);
-      }
-
-      const json = await res.json();
 
       setMessages((m) => [
         ...m,
         {
           id: `model-${Date.now()}`,
           role: "model",
-          text: json.reply ?? "",
+          text: res.reply ?? "",
           timestamp: new Date(),
         },
       ]);
-      clearAllPreferences();
-      if (!chatId) {
-        navigate(`?c=${encodeURIComponent(json.conversationId)}`);
+
+      if (!chatId && res.conversationId) {
+        setChatParam(res.conversationId, true);
       }
+
+      clearAllPreferences();
     } catch (err) {
       console.error("Message sending failed:", err);
       setMessages((m) => [
@@ -300,16 +333,11 @@ function ChatPage() {
   };
 
   const handleNewChat = () => {
-    const params = new URLSearchParams(searchParams);
-    params.delete("c");
-    setSearchParams(params, { replace: false });
-
+    clearChatParam(false);
     setMessages([buildAiGreeting()]);
     setInputValue("");
-    return;
   };
 
-  // Check if user has selected any preferences
   const hasSelectedPreferences = useMemo(() => {
     return (
       preferences.mealType.length > 0 ||
@@ -328,9 +356,8 @@ function ChatPage() {
 
   return (
     <>
-      {/* Mobile-only UI */}
       {isMobile ? (
-        <div className="flex flex-col h-screen">
+        <div className="flex flex-col h-screen min-h-0">
           <MobileTopBar onMenuClick={() => setIsMobileSidebarOpen(true)} />
 
           <MobileSidebar
@@ -350,11 +377,7 @@ function ChatPage() {
             confirmDelete={confirmDelete}
             cancelDelete={cancelDelete}
             preferences={preferences}
-            onPreferenceChange={(
-              category: string,
-              value: string | number,
-              action: "add" | "remove" | "set",
-            ) =>
+            onPreferenceChange={(category, value, action) =>
               handlePreferenceChange(
                 category as ArrayKeys | NumberKeys,
                 value,
@@ -365,15 +388,16 @@ function ChatPage() {
           />
 
           <div className="flex-1 flex flex-col overflow-hidden">
+            {isLoadingChat && (
+              <div className="pointer-events-none absolute inset-0 flex items-start justify-center pt-4">
+                <div className="rounded-full h-6 w-6 border-2 border-gray-300 border-t-transparent animate-spin" />
+              </div>
+            )}
             <ChatInterface
               preferences={preferences}
               inputValue={inputValue}
               onInputChange={setInputValue}
-              onPreferenceChange={(
-                category: string,
-                value: string | number,
-                action: "add" | "remove" | "set",
-              ) =>
+              onPreferenceChange={(category, value, action) =>
                 handlePreferenceChange(
                   category as ArrayKeys | NumberKeys,
                   value,
@@ -393,16 +417,11 @@ function ChatPage() {
           </div>
         </div>
       ) : (
-        // Desktop-only UI (original layout)
-        <div className="flex flex-1">
+        <div className="flex flex-1 min-h-0">
           <div className="hidden md:block">
             <PreferencesSidebar
               preferences={preferences}
-              onPreferenceChange={(
-                category: string,
-                value: string | number,
-                action: "add" | "remove" | "set",
-              ) =>
+              onPreferenceChange={(category, value, action) =>
                 handlePreferenceChange(
                   category as ArrayKeys | NumberKeys,
                   value,
@@ -412,31 +431,36 @@ function ChatPage() {
               clearAllPreferences={clearAllPreferences}
             />
           </div>
-          <ChatInterface
-            preferences={preferences}
-            inputValue={inputValue}
-            onInputChange={setInputValue}
-            onPreferenceChange={(
-              category: string,
-              value: string | number,
-              action: "add" | "remove" | "set",
-            ) =>
-              handlePreferenceChange(
-                category as ArrayKeys | NumberKeys,
-                value,
-                action as "add" | "remove" | "set" | "clear",
-              )
-            }
-            messages={messages}
-            remainingCharacters={remainingCharacters}
-            isOverLimit={isOverLimit}
-            maxCharacters={MAX_CHARACTERS}
-            hasSelectedPreferences={hasSelectedPreferences}
-            handleSubmit={handleSubmit}
-            isGenerating={isGenerating}
-            clearAllPreferences={clearAllPreferences}
-            inputRef={inputRef}
-          />
+
+          <div className="relative flex-1 flex flex-col overflow-hidden">
+            {isLoadingChat && (
+              <div className="pointer-events-none absolute inset-0 flex items-start justify-center pt-4">
+                <div className="rounded-full h-6 w-6 border-2 border-gray-300 border-t-transparent animate-spin" />
+              </div>
+            )}
+            <ChatInterface
+              preferences={preferences}
+              inputValue={inputValue}
+              onInputChange={setInputValue}
+              onPreferenceChange={(category, value, action) =>
+                handlePreferenceChange(
+                  category as ArrayKeys | NumberKeys,
+                  value,
+                  action as "add" | "remove" | "set" | "clear",
+                )
+              }
+              messages={messages}
+              remainingCharacters={remainingCharacters}
+              isOverLimit={isOverLimit}
+              maxCharacters={MAX_CHARACTERS}
+              hasSelectedPreferences={hasSelectedPreferences}
+              handleSubmit={handleSubmit}
+              isGenerating={isGenerating}
+              clearAllPreferences={clearAllPreferences}
+              inputRef={inputRef}
+            />
+          </div>
+
           <div className="hidden md:block">
             <ChatHistorySidebar
               chats={chats}

@@ -8,7 +8,7 @@ import {
   Plus,
   Sparkles,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useSearchParams } from "react-router-dom";
 import type { ChatItem } from "../types/types";
 import { formatTimestamp } from "../utils/format_timestamp.utils";
 
@@ -34,8 +34,6 @@ interface ChatHistorySidebarProps {
   cancelDelete: () => void;
 }
 
-// Title helpers (currently unused but may be needed for chat functionality)
-
 export default function ChatHistorySidebar({
   chats,
   isOpen,
@@ -45,7 +43,7 @@ export default function ChatHistorySidebar({
   activeDropdown,
   setActiveDropdown,
   renamingId,
-  // setRenamingId, // Currently managed by parent component
+  setRenamingId,
   renameValue,
   setRenameValue,
   cancelRename,
@@ -54,16 +52,15 @@ export default function ChatHistorySidebar({
   confirmDelete,
   cancelDelete,
 }: ChatHistorySidebarProps) {
-  const navigate = useNavigate();
-  // const [searchParams] = useSearchParams(); // Currently unused
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+  const currentId = searchParams.get("c");
 
   const toggleDropdown = (chatId: string) => {
     setActiveDropdown(activeDropdown === chatId ? null : chatId);
   };
 
-  const handleChatClick = (chatId: string) => {
-    navigate(`/?c=${chatId}`, { replace: false });
-  };
+  if (!isOpen) return null;
 
   return (
     <div
@@ -72,7 +69,9 @@ export default function ChatHistorySidebar({
       }`}
     >
       <div
-        className={`h-full flex flex-col transition-opacity duration-300 ${isOpen ? "opacity-100" : "opacity-0"}`}
+        className={`h-full flex flex-col transition-opacity duration-300 ${
+          isOpen ? "opacity-100" : "opacity-0"
+        }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-pink-200 bg-pink-50/50">
@@ -90,6 +89,7 @@ export default function ChatHistorySidebar({
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-pink-100"
+            type="button"
           >
             <X className="w-5 h-5" />
           </button>
@@ -100,6 +100,7 @@ export default function ChatHistorySidebar({
           <button
             onClick={onNewChat}
             className="w-full flex items-center justify-center space-x-3 px-4 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl hover:from-pink-600 hover:to-rose-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 group"
+            type="button"
           >
             <div className="bg-white/20 p-1 rounded-lg group-hover:bg-white/30 transition-colors">
               <Plus className="w-5 h-5" />
@@ -108,6 +109,7 @@ export default function ChatHistorySidebar({
             <Sparkles className="w-4 h-4 opacity-80 group-hover:opacity-100 transition-opacity" />
           </button>
         </div>
+
         {/* Chat List */}
         <div className="flex-1 overflow-y-auto">
           {chats.length === 0 ? (
@@ -124,72 +126,113 @@ export default function ChatHistorySidebar({
             </div>
           ) : (
             <div className="p-2">
-              {chats.map((chat) => (
-                <div
-                  key={chat.id}
-                  onClick={() => handleChatClick(chat.id)}
-                  className="group relative mb-1 rounded-lg hover:bg-pink-100/50 transition-colors duration-200 cursor-pointer"
-                >
-                  <div className="flex items-center justify-between p-3">
-                    <div className="flex-1 min-w-0 pr-2">
-                      <h4 className="text-sm font-medium text-gray-900 truncate group-hover:text-pink-800 transition-colors">
-                        {chat.title}
-                      </h4>
-                      {/*TODO: do last message*/}
-                      {/*<p className="text-xs text-gray-500 truncate mt-1">
-                        {chat.lastMessage ?? "test last"}
-                      </p>*/}
-                      <p className="text-xs text-pink-600 mt-1">
-                        {formatTimestamp(new Date(chat.timestamp)) ??
-                          "timestamp"}
-                      </p>
-                    </div>
+              {chats.map((chat) => {
+                const params = new URLSearchParams(searchParams);
+                params.set("c", chat.id);
+                const isActive = currentId === chat.id;
 
-                    {/* Three dots menu */}
-                    <div className="relative">
+                return (
+                  <div key={chat.id} className="group relative mb-1 rounded-lg">
+                    {/* Use Link to update ?c= without full reload */}
+                    <Link
+                      to={{
+                        pathname: location.pathname,
+                        search: `?${params.toString()}`,
+                      }}
+                      className={`flex items-center justify-between p-3 rounded-lg hover:bg-pink-100/50 transition-colors duration-200 ${
+                        isActive ? "bg-pink-100/70" : "cursor-pointer"
+                      }`}
+                    >
+                      <div className="flex-1 min-w-0 pr-2">
+                        <h4 className="text-sm font-medium text-gray-900 truncate group-hover:text-pink-800 transition-colors">
+                          {chat.title || "Untitled"}
+                        </h4>
+                        <p className="text-xs text-pink-600 mt-1">
+                          {formatTimestamp(new Date(chat.timestamp)) ??
+                            "timestamp"}
+                        </p>
+                      </div>
+
+                      {/* Three dots menu (don’t navigate when clicking it) */}
                       <button
+                        type="button"
                         onClick={(e) => {
+                          e.preventDefault();
                           e.stopPropagation();
                           toggleDropdown(chat.id);
                         }}
                         className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-pink-200 transition-all duration-200 text-gray-500 hover:text-gray-700"
+                        aria-label="Chat actions"
+                        title="Actions"
                       >
                         <MoreHorizontal className="w-4 h-4" />
                       </button>
+                    </Link>
 
-                      {activeDropdown === chat.id && (
-                        <div className="absolute right-0 top-full mt-1 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                    {/* Dropdown menu */}
+                    {activeDropdown === chat.id && (
+                      <div className="absolute right-2 top-12 w-36 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleDropdownAction("rename", chat.id);
+                            setRenamingId(chat.id);
+                          }}
+                          className="w-full flex items-center space-x-2 px-3 py-2 text-left text-gray-700 hover:bg-gray-50 transition-colors text-sm"
+                        >
+                          <Edit3 className="w-4 h-4" />
+                          <span>Rename</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            handleDropdownAction("delete", chat.id);
+                          }}
+                          className="w-full flex items-center space-x-2 px-3 py-2 text-left text-red-600 hover:bg-red-50 transition-colors text-sm"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Confirm delete row */}
+                    {confirmDeleteId === chat.id && (
+                      <div className="px-3 py-2 bg-red-50 border-t flex items-center justify-between rounded-b-lg">
+                        <span className="text-sm">Delete this chat?</span>
+                        <div className="flex gap-2">
                           <button
-                            onClick={() =>
-                              handleDropdownAction("rename", chat.id)
-                            }
-                            className="w-full flex items-center space-x-2 px-3 py-2 text-left text-gray-700 hover:bg-gray-50 transition-colors text-sm"
+                            type="button"
+                            className="text-sm px-2 py-1 rounded bg-red-600 text-white hover:bg-red-700"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              confirmDelete();
+                            }}
                           >
-                            <Edit3 className="w-4 h-4" />
-                            <span>Rename</span>
+                            Delete
                           </button>
-                          {/*<button
-                            onClick={() => handleDropdownAction("share", chat.id)}
-                            className="w-full flex items-center space-x-2 px-3 py-2 text-left text-gray-700 hover:bg-gray-50 transition-colors text-sm"
-                          >
-                            <Share2 className="w-4 h-4" />
-                            <span>Share</span>
-                          </button>*/}
                           <button
-                            onClick={() =>
-                              handleDropdownAction("delete", chat.id)
-                            }
-                            className="w-full flex items-center space-x-2 px-3 py-2 text-left text-red-600 hover:bg-red-50 transition-colors text-sm"
+                            type="button"
+                            className="text-sm px-2 py-1 rounded border"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              e.stopPropagation();
+                              cancelDelete();
+                            }}
                           >
-                            <Trash2 className="w-4 h-4" />
-                            <span>Delete</span>
+                            Cancel
                           </button>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
@@ -225,12 +268,14 @@ export default function ChatHistorySidebar({
             />
             <div className="mt-4 flex justify-end gap-2">
               <button
+                type="button"
                 onClick={cancelRename}
                 className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={saveRename}
                 className="px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700"
               >
@@ -258,12 +303,14 @@ export default function ChatHistorySidebar({
             </p>
             <div className="mt-4 flex justify-end gap-2">
               <button
+                type="button"
                 onClick={cancelDelete}
                 className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
+                type="button"
                 onClick={confirmDelete}
                 className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
               >

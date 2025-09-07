@@ -1,5 +1,5 @@
 // src/App.tsx
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Routes,
   Route,
@@ -48,68 +48,23 @@ function App() {
   const [userSubscription, setUserSubscription] = useState<any>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
-  useEffect(() => {
-    let isMounted = true;
+  // 🔁 used to force-remount ChatPage (reset chats)
+  const [chatResetKey, setChatResetKey] = useState(0);
 
-    (async () => {
-      try {
-        const { data, error } = await supabase.auth.getSession();
-        if (!isMounted) return;
-        if (error) console.error("getSession error:", error);
+  const clearConversationParam = useCallback(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.has("c")) {
+      params.delete("c");
+      navigate({ pathname: "/", search: params.toString() }, { replace: true });
+    }
+  }, [location.search, navigate]);
 
-        const s = data?.session ?? null;
-        setSession(s);
-
-        if (s?.user) {
-          setUser({
-            id: s.user.id,
-            email: s.user.email || "",
-            name:
-              (s.user.user_metadata as any)?.name ||
-              s.user.email?.split("@")[0] ||
-              "",
-          });
-          fetchUserSubscription(s.user.id);
-        } else {
-          setUser(null);
-          setUserSubscription(null); // anonymous -> Free
-        }
-      } finally {
-        if (isMounted) setIsLoadingAuth(false);
-      }
-    })();
-
-    const { data: listener } = supabase.auth.onAuthStateChange(
-      async (_event, newSession) => {
-        if (!isMounted) return;
-        setSession(newSession ?? null);
-
-        if (newSession?.user) {
-          setUser({
-            id: newSession.user.id,
-            email: newSession.user.email || "",
-            name:
-              (newSession.user.user_metadata as any)?.name ||
-              newSession.user.email?.split("@")[0] ||
-              "",
-          });
-          fetchUserSubscription(newSession.user.id);
-        } else {
-          setUser(null);
-          setUserSubscription(null); // back to Free
-        }
-      },
-    );
-
-    return () => {
-      isMounted = false;
-      listener.subscription.unsubscribe();
-    };
+  const resetChats = useCallback(() => {
+    setChatResetKey((k) => k + 1); // remount ChatPage
   }, []);
 
-  async function fetchUserSubscription(userId: string) {
+  const fetchUserSubscription = useCallback(async (userId: string) => {
     try {
-      // IMPORTANT: filter by current user id to avoid RLS issues & wrong rows
       const { data, error } = await supabase
         .from("stripe_user_subscriptions")
         .select("*")
@@ -121,12 +76,59 @@ function App() {
         setUserSubscription(null);
         return;
       }
-      setUserSubscription(data ?? null); // null => free
+      setUserSubscription(data ?? null);
     } catch (e) {
       console.error("Subscription fetch threw:", e);
       setUserSubscription(null);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    let unsubscribed = false;
+
+    const applySession = async (
+      s: import("@supabase/supabase-js").Session | null,
+    ) => {
+      if (unsubscribed) return;
+
+      setSession(s);
+
+      if (s?.user) {
+        const u = s.user;
+        setUser({
+          id: u.id,
+          email: u.email ?? "",
+          name: (u.user_metadata as any)?.name ?? u.email?.split("@")[0] ?? "",
+        });
+        await fetchUserSubscription(u.id);
+      } else {
+        setUser(null);
+        setUserSubscription(null);
+      }
+    };
+
+    (async () => {
+      setIsLoadingAuth(true);
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) console.error("getSession error:", error);
+        await applySession(data?.session ?? null);
+      } finally {
+        if (!unsubscribed) setIsLoadingAuth(false);
+      }
+    })();
+
+    const { data: subscription } = supabase.auth.onAuthStateChange(
+      (_event, newSession) => {
+        void applySession(newSession ?? null);
+      },
+    );
+
+    return () => {
+      unsubscribed = true;
+      subscription.subscription.unsubscribe();
+    };
+  }, [fetchUserSubscription, clearConversationParam, resetChats]);
 
   const handleViewChange = (view: string) => {
     navigate(`/${view === "generator" ? "" : view}`);
@@ -135,13 +137,15 @@ function App() {
   const handleAuthenticate = (u: User) => {
     setUser(u);
     setIsAuthModalOpen(false);
-    void fetchUserSubscription();
+    void fetchUserSubscription(u.id); // ✅ pass userId
   };
 
   const handleSignOut = async () => {
-    await supabase.auth.signOut();
+    clearConversationParam();
+    resetChats();
     setUser(null);
     setUserSubscription(null);
+    await supabase.auth.signOut();
   };
 
   const getCurrentView = () => {
@@ -180,9 +184,10 @@ function App() {
       {!isRecipePage && (
         <div className="hidden md:block sticky top-0 z-50">
           <Navbar
+            handleSignOut={handleSignOut}
             currentView={getCurrentView()}
             onViewChange={handleViewChange}
-            user={user} // null if anonymous
+            user={user}
             subscriptionPlan={getSubscriptionPlanName()}
             onAuthClick={() => setIsAuthModalOpen(true)}
             onPricingClick={() => setIsPricingModalOpen(true)}
@@ -194,8 +199,8 @@ function App() {
         className={`flex ${isRecipePage ? "h-screen" : "flex-1"} overflow-y-auto`}
       >
         <Routes>
-          {/* Public routes (anonymous-friendly) */}
-          <Route path="/" element={<ChatPage />} />
+          {/* Public routes */}
+          <Route path="/" element={<ChatPage key={chatResetKey} />} />
           <Route
             path="/macros"
             element={<NutritionView currentSubView="macros" recipe={null} />}
@@ -225,7 +230,7 @@ function App() {
           <Route path="/coming-soon" element={<ComingSoonView />} />
           <Route path="/success" element={<SuccessPage />} />
 
-          {/* Private route(s) (gate only what must be authenticated) */}
+          {/* Private */}
           <Route
             path="/profile"
             element={
@@ -235,12 +240,10 @@ function App() {
             }
           />
 
-          {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
 
-      {/* Your custom email/password modal (optional auth) */}
       <AuthModal
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}

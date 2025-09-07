@@ -155,10 +155,6 @@ export default function ChatInterface({
 
   const canSend = inputValue.trim() !== "" || hasSelectedPreferences;
 
-  useEffect(() => {
-    console.log('CHANGE', messages);
-  }, [messages]);
-
   return (
     <div className="flex-1 flex flex-col h-full">
       <div className="flex-1 flex flex-col min-h-0">
@@ -166,7 +162,7 @@ export default function ChatInterface({
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {messages.map((message, index) => (
             <div
-              key={`${index}-${message.role}`}
+              key={message.id ?? `${index}-${message.role}`}
               className={`flex text-sm ${message.role === "user" ? "justify-end" : "justify-start"}`}
             >
               <div
