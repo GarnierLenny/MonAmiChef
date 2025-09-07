@@ -228,12 +228,9 @@ function ChatPage() {
           },
         );
 
-        console.log('test', result, chatId);
-        // Only apply if we're still on the same chat
-        // credentials: "include",
         if (latestChatIdRef.current !== startedFor) return;
 
-        const msgs = result?.ChatMessage?.messages ?? [];
+        const msgs = result?.messages ?? [];
         setMessages(
           Array.isArray(msgs) && msgs.length ? msgs : [buildAiGreeting()],
         );
