@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+  // optional: output = "./generated/public"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Conversation {
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at DateTime @default(now())
+  title      String
+
+  // Store foreign keys to auth.users as raw UUIDs (no Prisma relation)
+  owner_profile_id String? @db.Uuid
+  owner_guest_id   String? @db.Uuid
+
+  ChatMessage ChatMessage?
+  Guest       Guest?       @relation(fields: [owner_guest_id], references: [id])
+}
+
+model ChatMessage {
+  conversation_id String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at      DateTime @default(now())
+  history         Json     @db.Json
+  messages        Json[]   @db.Json
+
+  Conversation Conversation @relation(fields: [conversation_id], references: [id])
+}
+
+model Profile {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email        String?   @unique
+  display_name String?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime?
+  avatar_url   String?
+  // NOTE: if Profile.id matches auth.users.id, it's still just a UUID here
+}
+
+model Guest {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at           DateTime @default(now())
+  converted_to_profile Boolean  @default(false)
+
+  Conversation Conversation[]
+}

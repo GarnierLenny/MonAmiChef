@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",                 // ES2021 or newer
+    "lib": ["ES2022"],                  // include ES2021+ so Promise.any is typed
+    "module": "commonjs",
+    "outDir": "dist",
+    "rootDir": ".",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
+  }
+}
