@@ -3,19 +3,32 @@ import type { Request, Response } from "express";
 import type { AuthUser } from "../authentication";
 import { prisma } from "../app";
 
-export type Owner = { userId: string | null; guestId: string | null };
+export type Owner = { userId: string | null; guestId: string | null; conversionToken?: string | null };
 
 function setGuestCookie(res: Response, guestId: string, ctrl?: { setHeader: (k: string, v: string) => void }) {
+  const isDev = process.env.NODE_ENV === 'development';
   const cookieDomain = process.env.COOKIE_DOMAIN || ".monamichef.com";
-  const cookie = [
+  
+  const cookieOptions = [
     `guestId=${guestId}`,
     "HttpOnly",
     "Path=/",
     "Max-Age=31536000",
-    "SameSite=None", // force cross-site safe in prod
-    "Secure",
-    `Domain=${cookieDomain}`,
-  ].join("; ");
+  ];
+  
+  if (isDev) {
+    // Development settings for localhost
+    cookieOptions.push("SameSite=Lax");
+    // Don't set Domain for localhost
+    // Don't set Secure for HTTP localhost
+  } else {
+    // Production settings
+    cookieOptions.push("SameSite=None");
+    cookieOptions.push("Secure");
+    cookieOptions.push(`Domain=${cookieDomain}`);
+  }
+  
+  const cookie = cookieOptions.join("; ");
   if (ctrl) ctrl.setHeader("Set-Cookie", cookie);
   else res.setHeader("Set-Cookie", cookie);
 }
@@ -47,17 +60,32 @@ export async function resolveOwner(
       },
     });
 
-    return { userId: id, guestId: null };
+    return { userId: id, guestId: null, conversionToken: null };
   }
 
   // GUEST FLOW
   let guestId = req.cookies?.guestId as string | undefined;
+  let conversionToken: string | null = null;
+  
+  console.log('🍪 Guest cookie from request:', guestId);
+  
   if (!guestId) {
     const guest = await prisma.guest.create({ data: {} }); // public.Guest
     guestId = guest.id;
+    conversionToken = guest.conversion_token;
+    console.log('👤 Created new guest:', guestId.slice(0, 8) + '...');
     setGuestCookie(res, guestId, ctrl);
+  } else {
+    // Fetch the conversion token for existing guest
+    const existingGuest = await prisma.guest.findUnique({
+      where: { id: guestId },
+      select: { conversion_token: true },
+    });
+    conversionToken = existingGuest?.conversion_token || null;
+    console.log('👤 Found existing guest:', guestId.slice(0, 8) + '...', existingGuest ? '✅' : '❌');
   }
-  return { userId: null, guestId };
+  
+  return { userId: null, guestId, conversionToken };
 }
 
 export function ownerWhere(owner: Owner) {
