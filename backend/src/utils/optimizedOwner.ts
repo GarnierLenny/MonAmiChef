@@ -154,8 +154,9 @@ export async function resolveOptimizedOwner(
 
   // GUEST FLOW - Optimized session handling
   const sessionCookie = req.cookies?.guestSession as string | undefined;
+  const legacyGuestId = req.cookies?.guestId as string | undefined;
   
-  // Try to parse existing session
+  // Try to parse existing optimized session first
   if (sessionCookie) {
     const session = parseGuestSession(sessionCookie);
     if (session) {
@@ -170,6 +171,27 @@ export async function resolveOptimizedOwner(
           isGuest: true 
         };
       }
+    }
+  }
+  
+  // Handle legacy guestId cookie format (backward compatibility)
+  if (legacyGuestId) {
+    const token = await getGuestToken(legacyGuestId);
+    if (token) {
+      console.log('🔄 Migrating legacy guest to optimized session:', legacyGuestId.slice(0, 8) + '...');
+      const sessionData = {
+        guestId: legacyGuestId,
+        conversionToken: token,
+        created: false // existing guest, not newly created
+      };
+      // Upgrade to optimized session format
+      setOptimizedGuestCookie(res, sessionData, ctrl);
+      return { 
+        userId: null, 
+        guestId: legacyGuestId, 
+        conversionToken: token,
+        isGuest: true 
+      };
     }
   }
   

@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 import cookieParser from "cookie-parser";
-import { ensureGuest } from "./middlewares/ensureGuest";
 import { performanceMonitor } from "./middlewares/performanceMonitor";
 
 dotenv.config();
@@ -74,8 +73,7 @@ app.use(
     res.setHeader("Vary", "Authorization, Cookie");
     if (req.method === "OPTIONS") return res.sendStatus(204); // preflight ends here
     next();
-  },
-  ensureGuest
+  }
 );
 
 // ── BODY PARSERS + ROUTES ────────────────────────────────────────────────────
