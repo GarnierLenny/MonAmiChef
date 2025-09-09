@@ -48,12 +48,29 @@ function getOrCreateMetrics(clientId: string): PerformanceMetrics {
 }
 
 export function performanceMonitor(req: Request, res: Response, next: NextFunction) {
+  // Skip monitoring for OPTIONS requests to avoid CORS interference
+  if (req.method === 'OPTIONS') {
+    return next();
+  }
+
   const startTime = Date.now();
   const clientId = getClientId(req);
   const metric = getOrCreateMetrics(clientId);
   
-  // Rate limiting check
+  // Rate limiting check (but allow through if already in progress)
   if (metric.requestCount >= RATE_LIMIT_MAX_REQUESTS) {
+    // Ensure CORS headers are still sent for rate limit responses
+    const origin = req.headers.origin;
+    if (origin && [
+      'https://www.monamichef.com',
+      'https://monamichef.com',
+      'http://localhost:8080',
+      'http://localhost:3000'
+    ].includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+    
     res.status(429).json({
       error: 'Too many requests',
       retryAfter: Math.ceil((RATE_LIMIT_WINDOW - (Date.now() - metric.lastReset)) / 1000),

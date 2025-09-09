@@ -20,24 +20,35 @@ app.set("etag", false);
 const ALLOWED_ORIGINS = [
   process.env.FRONTEND_ORIGIN,        // "https://www.monamichef.com"
   process.env.CORS_ORIGIN,            // keep as backup
+  "https://www.monamichef.com",       // explicit production frontend
   "https://monamichef.com",           // allow apex too
   "http://localhost:8080",            // development frontend
   "http://localhost:3000",            // alternative dev port
 ].filter(Boolean) as string[];
 
+console.log("[BOOT] Environment FRONTEND_ORIGIN:", process.env.FRONTEND_ORIGIN);
+console.log("[BOOT] Environment CORS_ORIGIN:", process.env.CORS_ORIGIN);
 console.log("[BOOT] Allowed CORS origins:", ALLOWED_ORIGINS);
 
 const corsCfg = cors({
   origin: (origin, cb) => {
+    console.log("[CORS] Request from origin:", origin);
     // allow non-browser requests (curl/health) where origin is undefined
-    if (!origin) return cb(null, true);
+    if (!origin) {
+      console.log("[CORS] Allowing request with no origin (server-to-server)");
+      return cb(null, true);
+    }
     const ok = ALLOWED_ORIGINS.includes(origin);
-    if (!ok) console.warn("[CORS] Blocked Origin:", origin);
+    if (ok) {
+      console.log("[CORS] ✅ Allowed origin:", origin);
+    } else {
+      console.warn("[CORS] ❌ Blocked origin:", origin, "- Not in allowed list:", ALLOWED_ORIGINS);
+    }
     cb(null, ok);
   },
   credentials: true,
   methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
-  allowedHeaders: ["Authorization", "Content-Type"],
+  allowedHeaders: ["Authorization", "Content-Type", "Cookie"],
 });
 
 app.use((req, _res, next) => {
@@ -52,9 +63,9 @@ app.use(corsCfg);
 // ANSWER PREFLIGHTS EXPLICITLY
 app.options("*", corsCfg);
 
-// ── PERFORMANCE & COOKIES MIDDLEWARE ────────────────────────────────────────
-app.use(performanceMonitor);
+// ── COOKIES & PERFORMANCE MIDDLEWARE ────────────────────────────────────────
 app.use(cookieParser());
+app.use(performanceMonitor); // After CORS to avoid interference
 
 app.use(
   "/chat",
