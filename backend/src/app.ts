@@ -20,6 +20,8 @@ const ALLOWED_ORIGINS = [
   process.env.FRONTEND_ORIGIN,        // "https://www.monamichef.com"
   process.env.CORS_ORIGIN,            // keep as backup
   "https://monamichef.com",           // allow apex too
+  "http://localhost:8080",            // development frontend
+  "http://localhost:3000",            // alternative dev port
 ].filter(Boolean) as string[];
 
 console.log("[BOOT] Allowed CORS origins:", ALLOWED_ORIGINS);
