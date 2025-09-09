@@ -31,7 +31,13 @@
     
     "dev:db": "npm run supabase:start && npm run db:push",
     "dev:reset": "npm run supabase:reset && npm run db:push",
-    "dev:fresh": "npm run supabase:stop && npm run supabase:start && npm run db:push"
+    "dev:fresh": "npm run supabase:stop && npm run supabase:start && npm run db:push",
+    
+    "prod:schema-fix": "npx prisma db execute --file ./fix-production-schema.sql --schema ./prisma/schema.prisma",
+    "prod:add-fks": "npx prisma db execute --file ./add-missing-fks.sql --schema ./prisma/schema.prisma",
+    "prod:introspect": "npx prisma db pull",
+    "prod:diff": "npx prisma migrate diff --from-empty --to-schema-datamodel prisma/schema.prisma --script",
+    "prod:update": "npm run prod:schema-fix && npm run prod:add-fks && npm run db:generate"
   },
   "dependencies": {
     "@google/genai": "^1.15.0",
