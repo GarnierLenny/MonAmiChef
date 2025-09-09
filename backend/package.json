@@ -8,7 +8,30 @@
   "scripts": {
     "start": "yarn run build && tsx watch dist/src/server.js",
     "build": "npx prisma generate && tsoa spec-and-routes && tsc",
-    "tsoa:gen": "tsoa routes && tsoa spec"
+    "tsoa:gen": "tsoa routes && tsoa spec",
+    
+    "db:generate": "npx prisma generate",
+    "db:push": "npx prisma db push",
+    "db:pull": "npx prisma db pull",
+    "db:migrate": "npx prisma migrate dev",
+    "db:migrate:deploy": "npx prisma migrate deploy",
+    "db:migrate:reset": "npx prisma migrate reset",
+    "db:seed": "npx prisma db seed",
+    "db:studio": "npx prisma studio",
+    "db:validate": "npx prisma validate",
+    "db:format": "npx prisma format",
+    
+    "supabase:start": "npx supabase start",
+    "supabase:stop": "npx supabase stop",
+    "supabase:status": "npx supabase status",
+    "supabase:reset": "npx supabase db reset",
+    "supabase:diff": "npx supabase db diff",
+    "supabase:link": "npx supabase link",
+    "supabase:gen-types": "npx supabase gen types typescript --local > src/types/supabase.ts",
+    
+    "dev:db": "npm run supabase:start && npm run db:push",
+    "dev:reset": "npm run supabase:reset && npm run db:push",
+    "dev:fresh": "npm run supabase:stop && npm run supabase:start && npm run db:push"
   },
   "dependencies": {
     "@google/genai": "^1.15.0",
@@ -40,5 +63,8 @@
   },
   "engines": {
     "node": ">=20"
+  },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
   }
 }
