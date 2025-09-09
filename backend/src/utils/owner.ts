@@ -3,7 +3,7 @@ import type { Request, Response } from "express";
 import type { AuthUser } from "../authentication";
 import { prisma } from "../app";
 
-export type Owner = { userId: string | null; guestId: string | null };
+export type Owner = { userId: string | null; guestId: string | null; conversionToken?: string | null };
 
 function setGuestCookie(res: Response, guestId: string, ctrl?: { setHeader: (k: string, v: string) => void }) {
   const cookieDomain = process.env.COOKIE_DOMAIN || ".monamichef.com";
@@ -47,17 +47,28 @@ export async function resolveOwner(
       },
     });
 
-    return { userId: id, guestId: null };
+    return { userId: id, guestId: null, conversionToken: null };
   }
 
   // GUEST FLOW
   let guestId = req.cookies?.guestId as string | undefined;
+  let conversionToken: string | null = null;
+  
   if (!guestId) {
     const guest = await prisma.guest.create({ data: {} }); // public.Guest
     guestId = guest.id;
+    conversionToken = guest.conversion_token;
     setGuestCookie(res, guestId, ctrl);
+  } else {
+    // Fetch the conversion token for existing guest
+    const existingGuest = await prisma.guest.findUnique({
+      where: { id: guestId },
+      select: { conversion_token: true },
+    });
+    conversionToken = existingGuest?.conversion_token || null;
   }
-  return { userId: null, guestId };
+  
+  return { userId: null, guestId, conversionToken };
 }
 
 export function ownerWhere(owner: Owner) {
