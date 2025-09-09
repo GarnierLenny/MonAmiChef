@@ -63,16 +63,10 @@ export default function AuthModal({
     setMessage(null);
 
     try {
-      // OAuth Flow:
-      // 1. User clicks Google sign-in button
-      // 2. Supabase redirects to Google OAuth (using GOOGLE_AUTH_CALLBACK_URL from backend .env)
-      // 3. User authorizes on Google
-      // 4. Google redirects to Supabase auth endpoint (GOOGLE_AUTH_CALLBACK_URL)
-      // 5. Supabase processes the auth and redirects to our app (redirectTo URL below)
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: import.meta.env.GOOGLE_AUTH_CALLBACK_URL,
         },
       });
 
