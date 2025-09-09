@@ -21,6 +21,7 @@ import SuccessPage from "./components/SuccessPage";
 import RecipePage from "./components/RecipePage";
 import UserProfile from "./components/UserProfile";
 import ChatPage from "./pages/ChatPage";
+import AuthCallback from "./components/AuthCallback";
 
 import { supabase } from "./lib/supabase";
 import { getProductByPriceId } from "./stripe-config";
@@ -234,6 +235,7 @@ function App() {
           <Route path="/explore" element={<ExploreView />} />
           <Route path="/coming-soon" element={<ComingSoonView />} />
           <Route path="/success" element={<SuccessPage />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
 
           {/* Private */}
           <Route
