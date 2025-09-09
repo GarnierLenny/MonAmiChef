@@ -27,7 +27,7 @@ import { prisma } from "../app";
 import { Prisma } from "@prisma/client";
 import * as express from "express";
 import type { AuthUser } from '../authentication';
-import { resolveOwner, ownerWhere } from '../utils/owner';
+import { resolveOptimizedOwner, ownerWhereOptimized } from '../utils/optimizedOwner';
 
 const GEMINI_MODEL = "gemini-2.5-flash";
 
@@ -108,7 +108,7 @@ export class ChatController extends Controller {
     const hasPrefs = preferencesSummary.length > 0;
 
     // ✅ Resolve identity (creates guest + sets cookie if needed)
-    const owner = await resolveOwner(request, request.res, this);
+    const owner = await resolveOptimizedOwner(request, request.res, this);
 
     let fullSystemInstruction = geminiCookAssistantPrompt;
     if (hasPrefs) {
@@ -138,7 +138,7 @@ export class ChatController extends Controller {
     const conversation = await prisma.conversation.create({
       data: {
         title: title ?? modelResponse.substring(0, 30) + "...",
-        ...ownerWhere(owner), // ✅ exactly one of { owner_profile_id } or { owner_guest_id }
+        ...ownerWhereOptimized(owner), // ✅ exactly one of { owner_profile_id } or { owner_guest_id }
       },
     });
 
@@ -248,10 +248,10 @@ export class ChatController extends Controller {
   public async getUserConversations(
     @Request() request: express.Request,
   ): Promise<any[]> {
-    const owner = await resolveOwner(request, request.res, this);
+    const owner = await resolveOptimizedOwner(request, request.res, this);
     const conversations = await prisma.conversation.findMany({
       where: {
-        ...ownerWhere(owner),
+        ...ownerWhereOptimized(owner),
       },
       select: {
         id: true,
@@ -270,11 +270,11 @@ export class ChatController extends Controller {
     @Body() body: RenameChatRequest,
     @Path("conversationId") conversationId: string,
   ) {
-    const owner = await resolveOwner(request, request.res, this);
+    const owner = await resolveOptimizedOwner(request, request.res, this);
     const renamed = await prisma.conversation.update({
       where: {
         id: conversationId,
-        ...ownerWhere(owner),
+        ...ownerWhereOptimized(owner),
       },
       data: {
         title: body.newTitle,
@@ -311,13 +311,13 @@ export class ChatController extends Controller {
     @Request() request: express.Request,
     @Path("conversationId") conversationId: string,
   ): Promise<any> {
-    const owner = await resolveOwner(request, request.res, this);
+    const owner = await resolveOptimizedOwner(request, request.res, this);
   
     console.log('owner', owner);
     const chat = await prisma.conversation.findFirst({
       where: {
         id: conversationId,
-        ...ownerWhere(owner),
+        ...ownerWhereOptimized(owner),
       },
       select: {
         id: true,

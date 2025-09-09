@@ -6,6 +6,7 @@ import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 import cookieParser from "cookie-parser";
 import { ensureGuest } from "./middlewares/ensureGuest";
+import { performanceMonitor } from "./middlewares/performanceMonitor";
 
 dotenv.config();
 
@@ -51,7 +52,8 @@ app.use(corsCfg);
 // ANSWER PREFLIGHTS EXPLICITLY
 app.options("*", corsCfg);
 
-// ── COOKIES / CHAT MIDDLEWARE ────────────────────────────────────────────────
+// ── PERFORMANCE & COOKIES MIDDLEWARE ────────────────────────────────────────
+app.use(performanceMonitor);
 app.use(cookieParser());
 
 app.use(

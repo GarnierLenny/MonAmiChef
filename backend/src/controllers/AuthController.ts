@@ -8,10 +8,18 @@ import {
   SuccessResponse,
   Request,
   Response,
+  Get,
 } from "tsoa";
 import { prisma } from "../app";
 import type { AuthUser } from '../authentication';
 import * as express from "express";
+
+export interface GuestStatusResponse {
+  isGuest: boolean;
+  guestId?: string;
+  conversationCount?: number;
+  canConvert?: boolean;
+}
 
 export interface ConvertGuestRequest {
   guest_id: string;
@@ -21,11 +29,64 @@ export interface ConvertGuestRequest {
 export interface ConvertGuestResponse {
   success: boolean;
   message: string;
+  data?: {
+    conversationsTransferred?: number;
+    profile?: {
+      id: string;
+      email?: string;
+    };
+  };
 }
 
 @Route("auth")
 @Tags("Authentication")
 export class AuthController extends Controller {
+  /**
+   * Get current session status (guest or authenticated)
+   */
+  @Get("status")
+  @Security("optionalAuth")
+  public async getSessionStatus(
+    @Request() request: express.Request,
+  ): Promise<GuestStatusResponse> {
+    const user = (request as any).user as AuthUser | null;
+    
+    if (user?.sub) {
+      return {
+        isGuest: false,
+      };
+    }
+    
+    // Guest status
+    const guestSession = request.cookies?.guestSession as string | undefined;
+    if (guestSession) {
+      try {
+        const [guestId] = guestSession.split(':');
+        if (guestId) {
+          // Count conversations for this guest
+          const conversationCount = await prisma.conversation.count({
+            where: { owner_guest_id: guestId }
+          });
+          
+          return {
+            isGuest: true,
+            guestId,
+            conversationCount,
+            canConvert: conversationCount > 0,
+          };
+        }
+      } catch (error) {
+        console.warn('Failed to parse guest session:', error);
+      }
+    }
+    
+    return {
+      isGuest: true,
+      conversationCount: 0,
+      canConvert: false,
+    };
+  }
+
   /**
    * Convert guest to authenticated user
    * This endpoint handles the atomic migration of guest data to an authenticated user
@@ -119,9 +180,27 @@ export class AuthController extends Controller {
         }
       }
 
+      // Get user profile and conversation count for response
+      const [profile, conversationCount] = await Promise.all([
+        prisma.profile.findUnique({
+          where: { id: userId },
+          select: { id: true, email: true }
+        }),
+        prisma.conversation.count({
+          where: { owner_profile_id: userId }
+        })
+      ]);
+
       return { 
         success: true, 
-        message: "Guest converted successfully" 
+        message: `Successfully converted guest and transferred conversations`,
+        data: {
+          conversationsTransferred: conversationCount,
+          profile: profile ? {
+            id: profile.id,
+            email: profile.email || undefined,
+          } : undefined,
+        }
       };
 
     } catch (error) {
