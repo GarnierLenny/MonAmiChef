@@ -5,7 +5,7 @@ import { prisma } from "../app";
 
 export type Owner = { userId: string | null; guestId: string | null; conversionToken?: string | null };
 
-function setGuestCookie(res: Response, guestId: string, ctrl?: { setHeader: (k: string, v: string) => void }) {
+function setGuestCookie(res: Response | undefined, guestId: string, ctrl?: { setHeader: (k: string, v: string) => void }) {
   const isDev = process.env.NODE_ENV === 'development';
   const cookieDomain = process.env.COOKIE_DOMAIN || ".monamichef.com";
   
@@ -29,13 +29,18 @@ function setGuestCookie(res: Response, guestId: string, ctrl?: { setHeader: (k: 
   }
   
   const cookie = cookieOptions.join("; ");
-  if (ctrl) ctrl.setHeader("Set-Cookie", cookie);
-  else res.setHeader("Set-Cookie", cookie);
+  if (ctrl) {
+    ctrl.setHeader("Set-Cookie", cookie);
+  } else if (res) {
+    res.setHeader("Set-Cookie", cookie);
+  } else {
+    console.warn('⚠️  Unable to set guest cookie - no response object available');
+  }
 }
 
 export async function resolveOwner(
   req: Request,
-  res: Response,
+  res?: Response,
   ctrl?: { setHeader: (k: string, v: string) => void }
 ): Promise<Owner> {
   const user = (req as any).user as AuthUser | null | undefined;

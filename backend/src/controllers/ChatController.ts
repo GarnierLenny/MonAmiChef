@@ -108,7 +108,7 @@ export class ChatController extends Controller {
     const hasPrefs = preferencesSummary.length > 0;
 
     // ✅ Resolve identity (creates guest + sets cookie if needed)
-    const owner = await resolveOwner(request, (this as any), this);
+    const owner = await resolveOwner(request, request.res, this);
 
     let fullSystemInstruction = geminiCookAssistantPrompt;
     if (hasPrefs) {
@@ -248,7 +248,7 @@ export class ChatController extends Controller {
   public async getUserConversations(
     @Request() request: express.Request,
   ): Promise<any[]> {
-    const owner = await resolveOwner(request, (this as any), this);
+    const owner = await resolveOwner(request, request.res, this);
     const conversations = await prisma.conversation.findMany({
       where: {
         ...ownerWhere(owner),
@@ -270,7 +270,7 @@ export class ChatController extends Controller {
     @Body() body: RenameChatRequest,
     @Path("conversationId") conversationId: string,
   ) {
-    const owner = await resolveOwner(request, (this as any), this);
+    const owner = await resolveOwner(request, request.res, this);
     const renamed = await prisma.conversation.update({
       where: {
         id: conversationId,
@@ -311,7 +311,7 @@ export class ChatController extends Controller {
     @Request() request: express.Request,
     @Path("conversationId") conversationId: string,
   ): Promise<any> {
-    const owner = await resolveOwner(request, (this as any), this);
+    const owner = await resolveOwner(request, request.res, this);
   
     console.log('owner', owner);
     const chat = await prisma.conversation.findFirst({
