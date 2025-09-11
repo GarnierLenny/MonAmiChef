@@ -22,6 +22,8 @@ import RecipePage from "./components/RecipePage";
 import UserProfile from "./components/UserProfile";
 import ChatPage from "./pages/ChatPage";
 import AuthCallback from "./components/AuthCallback";
+import SavedRecipes from "./pages/SavedRecipes";
+import RecipeHistoryPage from "./pages/RecipeHistory";
 
 import { supabase } from "./lib/supabase";
 import { getProductByPriceId } from "./stripe-config";
@@ -236,6 +238,8 @@ function App() {
           <Route path="/coming-soon" element={<ComingSoonView />} />
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/recipes/saved" element={<SavedRecipes />} />
+          <Route path="/recipes/history" element={<RecipeHistoryPage />} />
 
           {/* Private */}
           <Route

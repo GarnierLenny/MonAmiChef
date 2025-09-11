@@ -1,11 +1,13 @@
-import { useLayoutEffect, useEffect, useRef } from "react";
-import { Send, Loader2, Sparkles, X } from "lucide-react";
+import { useLayoutEffect, useEffect, useRef, useState } from "react";
+import { Send, Loader2, Sparkles, X, Heart } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import { useLocation } from "react-router-dom";
 import { ChatMessage } from "../types/types";
 import { Separator } from "@/components/ui/separator";
+import { parseRecipeFromText } from "../utils/recipeParser";
+import { recipeService } from "../services/recipeService";
 
 interface ChatInterfaceProps {
   preferences: {
@@ -56,6 +58,8 @@ export default function ChatInterface({
 }: ChatInterfaceProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
+  const [savedRecipes, setSavedRecipes] = useState<Set<string>>(new Set());
+  const [savingRecipes, setSavingRecipes] = useState<Set<string>>(new Set());
 
   // Get all selected preference tags for display
   const getSelectedTags = () => {
@@ -142,6 +146,42 @@ export default function ChatInterface({
     }
   };
 
+  const handleSaveRecipe = async (messageText: string, messageId?: string) => {
+    if (!messageId) return;
+    
+    // Parse the message text to see if it contains a recipe
+    const parsedRecipe = parseRecipeFromText(messageText);
+    if (!parsedRecipe) return;
+
+    setSavingRecipes(prev => new Set([...prev, messageId]));
+
+    try {
+      // Create recipe on backend
+      const recipe = await recipeService.createRecipe({
+        title: parsedRecipe.title,
+        content_json: parsedRecipe.content,
+        nutrition: parsedRecipe.nutrition,
+        tags: parsedRecipe.tags,
+      });
+
+      // Save the recipe for the user
+      const result = await recipeService.saveRecipe(recipe.id);
+      
+      if (result.is_saved) {
+        setSavedRecipes(prev => new Set([...prev, messageId]));
+      }
+    } catch (error) {
+      console.error('Failed to save recipe:', error);
+      // You might want to show a toast notification here
+    } finally {
+      setSavingRecipes(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(messageId);
+        return newSet;
+      });
+    }
+  };
+
   // Scroll to bottom after messages change
   useLayoutEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -160,73 +200,100 @@ export default function ChatInterface({
       <div className="flex-1 flex flex-col min-h-0">
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {messages.map((message, index) => (
-            <div
-              key={message.id ?? `${index}-${message.role}`}
-              className={`flex text-sm ${message.role === "user" ? "justify-end" : "justify-start"}`}
-            >
+          {messages.map((message, index) => {
+            const messageId = message.id ?? `${index}-${message.role}`;
+            const isRecipe = message.role === "model" && parseRecipeFromText(message.text);
+            const isSaved = savedRecipes.has(messageId);
+            const isSaving = savingRecipes.has(messageId);
+            
+            return (
               <div
-                className={`max-w-3xl rounded-2xl px-6 py-4 ${
-                  message.role === "user"
-                    ? "bg-orange-500 text-white"
-                    : "bg-gray-100 text-gray-900"
-                }`}
+                key={messageId}
+                className={`flex text-sm ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
-                {message.role === "model" && (
-                  <div className="flex items-center space-x-2 mb-2">
-                    <Sparkles className="w-4 h-4 text-orange-500" />
-                    <span className="text-sm font-medium text-orange-600">
-                      AI Chef
-                    </span>
-                  </div>
-                )}
+                <div
+                  className={`max-w-3xl rounded-2xl px-6 py-4 relative ${
+                    message.role === "user"
+                      ? "bg-orange-500 text-white"
+                      : "bg-gray-100 text-gray-900"
+                  }`}
+                >
+                  {message.role === "model" && (
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center space-x-2">
+                        <Sparkles className="w-4 h-4 text-orange-500" />
+                        <span className="text-sm font-medium text-orange-600">
+                          AI Chef
+                        </span>
+                      </div>
+                      {isRecipe && (
+                        <button
+                          onClick={() => handleSaveRecipe(message.text, messageId)}
+                          disabled={isSaving}
+                          className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
+                            isSaved
+                              ? "bg-red-100 text-red-700 hover:bg-red-200"
+                              : "bg-orange-100 text-orange-700 hover:bg-orange-200"
+                          } ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
+                        >
+                          {isSaving ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : (
+                            <Heart className={`w-3 h-3 ${isSaved ? "fill-current" : ""}`} />
+                          )}
+                          <span>{isSaving ? "Saving..." : isSaved ? "Saved" : "Save Recipe"}</span>
+                        </button>
+                      )}
+                    </div>
+                  )}
 
-                {message.role === "user" ? (
-                  <div className="font-sans">
-                    <ReactMarkdown>{message.text}</ReactMarkdown>
-                  </div>
-                ) : (
-                  <div className="font-sans">
-                    <ReactMarkdown
-                      remarkPlugins={[remarkGfm, remarkBreaks]}
-                      components={{
-                        p: (props) => (
-                          <p className="my-3 leading-6" {...props} />
-                        ),
-                        ul: (props) => (
-                          <ul
-                            className="my-2 pl-5 list-disc space-y-1"
-                            {...props}
-                          />
-                        ),
-                        ol: (props) => (
-                          <ol
-                            className="my-2 pl-5 list-decimal space-y-1"
-                            {...props}
-                          />
-                        ),
-                        li: (props) => <li className="my-1" {...props} />,
-                        h1: (props) => (
-                          <h3
-                            className="mt-3 mb-1 text-base font-semibold"
-                            {...props}
-                          />
-                        ),
-                        h2: (props) => (
-                          <h4
-                            className="mt-3 mb-1 text-sm font-semibold"
-                            {...props}
-                          />
-                        ),
-                      }}
-                    >
-                      {message.text}
-                    </ReactMarkdown>
-                  </div>
-                )}
+                  {message.role === "user" ? (
+                    <div className="font-sans">
+                      <ReactMarkdown>{message.text}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <div className="font-sans">
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm, remarkBreaks]}
+                        components={{
+                          p: (props) => (
+                            <p className="my-3 leading-6" {...props} />
+                          ),
+                          ul: (props) => (
+                            <ul
+                              className="my-2 pl-5 list-disc space-y-1"
+                              {...props}
+                            />
+                          ),
+                          ol: (props) => (
+                            <ol
+                              className="my-2 pl-5 list-decimal space-y-1"
+                              {...props}
+                            />
+                          ),
+                          li: (props) => <li className="my-1" {...props} />,
+                          h1: (props) => (
+                            <h3
+                              className="mt-3 mb-1 text-base font-semibold"
+                              {...props}
+                            />
+                          ),
+                          h2: (props) => (
+                            <h4
+                              className="mt-3 mb-1 text-sm font-semibold"
+                              {...props}
+                            />
+                          ),
+                        }}
+                      >
+                        {message.text}
+                      </ReactMarkdown>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
 
           {isGenerating && (
             <div className="flex justify-start">

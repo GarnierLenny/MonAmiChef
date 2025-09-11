@@ -15,6 +15,8 @@ import {
   Crown,
   LogIn,
   LogOut,
+  History,
+  Heart,
 } from "lucide-react";
 
 interface NavbarProps {
@@ -50,12 +52,22 @@ export default function Navbar({
       color: "text-orange-600",
     },
     {
+      id: "recipes",
+      label: "My Recipes",
+      icon: Bookmark,
+      color: "text-green-600",
+      dropdown: [
+        { id: "recipes/saved", label: "Saved Recipes", icon: Heart },
+        { id: "recipes/history", label: "Recipe History", icon: History },
+      ],
+    },
+    {
       id: "nutrition",
       label: "Nutrition & Analysis",
       icon: Calculator,
       color: "text-green-600",
       dropdown: [
-        { id: "macros", label: "Saved Recipes", icon: Bookmark },
+        { id: "macros", label: "Macro Tracker", icon: Bookmark },
         { id: "calories", label: "Calorie Calculator", icon: Zap },
       ],
     },
