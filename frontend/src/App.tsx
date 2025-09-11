@@ -208,7 +208,7 @@ function App() {
       >
         <Routes>
           {/* Public routes */}
-          <Route path="/" element={<ChatPage key={chatResetKey} />} />
+          <Route path="/" element={<ChatPage key={chatResetKey} user={user} onAuthClick={() => setIsAuthModalOpen(true)} />} />
           <Route
             path="/macros"
             element={<NutritionView currentSubView="macros" recipe={null} />}

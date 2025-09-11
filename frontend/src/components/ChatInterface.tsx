@@ -39,6 +39,8 @@ interface ChatInterfaceProps {
   isGenerating: boolean;
   clearAllPreferences: () => void;
   inputRef: React.RefObject<HTMLInputElement>;
+  user?: { id: string; email: string; name: string } | null;
+  onAuthClick?: () => void;
 }
 
 export default function ChatInterface({
@@ -55,6 +57,8 @@ export default function ChatInterface({
   isGenerating,
   clearAllPreferences,
   inputRef,
+  user,
+  onAuthClick,
 }: ChatInterfaceProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
@@ -148,6 +152,20 @@ export default function ChatInterface({
 
   const handleSaveRecipe = async (messageText: string, messageId?: string) => {
     if (!messageId) return;
+    
+    // Check if user is authenticated
+    if (!user) {
+      // Show registration prompt for guest users
+      if (onAuthClick) {
+        const shouldRegister = window.confirm(
+          "Recipe saving is only available for registered users. Would you like to sign up or log in to save your recipes?"
+        );
+        if (shouldRegister) {
+          onAuthClick();
+        }
+      }
+      return;
+    }
     
     // Parse the message text to see if it contains a recipe
     const parsedRecipe = parseRecipeFromText(messageText);

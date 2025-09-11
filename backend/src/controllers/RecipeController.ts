@@ -112,6 +112,12 @@ export class RecipeController extends Controller {
   ): Promise<{ success: boolean; is_saved: boolean }> {
     const owner = await resolveOptimizedOwner(request, request.res, this);
     
+    // Check if user is authenticated (not a guest)
+    if (!owner.userId) {
+      this.setStatus(401);
+      throw new Error("Recipe saving is only available for registered users. Please sign up or log in.");
+    }
+    
     // Check if recipe exists
     const recipe = await prisma.recipe.findUnique({
       where: { id: recipeId },
@@ -158,6 +164,12 @@ export class RecipeController extends Controller {
   ): Promise<SavedRecipeResponse[]> {
     const owner = await resolveOptimizedOwner(request, request.res, this);
     
+    // Check if user is authenticated (not a guest)
+    if (!owner.userId) {
+      this.setStatus(401);
+      throw new Error("Saved recipes are only available for registered users. Please sign up or log in.");
+    }
+    
     const savedRecipes = await prisma.savedRecipe.findMany({
       where: {
         ...ownerWhereOptimized(owner),
@@ -194,6 +206,12 @@ export class RecipeController extends Controller {
     @Request() request: express.Request,
   ): Promise<RecipeHistoryResponse[]> {
     const owner = await resolveOptimizedOwner(request, request.res, this);
+    
+    // Check if user is authenticated (not a guest)
+    if (!owner.userId) {
+      this.setStatus(401);
+      throw new Error("Recipe history is only available for registered users. Please sign up or log in.");
+    }
     
     const historyRecipes = await prisma.recipeHistory.findMany({
       where: {
@@ -240,6 +258,12 @@ export class RecipeController extends Controller {
     @Path("recipeId") recipeId: string,
   ): Promise<{ success: boolean }> {
     const owner = await resolveOptimizedOwner(request, request.res, this);
+    
+    // Check if user is authenticated (not a guest)
+    if (!owner.userId) {
+      this.setStatus(401);
+      throw new Error("Recipe saving is only available for registered users. Please sign up or log in.");
+    }
     
     const savedRecipe = await prisma.savedRecipe.findFirst({
       where: {

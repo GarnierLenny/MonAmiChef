@@ -1,16 +1,44 @@
 import { useState, useEffect } from "react";
-import { Heart, Clock, Users, Tag, Eye, History } from "lucide-react";
+import { Heart, Clock, Users, Tag, Eye, History, LogIn } from "lucide-react";
 import { recipeService } from "../services/recipeService";
 import { RecipeHistory, Recipe } from "../types/recipe";
+import { createClient } from "@supabase/supabase-js";
+
+const supabase = createClient(
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY,
+);
 
 export default function RecipeHistoryPage() {
+  const [user, setUser] = useState<any>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [recipeHistory, setRecipeHistory] = useState<RecipeHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
 
   useEffect(() => {
-    loadRecipeHistory();
+    checkAuth();
   }, []);
+
+  useEffect(() => {
+    if (user) {
+      loadRecipeHistory();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
+
+  const checkAuth = async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      setUser(session?.user || null);
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      setUser(null);
+    } finally {
+      setIsLoadingAuth(false);
+    }
+  };
 
   const loadRecipeHistory = async () => {
     try {
@@ -53,6 +81,42 @@ export default function RecipeHistoryPage() {
       minute: '2-digit'
     });
   };
+
+  if (isLoadingAuth) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 flex items-center justify-center">
+        <div className="text-center max-w-md mx-auto p-8">
+          <LogIn className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h2>
+          <p className="text-gray-600 mb-6">
+            You need to be logged in to view your recipe history. Please sign up or log in to access this feature.
+          </p>
+          <div className="space-y-3">
+            <a
+              href="/"
+              className="block w-full px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-center"
+            >
+              Go to Home & Sign In
+            </a>
+            <p className="text-sm text-gray-500">
+              Start cooking with our AI Chef to build your recipe history!
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (loading) {
     return (
