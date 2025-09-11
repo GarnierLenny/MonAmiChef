@@ -35,11 +35,11 @@ model Conversation {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Profile {
-  id              String            @id(map: "User_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email           String?           @unique(map: "User_email_key")
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email           String?           @unique
   display_name    String?
   created_at      DateTime          @default(now())
-  updated_at      DateTime?         @db.Timestamp(6)
+  updated_at      DateTime?
   avatar_url      String?
   Conversation    Conversation[]
   Guest           Guest[]
