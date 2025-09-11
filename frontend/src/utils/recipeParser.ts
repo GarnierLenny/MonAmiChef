@@ -1,12 +1,31 @@
 import { RecipeContent, RecipeNutrition, ParsedRecipe } from '../types/recipe';
 
 /**
+ * Simple check to see if text looks like a recipe (for showing save button)
+ */
+export function looksLikeRecipe(text: string): boolean {
+  // Check for recipe keywords
+  const hasRecipeKeywords = /\b(ingredients?|instructions?|steps?|recipe|cook|cooking|preparation|directions|method|how to make|what you.?ll need)\b/i.test(text);
+  
+  // Check for list patterns (common in recipes)
+  const hasListPattern = /^\s*[-*•]\s+.+/m.test(text) || /^\s*\d+\.\s+.+/m.test(text);
+  
+  // Check for measurement patterns (common in recipes)
+  const hasMeasurements = /\b\d+\s*(cups?|tablespoons?|teaspoons?|tbsp|tsp|oz|ounces?|pounds?|lbs?|grams?|g|ml|liters?|minutes?|mins?|hours?|hrs?)\b/i.test(text);
+  
+  // Check for cooking terms
+  const hasCookingTerms = /\b(bake|fry|sauté|simmer|boil|mix|stir|chop|dice|slice|season|garnish|serve|heat|oven|pan|pot)\b/i.test(text);
+  
+  // If it has recipe keywords AND (lists OR measurements OR cooking terms), it's likely a recipe
+  return hasRecipeKeywords && (hasListPattern || hasMeasurements || hasCookingTerms);
+}
+
+/**
  * Parse AI response text to extract recipe information
  */
 export function parseRecipeFromText(text: string): ParsedRecipe | null {
-  // Check if the text contains recipe-like content
-  const hasRecipeIndicators = /\b(ingredients?|instructions?|steps?|recipe|cook|preparation|ingredients list)\b/i.test(text);
-  if (!hasRecipeIndicators) {
+  // Use the simpler check first
+  if (!looksLikeRecipe(text)) {
     return null;
   }
 
@@ -20,11 +39,6 @@ export function parseRecipeFromText(text: string): ParsedRecipe | null {
   // Extract instructions
   const instructions = extractInstructions(text);
   
-  // If we don't have basic recipe components, it's probably not a recipe
-  if (ingredients.length === 0 && instructions.length === 0) {
-    return null;
-  }
-
   // Extract tips/variations
   const tips = extractTips(text);
 
@@ -80,20 +94,30 @@ function extractTitleFromContent(text: string): string {
 function extractIngredients(text: string): string[] {
   const ingredients: string[] = [];
   
-  // Look for ingredients section
-  const ingredientsMatch = text.match(/\*\*ingredients?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is);
-  if (ingredientsMatch) {
-    const ingredientsText = ingredientsMatch[1];
-    const lines = ingredientsText.split('\n');
-    
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (trimmed.match(/^[\-\*•]\s+(.+)/) || trimmed.match(/^\d+\.\s+(.+)/)) {
-        const ingredient = trimmed.replace(/^[\-\*•\d\.]\s*/, '').trim();
-        if (ingredient.length > 0) {
-          ingredients.push(ingredient);
+  // Look for ingredients section with multiple formats
+  const patterns = [
+    /\*\*ingredients?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is, // **Ingredients**
+    /ingredients?:?\s*\n(.*?)(?=\n\s*\n|\*\*\w|instructions?|directions|steps?|method|$)/is, // Ingredients:
+    /(ingredients?|what you.?ll need|shopping list)[\s\:]*\n(.*?)(?=\n\s*\n|\*\*\w|instructions?|directions|steps?|method|$)/is, // Various headers
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) {
+      const ingredientsText = match[match.length - 1]; // Get the last capture group
+      const lines = ingredientsText.split('\n');
+      
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.match(/^[\-\*•]\s+(.+)/) || trimmed.match(/^\d+\.\s+(.+)/)) {
+          const ingredient = trimmed.replace(/^[\-\*•\d\.]\s*/, '').trim();
+          if (ingredient.length > 0) {
+            ingredients.push(ingredient);
+          }
         }
       }
+      
+      if (ingredients.length > 0) break; // Found ingredients, no need to try other patterns
     }
   }
 
@@ -103,20 +127,29 @@ function extractIngredients(text: string): string[] {
 function extractInstructions(text: string): string[] {
   const instructions: string[] = [];
   
-  // Look for instructions section
-  const instructionsMatch = text.match(/\*\*instructions?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is);
-  if (instructionsMatch) {
-    const instructionsText = instructionsMatch[1];
-    const lines = instructionsText.split('\n');
-    
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (trimmed.match(/^\d+\.\s+(.+)/) || trimmed.match(/^[\-\*•]\s+(.+)/)) {
-        const instruction = trimmed.replace(/^[\d\.\-\*•]\s*/, '').trim();
-        if (instruction.length > 0) {
-          instructions.push(instruction);
+  // Look for instructions section with multiple formats
+  const patterns = [
+    /\*\*instructions?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is, // **Instructions**
+    /(instructions?|directions|steps?|method|preparation|how to)[\s\:]*\n(.*?)(?=\n\s*\n|\*\*\w|tips?|notes?|nutrition|$)/is, // Various headers
+  ];
+  
+  for (const pattern of patterns) {
+    const match = text.match(pattern);
+    if (match) {
+      const instructionsText = match[match.length - 1]; // Get the last capture group
+      const lines = instructionsText.split('\n');
+      
+      for (const line of lines) {
+        const trimmed = line.trim();
+        if (trimmed.match(/^\d+\.\s+(.+)/) || trimmed.match(/^[\-\*•]\s+(.+)/)) {
+          const instruction = trimmed.replace(/^[\d\.\-\*•]\s*/, '').trim();
+          if (instruction.length > 0) {
+            instructions.push(instruction);
+          }
         }
       }
+      
+      if (instructions.length > 0) break; // Found instructions, no need to try other patterns
     }
   }
 
