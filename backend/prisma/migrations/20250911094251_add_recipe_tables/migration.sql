@@ -11,8 +11,10 @@ ADD COLUMN     "converted_user_id" UUID,
 ALTER COLUMN "created_at" SET DATA TYPE TIMESTAMPTZ(6);
 
 -- AlterTable
-ALTER TABLE "public"."Profile" RENAME CONSTRAINT "Profile_pkey" TO "User_pkey",
-ALTER COLUMN "updated_at" SET DATA TYPE TIMESTAMP(6);
+ALTER TABLE "public"."Profile" RENAME CONSTRAINT "Profile_pkey" TO "User_pkey";
+
+-- AlterTable  
+ALTER TABLE "public"."Profile" ALTER COLUMN "updated_at" SET DATA TYPE TIMESTAMP(6);
 
 -- CreateTable
 CREATE TABLE "public"."GuestConversion" (
