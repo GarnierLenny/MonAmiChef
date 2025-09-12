@@ -1,11 +1,14 @@
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ReactNode } from "react";
 
 interface MobileTopBarProps {
   onMenuClick: () => void;
+  rightIcon?: ReactNode;
+  onRightIconClick?: () => void;
 }
 
-export function MobileTopBar({ onMenuClick }: MobileTopBarProps) {
+export function MobileTopBar({ onMenuClick, rightIcon, onRightIconClick }: MobileTopBarProps) {
   return (
     <header className="md:hidden sticky top-0 z-50 p-4">
       {/* Island container */}
@@ -34,8 +37,19 @@ export function MobileTopBar({ onMenuClick }: MobileTopBarProps) {
             </span>
           </div>
 
-          {/* Right spacer for balance */}
-          <div className="w-9"></div>
+          {/* Right icon or spacer for balance */}
+          {rightIcon && onRightIconClick ? (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onRightIconClick}
+              className="text-foreground hover:bg-accent/50 transition-colors rounded-xl h-9 w-9"
+            >
+              {rightIcon}
+            </Button>
+          ) : (
+            <div className="w-9"></div>
+          )}
         </div>
       </div>
     </header>

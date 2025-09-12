@@ -191,6 +191,7 @@ function App() {
                 key={chatResetKey}
                 user={user}
                 onAuthClick={() => setIsAuthModalOpen(true)}
+                onSignOut={handleSignOut}
               />
             }
           />

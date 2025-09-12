@@ -5,12 +5,14 @@ import PreferencesSidebar from "../components/PreferenceSidebar";
 import ChatInterface from "../components/ChatInterface";
 import ChatHistorySidebar from "../components/ChatHistorySidebar";
 import MobileTopBar from "../components/MobileTopBar";
-import MobileSidebar from "../components/MobileSidebar";
+import NavigationSidebar from "../components/NavigationSidebar";
+import ChatSidebar from "../components/ChatSidebar";
 import { useIsMobile } from "../hooks/use-mobile";
 import Cookies from "universal-cookie";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import { apiFetch } from "../lib/apiClient";
+import { Settings } from "lucide-react";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -35,9 +37,10 @@ const buildAiGreeting = (): ChatMessage => ({
 interface ChatPageProps {
   user?: { id: string; email: string; name: string } | null;
   onAuthClick?: () => void;
+  onSignOut?: () => Promise<void>;
 }
 
-function ChatPage({ user, onAuthClick }: ChatPageProps = {}) {
+function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
   const [chats, setChats] = useState<ChatItem[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([buildAiGreeting()]);
   const [inputValue, setInputValue] = useState("");
@@ -69,6 +72,7 @@ function ChatPage({ user, onAuthClick }: ChatPageProps = {}) {
   const [renameValue, setRenameValue] = useState<string>("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isChatSidebarOpen, setIsChatSidebarOpen] = useState(false);
 
   const isMobile = useIsMobile();
   const chatId = searchParams.get("c");
@@ -351,11 +355,23 @@ function ChatPage({ user, onAuthClick }: ChatPageProps = {}) {
     <>
       {isMobile ? (
         <div className="flex flex-col h-screen min-h-0">
-          <MobileTopBar onMenuClick={() => setIsMobileSidebarOpen(true)} />
+          <MobileTopBar 
+            onMenuClick={() => setIsMobileSidebarOpen(true)} 
+            rightIcon={<Settings className="h-5 w-5" />}
+            onRightIconClick={() => setIsChatSidebarOpen(true)}
+          />
 
-          <MobileSidebar
+          <NavigationSidebar
             isOpen={isMobileSidebarOpen}
             onClose={() => setIsMobileSidebarOpen(false)}
+            user={user}
+            onAuthClick={onAuthClick || (() => {})}
+            onSignOut={onSignOut || (async () => {})}
+          />
+
+          <ChatSidebar
+            isOpen={isChatSidebarOpen}
+            onClose={() => setIsChatSidebarOpen(false)}
             chats={chats}
             onNewChat={handleNewChat}
             handleDropdownAction={handleDropdownAction}
