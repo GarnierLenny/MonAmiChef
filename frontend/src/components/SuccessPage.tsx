@@ -123,7 +123,7 @@ export default function SuccessPage() {
           {/* Thank You Message */}
           <div className="mt-6">
             <p className="text-gray-500 text-sm">
-              Thank you for choosing GPT Meal Planner! We're excited to help you
+              Thank you for choosing Mon Ami Chef! We're excited to help you
               create amazing meals.
             </p>
           </div>

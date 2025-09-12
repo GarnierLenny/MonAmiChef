@@ -10,10 +10,10 @@ datasource db {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model ChatMessage {
-  created_at      DateTime     @default(now())
-  conversation_id String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   history         Json         @db.Json
   messages        Json[]       @db.Json
+  conversation_id String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at      DateTime     @default(now())
   Conversation    Conversation @relation(fields: [conversation_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ChatMessage_conversationId_fkey")
 
   @@schema("public")
@@ -21,44 +21,48 @@ model ChatMessage {
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Conversation {
-  created_at       DateTime     @default(now())
-  owner_profile_id String?      @db.Uuid
   title            String
+  created_at       DateTime     @default(now())
   owner_guest_id   String?      @db.Uuid
+  owner_profile_id String?      @db.Uuid
   id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   ChatMessage      ChatMessage?
   Guest            Guest?       @relation(fields: [owner_guest_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Profile          Profile?     @relation(fields: [owner_profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "Conversation_userId_fkey")
+  Profile          Profile?     @relation(fields: [owner_profile_id], references: [id], map: "Conversation_userId_fkey")
 
   @@schema("public")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Profile {
-  id              String            @id(map: "User_pkey") @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email           String?           @unique(map: "User_email_key")
+  id              String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email           String?           @unique
   display_name    String?
   created_at      DateTime          @default(now())
-  updated_at      DateTime?         @db.Timestamp(6)
+  updated_at      DateTime?
   avatar_url      String?
   Conversation    Conversation[]
   Guest           Guest[]
   GuestConversion GuestConversion[]
+  SavedRecipe     SavedRecipe[]
+  RecipeHistory   RecipeHistory[]
 
   @@schema("public")
 }
 
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model Guest {
-  created_at           DateTime          @default(now()) @db.Timestamptz(6)
   id                   String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  created_at           DateTime          @default(now()) @db.Timestamptz(6)
   converted_to_profile Boolean           @default(false)
   converted_user_id    String?           @db.Uuid
   converted_at         DateTime?         @db.Timestamptz(6)
   conversion_token     String            @default(dbgenerated("gen_random_uuid()"))
   Conversation         Conversation[]
-  Profile              Profile?          @relation(fields: [converted_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Profile              Profile?          @relation(fields: [converted_user_id], references: [id])
   GuestConversion      GuestConversion[]
+  SavedRecipe          SavedRecipe[]
+  RecipeHistory        RecipeHistory[]
 
   @@schema("public")
 }
@@ -71,8 +75,54 @@ model GuestConversion {
   converted_at      DateTime @default(now()) @db.Timestamptz(6)
   ip_address        String?
   user_agent        String?
-  Guest             Guest    @relation(fields: [guest_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
   Profile           Profile  @relation(fields: [converted_user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Guest             Guest    @relation(fields: [guest_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model Recipe {
+  id            String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title         String
+  content_json  Json            @db.Json
+  nutrition     Json?           @db.Json
+  tags          String[]
+  created_at    DateTime        @default(now())
+  SavedRecipe   SavedRecipe[]
+  RecipeHistory RecipeHistory[]
+
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model SavedRecipe {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_profile_id String?  @db.Uuid
+  owner_guest_id   String?  @db.Uuid
+  recipe_id        String   @db.Uuid
+  created_at       DateTime @default(now())
+  Recipe           Recipe   @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  Profile          Profile? @relation(fields: [owner_profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Guest            Guest?   @relation(fields: [owner_guest_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([owner_profile_id, recipe_id])
+  @@unique([owner_guest_id, recipe_id])
+  @@schema("public")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model RecipeHistory {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  owner_profile_id String?  @db.Uuid
+  owner_guest_id   String?  @db.Uuid
+  recipe_id        String   @db.Uuid
+  created_at       DateTime @default(now())
+  Recipe           Recipe   @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  Profile          Profile? @relation(fields: [owner_profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  Guest            Guest?   @relation(fields: [owner_guest_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@unique([owner_profile_id, recipe_id])
+  @@unique([owner_guest_id, recipe_id])
   @@schema("public")
 }

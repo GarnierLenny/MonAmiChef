@@ -22,6 +22,9 @@ import RecipePage from "./components/RecipePage";
 import UserProfile from "./components/UserProfile";
 import ChatPage from "./pages/ChatPage";
 import AuthCallback from "./components/AuthCallback";
+import SavedRecipes from "./pages/SavedRecipes";
+import RecipeHistoryPage from "./pages/RecipeHistory";
+import { Toaster } from "@/components/ui/toaster";
 
 import { supabase } from "./lib/supabase";
 import { getProductByPriceId } from "./stripe-config";
@@ -87,7 +90,9 @@ function App() {
   useEffect(() => {
     let unsubscribed = false;
 
-    const applySession = async (s: import("@supabase/supabase-js").Session | null) => {
+    const applySession = async (
+      s: import("@supabase/supabase-js").Session | null,
+    ) => {
       if (unsubscribed) return;
 
       setSession(s);
@@ -118,22 +123,22 @@ function App() {
     })();
 
     // ✅ Correct v2 signature + destructuring
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        void applySession(session ?? null);
-        if (event === "SIGNED_IN") {
-          resetChats(); // or window.location.reload() if you prefer a hard refresh
-        }
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      void applySession(session ?? null);
+      if (event === "SIGNED_IN") {
+        resetChats(); // or window.location.reload() if you prefer a hard refresh
       }
-    );
+    });
 
     return () => {
       unsubscribed = true;
       subscription.unsubscribe(); // ✅ correct unsubscribe
     };
 
-  // keep deps stable or wrap fetchUserSubscription/resetChats in useCallback
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // keep deps stable or wrap fetchUserSubscription/resetChats in useCallback
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleViewChange = (view: string) => {
@@ -141,6 +146,7 @@ function App() {
   };
 
   const handleAuthenticate = (u: User) => {
+    clearConversationParam();
     setUser(u);
     setIsAuthModalOpen(false);
     void fetchUserSubscription(u.id); // ✅ pass userId
@@ -206,7 +212,16 @@ function App() {
       >
         <Routes>
           {/* Public routes */}
-          <Route path="/" element={<ChatPage key={chatResetKey} />} />
+          <Route
+            path="/"
+            element={
+              <ChatPage
+                key={chatResetKey}
+                user={user}
+                onAuthClick={() => setIsAuthModalOpen(true)}
+              />
+            }
+          />
           <Route
             path="/macros"
             element={<NutritionView currentSubView="macros" recipe={null} />}
@@ -236,6 +251,8 @@ function App() {
           <Route path="/coming-soon" element={<ComingSoonView />} />
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/recipes/saved" element={<SavedRecipes />} />
+          <Route path="/recipes/history" element={<RecipeHistoryPage />} />
 
           {/* Private */}
           <Route
@@ -266,6 +283,7 @@ function App() {
           setIsAuthModalOpen(true);
         }}
       />
+      <Toaster />
     </div>
   );
 }

@@ -32,7 +32,12 @@ const buildAiGreeting = (): ChatMessage => ({
   timestamp: new Date(),
 });
 
-function ChatPage() {
+interface ChatPageProps {
+  user?: { id: string; email: string; name: string } | null;
+  onAuthClick?: () => void;
+}
+
+function ChatPage({ user, onAuthClick }: ChatPageProps = {}) {
   const [chats, setChats] = useState<ChatItem[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([buildAiGreeting()]);
   const [inputValue, setInputValue] = useState("");
@@ -401,6 +406,8 @@ function ChatPage() {
               isGenerating={isGenerating}
               clearAllPreferences={clearAllPreferences}
               inputRef={inputRef}
+              user={user}
+              onAuthClick={onAuthClick}
             />
           </div>
         </div>
@@ -446,6 +453,8 @@ function ChatPage() {
               isGenerating={isGenerating}
               clearAllPreferences={clearAllPreferences}
               inputRef={inputRef}
+              user={user}
+              onAuthClick={onAuthClick}
             />
           </div>
 
