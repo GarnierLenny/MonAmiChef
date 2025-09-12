@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   X,
   Mail,
@@ -38,14 +38,16 @@ interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAuthenticate: (user: User) => void;
+  authModeParam?: "login" | "register";
 }
 
 export default function AuthModal({
   isOpen,
   onClose,
   onAuthenticate,
+  authModeParam = "login",
 }: AuthModalProps) {
-  const [isLogin, setIsLogin] = useState(true);
+  // const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
@@ -55,6 +57,13 @@ export default function AuthModal({
     type: "error" | "success";
     text: string;
   } | null>(null);
+  const [authMode, setAuthMode] = useState<"login" | "register">(authModeParam);
+  const isLogin = useMemo(() => authMode === "login", [authMode]);
+
+  // Update authMode when authModeParam changes
+  useEffect(() => {
+    setAuthMode(authModeParam);
+  }, [authModeParam]);
 
   if (!isOpen) return null;
 
@@ -64,10 +73,10 @@ export default function AuthModal({
 
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
-        }
+        },
       });
 
       if (error) {
@@ -261,7 +270,9 @@ export default function AuthModal({
               <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-card px-2 text-muted-foreground">
+                Or continue with
+              </span>
             </div>
           </div>
         </div>
@@ -280,7 +291,10 @@ export default function AuthModal({
             {isLogin ? "Don't have an account?" : "Already have an account?"}
             <button
               onClick={() => {
-                setIsLogin(!isLogin);
+                console.log("bbb", authMode);
+                const newAuthMode = authMode === "login" ? "register" : "login";
+
+                setAuthMode(newAuthMode);
                 setMessage(null);
               }}
               className="ml-2 text-primary hover:text-primary/80 font-semibold transition-colors"

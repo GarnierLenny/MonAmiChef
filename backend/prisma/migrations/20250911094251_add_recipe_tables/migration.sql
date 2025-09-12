@@ -10,12 +10,6 @@ ADD COLUMN     "converted_at" TIMESTAMPTZ(6),
 ADD COLUMN     "converted_user_id" UUID,
 ALTER COLUMN "created_at" SET DATA TYPE TIMESTAMPTZ(6);
 
--- AlterTable
-ALTER TABLE "public"."Profile" RENAME CONSTRAINT "Profile_pkey" TO "User_pkey";
-
--- AlterTable  
-ALTER TABLE "public"."Profile" ALTER COLUMN "updated_at" SET DATA TYPE TIMESTAMP(6);
-
 -- CreateTable
 CREATE TABLE "public"."GuestConversion" (
     "id" UUID NOT NULL DEFAULT gen_random_uuid(),
@@ -104,5 +98,8 @@ ALTER TABLE "public"."RecipeHistory" ADD CONSTRAINT "RecipeHistory_owner_profile
 -- AddForeignKey
 ALTER TABLE "public"."RecipeHistory" ADD CONSTRAINT "RecipeHistory_owner_guest_id_fkey" FOREIGN KEY ("owner_guest_id") REFERENCES "public"."Guest"("id") ON DELETE NO ACTION ON UPDATE NO ACTION;
 
--- RenameIndex
-ALTER INDEX "public"."Profile_email_key" RENAME TO "User_email_key";
+-- CreateIndex
+CREATE UNIQUE INDEX "RecipeHistory_owner_profile_id_recipe_id_key" ON "public"."RecipeHistory"("owner_profile_id", "recipe_id");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "RecipeHistory_owner_guest_id_recipe_id_key" ON "public"."RecipeHistory"("owner_guest_id", "recipe_id");

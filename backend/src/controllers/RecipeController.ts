@@ -63,98 +63,6 @@ export class RecipeController extends Controller {
   }
 
   /**
-   * Get a single recipe by ID
-   */
-  @Get("{recipeId}")
-  @Security("optionalAuth")
-  public async getRecipe(
-    @Request() request: express.Request,
-    @Path("recipeId") recipeId: string,
-  ): Promise<RecipeResponse> {
-    const owner = await resolveOptimizedOwner(request, request.res, this);
-    
-    const recipe = await prisma.recipe.findUnique({
-      where: { id: recipeId },
-    });
-
-    if (!recipe) {
-      this.setStatus(404);
-      throw new Error("Recipe not found");
-    }
-
-    // Check if this recipe is saved by the current user
-    const savedRecipe = await prisma.savedRecipe.findFirst({
-      where: {
-        recipe_id: recipeId,
-        ...ownerWhereOptimized(owner),
-      },
-    });
-
-    return {
-      id: recipe.id,
-      title: recipe.title,
-      content_json: recipe.content_json as any,
-      nutrition: recipe.nutrition as any,
-      tags: recipe.tags,
-      created_at: recipe.created_at.toISOString(),
-      is_saved: !!savedRecipe,
-    };
-  }
-
-  /**
-   * Save a recipe for the current user
-   */
-  @Post("{recipeId}/save")
-  @Security("optionalAuth")
-  public async saveRecipe(
-    @Request() request: express.Request,
-    @Path("recipeId") recipeId: string,
-  ): Promise<{ success: boolean; is_saved: boolean }> {
-    const owner = await resolveOptimizedOwner(request, request.res, this);
-    
-    // Check if user is authenticated (not a guest)
-    if (!owner.userId) {
-      this.setStatus(401);
-      throw new Error("Recipe saving is only available for registered users. Please sign up or log in.");
-    }
-    
-    // Check if recipe exists
-    const recipe = await prisma.recipe.findUnique({
-      where: { id: recipeId },
-    });
-
-    if (!recipe) {
-      this.setStatus(404);
-      throw new Error("Recipe not found");
-    }
-
-    // Check if already saved
-    const existingSave = await prisma.savedRecipe.findFirst({
-      where: {
-        recipe_id: recipeId,
-        ...ownerWhereOptimized(owner),
-      },
-    });
-
-    if (existingSave) {
-      // Unsave (remove from saved recipes)
-      await prisma.savedRecipe.delete({
-        where: { id: existingSave.id },
-      });
-      return { success: true, is_saved: false };
-    } else {
-      // Save recipe
-      await prisma.savedRecipe.create({
-        data: {
-          ...ownerWhereOptimized(owner),
-          recipe_id: recipeId,
-        },
-      });
-      return { success: true, is_saved: true };
-    }
-  }
-
-  /**
    * Get user's saved recipes
    */
   @Get("saved")
@@ -246,6 +154,98 @@ export class RecipeController extends Controller {
       },
       created_at: history.created_at.toISOString(),
     }));
+  }
+
+  /**
+   * Get a single recipe by ID
+   */
+  @Get("{recipeId}")
+  @Security("optionalAuth")
+  public async getRecipe(
+    @Request() request: express.Request,
+    @Path("recipeId") recipeId: string,
+  ): Promise<RecipeResponse> {
+    const owner = await resolveOptimizedOwner(request, request.res, this);
+    
+    const recipe = await prisma.recipe.findUnique({
+      where: { id: recipeId },
+    });
+
+    if (!recipe) {
+      this.setStatus(404);
+      throw new Error("Recipe not found");
+    }
+
+    // Check if this recipe is saved by the current user
+    const savedRecipe = await prisma.savedRecipe.findFirst({
+      where: {
+        recipe_id: recipeId,
+        ...ownerWhereOptimized(owner),
+      },
+    });
+
+    return {
+      id: recipe.id,
+      title: recipe.title,
+      content_json: recipe.content_json as any,
+      nutrition: recipe.nutrition as any,
+      tags: recipe.tags,
+      created_at: recipe.created_at.toISOString(),
+      is_saved: !!savedRecipe,
+    };
+  }
+
+  /**
+   * Save a recipe for the current user
+   */
+  @Post("{recipeId}/save")
+  @Security("optionalAuth")
+  public async saveRecipe(
+    @Request() request: express.Request,
+    @Path("recipeId") recipeId: string,
+  ): Promise<{ success: boolean; is_saved: boolean }> {
+    const owner = await resolveOptimizedOwner(request, request.res, this);
+    
+    // Check if user is authenticated (not a guest)
+    if (!owner.userId) {
+      this.setStatus(401);
+      throw new Error("Recipe saving is only available for registered users. Please sign up or log in.");
+    }
+    
+    // Check if recipe exists
+    const recipe = await prisma.recipe.findUnique({
+      where: { id: recipeId },
+    });
+
+    if (!recipe) {
+      this.setStatus(404);
+      throw new Error("Recipe not found");
+    }
+
+    // Check if already saved
+    const existingSave = await prisma.savedRecipe.findFirst({
+      where: {
+        recipe_id: recipeId,
+        ...ownerWhereOptimized(owner),
+      },
+    });
+
+    if (existingSave) {
+      // Unsave (remove from saved recipes)
+      await prisma.savedRecipe.delete({
+        where: { id: existingSave.id },
+      });
+      return { success: true, is_saved: false };
+    } else {
+      // Save recipe
+      await prisma.savedRecipe.create({
+        data: {
+          ...ownerWhereOptimized(owner),
+          recipe_id: recipeId,
+        },
+      });
+      return { success: true, is_saved: true };
+    }
   }
 
   /**

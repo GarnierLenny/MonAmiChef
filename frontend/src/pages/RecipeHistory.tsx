@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
-import { Heart, Clock, Users, Tag, Eye, History, LogIn } from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { Heart, Clock, Users, Tag, Eye, History, LogIn, Sparkles, ChefHat } from "lucide-react";
 import { recipeService } from "../services/recipeService";
 import { RecipeHistory, Recipe } from "../types/recipe";
 import { createClient } from "@supabase/supabase-js";
+import AuthModal from "../components/AuthModal";
+import { User } from "../types/types";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -10,11 +13,15 @@ const supabase = createClient(
 );
 
 export default function RecipeHistoryPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState<any>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [recipeHistory, setRecipeHistory] = useState<RecipeHistory[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRecipe, setSelectedRecipe] = useState<Recipe | null>(null);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
 
   useEffect(() => {
     checkAuth();
@@ -67,6 +74,32 @@ export default function RecipeHistoryPage() {
     }
   };
 
+  const clearConversationParam = () => {
+    const params = new URLSearchParams(location.search);
+    if (params.has("c")) {
+      params.delete("c");
+      navigate({ pathname: "/recipes/history", search: params.toString() }, { replace: true });
+    }
+  };
+
+  const handleAuthenticate = (u: User) => {
+    clearConversationParam();
+    setUser(u);
+    setIsAuthModalOpen(false);
+    // Reload recipe history after authentication
+    loadRecipeHistory();
+  };
+
+  const handleLoginClick = () => {
+    setAuthMode('login');
+    setIsAuthModalOpen(true);
+  };
+
+  const handleRegisterClick = () => {
+    setAuthMode('register');
+    setIsAuthModalOpen(true);
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -95,26 +128,57 @@ export default function RecipeHistoryPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 flex items-center justify-center">
-        <div className="text-center max-w-md mx-auto p-8">
-          <LogIn className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Authentication Required</h2>
-          <p className="text-gray-600 mb-6">
-            You need to be logged in to view your recipe history. Please sign up or log in to access this feature.
-          </p>
-          <div className="space-y-3">
-            <a
-              href="/"
-              className="block w-full px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors text-center"
-            >
-              Go to Home & Sign In
-            </a>
-            <p className="text-sm text-gray-500">
-              Start cooking with our AI Chef to build your recipe history!
+      <>
+        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 flex items-center justify-center px-4">
+          <div className="text-center w-full max-w-2xl mx-auto">
+            {/* Friendly illustration */}
+            <div className="relative mb-12">
+              <div className="w-32 h-32 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <History className="w-16 h-16 text-orange-500" />
+              </div>
+              <div className="absolute top-0 right-1/2 translate-x-16 -translate-y-2">
+                <ChefHat className="w-10 h-10 text-orange-400" />
+              </div>
+              <div className="absolute bottom-6 left-1/2 -translate-x-20">
+                <Sparkles className="w-8 h-8 text-yellow-500" />
+              </div>
+            </div>
+
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+              ✨ Track your culinary journey and revisit past discoveries
+            </h1>
+            <p className="text-xl text-gray-600 mb-12 leading-relaxed max-w-3xl mx-auto">
+              Create a free account to automatically save every recipe you explore. Build your personal cooking timeline!
+            </p>
+            
+            <div className="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+              <button
+                onClick={handleLoginClick}
+                className="flex-1 px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 transform hover:scale-105 shadow-lg font-semibold"
+              >
+                Log in
+              </button>
+              <button
+                onClick={handleRegisterClick}
+                className="flex-1 px-8 py-4 bg-white text-gray-700 border-2 border-gray-200 rounded-xl hover:border-orange-300 hover:bg-orange-50 transition-all duration-200 font-semibold"
+              >
+                Register
+              </button>
+            </div>
+            
+            <p className="text-lg text-gray-500 mt-8">
+              Never lose track of a great recipe again with automatic history tracking
             </p>
           </div>
         </div>
-      </div>
+
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          onAuthenticate={handleAuthenticate}
+          authModeParam={authMode}
+        />
+      </>
     );
   }
 
@@ -131,24 +195,33 @@ export default function RecipeHistoryPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
-      <div className="container mx-auto px-6 py-8">
+      <div className="w-full max-w-7xl mx-auto px-6 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Recipe History</h1>
           <p className="text-gray-600">All the recipes you've discovered with our AI Chef</p>
         </div>
 
         {recipeHistory.length === 0 ? (
-          <div className="text-center py-12">
-            <History className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">No recipe history yet</h2>
-            <p className="text-gray-600 mb-4">
-              Start chatting with our AI Chef to build your recipe history!
+          <div className="text-center py-16">
+            <div className="relative mb-8">
+              <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <History className="w-10 h-10 text-orange-500" />
+              </div>
+              <div className="absolute -top-1 -right-6">
+                <Sparkles className="w-6 h-6 text-yellow-500" />
+              </div>
+            </div>
+            
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">Your culinary adventure starts here!</h2>
+            <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
+              Every recipe you explore with our AI Chef will automatically appear in your history. Start cooking to see your journey unfold!
             </p>
             <a
               href="/"
-              className="inline-flex items-center px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+              className="inline-flex items-center px-8 py-4 bg-gradient-to-r from-orange-500 to-orange-600 text-white rounded-xl hover:from-orange-600 hover:to-orange-700 transition-all duration-200 transform hover:scale-105 shadow-lg font-semibold"
             >
-              Start Cooking
+              <ChefHat className="w-5 h-5 mr-2" />
+              Discover Your First Recipe
             </a>
           </div>
         ) : (

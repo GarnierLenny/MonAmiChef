@@ -1,15 +1,30 @@
 import { Recipe, SavedRecipe, RecipeHistory, CreateRecipeRequest } from '../types/recipe';
+import { supabase } from '../lib/supabase';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8888';
 
 class RecipeService {
+  private async getAccessToken(): Promise<string | null> {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) return null;
+    return data.session?.access_token ?? null;
+  }
+
   private async makeRequest(endpoint: string, options: RequestInit = {}): Promise<Response> {
+    const token = await this.getAccessToken();
+    
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      ...options.headers,
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     const response = await fetch(`${API_BASE}${endpoint}`, {
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
+      headers,
       ...options,
     });
 

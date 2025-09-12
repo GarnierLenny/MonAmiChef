@@ -5,9 +5,9 @@ import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import { useLocation } from "react-router-dom";
 import { ChatMessage } from "../types/types";
-import { Separator } from "@/components/ui/separator";
 import { parseRecipeFromText } from "../utils/recipeParser";
 import { recipeService } from "../services/recipeService";
+import { useToast } from "@/hooks/use-toast";
 
 interface ChatInterfaceProps {
   preferences: {
@@ -64,6 +64,7 @@ export default function ChatInterface({
   const location = useLocation();
   const [savedRecipes, setSavedRecipes] = useState<Set<string>>(new Set());
   const [savingRecipes, setSavingRecipes] = useState<Set<string>>(new Set());
+  const { toast } = useToast();
 
   // Get all selected preference tags for display
   const getSelectedTags = () => {
@@ -155,14 +156,16 @@ export default function ChatInterface({
     
     // Check if user is authenticated
     if (!user) {
-      // Show registration prompt for guest users
+      // Show registration prompt for guest users with toast
+      toast({
+        title: "Sign up to save recipes",
+        description: "Recipe saving is only available for registered users. Sign up to start saving your favorite recipes!",
+        duration: 5000,
+      });
+      
+      // Open the authentication modal
       if (onAuthClick) {
-        const shouldRegister = window.confirm(
-          "Recipe saving is only available for registered users. Would you like to sign up or log in to save your recipes?"
-        );
-        if (shouldRegister) {
-          onAuthClick();
-        }
+        onAuthClick();
       }
       return;
     }
@@ -187,10 +190,20 @@ export default function ChatInterface({
       
       if (result.is_saved) {
         setSavedRecipes(prev => new Set([...prev, messageId]));
+        toast({
+          title: "Recipe saved!",
+          description: "Your recipe has been added to your saved recipes.",
+          duration: 3000,
+        });
       }
     } catch (error) {
       console.error('Failed to save recipe:', error);
-      // You might want to show a toast notification here
+      toast({
+        title: "Failed to save recipe",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+        duration: 4000,
+      });
     } finally {
       setSavingRecipes(prev => {
         const newSet = new Set(prev);
