@@ -27,7 +27,6 @@ import RecipeHistoryPage from "./pages/RecipeHistory";
 import { Toaster } from "@/components/ui/toaster";
 
 import { supabase } from "./lib/supabase";
-import { getProductByPriceId } from "./stripe-config";
 import { User } from "./types/types";
 
 function RequireAuth({
@@ -49,7 +48,6 @@ function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
-  const [userSubscription, setUserSubscription] = useState<any>(null);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
   // 🔁 used to force-remount ChatPage (reset chats)
@@ -65,26 +63,6 @@ function App() {
 
   const resetChats = useCallback(() => {
     setChatResetKey((k) => k + 1); // remount ChatPage
-  }, []);
-
-  const fetchUserSubscription = useCallback(async (userId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("stripe_user_subscriptions")
-        .select("*")
-        .eq("user_id", userId)
-        .maybeSingle();
-
-      if (error) {
-        console.error("Subscription fetch error:", error);
-        setUserSubscription(null);
-        return;
-      }
-      setUserSubscription(data ?? null);
-    } catch (e) {
-      console.error("Subscription fetch threw:", e);
-      setUserSubscription(null);
-    }
   }, []);
 
   useEffect(() => {
@@ -104,10 +82,8 @@ function App() {
           email: u.email ?? "",
           name: (u.user_metadata as any)?.name ?? u.email?.split("@")[0] ?? "",
         });
-        await fetchUserSubscription(u.id);
       } else {
         setUser(null);
-        setUserSubscription(null);
       }
     };
 
@@ -137,7 +113,7 @@ function App() {
       subscription.unsubscribe(); // ✅ correct unsubscribe
     };
 
-    // keep deps stable or wrap fetchUserSubscription/resetChats in useCallback
+    // keep deps stable or wrap resetChats in useCallback
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -149,14 +125,12 @@ function App() {
     clearConversationParam();
     setUser(u);
     setIsAuthModalOpen(false);
-    void fetchUserSubscription(u.id); // ✅ pass userId
   };
 
   const handleSignOut = async () => {
     clearConversationParam();
     resetChats();
     setUser(null);
-    setUserSubscription(null);
     await supabase.auth.signOut();
   };
 
@@ -166,17 +140,7 @@ function App() {
   };
 
   const getSubscriptionPlanName = () => {
-    if (
-      !userSubscription ||
-      userSubscription.subscription_status === "not_started"
-    ) {
-      return "Free Plan";
-    }
-    if (userSubscription.price_id) {
-      const product = getProductByPriceId(userSubscription.price_id);
-      return product?.name || "Premium Plan";
-    }
-    return "Premium Plan";
+    return "Free Plan";
   };
 
   if (isLoadingAuth) {
