@@ -8,7 +8,6 @@ import {
   Trash2,
   Eye,
   LogIn,
-  Sparkles,
   ChefHat,
 } from "lucide-react";
 import { recipeService } from "../services/recipeService";
@@ -85,7 +84,10 @@ export default function SavedRecipes() {
     const params = new URLSearchParams(location.search);
     if (params.has("c")) {
       params.delete("c");
-      navigate({ pathname: "/recipes/saved", search: params.toString() }, { replace: true });
+      navigate(
+        { pathname: "/recipes/saved", search: params.toString() },
+        { replace: true },
+      );
     }
   };
 
@@ -138,9 +140,6 @@ export default function SavedRecipes() {
               </div>
               <div className="absolute top-0 right-1/2 translate-x-16 -translate-y-2">
                 <Heart className="w-10 h-10 text-red-400 fill-current" />
-              </div>
-              <div className="absolute bottom-6 left-1/2 -translate-x-20">
-                <Sparkles className="w-8 h-8 text-yellow-500" />
               </div>
             </div>
 
@@ -197,7 +196,7 @@ export default function SavedRecipes() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
-      <div className="w-full max-w-7xl mx-auto px-6 py-8">
+      <div className="w-screen mx-auto px-6 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Saved Recipes
@@ -211,9 +210,7 @@ export default function SavedRecipes() {
               <div className="w-20 h-20 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <Heart className="w-10 h-10 text-orange-500" />
               </div>
-              <div className="absolute -top-1 -right-6">
-                <Sparkles className="w-6 h-6 text-yellow-500" />
-              </div>
+              <div className="absolute -top-1 -right-6"></div>
             </div>
 
             <h2 className="text-2xl font-bold text-gray-900 mb-3">
@@ -420,4 +417,3 @@ export default function SavedRecipes() {
     </div>
   );
 }
-
