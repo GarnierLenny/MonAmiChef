@@ -131,7 +131,7 @@ export default function SavedRecipes() {
   if (!user) {
     return (
       <>
-        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 flex items-center justify-center px-4">
+        <div className="overflow-hidden bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 flex items-center justify-center px-4">
           <div className="text-center w-full max-w-2xl mx-auto">
             {/* Friendly illustration */}
             <div className="relative mb-12">
@@ -195,7 +195,7 @@ export default function SavedRecipes() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
+    <div className="overflow-hidden bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
       <div className="w-screen mx-auto px-6 py-8">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
