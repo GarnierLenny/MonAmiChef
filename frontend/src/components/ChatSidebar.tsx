@@ -2,7 +2,15 @@ import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { History, Settings, Plus, Ellipsis, Edit, Trash, Share } from "lucide-react";
+import {
+  History,
+  CircleDot,
+  Plus,
+  Ellipsis,
+  Edit,
+  Trash,
+  Share,
+} from "lucide-react";
 import { ChatItem, Preferences } from "@/types/types";
 import PreferencesSidebar from "./PreferenceSidebar";
 import ChatHistorySidebar from "./ChatHistorySidebar";
@@ -19,6 +27,7 @@ interface ChatSidebarProps {
   activeDropdown: string | null;
   setActiveDropdown: (id: string | null) => void;
   renamingId: string | null;
+  setRenamingId: (id: string | null) => void;
   renameValue: string;
   setRenameValue: (value: string) => void;
   cancelRename: () => void;
@@ -44,6 +53,7 @@ export function ChatSidebar({
   activeDropdown,
   setActiveDropdown,
   renamingId,
+  setRenamingId,
   renameValue,
   setRenameValue,
   cancelRename,
@@ -59,22 +69,29 @@ export function ChatSidebar({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent 
-        side="right" 
-        className="w-80 p-0 bg-background border-l"
-      >
+      <SheetContent side="right" className="w-80 p-0 bg-background border-l">
         <div className="flex flex-col h-full">
           {/* Header with Tabs */}
           <div className="p-4 border-b">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="w-full"
+            >
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="history" className="flex items-center gap-2">
+                <TabsTrigger
+                  value="history"
+                  className="flex items-center gap-2"
+                >
                   <History className="h-4 w-4" />
                   History
                 </TabsTrigger>
-                <TabsTrigger value="preferences" className="flex items-center gap-2">
-                  <Settings className="h-4 w-4" />
-                  Settings
+                <TabsTrigger
+                  value="preferences"
+                  className="flex items-center gap-2"
+                >
+                  <CircleDot className="h-4 w-4" />
+                  Preferences
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -82,15 +99,22 @@ export function ChatSidebar({
 
           {/* Content */}
           <div className="flex-1 overflow-hidden">
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="h-full">
+            <Tabs
+              value={activeTab}
+              onValueChange={setActiveTab}
+              className="h-full"
+            >
               <TabsContent value="history" className="h-full m-0 p-0">
                 <ChatHistorySidebar
                   chats={chats}
+                  isOpen={true}
+                  onClose={() => {}}
                   onNewChat={onNewChat}
                   handleDropdownAction={handleDropdownAction}
                   activeDropdown={activeDropdown}
                   setActiveDropdown={setActiveDropdown}
                   renamingId={renamingId}
+                  setRenamingId={setRenamingId}
                   renameValue={renameValue}
                   setRenameValue={setRenameValue}
                   cancelRename={cancelRename}

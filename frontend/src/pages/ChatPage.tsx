@@ -12,7 +12,7 @@ import Cookies from "universal-cookie";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import { apiFetch } from "../lib/apiClient";
-import { Settings } from "lucide-react";
+import { ArrowLeftFromLine } from "lucide-react";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -103,7 +103,7 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
     action: "rename" | "delete" | "share",
     dropdownChatId: string,
   ) => {
-    console.log('id', dropdownChatId, action);
+    console.log("id", dropdownChatId, action);
     setActiveDropdown(null);
     if (action === "rename") {
       setRenamingId(dropdownChatId);
@@ -122,7 +122,10 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
     if (confirmDeleteId === chatId) {
       handleNewChat();
     }
-    await apiFetch(`/chat/conversations/${confirmDeleteId}`, { auth: 'optional', method: "DELETE" });
+    await apiFetch(`/chat/conversations/${confirmDeleteId}`, {
+      auth: "optional",
+      method: "DELETE",
+    });
     setConfirmDeleteId(null);
   };
 
@@ -136,19 +139,23 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
     if (!newTitle) return;
 
     await apiFetch(`/chat/conversations/${renamingId}`, {
-      auth: 'optional',
+      auth: "optional",
       method: "PATCH",
       body: JSON.stringify({ newTitle }),
     });
 
-    setChats(prev => prev.map(c => c.id === renamingId ? { ...c, title: newTitle } : c));
+    setChats((prev) =>
+      prev.map((c) => (c.id === renamingId ? { ...c, title: newTitle } : c)),
+    );
     setRenamingId(null);
   }, [renamingId, renameValue]);
 
   // Load history chats
   useEffect(() => {
     (async () => {
-      const result = await apiFetch("/chat/conversations", { auth: 'optional' });
+      const result = await apiFetch("/chat/conversations", {
+        auth: "optional",
+      });
       const tmpChats: ChatItem[] = [];
       result.forEach((chat: any) => {
         tmpChats.push({
@@ -222,7 +229,7 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
         const result = await apiFetch(
           `/chat/conversations/${chatId}/messages`,
           {
-            auth: 'optional',
+            auth: "optional",
             method: "GET",
             headers: { "Content-Type": "application/json" },
             signal: ac.signal,
@@ -293,7 +300,7 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
         reply: string;
         conversationId: string;
       }>(path, {
-        auth: 'optional',
+        auth: "optional",
         method: "POST",
         body: JSON.stringify(payload),
       });
@@ -355,9 +362,9 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
     <>
       {isMobile ? (
         <div className="flex flex-col h-screen min-h-0">
-          <MobileTopBar 
-            onMenuClick={() => setIsMobileSidebarOpen(true)} 
-            rightIcon={<Settings className="h-5 w-5" />}
+          <MobileTopBar
+            onMenuClick={() => setIsMobileSidebarOpen(true)}
+            rightIcon={<ArrowLeftFromLine className="h-5 w-5" />}
             onRightIconClick={() => setIsChatSidebarOpen(true)}
           />
 

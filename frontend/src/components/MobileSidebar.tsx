@@ -99,7 +99,10 @@ export function MobileSidebar({
             Chat History
           </button>
           <button
-            onClick={() => setActiveTab("preferences")}
+            onClick={() => {
+              setActiveTab("preferences");
+              onClose();
+            }}
             className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
               activeTab === "preferences"
                 ? "text-chef-brown border-b-2 border-chef-orange bg-chef-orange/5"
