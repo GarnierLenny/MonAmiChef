@@ -5,11 +5,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   History,
   CircleDot,
-  Plus,
-  Ellipsis,
-  Edit,
-  Trash,
-  Share,
 } from "lucide-react";
 import { ChatItem, Preferences } from "@/types/types";
 import PreferencesSidebar from "./PreferenceSidebar";

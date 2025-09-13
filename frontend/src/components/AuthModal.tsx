@@ -291,7 +291,6 @@ export default function AuthModal({
             {isLogin ? "Don't have an account?" : "Already have an account?"}
             <button
               onClick={() => {
-                console.log("bbb", authMode);
                 const newAuthMode = authMode === "login" ? "register" : "login";
 
                 setAuthMode(newAuthMode);

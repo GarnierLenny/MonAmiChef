@@ -101,7 +101,6 @@ export function MobileSidebar({
           <button
             onClick={() => {
               setActiveTab("preferences");
-              console.log("test");
               onClose();
             }}
             className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${

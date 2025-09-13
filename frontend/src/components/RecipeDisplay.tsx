@@ -70,7 +70,7 @@ export default function RecipeDisplay({
           url: window.location.href,
         });
       } catch (err) {
-        console.log("Error sharing:", err);
+        // Error sharing - fall back to copy to clipboard
       }
     } else {
       copyToClipboard();
