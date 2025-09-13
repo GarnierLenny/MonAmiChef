@@ -104,10 +104,8 @@ export default function ChatHistorySidebar({
           <button
             onClick={() => {
               onNewChat();
-              console.log("test");
               if (isMobile) {
                 onClose();
-                console.log("mobile");
               }
             }}
             className="w-full flex items-center justify-center space-x-3 px-4 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl hover:from-pink-600 hover:to-rose-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 group"

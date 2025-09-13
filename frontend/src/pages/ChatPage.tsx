@@ -103,14 +103,13 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
     action: "rename" | "delete" | "share",
     dropdownChatId: string,
   ) => {
-    console.log("id", dropdownChatId, action);
     setActiveDropdown(null);
     if (action === "rename") {
       setRenamingId(dropdownChatId);
     } else if (action === "delete") {
       setConfirmDeleteId(dropdownChatId);
     } else if (action === "share") {
-      console.log("Share action for chat:", dropdownChatId);
+      // Share functionality not implemented yet
     }
   };
 

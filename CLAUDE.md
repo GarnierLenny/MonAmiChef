@@ -86,3 +86,9 @@ yarn tsoa:gen         # Generate TSOA routes and OpenAPI spec only
 - CORS is configured for specific production domains
 - API routes are auto-generated via TSOA decorators
 - Database uses both Supabase auth schema and custom public schema
+
+## Pull Request Guidelines
+
+- **Keep MRs Small**: Any new MR created by Claude should remain under 300 lines of changes
+- **Change Monitoring**: Claude must check the diff size before creating an MR and notify the user when a branch has more than 300 lines changed
+- **Large Changes**: If changes exceed 300 lines, Claude should ask for approval or suggest breaking the work into smaller, focused MRs
