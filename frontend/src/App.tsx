@@ -27,6 +27,7 @@ import AuthCallback from "./components/AuthCallback";
 import SavedRecipes from "./pages/SavedRecipes";
 import RecipeHistoryPage from "./pages/RecipeHistory";
 import { Toaster } from "@/components/ui/toaster";
+import { AppErrorBoundary, ComponentErrorBoundary } from "./components/ErrorBoundary";
 
 import { supabase } from "./lib/supabase";
 import { User } from "./types/types";
@@ -160,7 +161,8 @@ function App() {
 
   // Anonymous-first: we do NOT block the app if not logged in.
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
+    <AppErrorBoundary>
+      <div className="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
       {!isRecipePage && !isChatPage && (
         <MobileTopBar onMenuClick={() => setIsMobileSidebarOpen(true)} />
       )}
@@ -187,12 +189,14 @@ function App() {
           <Route
             path="/"
             element={
-              <ChatPage
-                key={chatResetKey}
-                user={user}
-                onAuthClick={() => setIsAuthModalOpen(true)}
-                onSignOut={handleSignOut}
-              />
+              <ComponentErrorBoundary componentName="ChatPage">
+                <ChatPage
+                  key={chatResetKey}
+                  user={user}
+                  onAuthClick={() => setIsAuthModalOpen(true)}
+                  onSignOut={handleSignOut}
+                />
+              </ComponentErrorBoundary>
             }
           />
           <Route
@@ -267,8 +271,9 @@ function App() {
           setIsAuthModalOpen(true);
         }}
       />
-      <Toaster />
-    </div>
+        <Toaster />
+      </div>
+    </AppErrorBoundary>
   );
 }
 
