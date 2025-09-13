@@ -215,182 +215,386 @@ export class ChatController extends Controller {
 
   @Post("conversations/:conversationId")
   @Security("optionalAuth")
+  @Response<ErrorResponse>(400, "Bad Request")
+  @Response<ErrorResponse>(404, "Not Found")
+  @Response<ErrorResponse>(500, "Internal Server Error")
+  @Response<ErrorResponse>(503, "Service Unavailable")
   public async sendMessage(@Request() request: any, @Path("conversationId") conversationId: string, @Body() body: ChatRequest): Promise<ChatResponse> {
-    const rawInput = (body.userMessage ?? "").trim();
-    const hasInput = rawInput.length > 0;
-
-    const preferencesSummary = buildPreferenceSummary(body.preferences);
-    const hasPrefs = preferencesSummary.length > 0;
-
-    let conversationHistory = [];
-    let conversationMessages: Prisma.InputJsonValue[] = [];
-
     try {
-      const messagesQuery = await prisma.chatMessage.findFirst({
-        where: {
-          conversation_id: conversationId!,
-        },
-        select: {
-          messages: true,
-          history: true,
-        },
-      });
-      if (messagesQuery && messagesQuery.history) {
-        if (Array.isArray(messagesQuery.history)) {
-          conversationHistory = messagesQuery.history as any[];
-        }
-        if (Array.isArray(messagesQuery.messages)) {
-          conversationMessages = messagesQuery.messages as any[];
-        }
+      // Validate input
+      const rawInput = (body.userMessage ?? "").trim();
+      if (!rawInput) {
+        throw new ValidationError("Message cannot be empty");
       }
-    } catch (err) {
-      console.error("Error finding chat", err);
+
+      if (rawInput.length > 1000) {
+        throw new ValidationError("Message is too long (max 1000 characters)");
+      }
+
+      if (!conversationId) {
+        throw new ValidationError("Conversation ID is required");
+      }
+
+      const preferencesSummary = buildPreferenceSummary(body.preferences);
+      const hasPrefs = preferencesSummary.length > 0;
+
+      let conversationHistory = [];
+      let conversationMessages: Prisma.InputJsonValue[] = [];
+
+      // Get conversation history with proper error handling
+      try {
+        const owner = await resolveOptimizedOwner(request, request.res, this);
+        
+        // Verify conversation exists and belongs to user
+        const conversation = await prisma.conversation.findFirst({
+          where: {
+            id: conversationId,
+            ...ownerWhereOptimized(owner),
+          },
+        });
+
+        if (!conversation) {
+          throw new NotFoundError("Conversation not found or access denied");
+        }
+
+        const messagesQuery = await prisma.chatMessage.findFirst({
+          where: {
+            conversation_id: conversationId,
+          },
+          select: {
+            messages: true,
+            history: true,
+          },
+        });
+
+        if (messagesQuery) {
+          if (Array.isArray(messagesQuery.history)) {
+            conversationHistory = messagesQuery.history as any[];
+          }
+          if (Array.isArray(messagesQuery.messages)) {
+            conversationMessages = messagesQuery.messages as any[];
+          }
+        }
+      } catch (error) {
+        if (error instanceof APIError) {
+          throw error;
+        }
+        console.error("Error finding chat:", error);
+        throw new InternalServerError("Failed to retrieve conversation history");
+      }
+
+      // Generate AI response
+      let modelResponse: string;
+      try {
+        let fullSystemInstruction = geminiCookAssistantPrompt;
+        if (hasPrefs) {
+          fullSystemInstruction += `\n\nUser Preferences:\n${preferencesSummary}`;
+        }
+
+        const chat = ai.chats.create({
+          model: GEMINI_MODEL,
+          history: conversationHistory,
+          config: {
+            systemInstruction: fullSystemInstruction,
+          },
+        });
+
+        const response = await chat.sendMessage({
+          message: rawInput,
+        });
+
+        modelResponse = response.text ?? "Failed to retrieve model response";
+      } catch (aiError) {
+        console.error("AI service error:", aiError);
+        throw new ServiceUnavailableError("AI cooking assistant is temporarily unavailable. Please try again in a few moments.");
+      }
+
+      // Update conversation in database
+      try {
+        // Handle conversation history updates safely
+        const userMessage = {
+          role: "user",
+          parts: conversationHistory.length > 0 && conversationHistory[0]?.parts 
+            ? [...conversationHistory[0].parts, { text: rawInput }]
+            : [{ text: rawInput }],
+        };
+        
+        const modelMessage = {
+          role: "model",
+          parts: conversationHistory.length > 1 && conversationHistory[1]?.parts 
+            ? [...conversationHistory[1].parts, { text: modelResponse }]
+            : [{ text: modelResponse }],
+        };
+
+        const updatedMessages = [userMessage, modelMessage];
+
+        await prisma.chatMessage.update({
+          where: {
+            conversation_id: conversationId,
+          },
+          data: {
+            history: updatedMessages as unknown as Prisma.InputJsonValue,
+            messages: [
+              ...conversationMessages,
+              { role: "user", text: rawInput },
+              { role: "model", text: modelResponse },
+            ],
+          },
+        });
+
+        return { reply: modelResponse, conversationId };
+      } catch (dbError) {
+        console.error("Database error:", dbError);
+        throw new InternalServerError("Failed to save message. Please try again.");
+      }
+    } catch (error) {
+      if (error instanceof APIError) {
+        this.setStatus(error.statusCode);
+        throw error;
+      }
+      
+      const errorResponse = handleControllerError(error, request.path);
+      this.setStatus(errorResponse.statusCode);
+      throw new APIError(errorResponse.statusCode, errorResponse.message);
     }
-
-    let fullSystemInstruction = geminiCookAssistantPrompt;
-    if (hasPrefs) {
-      fullSystemInstruction += `\n\nUser Preferences:\n${preferencesSummary}`;
-    }
-
-    const chat = ai.chats.create({
-      model: GEMINI_MODEL,
-      history: conversationHistory,
-      config: {
-        systemInstruction: fullSystemInstruction,
-      },
-    });
-
-    const response = await chat.sendMessage({
-      message: rawInput,
-    });
-
-    const modelResponse = response.text ?? "Failed to retrieve model response";
-
-    // Insert conversation in db
-    const userMessage = {
-      role: "user",
-      parts: [...conversationHistory[0].parts, { text: rawInput }],
-    };
-    const modelMessage = {
-      role: "model",
-      parts: [...conversationHistory[1].parts, { text: modelResponse }],
-    };
-
-    const updatedMessages = [userMessage, modelMessage];
-
-    await prisma.chatMessage.update({
-      where: {
-        conversation_id: conversationId!,
-      },
-      data: {
-        history: updatedMessages as unknown as Prisma.InputJsonValue,
-        messages: [
-          ...conversationMessages,
-          { role: "user", text: rawInput },
-          { role: "model", text: modelResponse },
-        ],
-      },
-    });
-    return { reply: modelResponse, conversationId };
   }
 
   // Get user conversations
   @Get("conversations")
   @Security("optionalAuth")
+  @Response<ErrorResponse>(500, "Internal Server Error")
   public async getUserConversations(
     @Request() request: express.Request,
   ): Promise<any[]> {
-    const owner = await resolveOptimizedOwner(request, request.res, this);
-    const conversations = await prisma.conversation.findMany({
-      where: {
-        ...ownerWhereOptimized(owner),
-      },
-      select: {
-        id: true,
-        created_at: true,
-        title: true,
-      },
-    });
-    return conversations;
+    try {
+      const owner = await resolveOptimizedOwner(request, request.res, this);
+      
+      const conversations = await prisma.conversation.findMany({
+        where: {
+          ...ownerWhereOptimized(owner),
+        },
+        select: {
+          id: true,
+          created_at: true,
+          title: true,
+        },
+        orderBy: {
+          created_at: 'desc',
+        },
+        take: 100, // Limit to prevent performance issues
+      });
+      
+      return conversations;
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+      
+      if (error instanceof APIError) {
+        this.setStatus(error.statusCode);
+        throw error;
+      }
+      
+      const errorResponse = handleControllerError(error, request.path);
+      this.setStatus(errorResponse.statusCode);
+      throw new APIError(errorResponse.statusCode, errorResponse.message);
+    }
   }
 
   // Rename a chat
   @Patch("conversations/:conversationId")
   @Security("optionalAuth")
+  @Response<ErrorResponse>(400, "Bad Request")
+  @Response<ErrorResponse>(404, "Not Found")
+  @Response<ErrorResponse>(500, "Internal Server Error")
   public async renameUserChat(
     @Request() request: express.Request,
     @Body() body: RenameChatRequest,
     @Path("conversationId") conversationId: string,
   ) {
-    const owner = await resolveOptimizedOwner(request, request.res, this);
-    const renamed = await prisma.conversation.update({
-      where: {
-        id: conversationId,
-        ...ownerWhereOptimized(owner),
-      },
-      data: {
-        title: body.newTitle,
-      },
-    });
-    return renamed;
+    try {
+      // Validate input
+      if (!conversationId) {
+        throw new ValidationError("Conversation ID is required");
+      }
+
+      if (!body.newTitle || typeof body.newTitle !== 'string') {
+        throw new ValidationError("New title is required");
+      }
+
+      const newTitle = body.newTitle.trim();
+      if (!newTitle) {
+        throw new ValidationError("Title cannot be empty");
+      }
+
+      if (newTitle.length > 100) {
+        throw new ValidationError("Title is too long (max 100 characters)");
+      }
+
+      const owner = await resolveOptimizedOwner(request, request.res, this);
+      
+      try {
+        const renamed = await prisma.conversation.update({
+          where: {
+            id: conversationId,
+            ...ownerWhereOptimized(owner),
+          },
+          data: {
+            title: newTitle,
+          },
+        });
+        return renamed;
+      } catch (prismaError: any) {
+        if (prismaError.code === 'P2025') {
+          throw new NotFoundError("Conversation not found or access denied");
+        }
+        throw prismaError;
+      }
+    } catch (error) {
+      console.error("Error renaming conversation:", error);
+      
+      if (error instanceof APIError) {
+        this.setStatus(error.statusCode);
+        throw error;
+      }
+      
+      const errorResponse = handleControllerError(error, request.path);
+      this.setStatus(errorResponse.statusCode);
+      throw new APIError(errorResponse.statusCode, errorResponse.message);
+    }
   }
 
   // Delete a chat
   @Delete("conversations/:conversationId")
   @Security("optionalAuth")
   @SuccessResponse(204, "No Content")
+  @Response<ErrorResponse>(400, "Bad Request")
+  @Response<ErrorResponse>(404, "Not Found")
+  @Response<ErrorResponse>(500, "Internal Server Error")
   public async deleteUserChat(
+    @Request() request: express.Request,
     @Path("conversationId") conversationId: string,
   ) {
-    await prisma.chatMessage.deleteMany({
-      where: {
-        conversation_id: conversationId,
-      },
-    });
+    try {
+      // Validate input
+      if (!conversationId) {
+        throw new ValidationError("Conversation ID is required");
+      }
 
-    await prisma.conversation.delete({
-      where: {
-        id: conversationId,
-      },
-    });
-    return;
+      const owner = await resolveOptimizedOwner(request, request.res, this);
+
+      // Verify conversation exists and belongs to user before deletion
+      const conversation = await prisma.conversation.findFirst({
+        where: {
+          id: conversationId,
+          ...ownerWhereOptimized(owner),
+        },
+      });
+
+      if (!conversation) {
+        throw new NotFoundError("Conversation not found or access denied");
+      }
+
+      try {
+        // Delete in transaction for data integrity
+        await prisma.$transaction(async (tx) => {
+          // Delete messages first (foreign key constraint)
+          await tx.chatMessage.deleteMany({
+            where: {
+              conversation_id: conversationId,
+            },
+          });
+
+          // Then delete conversation
+          await tx.conversation.delete({
+            where: {
+              id: conversationId,
+            },
+          });
+        });
+
+        this.setStatus(204);
+        return;
+      } catch (deleteError) {
+        console.error("Error deleting conversation:", deleteError);
+        throw new InternalServerError("Failed to delete conversation. Please try again.");
+      }
+    } catch (error) {
+      if (error instanceof APIError) {
+        this.setStatus(error.statusCode);
+        throw error;
+      }
+      
+      const errorResponse = handleControllerError(error, request.path);
+      this.setStatus(errorResponse.statusCode);
+      throw new APIError(errorResponse.statusCode, errorResponse.message);
+    }
   }
 
   // Get chat
   @Get("conversations/:conversationId/messages")
   @Security("optionalAuth")
+  @Response<ErrorResponse>(400, "Bad Request")
+  @Response<ErrorResponse>(404, "Not Found")
+  @Response<ErrorResponse>(500, "Internal Server Error")
   public async getUserChatFromId(
     @Request() request: express.Request,
     @Path("conversationId") conversationId: string,
   ): Promise<any> {
-    const owner = await resolveOptimizedOwner(request, request.res, this);
-  
-    console.log('owner', owner);
-    const chat = await prisma.conversation.findFirst({
-      where: {
-        id: conversationId,
-        ...ownerWhereOptimized(owner),
-      },
-      select: {
-        id: true,
-        created_at: true,
-        ChatMessage: {
-          select: { messages: true, created_at: true },
-        },
-      },
-      orderBy: {
-        created_at: "asc",
-      },
-    });
-    if (!chat) {
-      this.setStatus(404);
-      return { error: "Conversation not found for this owner" };
-    }
+    try {
+      // Validate input
+      if (!conversationId) {
+        throw new ValidationError("Conversation ID is required");
+      }
 
-    return {
-      id: chat.id,
-      created_at: chat.created_at,
-      messages: chat.ChatMessage?.messages ?? [],
-    };
+      const owner = await resolveOptimizedOwner(request, request.res, this);
+    
+      try {
+        const chat = await prisma.conversation.findFirst({
+          where: {
+            id: conversationId,
+            ...ownerWhereOptimized(owner),
+          },
+          select: {
+            id: true,
+            created_at: true,
+            title: true,
+            ChatMessage: {
+              select: { 
+                messages: true, 
+                created_at: true 
+              },
+            },
+          },
+          orderBy: {
+            created_at: "asc",
+          },
+        });
+
+        if (!chat) {
+          throw new NotFoundError("Conversation not found or access denied");
+        }
+
+        return {
+          id: chat.id,
+          title: chat.title,
+          created_at: chat.created_at,
+          messages: chat.ChatMessage?.messages ?? [],
+        };
+      } catch (dbError) {
+        if (dbError instanceof APIError) {
+          throw dbError;
+        }
+        console.error("Database error:", dbError);
+        throw new InternalServerError("Failed to retrieve conversation. Please try again.");
+      }
+    } catch (error) {
+      if (error instanceof APIError) {
+        this.setStatus(error.statusCode);
+        throw error;
+      }
+      
+      const errorResponse = handleControllerError(error, request.path);
+      this.setStatus(errorResponse.statusCode);
+      throw new APIError(errorResponse.statusCode, errorResponse.message);
+    }
   }
 }
