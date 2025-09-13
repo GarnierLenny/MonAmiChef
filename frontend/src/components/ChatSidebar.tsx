@@ -111,7 +111,7 @@ export function ChatSidebar({
                 <ChatHistorySidebar
                   chats={chats}
                   isOpen={true}
-                  onClose={() => {}}
+                  onClose={onClose}
                   onNewChat={onNewChat}
                   handleDropdownAction={handleDropdownAction}
                   activeDropdown={activeDropdown}
