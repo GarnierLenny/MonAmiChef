@@ -121,7 +121,6 @@ model MealPlanItem {
   // One row per (plan, day, meal)
   @@unique([mealPlanId, day, mealSlot], map: "meal_plan_day_slot_unique")
   @@index([mealPlanId], map: "meal_plan_items_plan_idx")
-  @@check("day_range_check", map: "meal_plan_items_day_check", [day >= 0 && day <= 6])
   @@schema("public")
 }
 
