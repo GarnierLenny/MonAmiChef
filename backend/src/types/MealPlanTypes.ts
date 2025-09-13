@@ -25,7 +25,7 @@ export interface MealPlanItem {
   id: string;
   mealPlanId: string;
   day: number;
-  mealSlot: "breakfast" | "lunch" | "dinner";
+  mealSlot: "breakfast" | "lunch" | "dinner" | "snack";
   recipeId?: string;
   createdAt: Date;
 }

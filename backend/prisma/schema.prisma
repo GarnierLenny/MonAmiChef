@@ -67,8 +67,6 @@ model Guest {
   @@schema("public")
 }
 
-// prisma/schema.prisma (only the relevant part)
-
 // Constrain mealSlot values
 enum MealSlot {
   breakfast
@@ -110,7 +108,7 @@ model MealPlan {
 model MealPlanItem {
   id         String   @id @default(uuid()) @db.Uuid
   mealPlanId String   @map("meal_plan_id") @db.Uuid
-  day        Int // 0..6 (Sun..Sat). We'll add a DB CHECK via SQL migration below.
+  day        Int // 0..6 (Sun..Sat)
   mealSlot   MealSlot @map("meal_slot")
   recipeId   String?  @map("recipe_id") @db.Uuid
   createdAt  DateTime @default(now()) @map("created_at")
@@ -123,6 +121,7 @@ model MealPlanItem {
   // One row per (plan, day, meal)
   @@unique([mealPlanId, day, mealSlot], map: "meal_plan_day_slot_unique")
   @@index([mealPlanId], map: "meal_plan_items_plan_idx")
+  @@check("day_range_check", map: "meal_plan_items_day_check", [day >= 0 && day <= 6])
   @@schema("public")
 }
 
