@@ -11,6 +11,7 @@ import {
   Security,
   SuccessResponse,
   Request,
+  Response,
 } from "tsoa";
 import { GoogleGenAI } from "@google/genai";
 import {
@@ -28,6 +29,15 @@ import { Prisma } from "@prisma/client";
 import * as express from "express";
 import type { AuthUser } from '../authentication';
 import { resolveOptimizedOwner, ownerWhereOptimized } from '../utils/optimizedOwner';
+import { 
+  APIError, 
+  NotFoundError, 
+  ServiceUnavailableError, 
+  ValidationError,
+  InternalServerError,
+  handleControllerError,
+  type ErrorResponse 
+} from '../types/ErrorTypes';
 
 const GEMINI_MODEL = "gemini-2.5-flash";
 
@@ -99,66 +109,108 @@ export class ChatController extends Controller {
 
   @Post("conversations")
   @Security("optionalAuth")
+  @Response<ErrorResponse>(400, "Bad Request")
+  @Response<ErrorResponse>(500, "Internal Server Error")
+  @Response<ErrorResponse>(503, "Service Unavailable")
   public async createConversation(
     @Request() request: any,
     @Body() body: ChatRequest,
   ): Promise<ChatResponse> {
-    const rawInput = (body.userMessage ?? "").trim();
-    const preferencesSummary = buildPreferenceSummary(body.preferences);
-    const hasPrefs = preferencesSummary.length > 0;
+    try {
+      // Validate input
+      const rawInput = (body.userMessage ?? "").trim();
+      if (!rawInput) {
+        throw new ValidationError("Message cannot be empty");
+      }
 
-    // ✅ Resolve identity (creates guest + sets cookie if needed)
-    const owner = await resolveOptimizedOwner(request, request.res, this);
+      if (rawInput.length > 1000) {
+        throw new ValidationError("Message is too long (max 1000 characters)");
+      }
 
-    let fullSystemInstruction = geminiCookAssistantPrompt;
-    if (hasPrefs) {
-      fullSystemInstruction += `\n\nUser Preferences:\n${preferencesSummary}`;
+      const preferencesSummary = buildPreferenceSummary(body.preferences);
+      const hasPrefs = preferencesSummary.length > 0;
+
+      // ✅ Resolve identity (creates guest + sets cookie if needed)
+      const owner = await resolveOptimizedOwner(request, request.res, this);
+
+      let fullSystemInstruction = geminiCookAssistantPrompt;
+      if (hasPrefs) {
+        fullSystemInstruction += `\n\nUser Preferences:\n${preferencesSummary}`;
+      }
+
+      let modelResponse: string;
+      let title: string | undefined;
+
+      try {
+        const chat = ai.chats.create({
+          model: GEMINI_MODEL,
+          history: [],
+          config: { systemInstruction: fullSystemInstruction },
+        });
+
+        const response = await chat.sendMessage({ message: rawInput });
+        modelResponse = response.text ?? "Failed to retrieve model response";
+
+        // Generate title with timeout and fallback
+        try {
+          const titleQuery = await ai.models.generateContent({
+            model: "gemini-2.5-flash",
+            contents: `User input: ${rawInput} ${preferencesSummary}`,
+            config: {
+              systemInstruction:
+                `Return only 2 to 3 plain words summarizing the main dish or request. ` +
+                `Output only the clean title.`,
+            },
+          });
+          title = titleQuery.text?.trim();
+        } catch (titleError) {
+          console.warn("Failed to generate title:", titleError);
+          // Continue without title - will use fallback
+        }
+      } catch (aiError) {
+        console.error("AI service error:", aiError);
+        throw new ServiceUnavailableError("AI cooking assistant is temporarily unavailable. Please try again in a few moments.");
+      }
+
+      try {
+        const conversation = await prisma.conversation.create({
+          data: {
+            title: title ?? modelResponse.substring(0, 30) + "...",
+            ...ownerWhereOptimized(owner),
+          },
+        });
+
+        const userModelConversation: UserModelMessage[] = [
+          { role: "user",  parts: [{ text: rawInput }] },
+          { role: "model", parts: [{ text: modelResponse }] },
+        ];
+
+        await prisma.chatMessage.create({
+          data: {
+            conversation_id: conversation.id,
+            history: userModelConversation as unknown as Prisma.InputJsonValue,
+            messages: [
+              { role: "user", text: rawInput },
+              { role: "model", text: modelResponse },
+            ],
+          },
+        });
+
+        return { reply: modelResponse, conversationId: conversation.id };
+      } catch (dbError) {
+        console.error("Database error:", dbError);
+        throw new InternalServerError("Failed to save conversation. Please try again.");
+      }
+    } catch (error) {
+      if (error instanceof APIError) {
+        this.setStatus(error.statusCode);
+        throw error;
+      }
+      
+      const errorResponse = handleControllerError(error, request.path);
+      this.setStatus(errorResponse.statusCode);
+      throw new APIError(errorResponse.statusCode, errorResponse.message);
     }
-
-    const chat = ai.chats.create({
-      model: GEMINI_MODEL,
-      history: [],
-      config: { systemInstruction: fullSystemInstruction },
-    });
-
-    const response = await chat.sendMessage({ message: rawInput });
-    const modelResponse = response.text ?? "Failed to retrieve model response";
-
-    const titleQuery = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: `User input: ${rawInput} ${preferencesSummary}`,
-      config: {
-        systemInstruction:
-          `Return only 2 to 3 plain words summarizing the main dish or request. ` +
-          `Output only the clean title.`,
-      },
-    });
-    const title = titleQuery.text?.trim();
-
-    const conversation = await prisma.conversation.create({
-      data: {
-        title: title ?? modelResponse.substring(0, 30) + "...",
-        ...ownerWhereOptimized(owner), // ✅ exactly one of { owner_profile_id } or { owner_guest_id }
-      },
-    });
-
-    const userModelConversation: UserModelMessage[] = [
-      { role: "user",  parts: [{ text: rawInput }] },
-      { role: "model", parts: [{ text: modelResponse }] },
-    ];
-
-    await prisma.chatMessage.create({
-      data: {
-        conversation_id: conversation.id,
-        history: userModelConversation as unknown as Prisma.InputJsonValue,
-        messages: [
-          { role: "user", text: rawInput },
-          { role: "model", text: modelResponse },
-        ],
-      },
-    });
-
-    return { reply: modelResponse, conversationId: conversation.id };
   }
 
   @Post("conversations/:conversationId")
