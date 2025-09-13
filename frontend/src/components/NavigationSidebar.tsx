@@ -2,15 +2,15 @@ import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
-import { 
-  Heart, 
-  History, 
-  User, 
-  LogOut, 
-  LogIn, 
+import {
+  Heart,
+  History,
+  User,
+  LogOut,
+  LogIn,
   UserPlus,
   Home,
-  ChefHat
+  ChefHat,
 } from "lucide-react";
 import { User as UserType } from "../types/types";
 
@@ -22,12 +22,12 @@ interface NavigationSidebarProps {
   onSignOut: () => Promise<void>;
 }
 
-export function NavigationSidebar({ 
-  isOpen, 
-  onClose, 
-  user, 
+export function NavigationSidebar({
+  isOpen,
+  onClose,
+  user,
   onAuthClick,
-  onSignOut 
+  onSignOut,
 }: NavigationSidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
@@ -44,7 +44,7 @@ export function NavigationSidebar({
       await onSignOut();
       onClose();
     } catch (error) {
-      console.error('Sign out failed:', error);
+      console.error("Sign out failed:", error);
     } finally {
       setIsSigningOut(false);
     }
@@ -59,10 +59,7 @@ export function NavigationSidebar({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent 
-        side="left" 
-        className="w-80 p-0 bg-background border-r"
-      >
+      <SheetContent side="left" className="w-80 p-0 bg-background border-r">
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-6 border-b">
@@ -78,7 +75,9 @@ export function NavigationSidebar({
             </div>
             {user && (
               <div className="mt-4 p-3 bg-accent/20 rounded-lg">
-                <p className="text-sm font-medium text-foreground">{user.name}</p>
+                <p className="text-sm font-medium text-foreground">
+                  {user.name}
+                </p>
                 <p className="text-xs text-muted-foreground">{user.email}</p>
               </div>
             )}
@@ -99,7 +98,9 @@ export function NavigationSidebar({
               {user && (
                 <>
                   <Button
-                    variant={isActivePath("/recipes/saved") ? "secondary" : "ghost"}
+                    variant={
+                      isActivePath("/recipes/saved") ? "secondary" : "ghost"
+                    }
                     className="w-full justify-start gap-3"
                     onClick={() => handleNavigation("/recipes/saved")}
                   >
@@ -108,7 +109,9 @@ export function NavigationSidebar({
                   </Button>
 
                   <Button
-                    variant={isActivePath("/recipes/history") ? "secondary" : "ghost"}
+                    variant={
+                      isActivePath("/recipes/history") ? "secondary" : "ghost"
+                    }
                     className="w-full justify-start gap-3"
                     onClick={() => handleNavigation("/recipes/history")}
                   >
@@ -126,23 +129,6 @@ export function NavigationSidebar({
                   </Button>
                 </>
               )}
-
-              <div className="border-t my-4" />
-
-              {/* Other Navigation Items */}
-              <div className="space-y-1">
-                <p className="px-3 py-2 text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                  Explore
-                </p>
-                <Button
-                  variant={isActivePath("/macros") ? "secondary" : "ghost"}
-                  className="w-full justify-start gap-3"
-                  onClick={() => handleNavigation("/macros")}
-                >
-                  <ChefHat className="h-4 w-4" />
-                  Nutrition
-                </Button>
-              </div>
             </nav>
           </div>
 
@@ -186,3 +172,4 @@ export function NavigationSidebar({
 }
 
 export default NavigationSidebar;
+
