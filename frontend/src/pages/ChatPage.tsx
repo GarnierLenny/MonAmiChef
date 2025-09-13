@@ -5,12 +5,14 @@ import PreferencesSidebar from "../components/PreferenceSidebar";
 import ChatInterface from "../components/ChatInterface";
 import ChatHistorySidebar from "../components/ChatHistorySidebar";
 import MobileTopBar from "../components/MobileTopBar";
-import MobileSidebar from "../components/MobileSidebar";
+import NavigationSidebar from "../components/NavigationSidebar";
+import ChatSidebar from "../components/ChatSidebar";
 import { useIsMobile } from "../hooks/use-mobile";
 import Cookies from "universal-cookie";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import { apiFetch } from "../lib/apiClient";
+import { ArrowLeftFromLine } from "lucide-react";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -35,9 +37,10 @@ const buildAiGreeting = (): ChatMessage => ({
 interface ChatPageProps {
   user?: { id: string; email: string; name: string } | null;
   onAuthClick?: () => void;
+  onSignOut?: () => Promise<void>;
 }
 
-function ChatPage({ user, onAuthClick }: ChatPageProps = {}) {
+function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
   const [chats, setChats] = useState<ChatItem[]>([]);
   const [messages, setMessages] = useState<ChatMessage[]>([buildAiGreeting()]);
   const [inputValue, setInputValue] = useState("");
@@ -69,6 +72,7 @@ function ChatPage({ user, onAuthClick }: ChatPageProps = {}) {
   const [renameValue, setRenameValue] = useState<string>("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isChatSidebarOpen, setIsChatSidebarOpen] = useState(false);
 
   const isMobile = useIsMobile();
   const chatId = searchParams.get("c");
@@ -99,7 +103,7 @@ function ChatPage({ user, onAuthClick }: ChatPageProps = {}) {
     action: "rename" | "delete" | "share",
     dropdownChatId: string,
   ) => {
-    console.log('id', dropdownChatId, action);
+    console.log("id", dropdownChatId, action);
     setActiveDropdown(null);
     if (action === "rename") {
       setRenamingId(dropdownChatId);
@@ -118,7 +122,10 @@ function ChatPage({ user, onAuthClick }: ChatPageProps = {}) {
     if (confirmDeleteId === chatId) {
       handleNewChat();
     }
-    await apiFetch(`/chat/conversations/${confirmDeleteId}`, { auth: 'optional', method: "DELETE" });
+    await apiFetch(`/chat/conversations/${confirmDeleteId}`, {
+      auth: "optional",
+      method: "DELETE",
+    });
     setConfirmDeleteId(null);
   };
 
@@ -132,19 +139,23 @@ function ChatPage({ user, onAuthClick }: ChatPageProps = {}) {
     if (!newTitle) return;
 
     await apiFetch(`/chat/conversations/${renamingId}`, {
-      auth: 'optional',
+      auth: "optional",
       method: "PATCH",
       body: JSON.stringify({ newTitle }),
     });
 
-    setChats(prev => prev.map(c => c.id === renamingId ? { ...c, title: newTitle } : c));
+    setChats((prev) =>
+      prev.map((c) => (c.id === renamingId ? { ...c, title: newTitle } : c)),
+    );
     setRenamingId(null);
   }, [renamingId, renameValue]);
 
   // Load history chats
   useEffect(() => {
     (async () => {
-      const result = await apiFetch("/chat/conversations", { auth: 'optional' });
+      const result = await apiFetch("/chat/conversations", {
+        auth: "optional",
+      });
       const tmpChats: ChatItem[] = [];
       result.forEach((chat: any) => {
         tmpChats.push({
@@ -218,7 +229,7 @@ function ChatPage({ user, onAuthClick }: ChatPageProps = {}) {
         const result = await apiFetch(
           `/chat/conversations/${chatId}/messages`,
           {
-            auth: 'optional',
+            auth: "optional",
             method: "GET",
             headers: { "Content-Type": "application/json" },
             signal: ac.signal,
@@ -289,7 +300,7 @@ function ChatPage({ user, onAuthClick }: ChatPageProps = {}) {
         reply: string;
         conversationId: string;
       }>(path, {
-        auth: 'optional',
+        auth: "optional",
         method: "POST",
         body: JSON.stringify(payload),
       });
@@ -351,11 +362,23 @@ function ChatPage({ user, onAuthClick }: ChatPageProps = {}) {
     <>
       {isMobile ? (
         <div className="flex flex-col h-screen min-h-0">
-          <MobileTopBar onMenuClick={() => setIsMobileSidebarOpen(true)} />
+          <MobileTopBar
+            onMenuClick={() => setIsMobileSidebarOpen(true)}
+            rightIcon={<ArrowLeftFromLine className="h-5 w-5" />}
+            onRightIconClick={() => setIsChatSidebarOpen(true)}
+          />
 
-          <MobileSidebar
+          <NavigationSidebar
             isOpen={isMobileSidebarOpen}
             onClose={() => setIsMobileSidebarOpen(false)}
+            user={user}
+            onAuthClick={onAuthClick || (() => {})}
+            onSignOut={onSignOut || (async () => {})}
+          />
+
+          <ChatSidebar
+            isOpen={isChatSidebarOpen}
+            onClose={() => setIsChatSidebarOpen(false)}
             chats={chats}
             onNewChat={handleNewChat}
             handleDropdownAction={handleDropdownAction}

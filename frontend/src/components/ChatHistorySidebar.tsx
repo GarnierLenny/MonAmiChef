@@ -11,6 +11,7 @@ import {
 import { Link, useLocation, useSearchParams } from "react-router-dom";
 import type { ChatItem } from "../types/types";
 import { formatTimestamp } from "../utils/format_timestamp.utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ChatHistorySidebarProps {
   chats: ChatItem[];
@@ -55,6 +56,7 @@ export default function ChatHistorySidebar({
   const location = useLocation();
   const [searchParams] = useSearchParams();
   const currentId = searchParams.get("c");
+  const isMobile = useIsMobile();
 
   const toggleDropdown = (chatId: string) => {
     setActiveDropdown(activeDropdown === chatId ? null : chatId);
@@ -86,19 +88,28 @@ export default function ChatHistorySidebar({
               <p className="text-sm text-pink-700">Your recent conversations</p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-pink-100"
-            type="button"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {!isMobile && (
+            <button
+              onClick={onClose}
+              className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-pink-100"
+              type="button"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
 
         {/* New Chat Button */}
         <div className="p-4 border-b border-pink-200">
           <button
-            onClick={onNewChat}
+            onClick={() => {
+              onNewChat();
+              console.log("test");
+              if (isMobile) {
+                onClose();
+                console.log("mobile");
+              }
+            }}
             className="w-full flex items-center justify-center space-x-3 px-4 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl hover:from-pink-600 hover:to-rose-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 group"
             type="button"
           >
@@ -132,7 +143,15 @@ export default function ChatHistorySidebar({
                 const isActive = currentId === chat.id;
 
                 return (
-                  <div key={chat.id} className="group relative mb-1 rounded-lg">
+                  <div
+                    key={chat.id}
+                    onClick={() => {
+                      if (isMobile) {
+                        onClose();
+                      }
+                    }}
+                    className="group relative mb-1 rounded-lg"
+                  >
                     {/* Use Link to update ?c= without full reload */}
                     <Link
                       to={{

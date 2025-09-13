@@ -10,6 +10,8 @@ import {
 import type { Session } from "@supabase/supabase-js";
 
 import Navbar from "./components/Navbar";
+import MobileTopBar from "./components/MobileTopBar";
+import NavigationSidebar from "./components/NavigationSidebar";
 import NutritionView from "./components/NutritionView";
 import CookingToolsView from "./components/CookingToolsView";
 import MealPlanningView from "./components/MealPlanningView";
@@ -43,12 +45,14 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
   const isRecipePage = location.pathname.startsWith("/recipe/");
+  const isChatPage = location.pathname === "/";
 
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   // 🔁 used to force-remount ChatPage (reset chats)
   const [chatResetKey, setChatResetKey] = useState(0);
@@ -157,6 +161,10 @@ function App() {
   // Anonymous-first: we do NOT block the app if not logged in.
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
+      {!isRecipePage && !isChatPage && (
+        <MobileTopBar onMenuClick={() => setIsMobileSidebarOpen(true)} />
+      )}
+      
       {!isRecipePage && (
         <div className="hidden md:block sticky top-0 z-50">
           <Navbar
@@ -183,6 +191,7 @@ function App() {
                 key={chatResetKey}
                 user={user}
                 onAuthClick={() => setIsAuthModalOpen(true)}
+                onSignOut={handleSignOut}
               />
             }
           />
@@ -231,6 +240,17 @@ function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>
+
+      <NavigationSidebar
+        isOpen={isMobileSidebarOpen}
+        onClose={() => setIsMobileSidebarOpen(false)}
+        user={user}
+        onAuthClick={() => {
+          setIsMobileSidebarOpen(false);
+          setIsAuthModalOpen(true);
+        }}
+        onSignOut={handleSignOut}
+      />
 
       <AuthModal
         isOpen={isAuthModalOpen}
