@@ -67,6 +67,63 @@ model Guest {
   @@schema("public")
 }
 
+// Constrain mealSlot values
+enum MealSlot {
+  breakfast
+  lunch
+  dinner
+  snack
+
+  @@schema("public")
+}
+
+// Optional: constrain how the plan was created
+enum GenerationMethod {
+  manual
+  ai_generated
+  ai_assisted
+
+  @@schema("public")
+}
+
+model MealPlan {
+  id               String            @id @default(uuid()) @db.Uuid
+  userId           String            @map("user_id") @db.Uuid // logical ref to auth.users; no DB FK
+  weekStartDate    DateTime          @map("week_start_date") @db.Date // store "date" only
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+  title            String?
+  generationPrompt String?           @map("generation_prompt") @db.Text
+  generationMethod GenerationMethod? @map("generation_method")
+  aiPreferences    Json?             @map("ai_preferences")
+
+  // Relations
+  items MealPlanItem[]
+
+  // Useful for queries like "get this user's plan for week X"
+  @@index([userId, weekStartDate], map: "meal_plans_user_week_idx")
+  @@schema("public")
+}
+
+model MealPlanItem {
+  id         String   @id @default(uuid()) @db.Uuid
+  mealPlanId String   @map("meal_plan_id") @db.Uuid
+  day        Int // 0..6 (Sun..Sat)
+  mealSlot   MealSlot @map("meal_slot")
+  recipeId   String?  @map("recipe_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  // Relations
+  mealPlan MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  // If you have a Recipe model in public schema, you can add:
+  // recipe     Recipe?  @relation(fields: [recipeId], references: [id])
+
+  // One row per (plan, day, meal)
+  @@unique([mealPlanId, day, mealSlot], map: "meal_plan_day_slot_unique")
+  @@index([mealPlanId], map: "meal_plan_items_plan_idx")
+  @@schema("public")
+}
+
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model GuestConversion {
   id                String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
