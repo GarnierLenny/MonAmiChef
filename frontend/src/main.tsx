@@ -10,6 +10,35 @@ Sentry.init({
   // Setting this option to true will send default PII data to Sentry.
   // For example, automatic IP address collection on events
   sendDefaultPii: true,
+  beforeSend(event) {
+    // Filter out browser extension errors
+    const errorMessage = event.exception?.values?.[0]?.value || '';
+    const extensionPatterns = [
+      'The message port closed before a response was received',
+      'MessageNotSentError',
+      'RegisterClientLocalizationsError',
+      'cookieManager.injectClientScript',
+      'chrome-extension://',
+      'moz-extension://',
+      'safari-extension://',
+      'Receiving end does not exist',
+      'Extension context invalidated',
+      'Could not establish connection'
+    ];
+
+    // Check if error is from browser extension
+    if (extensionPatterns.some(pattern => errorMessage.includes(pattern))) {
+      return null; // Don't send to Sentry
+    }
+
+    // Filter errors from extension-injected scripts
+    const fileName = event.exception?.values?.[0]?.stacktrace?.frames?.[0]?.filename || '';
+    if (fileName.includes('extension://') || fileName.includes('chrome://') || fileName.includes('moz://')) {
+      return null;
+    }
+
+    return event;
+  },
 });
 
 const options = {
