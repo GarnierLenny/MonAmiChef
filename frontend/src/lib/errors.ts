@@ -96,8 +96,8 @@ export class ValidationError extends Error implements AppError {
 
 // Error categorization utility
 export function categorizeError(error: unknown): AppError {
-  if (error instanceof AppError) {
-    return error;
+  if (error && typeof error === 'object' && 'type' in error && 'userMessage' in error) {
+    return error as AppError;
   }
 
   if (error instanceof TypeError && error.message.includes("fetch")) {
