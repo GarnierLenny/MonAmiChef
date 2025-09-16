@@ -12,3 +12,15 @@ Allow: /
 
 User-agent: *
 Allow: /
+
+# Sitemap
+Sitemap: https://monamichef.com/sitemap.xml
+
+# Common crawl optimization
+Crawl-delay: 1
+
+# Block common non-essential paths
+Disallow: /api/
+Disallow: /*.json$
+Disallow: /build/
+Disallow: /dist/
