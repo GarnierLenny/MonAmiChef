@@ -1,0 +1,25 @@
+{
+  "name": "Mon Ami Chef - AI-Powered Recipe Generator",
+  "short_name": "Mon Ami Chef",
+  "description": "Generate personalized recipes with AI based on your ingredients, dietary preferences, and cooking style.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "16x16 32x32",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "food"],
+  "lang": "en-US"
+}
