@@ -385,7 +385,7 @@ export default function MealPlanPage() {
       </div>
 
       {/* Mobile Layout - Day-by-day meal cards */}
-      <div className="md:hidden h-screen flex flex-col bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 overflow-hidden">
+      <div className="md:hidden h-screen w-screen flex flex-col bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 overflow-hidden">
         {/* Mobile Day Navigation - Fixed at top */}
         <div className="flex-shrink-0 bg-white px-4 py-3 border-b">
           <div className="flex items-center justify-center gap-4">

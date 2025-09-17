@@ -47,6 +47,7 @@ function App() {
   const location = useLocation();
   const isRecipePage = location.pathname.startsWith("/recipe/");
   const isChatPage = location.pathname === "/";
+  const isMealPlanPage = location.pathname === "/meal-plan-chat";
 
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -163,7 +164,7 @@ function App() {
   return (
     <AppErrorBoundary>
       <div className="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
-      {!isRecipePage && !isChatPage && (
+      {!isRecipePage && !isChatPage && !isMealPlanPage && (
         <MobileTopBar onMenuClick={() => setIsMobileSidebarOpen(true)} />
       )}
       
@@ -182,7 +183,7 @@ function App() {
       )}
 
       <div
-        className={`flex ${isRecipePage ? "h-screen" : "flex-1"} overflow-y-auto`}
+        className={`flex ${isRecipePage || isMealPlanPage ? "h-screen" : "flex-1"} ${isMealPlanPage ? "overflow-hidden" : "overflow-y-auto"}`}
       >
         <Routes>
           {/* Public routes */}
