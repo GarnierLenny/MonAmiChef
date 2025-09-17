@@ -23,6 +23,7 @@ import SuccessPage from "./components/SuccessPage";
 import RecipePage from "./components/RecipePage";
 import UserProfile from "./components/UserProfile";
 import ChatPage from "./pages/ChatPage";
+import MealPlanPage from "./pages/MealPlanPage";
 import AuthCallback from "./components/AuthCallback";
 import SavedRecipes from "./pages/SavedRecipes";
 import RecipeHistoryPage from "./pages/RecipeHistory";
@@ -223,6 +224,14 @@ function App() {
           <Route
             path="/plan-week"
             element={<MealPlanningView currentSubView="plan-week" />}
+          />
+          <Route
+            path="/meal-plan-chat"
+            element={
+              <ComponentErrorBoundary componentName="MealPlanPage">
+                <MealPlanPage />
+              </ComponentErrorBoundary>
+            }
           />
           <Route path="/explore" element={<ExploreView />} />
           <Route path="/coming-soon" element={<ComingSoonView />} />
