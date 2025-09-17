@@ -392,9 +392,9 @@ export default function MealPlanPage() {
       </div>
 
       {/* Mobile Layout - Day-by-day meal cards */}
-      <div className="md:hidden h-screen w-full flex flex-col bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 overflow-hidden fixed inset-0 pt-16">
+      <div className="md:hidden h-screen w-full flex flex-col bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 overflow-hidden fixed inset-0 pt-20">
         {/* Mobile Meal Cards - Full screen width, no scrolling */}
-        <div className="flex-1 px-4 pt-1 pb-4 flex flex-col gap-3 overflow-hidden min-h-0">
+        <div className="flex-1 px-4 pt-4 pb-4 flex flex-col gap-3 overflow-hidden min-h-0">
           {MEAL_SLOTS.map((meal) => {
             // Use Monday as default day since we removed day navigation
             const currentDay = "Monday";
