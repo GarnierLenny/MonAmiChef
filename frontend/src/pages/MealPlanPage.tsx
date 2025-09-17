@@ -384,106 +384,124 @@ export default function MealPlanPage() {
         </div>
       </div>
 
-      {/* Mobile Layout - Just the meal planning grid */}
+      {/* Mobile Layout - Day-by-day meal cards */}
       <div className="md:hidden h-screen flex flex-col bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
         {/* Mobile Header */}
-        <div className="flex-shrink-0 bg-white/90 backdrop-blur-sm px-4 py-4 border-b shadow-sm">
-          <div className="flex items-center justify-between">
+        <div className="flex-shrink-0 bg-white px-4 py-3 border-b">
+          <div className="flex items-center justify-center">
+            <div className="flex items-center gap-2">
+              <span className="text-2xl">👨‍🍳</span>
+              <span className="text-lg font-semibold text-gray-800">Mon Ami Chef</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Day Navigation */}
+        <div className="flex-shrink-0 bg-white px-4 py-3 border-b">
+          <div className="flex items-center justify-center gap-4">
             <Button
               variant="ghost"
               size="sm"
-              onClick={goToPreviousWeek}
-              className="text-orange-600"
+              onClick={() => setCurrentDayIndex(Math.max(0, currentDayIndex - 1))}
+              disabled={currentDayIndex === 0}
+              className="p-2"
             >
-              ← Previous Week
+              <span className="text-lg">‹</span>
             </Button>
             <div className="text-center">
-              <h2 className="text-lg font-semibold text-gray-800">
-                Week of {format(currentWeek, "MMM d, yyyy")}
-              </h2>
+              <div className="text-lg font-semibold text-gray-800">
+                {format(addDays(weekStart, currentDayIndex), "EEEE")}
+              </div>
+              <div className="text-sm text-gray-500">
+                {format(addDays(weekStart, currentDayIndex), "MMM d")}
+              </div>
             </div>
             <Button
               variant="ghost"
               size="sm"
-              onClick={goToNextWeek}
-              className="text-orange-600"
+              onClick={() => setCurrentDayIndex(Math.min(6, currentDayIndex + 1))}
+              disabled={currentDayIndex === 6}
+              className="p-2"
             >
-              Next Week →
+              <span className="text-lg">›</span>
             </Button>
           </div>
         </div>
 
-        {/* Mobile Meal Planning Grid */}
-        <div className="flex-1 overflow-auto p-4">
-          <div className="grid grid-cols-4 gap-2 h-full">
-            {/* Empty top-left corner */}
-            <div></div>
+        {/* Mobile Meal Cards */}
+        <div className="flex-1 overflow-y-auto px-4 py-6">
+          <div className="space-y-4">
+            {MEAL_SLOTS.map((meal) => {
+              const currentDay = DAYS_OF_WEEK[currentDayIndex];
+              const mealKey = `${currentDay}-${meal}`;
+              const assignedMeal = mealAssignments[mealKey];
 
-            {/* Day headers */}
-            {DAYS_OF_WEEK.map((day, index) => {
-              const dayDate = addDays(currentWeek, index);
               return (
-                <div key={day} className="text-center p-2">
-                  <div className="text-sm font-medium text-gray-700">
-                    {format(dayDate, "EEE")}
-                  </div>
-                  <div className="text-xs text-gray-500">
-                    {format(dayDate, "d")}
-                  </div>
-                </div>
-              );
-            })}
+                <Card key={meal} className="border-2 border-gray-200 rounded-xl">
+                  <CardContent className="p-4">
+                    <div className="text-center">
+                      <div className="mb-4">
+                        <span className="text-lg font-semibold text-gray-700 capitalize">
+                          {meal}
+                        </span>
+                      </div>
 
-            {/* Grid rows */}
-            {MEAL_SLOTS.map((meal) => (
-              <>
-                {/* Meal label */}
-                <div key={`${meal}-label`} className="flex items-center justify-center p-1">
-                  <span className="text-xs font-medium text-gray-700 capitalize transform -rotate-90 whitespace-nowrap">
-                    {meal}
-                  </span>
-                </div>
-
-                {/* Meal slots for each day */}
-                {DAYS_OF_WEEK.map((day) => (
-                  <Card
-                    key={`${day}-${meal}`}
-                    className="h-24 cursor-pointer hover:shadow-md transition-shadow border border-gray-200"
-                    onClick={() => addRandomMeal(day, meal)}
-                  >
-                    <CardContent className="p-2 h-full flex flex-col">
-                      {mealPlan[day]?.[meal] ? (
-                        <div className="flex flex-col items-center justify-center h-full text-center relative">
+                      {assignedMeal ? (
+                        <div className="space-y-2">
+                          <div className="text-3xl mb-2">{assignedMeal.image}</div>
+                          <div className="text-center">
+                            <p className="text-base font-medium text-gray-900">
+                              {assignedMeal.title}
+                            </p>
+                            <p className="text-sm text-gray-500 mt-1">
+                              {assignedMeal.description}
+                            </p>
+                          </div>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeMeal(day, meal);
-                            }}
-                            className="absolute top-0 right-0 h-4 w-4 p-0 text-gray-400 hover:text-red-500"
+                            onClick={() => removeMeal(mealKey)}
+                            className="mt-2 text-red-500 hover:text-red-600 hover:bg-red-50"
                           >
-                            <X className="h-3 w-3" />
+                            <X className="h-4 w-4 mr-1" />
+                            Remove
                           </Button>
-                          <div className="text-lg mb-1">
-                            {mealPlan[day][meal]?.image}
-                          </div>
-                          <div className="text-xs font-medium text-gray-900 line-clamp-2">
-                            {mealPlan[day][meal]?.title}
-                          </div>
                         </div>
                       ) : (
-                        <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                          <Plus className="h-4 w-4 mb-1" />
-                          <span className="text-xs">Add</span>
+                        <div className="py-6">
+                          <div className="w-16 h-16 mx-auto mb-3 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center">
+                            <Plus className="h-6 w-6 text-gray-400" />
+                          </div>
+                          <p className="text-sm text-gray-500">Add {meal}</p>
                         </div>
                       )}
-                    </CardContent>
-                  </Card>
-                ))}
-              </>
-            ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
+        </div>
+
+        {/* Mobile Chat Input - Fixed at Bottom */}
+        <div className="flex-shrink-0 bg-white border-t px-4 py-3">
+          <form onSubmit={handleSubmit} className="flex gap-2">
+            <Input
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Ask about meal planning..."
+              disabled={isGenerating}
+              className="flex-1 rounded-full border-gray-300"
+            />
+            <Button
+              type="submit"
+              disabled={isGenerating || !inputValue.trim()}
+              size="sm"
+              className="px-4 rounded-full bg-orange-500 hover:bg-orange-600"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          </form>
         </div>
       </div>
     </div>
