@@ -385,7 +385,7 @@ export default function MealPlanPage() {
       </div>
 
       {/* Mobile Layout - Day-by-day meal cards */}
-      <div className="md:hidden h-screen flex flex-col bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
+      <div className="md:hidden h-screen flex flex-col bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 overflow-hidden">
         {/* Mobile Day Navigation - Fixed at top */}
         <div className="flex-shrink-0 bg-white px-4 py-3 border-b">
           <div className="flex items-center justify-center gap-4">
@@ -418,16 +418,22 @@ export default function MealPlanPage() {
           </div>
         </div>
 
-        {/* Mobile Meal Cards - Only these scroll */}
-        <div className="flex-1 min-h-0 px-4 py-6">
-          <div className="h-full overflow-y-auto space-y-4">
+        {/* Mobile Meal Cards - Only these scroll, full width, hidden scrollbar */}
+        <div className="flex-1 min-h-0 overflow-hidden">
+          <div
+            className="h-full overflow-y-auto px-4 py-4 space-y-4 [&::-webkit-scrollbar]:hidden"
+            style={{
+              scrollbarWidth: 'none',
+              msOverflowStyle: 'none'
+            }}
+          >
             {MEAL_SLOTS.map((meal) => {
               const currentDay = DAYS_OF_WEEK[currentDayIndex];
               const mealKey = `${currentDay}-${meal}`;
               const assignedMeal = mealAssignments[mealKey];
 
               return (
-                <Card key={meal} className="border-2 border-gray-200 rounded-xl">
+                <Card key={meal} className="w-full border-2 border-gray-200 rounded-xl">
                   <CardContent className="p-4">
                     <div className="text-center">
                       <div className="mb-4">
