@@ -243,23 +243,30 @@ export default function MealPlanPage() {
 
         {/* Chat Input */}
         <div className="p-4 border-t border-gray-200">
-          <form onSubmit={handleSubmit} className="flex space-x-2">
-            <Input
+          <form
+            onSubmit={handleSubmit}
+            className="flex items-center gap-4 mb-2 p-2 pl-5 bg-white flex-1 shadow-lg shadow-orange-500/30 border border-gray-300 focus-within:ring-2 focus-within:ring-orange-500 rounded-full transition-colors"
+          >
+            <input
               ref={inputRef}
+              type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Ask about meal planning, dietary preferences..."
               disabled={isGenerating}
-              className="flex-1"
+              className="min-w-0 grow basis-0 bg-transparent outline-none focus:ring-0"
             />
-            <Button
+            <button
               type="submit"
               disabled={isGenerating || !inputValue.trim()}
-              size="sm"
-              className="bg-orange-500 hover:bg-orange-600"
+              className={`shrink-0 rounded-full px-4 py-4 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 ${
+                !inputValue.trim() || isGenerating
+                  ? "bg-gray-400"
+                  : "bg-orange-500 hover:bg-orange-600"
+              }`}
             >
               <Send className="w-4 h-4" />
-            </Button>
+            </button>
           </form>
         </div>
       </div>
@@ -441,23 +448,30 @@ export default function MealPlanPage() {
         </div>
 
         {/* Mobile Chat Input - Always visible at bottom */}
-        <div className="flex-shrink-0 bg-white border-t px-4 py-3">
-          <form onSubmit={handleSubmit} className="flex gap-2">
-            <Input
+        <div className="flex-shrink-0 px-4 py-3">
+          <form
+            onSubmit={handleSubmit}
+            className="flex items-center gap-4 mb-2 p-2 pl-5 bg-white flex-1 shadow-lg shadow-orange-500/30 border border-gray-300 focus-within:ring-2 focus-within:ring-orange-500 rounded-full transition-colors"
+          >
+            <input
+              type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Ask about meal planning..."
               disabled={isGenerating}
-              className="flex-1 rounded-full border-gray-300"
+              className="min-w-0 grow basis-0 bg-transparent outline-none focus:ring-0"
             />
-            <Button
+            <button
               type="submit"
               disabled={isGenerating || !inputValue.trim()}
-              size="sm"
-              className="px-4 rounded-full bg-orange-500 hover:bg-orange-600"
+              className={`shrink-0 rounded-full px-4 py-4 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 ${
+                !inputValue.trim() || isGenerating
+                  ? "bg-gray-400"
+                  : "bg-orange-500 hover:bg-orange-600"
+              }`}
             >
-              <Send className="h-4 w-4" />
-            </Button>
+              <Send className="w-4 h-4" />
+            </button>
           </form>
         </div>
       </div>
