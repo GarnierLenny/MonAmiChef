@@ -69,8 +69,20 @@ export default function MealPlanPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Meal plan state
-  const [selectedWeek, setSelectedWeek] = useState(startOfWeek(new Date()));
+  const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date()));
   const [mealPlan, setMealPlan] = useState<MealPlan>({});
+  const [currentDayIndex, setCurrentDayIndex] = useState(0);
+
+  // Calculate week start for consistency
+  const weekStart = startOfWeek(currentWeek);
+
+  // Convert meal plan to assignments format for mobile
+  const mealAssignments: Record<string, any> = {};
+  Object.entries(mealPlan).forEach(([day, meals]) => {
+    Object.entries(meals).forEach(([meal, mealData]) => {
+      mealAssignments[`${day}-${meal}`] = mealData;
+    });
+  });
 
   // Auto-scroll to bottom of chat
   const scrollToBottom = () => {
@@ -155,19 +167,31 @@ export default function MealPlanPage() {
   };
 
   // Remove meal from slot
-  const removeMeal = (day: string, meal: MealSlot) => {
+  const removeMeal = (dayOrKey: string, meal?: MealSlot) => {
     setMealPlan(prev => {
       const newPlan = { ...prev };
-      if (newPlan[day]) {
-        delete newPlan[day][meal];
+
+      if (meal) {
+        // Desktop format: removeMeal(day, meal)
+        const day = dayOrKey;
+        if (newPlan[day]) {
+          delete newPlan[day][meal];
+        }
+      } else {
+        // Mobile format: removeMeal(mealKey)
+        const [day, mealType] = dayOrKey.split('-');
+        if (newPlan[day]) {
+          delete newPlan[day][mealType as MealSlot];
+        }
       }
+
       return newPlan;
     });
   };
 
   // Week navigation
-  const goToPreviousWeek = () => setSelectedWeek(prev => subWeeks(prev, 1));
-  const goToNextWeek = () => setSelectedWeek(prev => addWeeks(prev, 1));
+  const goToPreviousWeek = () => setCurrentWeek(prev => subWeeks(prev, 1));
+  const goToNextWeek = () => setCurrentWeek(prev => addWeeks(prev, 1));
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
@@ -252,7 +276,7 @@ export default function MealPlanPage() {
               <div>
                 <h1 className="text-3xl font-bold text-gray-900">Weekly Meal Plan</h1>
                 <p className="text-gray-600">
-                  Week of {format(selectedWeek, "MMMM d, yyyy")}
+                  Week of {format(currentWeek, "MMMM d, yyyy")}
                 </p>
               </div>
             </div>
@@ -292,7 +316,7 @@ export default function MealPlanPage() {
               <span className="text-sm font-medium text-gray-500">Meals</span>
             </div>
             {DAYS_OF_WEEK.map((day, index) => {
-              const dayDate = addDays(selectedWeek, index);
+              const dayDate = addDays(currentWeek, index);
               return (
                 <div key={day} className="text-center">
                   <div className="text-sm text-gray-500">{format(dayDate, "EEE")}</div>
@@ -377,11 +401,11 @@ export default function MealPlanPage() {
                       : "bg-gray-100 text-gray-800"
                   }`}
                 >
-                  <p className="text-sm">{message.content}</p>
+                  <p className="text-sm">{message.text}</p>
                 </div>
               </div>
             ))}
-            {isLoading && (
+            {isGenerating && (
               <div className="flex justify-start">
                 <div className="bg-gray-100 rounded-lg px-3 py-2">
                   <Loader2 className="h-4 w-4 animate-spin text-orange-500" />
@@ -394,16 +418,16 @@ export default function MealPlanPage() {
           <div className="flex-shrink-0 p-4 border-t bg-white">
             <div className="flex gap-2">
               <Input
-                value={inputMessage}
-                onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyPress={(e) => e.key === "Enter" && handleSubmit()}
                 placeholder="Ask about meal planning..."
-                disabled={isLoading}
+                disabled={isGenerating}
                 className="flex-1"
               />
               <Button
-                onClick={handleSendMessage}
-                disabled={isLoading || !inputMessage.trim()}
+                onClick={handleSubmit}
+                disabled={isGenerating || !inputValue.trim()}
                 size="sm"
                 className="px-3"
               >
