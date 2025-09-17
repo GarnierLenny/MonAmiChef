@@ -386,63 +386,32 @@ export default function MealPlanPage() {
 
       {/* Mobile Layout - Day-by-day meal cards */}
       <div className="md:hidden h-full w-full flex flex-col bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 overflow-hidden">
-        {/* Mobile Day Navigation - Fixed at top */}
-        <div className="flex-shrink-0 bg-white px-4 py-3 border-b">
-          <div className="flex items-center justify-center gap-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCurrentDayIndex(Math.max(0, currentDayIndex - 1))}
-              disabled={currentDayIndex === 0}
-              className="p-2"
-            >
-              <span className="text-lg">‹</span>
-            </Button>
-            <div className="text-center">
-              <div className="text-lg font-semibold text-gray-800">
-                {format(addDays(weekStart, currentDayIndex), "EEEE")}
-              </div>
-              <div className="text-sm text-gray-500">
-                {format(addDays(weekStart, currentDayIndex), "MMM d")}
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setCurrentDayIndex(Math.min(6, currentDayIndex + 1))}
-              disabled={currentDayIndex === 6}
-              className="p-2"
-            >
-              <span className="text-lg">›</span>
-            </Button>
-          </div>
-        </div>
-
-        {/* Mobile Meal Cards - Fixed height, no scrolling */}
-        <div className="flex-1 px-4 py-2 flex flex-col gap-2 overflow-hidden">
+        {/* Mobile Meal Cards - Full screen width, no scrolling */}
+        <div className="flex-1 p-4 flex flex-col gap-3 overflow-hidden">
           {MEAL_SLOTS.map((meal) => {
-            const currentDay = DAYS_OF_WEEK[currentDayIndex];
+            // Use Monday as default day since we removed day navigation
+            const currentDay = "Monday";
             const mealKey = `${currentDay}-${meal}`;
             const assignedMeal = mealAssignments[mealKey];
 
             return (
-              <Card key={meal} className="flex-1 border-2 border-gray-200 rounded-xl min-h-0">
-                <CardContent className="p-3 h-full flex flex-col">
+              <Card key={meal} className="flex-1 w-full border-2 border-gray-200 rounded-xl min-h-0">
+                <CardContent className="p-4 h-full flex flex-col">
                   <div className="text-center flex-1 flex flex-col justify-center">
-                    <div className="mb-2">
-                      <span className="text-base font-semibold text-gray-700 capitalize">
+                    <div className="mb-3">
+                      <span className="text-lg font-semibold text-gray-700 capitalize">
                         {meal}
                       </span>
                     </div>
 
                     {assignedMeal ? (
                       <div className="flex flex-col items-center justify-center flex-1">
-                        <div className="text-2xl mb-1">{assignedMeal.image}</div>
+                        <div className="text-3xl mb-2">{assignedMeal.image}</div>
                         <div className="text-center">
-                          <p className="text-sm font-medium text-gray-900 line-clamp-1">
+                          <p className="text-base font-medium text-gray-900 line-clamp-1">
                             {assignedMeal.title}
                           </p>
-                          <p className="text-xs text-gray-500 mt-1 line-clamp-2">
+                          <p className="text-sm text-gray-500 mt-1 line-clamp-2">
                             {assignedMeal.description}
                           </p>
                         </div>
@@ -450,18 +419,18 @@ export default function MealPlanPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeMeal(mealKey)}
-                          className="mt-1 text-red-500 hover:text-red-600 hover:bg-red-50 h-6 px-2 text-xs"
+                          className="mt-2 text-red-500 hover:text-red-600 hover:bg-red-50"
                         >
-                          <X className="h-3 w-3 mr-1" />
+                          <X className="h-4 w-4 mr-1" />
                           Remove
                         </Button>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center justify-center flex-1">
-                        <div className="w-12 h-12 mx-auto mb-2 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center">
-                          <Plus className="h-5 w-5 text-gray-400" />
+                        <div className="w-16 h-16 mx-auto mb-3 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center">
+                          <Plus className="h-6 w-6 text-gray-400" />
                         </div>
-                        <p className="text-sm text-gray-500">Add {meal}</p>
+                        <p className="text-base text-gray-500">Add {meal}</p>
                       </div>
                     )}
                   </div>
