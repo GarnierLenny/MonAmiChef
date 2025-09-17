@@ -448,36 +448,29 @@ export default function MealPlanPage() {
         </div>
 
         {/* Day Navigation Bar - Above input */}
-        <div className="flex-shrink-0 px-4 pt-3 pb-2">
-          <div className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 p-3 rounded-2xl shadow-lg">
-            <div className="flex items-center justify-between">
-              <button
-                onClick={() => setCurrentDayIndex(Math.max(0, currentDayIndex - 1))}
-                disabled={currentDayIndex === 0}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 backdrop-blur-sm"
-              >
-                <span className="text-white text-lg font-bold">‹</span>
-              </button>
+        <div className="flex-shrink-0 px-6 py-2">
+          <div className="flex items-center justify-between bg-white rounded-xl shadow-sm border border-gray-100 px-4 py-2">
+            <button
+              onClick={() => setCurrentDayIndex(Math.max(0, currentDayIndex - 1))}
+              disabled={currentDayIndex === 0}
+              className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <span className="text-gray-600 text-base">‹</span>
+            </button>
 
-              <div className="flex-1 text-center">
-                <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/30">
-                  <div className="text-white font-bold text-lg">
-                    {format(addDays(weekStart, currentDayIndex), "EEEE")}
-                  </div>
-                  <div className="text-white/80 text-sm font-medium">
-                    {format(addDays(weekStart, currentDayIndex), "MMMM d, yyyy")}
-                  </div>
-                </div>
+            <div className="text-center">
+              <div className="text-gray-800 font-semibold text-base">
+                {format(addDays(weekStart, currentDayIndex), "EEEE, MMM d")}
               </div>
-
-              <button
-                onClick={() => setCurrentDayIndex(Math.min(6, currentDayIndex + 1))}
-                disabled={currentDayIndex === 6}
-                className="flex items-center justify-center w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 backdrop-blur-sm"
-              >
-                <span className="text-white text-lg font-bold">›</span>
-              </button>
             </div>
+
+            <button
+              onClick={() => setCurrentDayIndex(Math.min(6, currentDayIndex + 1))}
+              disabled={currentDayIndex === 6}
+              className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <span className="text-gray-600 text-base">›</span>
+            </button>
           </div>
         </div>
 
