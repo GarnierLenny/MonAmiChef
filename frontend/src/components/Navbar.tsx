@@ -78,7 +78,7 @@ export default function Navbar({
       color: "text-orange-600",
     },
     {
-      id: "weekly-planner",
+      id: "meal-plan-chat",
       label: "Meal Planning",
       icon: CalendarDays,
       color: "text-green-600",

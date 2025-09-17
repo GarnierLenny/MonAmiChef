@@ -14,7 +14,6 @@ import MobileTopBar from "./components/MobileTopBar";
 import NavigationSidebar from "./components/NavigationSidebar";
 import NutritionView from "./components/NutritionView";
 import CookingToolsView from "./components/CookingToolsView";
-import MealPlanningView from "./components/MealPlanningView";
 import ExploreView from "./components/ExploreView";
 import ComingSoonView from "./components/ComingSoonView";
 import AuthModal from "./components/AuthModal";
@@ -216,14 +215,6 @@ function App() {
           <Route
             path="/notifications"
             element={<CookingToolsView currentSubView="notifications" />}
-          />
-          <Route
-            path="/weekly-planner"
-            element={<MealPlanningView currentSubView="weekly-planner" />}
-          />
-          <Route
-            path="/plan-week"
-            element={<MealPlanningView currentSubView="plan-week" />}
           />
           <Route
             path="/meal-plan-chat"
