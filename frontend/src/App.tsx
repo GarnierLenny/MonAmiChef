@@ -14,15 +14,15 @@ import MobileTopBar from "./components/MobileTopBar";
 import NavigationSidebar from "./components/NavigationSidebar";
 import NutritionView from "./components/NutritionView";
 import CookingToolsView from "./components/CookingToolsView";
-import MealPlanningView from "./components/MealPlanningView";
 import ExploreView from "./components/ExploreView";
 import ComingSoonView from "./components/ComingSoonView";
 import AuthModal from "./components/AuthModal";
 import PricingModal from "./components/PricingModal";
 import SuccessPage from "./components/SuccessPage";
 import RecipePage from "./components/RecipePage";
-import UserProfile from "./components/UserProfile";
+import ProfilePage from "./pages/ProfilePage";
 import ChatPage from "./pages/ChatPage";
+import MealPlanPage from "./pages/MealPlanPage";
 import AuthCallback from "./components/AuthCallback";
 import SavedRecipes from "./pages/SavedRecipes";
 import RecipeHistoryPage from "./pages/RecipeHistory";
@@ -47,6 +47,7 @@ function App() {
   const location = useLocation();
   const isRecipePage = location.pathname.startsWith("/recipe/");
   const isChatPage = location.pathname === "/";
+  const isMealPlanPage = location.pathname === "/meal-plan-chat";
 
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -163,11 +164,11 @@ function App() {
   return (
     <AppErrorBoundary>
       <div className="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
-      {!isRecipePage && !isChatPage && (
+      {!isRecipePage && !isChatPage && !isMealPlanPage && (
         <MobileTopBar onMenuClick={() => setIsMobileSidebarOpen(true)} />
       )}
-      
-      {!isRecipePage && (
+
+      {!isRecipePage && !isMealPlanPage && (
         <div className="hidden md:block sticky top-0 z-50">
           <Navbar
             handleSignOut={handleSignOut}
@@ -182,7 +183,7 @@ function App() {
       )}
 
       <div
-        className={`flex ${isRecipePage ? "h-screen" : "flex-1"} overflow-y-auto`}
+        className={`flex ${isRecipePage || isMealPlanPage ? "h-screen" : "flex-1"} overflow-y-auto`}
       >
         <Routes>
           {/* Public routes */}
@@ -217,12 +218,12 @@ function App() {
             element={<CookingToolsView currentSubView="notifications" />}
           />
           <Route
-            path="/weekly-planner"
-            element={<MealPlanningView currentSubView="weekly-planner" />}
-          />
-          <Route
-            path="/plan-week"
-            element={<MealPlanningView currentSubView="plan-week" />}
+            path="/meal-plan-chat"
+            element={
+              <ComponentErrorBoundary componentName="MealPlanPage">
+                <MealPlanPage />
+              </ComponentErrorBoundary>
+            }
           />
           <Route path="/explore" element={<ExploreView />} />
           <Route path="/coming-soon" element={<ComingSoonView />} />
@@ -236,7 +237,7 @@ function App() {
             path="/profile"
             element={
               <RequireAuth session={session}>
-                <UserProfile user={user} onSignOut={handleSignOut} />
+                <ProfilePage />
               </RequireAuth>
             }
           />
