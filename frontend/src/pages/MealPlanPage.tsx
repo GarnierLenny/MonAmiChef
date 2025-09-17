@@ -447,8 +447,42 @@ export default function MealPlanPage() {
           })}
         </div>
 
+        {/* Day Navigation Bar - Above input */}
+        <div className="flex-shrink-0 px-4 pt-3 pb-2">
+          <div className="bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 p-3 rounded-2xl shadow-lg">
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => setCurrentDayIndex(Math.max(0, currentDayIndex - 1))}
+                disabled={currentDayIndex === 0}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 backdrop-blur-sm"
+              >
+                <span className="text-white text-lg font-bold">‹</span>
+              </button>
+
+              <div className="flex-1 text-center">
+                <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2 border border-white/30">
+                  <div className="text-white font-bold text-lg">
+                    {format(addDays(weekStart, currentDayIndex), "EEEE")}
+                  </div>
+                  <div className="text-white/80 text-sm font-medium">
+                    {format(addDays(weekStart, currentDayIndex), "MMMM d, yyyy")}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={() => setCurrentDayIndex(Math.min(6, currentDayIndex + 1))}
+                disabled={currentDayIndex === 6}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 backdrop-blur-sm"
+              >
+                <span className="text-white text-lg font-bold">›</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Mobile Chat Input - Always visible at bottom */}
-        <div className="flex-shrink-0 px-4 py-3">
+        <div className="flex-shrink-0 px-4 pb-3">
           <form
             onSubmit={handleSubmit}
             className="flex items-center gap-4 mb-2 p-2 pl-5 bg-white flex-1 shadow-lg shadow-orange-500/30 border border-gray-300 focus-within:ring-2 focus-within:ring-orange-500 rounded-full transition-colors"
