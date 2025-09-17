@@ -386,17 +386,7 @@ export default function MealPlanPage() {
 
       {/* Mobile Layout - Day-by-day meal cards */}
       <div className="md:hidden h-screen flex flex-col bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
-        {/* Mobile Header */}
-        <div className="flex-shrink-0 bg-white px-4 py-3 border-b">
-          <div className="flex items-center justify-center">
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">👨‍🍳</span>
-              <span className="text-lg font-semibold text-gray-800">Mon Ami Chef</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Mobile Day Navigation */}
+        {/* Mobile Day Navigation - Fixed at top */}
         <div className="flex-shrink-0 bg-white px-4 py-3 border-b">
           <div className="flex items-center justify-center gap-4">
             <Button
@@ -428,9 +418,9 @@ export default function MealPlanPage() {
           </div>
         </div>
 
-        {/* Mobile Meal Cards */}
-        <div className="flex-1 overflow-y-auto px-4 py-6">
-          <div className="space-y-4">
+        {/* Mobile Meal Cards - Only these scroll */}
+        <div className="flex-1 min-h-0 px-4 py-6">
+          <div className="h-full overflow-y-auto space-y-4">
             {MEAL_SLOTS.map((meal) => {
               const currentDay = DAYS_OF_WEEK[currentDayIndex];
               const mealKey = `${currentDay}-${meal}`;
@@ -483,7 +473,7 @@ export default function MealPlanPage() {
           </div>
         </div>
 
-        {/* Mobile Chat Input - Fixed at Bottom */}
+        {/* Mobile Chat Input - Always visible at bottom */}
         <div className="flex-shrink-0 bg-white border-t px-4 py-3">
           <form onSubmit={handleSubmit} className="flex gap-2">
             <Input
