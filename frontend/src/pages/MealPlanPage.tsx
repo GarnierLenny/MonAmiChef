@@ -505,5 +505,3 @@ export default function MealPlanPage() {
     </div>
   );
 }
-
-export default MealPlanPage;
