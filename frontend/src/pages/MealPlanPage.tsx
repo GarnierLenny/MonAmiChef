@@ -195,8 +195,8 @@ export default function MealPlanPage() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
-      {/* Left Chat Panel - 1/3 */}
-      <div className="w-1/3 bg-white border-r border-gray-200 flex flex-col">
+      {/* Left Chat Panel - 1/3 - Hidden on mobile */}
+      <div className="hidden md:flex md:w-1/3 bg-white border-r border-gray-200 flex-col">
         {/* Chat Header */}
         <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-orange-500 to-pink-500">
           <div className="flex items-center space-x-3">
@@ -264,8 +264,8 @@ export default function MealPlanPage() {
         </div>
       </div>
 
-      {/* Right Meal Plan Grid - 2/3 */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Right Meal Plan Grid - 2/3 - Hidden on mobile */}
+      <div className="hidden md:flex md:flex-1 flex-col overflow-hidden">
         {/* Grid Header */}
         <div className="p-6 bg-white border-b border-gray-200">
           <div className="flex items-center justify-between">
