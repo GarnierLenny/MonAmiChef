@@ -385,9 +385,9 @@ export default function MealPlanPage() {
       </div>
 
       {/* Mobile Layout - Day-by-day meal cards */}
-      <div className="md:hidden h-full w-full flex flex-col bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 overflow-hidden">
+      <div className="md:hidden h-screen w-full flex flex-col bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 overflow-hidden fixed inset-0 pt-16">
         {/* Mobile Meal Cards - Full screen width, no scrolling */}
-        <div className="flex-1 p-4 flex flex-col gap-3 overflow-hidden">
+        <div className="flex-1 p-4 flex flex-col gap-3 overflow-hidden min-h-0">
           {MEAL_SLOTS.map((meal) => {
             // Use Monday as default day since we removed day navigation
             const currentDay = "Monday";
@@ -396,22 +396,22 @@ export default function MealPlanPage() {
 
             return (
               <Card key={meal} className="flex-1 w-full border-2 border-gray-200 rounded-xl min-h-0">
-                <CardContent className="p-4 h-full flex flex-col">
+                <CardContent className="p-3 h-full flex flex-col">
                   <div className="text-center flex-1 flex flex-col justify-center">
-                    <div className="mb-3">
-                      <span className="text-lg font-semibold text-gray-700 capitalize">
+                    <div className="mb-2">
+                      <span className="text-base font-semibold text-gray-700 capitalize">
                         {meal}
                       </span>
                     </div>
 
                     {assignedMeal ? (
                       <div className="flex flex-col items-center justify-center flex-1">
-                        <div className="text-3xl mb-2">{assignedMeal.image}</div>
+                        <div className="text-2xl mb-1">{assignedMeal.image}</div>
                         <div className="text-center">
-                          <p className="text-base font-medium text-gray-900 line-clamp-1">
+                          <p className="text-sm font-medium text-gray-900 line-clamp-1">
                             {assignedMeal.title}
                           </p>
-                          <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                          <p className="text-xs text-gray-500 mt-1 line-clamp-1">
                             {assignedMeal.description}
                           </p>
                         </div>
@@ -419,18 +419,18 @@ export default function MealPlanPage() {
                           variant="ghost"
                           size="sm"
                           onClick={() => removeMeal(mealKey)}
-                          className="mt-2 text-red-500 hover:text-red-600 hover:bg-red-50"
+                          className="mt-1 text-red-500 hover:text-red-600 hover:bg-red-50 h-7 px-2 text-xs"
                         >
-                          <X className="h-4 w-4 mr-1" />
+                          <X className="h-3 w-3 mr-1" />
                           Remove
                         </Button>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center justify-center flex-1">
-                        <div className="w-16 h-16 mx-auto mb-3 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center">
-                          <Plus className="h-6 w-6 text-gray-400" />
+                        <div className="w-12 h-12 mx-auto mb-2 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center">
+                          <Plus className="h-5 w-5 text-gray-400" />
                         </div>
-                        <p className="text-base text-gray-500">Add {meal}</p>
+                        <p className="text-sm text-gray-500">Add {meal}</p>
                       </div>
                     )}
                   </div>
