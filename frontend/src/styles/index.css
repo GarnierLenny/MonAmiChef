@@ -4,18 +4,18 @@
   /* Colors */
   --color-border: oklch(0.922 0 0);
   --color-input: oklch(0.922 0 0);
-  --color-ring: oklch(0.708 0 0);
+  --color-ring: oklch(0.72 0.15 45);
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.145 0 0);
-  --color-primary: oklch(0.205 0 0);
+  --color-primary: oklch(0.72 0.15 45);
   --color-primary-foreground: oklch(0.985 0 0);
-  --color-secondary: oklch(0.97 0 0);
-  --color-secondary-foreground: oklch(0.205 0 0);
+  --color-secondary: oklch(0.96 0.01 220);
+  --color-secondary-foreground: oklch(0.25 0.02 220);
   --color-destructive: oklch(0.577 0.245 27.325);
   --color-muted: oklch(0.97 0 0);
   --color-muted-foreground: oklch(0.556 0 0);
-  --color-accent: oklch(0.97 0 0);
-  --color-accent-foreground: oklch(0.205 0 0);
+  --color-accent: oklch(0.95 0.02 150);
+  --color-accent-foreground: oklch(0.25 0.08 150);
   --color-popover: oklch(1 0 0);
   --color-popover-foreground: oklch(0.145 0 0);
   --color-card: oklch(1 0 0);
@@ -90,5 +90,127 @@
   .markdown-content ul,
   .markdown-content ol {
     margin-bottom: 0.5rem;
+  }
+
+  /* Custom badge variants for macros - targeting all possible selectors */
+  .badge-protein,
+  [class*="badge-protein"] {
+    background-color: oklch(0.6 0.2 140) !important;
+    color: white !important;
+    border-color: oklch(0.6 0.2 140) !important;
+  }
+
+  .badge-carbs,
+  [class*="badge-carbs"] {
+    background-color: oklch(0.55 0.2 260) !important;
+    color: white !important;
+    border-color: oklch(0.55 0.2 260) !important;
+  }
+
+  .badge-fat,
+  [class*="badge-fat"] {
+    background-color: oklch(0.72 0.15 45) !important;
+    color: white !important;
+    border-color: oklch(0.72 0.15 45) !important;
+  }
+
+  /* Custom progress bar colors - comprehensive targeting */
+  .progress-protein [data-state="complete"],
+  .progress-protein .bg-primary,
+  .progress-protein > div > div,
+  .progress-protein [role="progressbar"] > div,
+  .progress-protein div[data-state="complete"],
+  .progress-protein * {
+    background-color: oklch(0.6 0.2 140) !important;
+  }
+
+  .progress-carbs [data-state="complete"],
+  .progress-carbs .bg-primary,
+  .progress-carbs > div > div,
+  .progress-carbs [role="progressbar"] > div,
+  .progress-carbs div[data-state="complete"],
+  .progress-carbs * {
+    background-color: oklch(0.55 0.2 260) !important;
+  }
+
+  .progress-fat [data-state="complete"],
+  .progress-fat .bg-primary,
+  .progress-fat > div > div,
+  .progress-fat [role="progressbar"] > div,
+  .progress-fat div[data-state="complete"],
+  .progress-fat * {
+    background-color: oklch(0.72 0.15 45) !important;
+  }
+
+  /* Custom properties for progress bars */
+  .progress-protein {
+    --color-primary: oklch(0.6 0.2 140);
+  }
+
+  .progress-carbs {
+    --color-primary: oklch(0.55 0.2 260);
+  }
+
+  .progress-fat {
+    --color-primary: oklch(0.72 0.15 45);
+  }
+
+  /* Remove orange outline from dialogs and center them */
+  [role="dialog"],
+  [data-state="open"] {
+    outline: none !important;
+    border: none !important;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+  }
+
+  [role="dialog"]:focus,
+  [role="dialog"]:focus-visible {
+    outline: none !important;
+    ring: none !important;
+    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+  }
+
+  /* Fix dialog centering */
+  [data-radix-dialog-overlay] {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+  }
+
+  [data-radix-dialog-content] {
+    position: relative !important;
+    transform: none !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+  }
+
+
+  /* Softer button hover states */
+  .btn-soft-orange {
+    background-color: oklch(0.72 0.15 45);
+    transition: all 0.2s ease;
+  }
+
+  .btn-soft-orange:hover {
+    background-color: oklch(0.68 0.18 45);
+  }
+
+  /* Custom grade colors that are softer */
+  .grade-a {
+    background-color: oklch(0.65 0.15 150);
+  }
+
+  .grade-b {
+    background-color: oklch(0.6 0.12 220);
+  }
+
+  .grade-c {
+    background-color: oklch(0.62 0.12 60);
+  }
+
+  .grade-d {
+    background-color: oklch(0.55 0.15 15);
   }
 }

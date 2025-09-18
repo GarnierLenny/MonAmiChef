@@ -1,8 +1,18 @@
 // src/pages/MealPlanPage.tsx
 import { useState, useEffect, useRef, useCallback } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import {
   Send,
   Loader2,
@@ -14,9 +24,13 @@ import {
   Clock,
   User,
   Zap,
+  TrendingUp,
+  ChevronRight,
 } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks } from "date-fns";
 import type { ChatMessage } from "../types/types";
+import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { cn } from "@/lib/utils";
 
 // interface MealPlanPageProps {
 //   user?: User | null;
@@ -221,7 +235,7 @@ interface MealPlan {
       servings: number;
       cookingTime: number;
       calories: number;
-      grade: "A" | "B" | "C";
+      grade: "A" | "B" | "C" | "D";
       macros: {
         protein: number;
         carbs: number;
@@ -239,31 +253,187 @@ const initialChatMessage: ChatMessage = {
 };
 
 // Helper function for grade badge styling
-const getGradeStyles = (grade: "A" | "B" | "C") => {
+const getGradeStyles = (grade: "A" | "B" | "C" | "D") => {
   switch (grade) {
     case "A":
-      return "bg-green-500 text-white";
+      return "bg-emerald-500 text-white";
     case "B":
-      return "bg-yellow-500 text-white";
+      return "bg-blue-500 text-white";
     case "C":
-      return "bg-red-500 text-white";
+      return "bg-amber-500 text-white";
+    case "D":
+      return "bg-rose-500 text-white";
     default:
-      return "bg-gray-500 text-white";
+      return "bg-slate-500 text-white";
   }
 };
 
 // Helper function for macro badge styling
-const getMacroStyles = (type: "protein" | "carbs" | "fat") => {
+const getMacroBadgeClass = (type: "protein" | "carbs" | "fat") => {
   switch (type) {
     case "protein":
-      return "bg-green-100 text-green-800 border-green-200";
+      return "badge-protein";
     case "carbs":
-      return "bg-blue-100 text-blue-800 border-blue-200";
+      return "badge-carbs";
     case "fat":
-      return "bg-orange-100 text-orange-800 border-orange-200";
+      return "badge-fat";
     default:
-      return "bg-gray-100 text-gray-800 border-gray-200";
+      return "badge-protein";
   }
+};
+
+// Helper function for macro progress styling
+const getMacroProgressClass = (type: "protein" | "carbs" | "fat") => {
+  switch (type) {
+    case "protein":
+      return "progress-protein";
+    case "carbs":
+      return "progress-carbs";
+    case "fat":
+      return "progress-fat";
+    default:
+      return "progress-protein";
+  }
+};
+
+// Helper function for macro colors (for progress bars)
+const getMacroColor = (type: "protein" | "carbs" | "fat") => {
+  switch (type) {
+    case "protein":
+      return "#22c55e"; // Green
+    case "carbs":
+      return "#6366f1"; // Purple-blue
+    case "fat":
+      return "#f97316"; // Favicon orange
+    default:
+      return "#64748b";
+  }
+};
+
+// Daily nutrition goals
+const DAILY_GOALS = {
+  calories: 2000,
+  protein: 150, // grams
+  carbs: 250, // grams
+  fat: 65, // grams
+};
+
+// Helper function to calculate today's progress
+const calculateDayProgress = (mealPlan: MealPlan, day: string) => {
+  const dayMeals = mealPlan[day] || {};
+  const consumed = {
+    calories: 0,
+    protein: 0,
+    carbs: 0,
+    fat: 0,
+  };
+
+  Object.values(dayMeals).forEach((meal) => {
+    if (meal) {
+      consumed.calories += meal.calories;
+      consumed.protein += meal.macros.protein;
+      consumed.carbs += meal.macros.carbs;
+      consumed.fat += meal.macros.fat;
+    }
+  });
+
+  const progress = {
+    calories: {
+      used: consumed.calories,
+      goal: DAILY_GOALS.calories,
+      percentage: Math.round((consumed.calories / DAILY_GOALS.calories) * 100),
+    },
+    protein: {
+      used: consumed.protein,
+      goal: DAILY_GOALS.protein,
+      percentage: Math.round((consumed.protein / DAILY_GOALS.protein) * 100),
+    },
+    carbs: {
+      used: consumed.carbs,
+      goal: DAILY_GOALS.carbs,
+      percentage: Math.round((consumed.carbs / DAILY_GOALS.carbs) * 100),
+    },
+    fat: {
+      used: consumed.fat,
+      goal: DAILY_GOALS.fat,
+      percentage: Math.round((consumed.fat / DAILY_GOALS.fat) * 100),
+    },
+  };
+
+  return progress;
+};
+
+// Helper function to get progress status styling
+const getProgressStatus = (percentage: number) => {
+  if (percentage >= 100)
+    return {
+      color: "text-red-600",
+      bg: "bg-red-100",
+      status: "over",
+      strokeColor: "#dc2626",
+    };
+  if (percentage >= 80)
+    return {
+      color: "text-orange-600",
+      bg: "bg-orange-100",
+      status: "near",
+      strokeColor: "#ea580c",
+    };
+  return {
+    color: "text-green-600",
+    bg: "bg-green-100",
+    status: "under",
+    strokeColor: "#16a34a",
+  };
+};
+
+// Donut Chart Component
+const DonutChart = ({
+  percentage,
+  size = 64,
+  strokeWidth = 6,
+}: {
+  percentage: number;
+  size?: number;
+  strokeWidth?: number;
+}) => {
+  const data = [
+    { name: "completed", value: percentage },
+    { name: "remaining", value: 100 - percentage },
+  ];
+
+  const colors = [getProgressStatus(percentage).strokeColor, "#e5e7eb"];
+
+  return (
+    <div className="relative" style={{ width: size, height: size }}>
+      <ResponsiveContainer width="100%" height="100%">
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            innerRadius={size / 2 - strokeWidth}
+            outerRadius={size / 2}
+            startAngle={90}
+            endAngle={450}
+            dataKey="value"
+            stroke="none"
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={colors[index]} />
+            ))}
+          </Pie>
+        </PieChart>
+      </ResponsiveContainer>
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span
+          className={`font-bold text-gray-900 ${size >= 80 ? "text-sm" : "text-xs"}`}
+        >
+          {Math.round(percentage)}%
+        </span>
+      </div>
+    </div>
+  );
 };
 
 export default function MealPlanPage() {
@@ -278,6 +448,9 @@ export default function MealPlanPage() {
   const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date()));
   const [mealPlan, setMealPlan] = useState<MealPlan>({});
   const [currentDayIndex, setCurrentDayIndex] = useState(0);
+
+  // Progress modal state
+  const [showProgressDetails, setShowProgressDetails] = useState(false);
 
   // Calculate week start for consistency
   const weekStart = startOfWeek(currentWeek);
@@ -469,17 +642,14 @@ export default function MealPlanPage() {
               disabled={isGenerating}
               className="min-w-0 grow basis-0 bg-transparent outline-none focus:ring-0"
             />
-            <button
+            <Button
               type="submit"
               disabled={isGenerating || !inputValue.trim()}
-              className={`shrink-0 rounded-full px-4 py-4 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 ${
-                !inputValue.trim() || isGenerating
-                  ? "bg-gray-400"
-                  : "bg-orange-500 hover:bg-orange-600"
-              }`}
+              className="shrink-0 rounded-full px-4 py-4 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400"
+              size="sm"
             >
               <Send className="w-4 h-4" />
-            </button>
+            </Button>
           </form>
         </div>
       </div>
@@ -522,8 +692,93 @@ export default function MealPlanPage() {
           </div>
         </div>
 
+        {/* Today's Progress Card - Desktop */}
+        <div className="px-6 pb-4">
+          {(() => {
+            const currentDay =
+              DAYS_OF_WEEK[
+                new Date().getDay() === 0 ? 6 : new Date().getDay() - 1
+              ]; // Get current day
+            const dayProgress = calculateDayProgress(mealPlan, currentDay);
+            const hasMeals = Object.keys(mealPlan[currentDay] || {}).length > 0;
+
+            return (
+              <Card
+                className="border border-gray-200 rounded-xl cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => setShowProgressDetails(true)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h2 className="text-lg font-semibold text-gray-900">
+                      Today's Progress
+                    </h2>
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                  </div>
+
+                  {!hasMeals ? (
+                    <div className="text-center py-6">
+                      <TrendingUp className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                      <p className="text-gray-500">
+                        No meals yet — add breakfast to start tracking
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-8">
+                      {/* Calories Donut */}
+                      <div className="flex-shrink-0">
+                        <DonutChart
+                          percentage={dayProgress.calories.percentage}
+                          size={80}
+                          strokeWidth={8}
+                        />
+                        <div className="text-center mt-2">
+                          <p className="text-sm text-gray-600">
+                            {dayProgress.calories.used}/
+                            {dayProgress.calories.goal} cal
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Macro Bars */}
+                      <div className="flex-1 space-y-3">
+                        {[
+                          { key: "protein", label: "P" },
+                          { key: "carbs", label: "C" },
+                          { key: "fat", label: "F" },
+                        ].map(({ key, label }) => {
+                          const macro =
+                            dayProgress[key as keyof typeof dayProgress];
+                          return (
+                            <div key={key} className="flex items-center gap-3">
+                              <span className="text-sm font-medium text-gray-600 w-4">
+                                {label}
+                              </span>
+                              <Progress
+                                value={Math.min(macro.percentage, 100)}
+                                className={cn(
+                                  "flex-1 h-2.5",
+                                  getMacroProgressClass(
+                                    key as "protein" | "carbs" | "fat",
+                                  ),
+                                )}
+                              />
+                              <span className="text-sm text-gray-600 w-12 text-right">
+                                {macro.percentage}%
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })()}
+        </div>
+
         {/* Meal Grid */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto px-6 pb-6">
           <div className="grid grid-cols-8 gap-4">
             {/* Header row */}
             <div className="col-span-1 flex items-center justify-center">
@@ -615,21 +870,30 @@ export default function MealPlanPage() {
 
                           {/* Macros */}
                           <div className="flex items-center gap-1 flex-wrap mt-auto">
-                            <div
-                              className={`px-1.5 py-0.5 rounded text-xs font-medium border ${getMacroStyles("protein")}`}
+                            <Badge
+                              className={cn(
+                                "text-xs",
+                                getMacroBadgeClass("protein"),
+                              )}
                             >
                               P {mealPlan[day][meal]?.macros.protein}g
-                            </div>
-                            <div
-                              className={`px-1.5 py-0.5 rounded text-xs font-medium border ${getMacroStyles("carbs")}`}
+                            </Badge>
+                            <Badge
+                              className={cn(
+                                "text-xs",
+                                getMacroBadgeClass("carbs"),
+                              )}
                             >
                               C {mealPlan[day][meal]?.macros.carbs}g
-                            </div>
-                            <div
-                              className={`px-1.5 py-0.5 rounded text-xs font-medium border ${getMacroStyles("fat")}`}
+                            </Badge>
+                            <Badge
+                              className={cn(
+                                "text-xs",
+                                getMacroBadgeClass("fat"),
+                              )}
                             >
                               F {mealPlan[day][meal]?.macros.fat}g
-                            </div>
+                            </Badge>
                           </div>
                         </div>
                       ) : (
@@ -651,8 +915,97 @@ export default function MealPlanPage() {
 
       {/* Mobile Layout - Day-by-day meal cards */}
       <div className="md:hidden h-screen w-full flex flex-col bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 overflow-hidden fixed inset-0 pt-20">
+        {/* Today's Progress Card */}
+        <div className="px-4 pt-4 pb-2">
+          {(() => {
+            const currentDay = DAYS_OF_WEEK[currentDayIndex];
+            const dayProgress = calculateDayProgress(mealPlan, currentDay);
+            const hasMeals = Object.keys(mealPlan[currentDay] || {}).length > 0;
+
+            return (
+              <Card
+                className="border-2 border-gray-200 rounded-xl cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => setShowProgressDetails(true)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-sm font-semibold text-gray-900">
+                      Today's Progress
+                    </h2>
+                    <ChevronRight className="w-4 h-4 text-gray-400" />
+                  </div>
+
+                  {!hasMeals ? (
+                    <div className="text-center py-4">
+                      <TrendingUp className="w-8 h-8 mx-auto mb-2 text-gray-400" />
+                      <p className="text-sm text-gray-500">
+                        No meals yet — add breakfast to start tracking
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-4">
+                      {/* Calories Donut */}
+                      <div className="flex-shrink-0">
+                        <DonutChart
+                          percentage={dayProgress.calories.percentage}
+                          size={64}
+                          strokeWidth={6}
+                        />
+                        <div className="text-center mt-1">
+                          <p className="text-xs text-gray-600">
+                            {dayProgress.calories.used}/
+                            {dayProgress.calories.goal} cal
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Macro Bars */}
+                      <div className="flex-1 space-y-2">
+                        {[
+                          { key: "protein", label: "P" },
+                          { key: "carbs", label: "C" },
+                          { key: "fat", label: "F" },
+                        ].map(({ key, label }) => {
+                          const macro =
+                            dayProgress[key as keyof typeof dayProgress];
+                          return (
+                            <div key={key} className="flex items-center gap-2">
+                              <Badge
+                                className={cn(
+                                  "w-6 h-6 p-0 flex items-center justify-center text-xs",
+                                  getMacroBadgeClass(
+                                    key as "protein" | "carbs" | "fat",
+                                  ),
+                                )}
+                              >
+                                {label}
+                              </Badge>
+                              <Progress
+                                value={Math.min(macro.percentage, 100)}
+                                className={cn(
+                                  "flex-1 h-2",
+                                  getMacroProgressClass(
+                                    key as "protein" | "carbs" | "fat",
+                                  ),
+                                )}
+                              />
+                              <span className="text-xs text-gray-600 w-8 text-right">
+                                {macro.percentage}%
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            );
+          })()}
+        </div>
+
         {/* Mobile Meal Cards - Full screen width, no scrolling */}
-        <div className="flex-1 px-4 pt-4 pb-4 flex flex-col gap-3 overflow-hidden min-h-0">
+        <div className="flex-1 px-4 pb-4 flex flex-col gap-3 overflow-hidden min-h-0">
           {MEAL_SLOTS.map((meal) => {
             // Use current day from navigation
             const currentDay = DAYS_OF_WEEK[currentDayIndex];
@@ -665,11 +1018,11 @@ export default function MealPlanPage() {
                 className="flex-1 w-full border-2 border-gray-200 rounded-xl min-h-0 cursor-pointer hover:shadow-md transition-shadow"
                 onClick={() => handleSlotClick(currentDay, meal)}
               >
-                <CardContent className="p-4 h-full flex flex-col">
+                <CardContent className="p-3 h-full flex flex-col">
                   {assignedMeal ? (
                     <div className="flex flex-col h-full">
                       {/* Header with meal type, title and grade */}
-                      <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-start justify-between mb-2">
                         <div className="flex-1 min-w-0">
                           <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
                             {meal}
@@ -679,14 +1032,14 @@ export default function MealPlanPage() {
                           </h3>
                         </div>
                         <div
-                          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ml-3 flex-shrink-0 ${getGradeStyles(assignedMeal.grade)}`}
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ml-2 flex-shrink-0 ${getGradeStyles(assignedMeal.grade)}`}
                         >
                           {assignedMeal.grade}
                         </div>
                       </div>
 
                       {/* Info Row */}
-                      <div className="flex items-center gap-4 mb-3 text-xs text-gray-600">
+                      <div className="flex items-center gap-4 mb-2 text-xs text-gray-600">
                         <div className="flex items-center gap-1">
                           <User className="w-3 h-3" />
                           <span>Servings: {assignedMeal.servings}</span>
@@ -697,30 +1050,39 @@ export default function MealPlanPage() {
                         </div>
                       </div>
 
-                      {/* Calories */}
-                      <div className="flex items-center gap-1 mb-3 text-xs">
-                        <Zap className="w-3 h-3 text-orange-500" />
-                        <span className="font-medium">
-                          {assignedMeal.calories} cal
-                        </span>
-                      </div>
+                      {/* Calories and Macros Row */}
+                      <div className="flex items-center justify-between">
+                        {/* Calories */}
+                        <div className="flex items-center gap-1 text-xs">
+                          <Zap className="w-3 h-3 text-orange-500" />
+                          <span className="font-medium">
+                            {assignedMeal.calories} cal
+                          </span>
+                        </div>
 
-                      {/* Macros */}
-                      <div className="flex items-center gap-2 mb-4">
-                        <div
-                          className={`px-2 py-1 rounded-md text-xs font-medium border ${getMacroStyles("protein")}`}
-                        >
-                          P {assignedMeal.macros.protein}g
-                        </div>
-                        <div
-                          className={`px-2 py-1 rounded-md text-xs font-medium border ${getMacroStyles("carbs")}`}
-                        >
-                          C {assignedMeal.macros.carbs}g
-                        </div>
-                        <div
-                          className={`px-2 py-1 rounded-md text-xs font-medium border ${getMacroStyles("fat")}`}
-                        >
-                          F {assignedMeal.macros.fat}g
+                        {/* Macros */}
+                        <div className="flex items-center gap-1">
+                          <Badge
+                            className={cn(
+                              "text-xs",
+                              getMacroBadgeClass("protein"),
+                            )}
+                          >
+                            P {assignedMeal.macros.protein}g
+                          </Badge>
+                          <Badge
+                            className={cn(
+                              "text-xs",
+                              getMacroBadgeClass("carbs"),
+                            )}
+                          >
+                            C {assignedMeal.macros.carbs}g
+                          </Badge>
+                          <Badge
+                            className={cn("text-xs", getMacroBadgeClass("fat"))}
+                          >
+                            F {assignedMeal.macros.fat}g
+                          </Badge>
                         </div>
                       </div>
 
@@ -759,15 +1121,17 @@ export default function MealPlanPage() {
         {/* Day Navigation Bar - Above input */}
         <div className="flex-shrink-0 px-6 py-2">
           <div className="flex items-center justify-between bg-white rounded-xl shadow-sm border border-gray-100 px-4 py-2">
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() =>
                 setCurrentDayIndex(Math.max(0, currentDayIndex - 1))
               }
               disabled={currentDayIndex === 0}
-              className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="w-8 h-8 rounded-full p-0"
             >
               <span className="text-gray-600 text-base">‹</span>
-            </button>
+            </Button>
 
             <div className="text-center">
               <div className="text-gray-800 font-semibold text-base">
@@ -775,15 +1139,17 @@ export default function MealPlanPage() {
               </div>
             </div>
 
-            <button
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() =>
                 setCurrentDayIndex(Math.min(6, currentDayIndex + 1))
               }
               disabled={currentDayIndex === 6}
-              className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="w-8 h-8 rounded-full p-0"
             >
               <span className="text-gray-600 text-base">›</span>
-            </button>
+            </Button>
           </div>
         </div>
 
@@ -801,20 +1167,159 @@ export default function MealPlanPage() {
               disabled={isGenerating}
               className="min-w-0 grow basis-0 bg-transparent outline-none focus:ring-0"
             />
-            <button
+            <Button
               type="submit"
               disabled={isGenerating || !inputValue.trim()}
-              className={`shrink-0 rounded-full px-4 py-4 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 ${
-                !inputValue.trim() || isGenerating
-                  ? "bg-gray-400"
-                  : "bg-orange-500 hover:bg-orange-600"
-              }`}
+              className="shrink-0 rounded-full px-4 py-4 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400"
+              size="sm"
             >
               <Send className="w-4 h-4" />
-            </button>
+            </Button>
           </form>
         </div>
       </div>
+
+      {/* Progress Details Modal */}
+      <Dialog open={showProgressDetails} onOpenChange={setShowProgressDetails}>
+        <DialogContent className="rounded-sm max-w-sm w-[calc(100vw-2rem)] pb-7 max-h-[85vh] mx-auto overflow-hidden border-none shadow-lg focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 sm:mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-lg font-semibold text-gray-900">
+              Progress Details
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 max-h-80 overflow-y-auto">
+            {(() => {
+              const currentDay = DAYS_OF_WEEK[currentDayIndex];
+              const dayProgress = calculateDayProgress(mealPlan, currentDay);
+              const hasMeals =
+                Object.keys(mealPlan[currentDay] || {}).length > 0;
+
+              if (!hasMeals) {
+                return (
+                  <div className="text-center py-8">
+                    <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
+                      <TrendingUp className="w-6 h-6 text-gray-400" />
+                    </div>
+                    <h3 className="text-base font-medium text-gray-900 mb-1">
+                      No Progress Yet
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      Add meals to track your progress
+                    </p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="space-y-4">
+                  {/* Calories Section */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Zap className="w-4 h-4 text-orange-500" />
+                      <h3 className="font-semibold text-gray-900">Calories</h3>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <DonutChart
+                        percentage={dayProgress.calories.percentage}
+                        size={60}
+                        strokeWidth={6}
+                      />
+                      <div className="flex-1 grid grid-cols-3 gap-2 text-xs">
+                        <div className="text-center">
+                          <p className="text-gray-500">Consumed</p>
+                          <p className="font-semibold text-gray-900">
+                            {dayProgress.calories.used}
+                          </p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-gray-500">Goal</p>
+                          <p className="font-semibold text-gray-900">
+                            {dayProgress.calories.goal}
+                          </p>
+                        </div>
+                        <div className="text-center">
+                          <p className="text-gray-500">Left</p>
+                          <p
+                            className={`font-semibold ${getProgressStatus(dayProgress.calories.percentage).color}`}
+                          >
+                            {Math.max(
+                              0,
+                              dayProgress.calories.goal -
+                                dayProgress.calories.used,
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Macros Section */}
+                  <div>
+                    <div className="flex items-center gap-2 mb-3">
+                      <Utensils className="w-4 h-4 text-gray-600" />
+                      <h3 className="font-semibold text-gray-900">Macros</h3>
+                    </div>
+                    <div className="space-y-3">
+                      {[
+                        { key: "protein", label: "Protein" },
+                        { key: "carbs", label: "Carbs" },
+                        { key: "fat", label: "Fat" },
+                      ].map(({ key, label }) => {
+                        const macro =
+                          dayProgress[key as keyof typeof dayProgress];
+                        return (
+                          <div key={key} className="flex items-center gap-3">
+                            <Badge
+                              className={cn(
+                                "w-6 h-6 p-0 flex items-center justify-center text-xs shrink-0",
+                                getMacroBadgeClass(
+                                  key as "protein" | "carbs" | "fat",
+                                ),
+                              )}
+                            >
+                              {key.charAt(0).toUpperCase()}
+                            </Badge>
+                            <div className="flex-1">
+                              <div className="flex justify-between items-center mb-1">
+                                <span className="text-sm font-medium text-gray-900">
+                                  {label}
+                                </span>
+                                <span className="text-xs text-gray-500">
+                                  {macro.used}g / {macro.goal}g
+                                </span>
+                              </div>
+                              <Progress
+                                value={Math.min(macro.percentage, 100)}
+                                className={cn(
+                                  "h-2",
+                                  getMacroProgressClass(
+                                    key as "protein" | "carbs" | "fat",
+                                  ),
+                                )}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
+          </div>
+
+          {/* TODO: Modal Actions */}
+          {/*<div className="flex gap-2 pt-4">
+            <Button variant="outline" className="flex-1" size="sm">
+              Adjust Goals
+            </Button>
+            <Button className="flex-1" size="sm">
+              View Details
+            </Button>
+          </div>*/}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
