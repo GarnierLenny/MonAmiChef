@@ -3,7 +3,15 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Loader2, Calendar, Utensils, Plus, X, ChefHat } from "lucide-react";
+import {
+  Send,
+  Loader2,
+  Calendar,
+  Utensils,
+  Plus,
+  X,
+  ChefHat,
+} from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks } from "date-fns";
 import type { ChatMessage } from "../types/types";
 
@@ -15,32 +23,115 @@ import type { ChatMessage } from "../types/types";
 // Fake meal data for development
 const FAKE_MEALS = {
   breakfast: [
-    { id: "b1", title: "Avocado Toast", image: "🥑", description: "Whole grain toast with fresh avocado" },
-    { id: "b2", title: "Greek Yogurt Bowl", image: "🥣", description: "Greek yogurt with berries and granola" },
-    { id: "b3", title: "Oatmeal with Berries", image: "🥣", description: "Steel-cut oats with fresh berries" },
-    { id: "b4", title: "Scrambled Eggs", image: "🍳", description: "Fluffy scrambled eggs with herbs" },
-    { id: "b5", title: "Smoothie Bowl", image: "🥤", description: "Tropical smoothie bowl with toppings" },
+    {
+      id: "b1",
+      title: "Avocado Toast",
+      image: "🥑",
+      description: "Whole grain toast with fresh avocado",
+    },
+    {
+      id: "b2",
+      title: "Greek Yogurt Bowl",
+      image: "🥣",
+      description: "Greek yogurt with berries and granola",
+    },
+    {
+      id: "b3",
+      title: "Oatmeal with Berries",
+      image: "🥣",
+      description: "Steel-cut oats with fresh berries",
+    },
+    {
+      id: "b4",
+      title: "Scrambled Eggs",
+      image: "🍳",
+      description: "Fluffy scrambled eggs with herbs",
+    },
+    {
+      id: "b5",
+      title: "Smoothie Bowl",
+      image: "🥤",
+      description: "Tropical smoothie bowl with toppings",
+    },
   ],
   lunch: [
-    { id: "l1", title: "Caesar Salad", image: "🥗", description: "Classic caesar with homemade dressing" },
-    { id: "l2", title: "Grilled Chicken Wrap", image: "🌯", description: "Grilled chicken with fresh vegetables" },
-    { id: "l3", title: "Quinoa Bowl", image: "🍲", description: "Quinoa with roasted vegetables" },
-    { id: "l4", title: "Soup & Sandwich", image: "🥪", description: "Tomato soup with grilled cheese" },
-    { id: "l5", title: "Pasta Salad", image: "🍝", description: "Mediterranean pasta salad" },
+    {
+      id: "l1",
+      title: "Caesar Salad",
+      image: "🥗",
+      description: "Classic caesar with homemade dressing",
+    },
+    {
+      id: "l2",
+      title: "Grilled Chicken Wrap",
+      image: "🌯",
+      description: "Grilled chicken with fresh vegetables",
+    },
+    {
+      id: "l3",
+      title: "Quinoa Bowl",
+      image: "🍲",
+      description: "Quinoa with roasted vegetables",
+    },
+    {
+      id: "l4",
+      title: "Soup & Sandwich",
+      image: "🥪",
+      description: "Tomato soup with grilled cheese",
+    },
+    {
+      id: "l5",
+      title: "Pasta Salad",
+      image: "🍝",
+      description: "Mediterranean pasta salad",
+    },
   ],
   dinner: [
-    { id: "d1", title: "Grilled Salmon", image: "🐟", description: "Atlantic salmon with lemon herbs" },
-    { id: "d2", title: "Chicken Stir Fry", image: "🍜", description: "Asian-style chicken and vegetables" },
-    { id: "d3", title: "Beef Tacos", image: "🌮", description: "Ground beef tacos with fresh toppings" },
-    { id: "d4", title: "Vegetable Curry", image: "🍛", description: "Coconut curry with mixed vegetables" },
-    { id: "d5", title: "Pizza Night", image: "🍕", description: "Homemade pizza with favorite toppings" },
+    {
+      id: "d1",
+      title: "Grilled Salmon",
+      image: "🐟",
+      description: "Atlantic salmon with lemon herbs",
+    },
+    {
+      id: "d2",
+      title: "Chicken Stir Fry",
+      image: "🍜",
+      description: "Asian-style chicken and vegetables",
+    },
+    {
+      id: "d3",
+      title: "Beef Tacos",
+      image: "🌮",
+      description: "Ground beef tacos with fresh toppings",
+    },
+    {
+      id: "d4",
+      title: "Vegetable Curry",
+      image: "🍛",
+      description: "Coconut curry with mixed vegetables",
+    },
+    {
+      id: "d5",
+      title: "Pizza Night",
+      image: "🍕",
+      description: "Homemade pizza with favorite toppings",
+    },
   ],
 };
 
-const DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+const DAYS_OF_WEEK = [
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
+];
 const MEAL_SLOTS = ["breakfast", "lunch", "dinner"] as const;
 
-type MealSlot = typeof MEAL_SLOTS[number];
+type MealSlot = (typeof MEAL_SLOTS)[number];
 
 interface MealPlan {
   [day: string]: {
@@ -49,7 +140,7 @@ interface MealPlan {
       title: string;
       image: string;
       description: string;
-    }
+    };
   };
 }
 
@@ -100,7 +191,8 @@ export default function MealPlanPage() {
       newPlan[day] = {};
       MEAL_SLOTS.forEach((meal) => {
         const mealOptions = FAKE_MEALS[meal];
-        const randomMeal = mealOptions[Math.floor(Math.random() * mealOptions.length)];
+        const randomMeal =
+          mealOptions[Math.floor(Math.random() * mealOptions.length)];
         newPlan[day][meal] = randomMeal;
       });
     });
@@ -121,7 +213,7 @@ export default function MealPlanPage() {
       text,
       timestamp: new Date(),
     };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInputValue("");
     setIsGenerating(true);
 
@@ -135,7 +227,8 @@ export default function MealPlanPage() {
         "That sounds delicious! I'm adding some great meal options to your calendar based on your preferences.",
       ];
 
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+      const randomResponse =
+        responses[Math.floor(Math.random() * responses.length)];
 
       const aiMessage: ChatMessage = {
         id: `ai-${Date.now()}`,
@@ -144,7 +237,7 @@ export default function MealPlanPage() {
         timestamp: new Date(),
       };
 
-      setMessages(prev => [...prev, aiMessage]);
+      setMessages((prev) => [...prev, aiMessage]);
       setIsGenerating(false);
 
       // Update meal plan after AI response
@@ -155,9 +248,10 @@ export default function MealPlanPage() {
   // Handle meal slot click
   const handleSlotClick = (day: string, meal: MealSlot) => {
     const mealOptions = FAKE_MEALS[meal];
-    const randomMeal = mealOptions[Math.floor(Math.random() * mealOptions.length)];
+    const randomMeal =
+      mealOptions[Math.floor(Math.random() * mealOptions.length)];
 
-    setMealPlan(prev => ({
+    setMealPlan((prev) => ({
       ...prev,
       [day]: {
         ...prev[day],
@@ -168,7 +262,7 @@ export default function MealPlanPage() {
 
   // Remove meal from slot
   const removeMeal = (dayOrKey: string, meal?: MealSlot) => {
-    setMealPlan(prev => {
+    setMealPlan((prev) => {
       const newPlan = { ...prev };
 
       if (meal) {
@@ -179,7 +273,7 @@ export default function MealPlanPage() {
         }
       } else {
         // Mobile format: removeMeal(mealKey)
-        const [day, mealType] = dayOrKey.split('-');
+        const [day, mealType] = dayOrKey.split("-");
         if (newPlan[day]) {
           delete newPlan[day][mealType as MealSlot];
         }
@@ -190,8 +284,8 @@ export default function MealPlanPage() {
   };
 
   // Week navigation
-  const goToPreviousWeek = () => setCurrentWeek(prev => subWeeks(prev, 1));
-  const goToNextWeek = () => setCurrentWeek(prev => addWeeks(prev, 1));
+  const goToPreviousWeek = () => setCurrentWeek((prev) => subWeeks(prev, 1));
+  const goToNextWeek = () => setCurrentWeek((prev) => addWeeks(prev, 1));
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
@@ -204,8 +298,12 @@ export default function MealPlanPage() {
               <ChefHat className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl font-bold text-white">Meal Planning Chat</h2>
-              <p className="text-orange-100 text-sm">Your AI cooking assistant</p>
+              <h2 className="text-xl font-bold text-white">
+                Meal Planning Chat
+              </h2>
+              <p className="text-orange-100 text-sm">
+                Your AI cooking assistant
+              </p>
             </div>
           </div>
         </div>
@@ -281,7 +379,9 @@ export default function MealPlanPage() {
                 <Calendar className="w-8 h-8 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Weekly Meal Plan</h1>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Weekly Meal Plan
+                </h1>
                 <p className="text-gray-600">
                   Week of {format(currentWeek, "MMMM d, yyyy")}
                 </p>
@@ -290,18 +390,10 @@ export default function MealPlanPage() {
 
             {/* Week Navigation */}
             <div className="flex items-center space-x-2">
-              <Button
-                variant="outline"
-                onClick={goToPreviousWeek}
-                size="sm"
-              >
+              <Button variant="outline" onClick={goToPreviousWeek} size="sm">
                 Previous
               </Button>
-              <Button
-                variant="outline"
-                onClick={goToNextWeek}
-                size="sm"
-              >
+              <Button variant="outline" onClick={goToNextWeek} size="sm">
                 Next
               </Button>
               <Button
@@ -326,7 +418,9 @@ export default function MealPlanPage() {
               const dayDate = addDays(currentWeek, index);
               return (
                 <div key={day} className="text-center">
-                  <div className="text-sm text-gray-500">{format(dayDate, "EEE")}</div>
+                  <div className="text-sm text-gray-500">
+                    {format(dayDate, "EEE")}
+                  </div>
                   <div className="text-lg font-semibold text-gray-900">
                     {format(dayDate, "d")}
                   </div>
@@ -338,7 +432,10 @@ export default function MealPlanPage() {
             {MEAL_SLOTS.map((meal) => (
               <>
                 {/* Meal label */}
-                <div key={`${meal}-label`} className="flex items-center justify-center">
+                <div
+                  key={`${meal}-label`}
+                  className="flex items-center justify-center"
+                >
                   <span className="text-sm font-medium text-gray-700 capitalize">
                     {meal}
                   </span>
@@ -402,7 +499,10 @@ export default function MealPlanPage() {
             const assignedMeal = mealAssignments[mealKey];
 
             return (
-              <Card key={meal} className="flex-1 w-full border-2 border-gray-200 rounded-xl min-h-0">
+              <Card
+                key={meal}
+                className="flex-1 w-full border-2 border-gray-200 rounded-xl min-h-0"
+              >
                 <CardContent className="p-3 h-full flex flex-col">
                   <div className="text-center flex-1 flex flex-col justify-center">
                     <div className="mb-2">
@@ -413,7 +513,9 @@ export default function MealPlanPage() {
 
                     {assignedMeal ? (
                       <div className="flex flex-col items-center justify-center flex-1">
-                        <div className="text-2xl mb-1">{assignedMeal.image}</div>
+                        <div className="text-2xl mb-1">
+                          {assignedMeal.image}
+                        </div>
                         <div className="text-center">
                           <p className="text-sm font-medium text-gray-900 line-clamp-1">
                             {assignedMeal.title}
@@ -451,7 +553,9 @@ export default function MealPlanPage() {
         <div className="flex-shrink-0 px-6 py-2">
           <div className="flex items-center justify-between bg-white rounded-xl shadow-sm border border-gray-100 px-4 py-2">
             <button
-              onClick={() => setCurrentDayIndex(Math.max(0, currentDayIndex - 1))}
+              onClick={() =>
+                setCurrentDayIndex(Math.max(0, currentDayIndex - 1))
+              }
               disabled={currentDayIndex === 0}
               className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
@@ -465,7 +569,9 @@ export default function MealPlanPage() {
             </div>
 
             <button
-              onClick={() => setCurrentDayIndex(Math.min(6, currentDayIndex + 1))}
+              onClick={() =>
+                setCurrentDayIndex(Math.min(6, currentDayIndex + 1))
+              }
               disabled={currentDayIndex === 6}
               className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
@@ -484,7 +590,7 @@ export default function MealPlanPage() {
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Ask about meal planning..."
+              placeholder="What do you crave this week?"
               disabled={isGenerating}
               className="min-w-0 grow basis-0 bg-transparent outline-none focus:ring-0"
             />
@@ -505,3 +611,4 @@ export default function MealPlanPage() {
     </div>
   );
 }
+
