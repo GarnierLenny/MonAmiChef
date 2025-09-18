@@ -11,6 +11,9 @@ import {
   Plus,
   X,
   ChefHat,
+  Clock,
+  User,
+  Zap,
 } from "lucide-react";
 import { format, startOfWeek, addDays, addWeeks, subWeeks } from "date-fns";
 import type { ChatMessage } from "../types/types";
@@ -25,97 +28,172 @@ const FAKE_MEALS = {
   breakfast: [
     {
       id: "b1",
-      title: "Avocado Toast",
-      image: "🥑",
-      description: "Whole grain toast with fresh avocado",
+      title: "Overnight Oats with Berries & Nuts",
+      image: "🥣",
+      description: "Steel-cut oats with fresh berries and almonds",
+      servings: 1,
+      cookingTime: 20,
+      calories: 320,
+      grade: "A",
+      macros: { protein: 20, carbs: 45, fat: 10 },
     },
     {
       id: "b2",
       title: "Greek Yogurt Bowl",
       image: "🥣",
       description: "Greek yogurt with berries and granola",
+      servings: 1,
+      cookingTime: 5,
+      calories: 280,
+      grade: "A",
+      macros: { protein: 18, carbs: 35, fat: 8 },
     },
     {
       id: "b3",
-      title: "Oatmeal with Berries",
-      image: "🥣",
-      description: "Steel-cut oats with fresh berries",
+      title: "Avocado Toast with Eggs",
+      image: "🥑",
+      description: "Whole grain toast with fresh avocado and poached eggs",
+      servings: 1,
+      cookingTime: 15,
+      calories: 420,
+      grade: "B",
+      macros: { protein: 22, carbs: 28, fat: 18 },
     },
     {
       id: "b4",
-      title: "Scrambled Eggs",
+      title: "Scrambled Eggs with Herbs",
       image: "🍳",
-      description: "Fluffy scrambled eggs with herbs",
+      description: "Fluffy scrambled eggs with fresh herbs",
+      servings: 1,
+      cookingTime: 10,
+      calories: 250,
+      grade: "A",
+      macros: { protein: 20, carbs: 5, fat: 15 },
     },
     {
       id: "b5",
       title: "Smoothie Bowl",
       image: "🥤",
-      description: "Tropical smoothie bowl with toppings",
+      description: "Tropical smoothie bowl with coconut toppings",
+      servings: 1,
+      cookingTime: 8,
+      calories: 350,
+      grade: "B",
+      macros: { protein: 12, carbs: 55, fat: 12 },
     },
   ],
   lunch: [
     {
       id: "l1",
-      title: "Caesar Salad",
+      title: "Mediterranean Quinoa Bowl",
       image: "🥗",
-      description: "Classic caesar with homemade dressing",
+      description: "Quinoa with fresh vegetables and feta",
+      servings: 1,
+      cookingTime: 25,
+      calories: 450,
+      grade: "A",
+      macros: { protein: 18, carbs: 52, fat: 16 },
     },
     {
       id: "l2",
       title: "Grilled Chicken Wrap",
       image: "🌯",
-      description: "Grilled chicken with fresh vegetables",
+      description: "Lean chicken with fresh vegetables in whole wheat wrap",
+      servings: 1,
+      cookingTime: 15,
+      calories: 380,
+      grade: "A",
+      macros: { protein: 32, carbs: 35, fat: 12 },
     },
     {
       id: "l3",
-      title: "Quinoa Bowl",
+      title: "Asian Buddha Bowl",
       image: "🍲",
-      description: "Quinoa with roasted vegetables",
+      description: "Brown rice with tofu and mixed vegetables",
+      servings: 1,
+      cookingTime: 30,
+      calories: 420,
+      grade: "A",
+      macros: { protein: 22, carbs: 48, fat: 14 },
     },
     {
       id: "l4",
-      title: "Soup & Sandwich",
+      title: "Turkey & Avocado Sandwich",
       image: "🥪",
-      description: "Tomato soup with grilled cheese",
+      description: "Lean turkey with avocado on whole grain bread",
+      servings: 1,
+      cookingTime: 10,
+      calories: 390,
+      grade: "B",
+      macros: { protein: 28, carbs: 32, fat: 16 },
     },
     {
       id: "l5",
-      title: "Pasta Salad",
+      title: "Mediterranean Pasta Salad",
       image: "🍝",
-      description: "Mediterranean pasta salad",
+      description: "Whole wheat pasta with olives and vegetables",
+      servings: 1,
+      cookingTime: 20,
+      calories: 410,
+      grade: "B",
+      macros: { protein: 15, carbs: 58, fat: 14 },
     },
   ],
   dinner: [
     {
       id: "d1",
-      title: "Grilled Salmon",
+      title: "Grilled Salmon with Vegetables",
       image: "🐟",
-      description: "Atlantic salmon with lemon herbs",
+      description: "Atlantic salmon with roasted seasonal vegetables",
+      servings: 1,
+      cookingTime: 35,
+      calories: 520,
+      grade: "A",
+      macros: { protein: 42, carbs: 18, fat: 28 },
     },
     {
       id: "d2",
       title: "Chicken Stir Fry",
       image: "🍜",
-      description: "Asian-style chicken and vegetables",
+      description: "Lean chicken with mixed vegetables and brown rice",
+      servings: 1,
+      cookingTime: 25,
+      calories: 480,
+      grade: "A",
+      macros: { protein: 38, carbs: 45, fat: 15 },
     },
     {
       id: "d3",
-      title: "Beef Tacos",
+      title: "Lean Beef Tacos",
       image: "🌮",
-      description: "Ground beef tacos with fresh toppings",
+      description: "Grass-fed beef with fresh toppings in corn tortillas",
+      servings: 2,
+      cookingTime: 20,
+      calories: 650,
+      grade: "B",
+      macros: { protein: 35, carbs: 48, fat: 22 },
     },
     {
       id: "d4",
-      title: "Vegetable Curry",
+      title: "Vegetable Curry with Rice",
       image: "🍛",
-      description: "Coconut curry with mixed vegetables",
+      description: "Coconut curry with mixed vegetables and brown rice",
+      servings: 1,
+      cookingTime: 40,
+      calories: 420,
+      grade: "A",
+      macros: { protein: 16, carbs: 62, fat: 12 },
     },
     {
       id: "d5",
-      title: "Pizza Night",
+      title: "Margherita Pizza",
       image: "🍕",
-      description: "Homemade pizza with favorite toppings",
+      description: "Homemade thin crust with fresh mozzarella and basil",
+      servings: 2,
+      cookingTime: 45,
+      calories: 780,
+      grade: "C",
+      macros: { protein: 28, carbs: 85, fat: 32 },
     },
   ],
 };
@@ -140,6 +218,15 @@ interface MealPlan {
       title: string;
       image: string;
       description: string;
+      servings: number;
+      cookingTime: number;
+      calories: number;
+      grade: "A" | "B" | "C";
+      macros: {
+        protein: number;
+        carbs: number;
+        fat: number;
+      };
     };
   };
 }
@@ -149,6 +236,34 @@ const initialChatMessage: ChatMessage = {
   role: "model",
   text: "Hi! I'm your AI meal planning assistant. Tell me about your dietary preferences, cooking goals, or what you'd like to eat this week, and I'll help you plan amazing meals!",
   timestamp: new Date(),
+};
+
+// Helper function for grade badge styling
+const getGradeStyles = (grade: "A" | "B" | "C") => {
+  switch (grade) {
+    case "A":
+      return "bg-green-500 text-white";
+    case "B":
+      return "bg-yellow-500 text-white";
+    case "C":
+      return "bg-red-500 text-white";
+    default:
+      return "bg-gray-500 text-white";
+  }
+};
+
+// Helper function for macro badge styling
+const getMacroStyles = (type: "protein" | "carbs" | "fat") => {
+  switch (type) {
+    case "protein":
+      return "bg-green-100 text-green-800 border-green-200";
+    case "carbs":
+      return "bg-blue-100 text-blue-800 border-blue-200";
+    case "fat":
+      return "bg-orange-100 text-orange-800 border-orange-200";
+    default:
+      return "bg-gray-100 text-gray-800 border-gray-200";
+  }
 };
 
 export default function MealPlanPage() {
@@ -445,12 +560,13 @@ export default function MealPlanPage() {
                 {DAYS_OF_WEEK.map((day) => (
                   <Card
                     key={`${day}-${meal}`}
-                    className="h-32 cursor-pointer hover:shadow-md transition-shadow group"
+                    className="h-48 cursor-pointer hover:shadow-md transition-shadow group"
                     onClick={() => handleSlotClick(day, meal)}
                   >
                     <CardContent className="p-3 h-full flex flex-col">
                       {mealPlan[day]?.[meal] ? (
-                        <>
+                        <div className="flex flex-col h-full">
+                          {/* Remove button */}
                           <Button
                             variant="ghost"
                             size="sm"
@@ -462,15 +578,60 @@ export default function MealPlanPage() {
                           >
                             <X className="h-3 w-3" />
                           </Button>
-                          <div className="flex-1 flex flex-col items-center justify-center text-center">
-                            <div className="text-2xl mb-1">
-                              {mealPlan[day][meal]?.image}
+
+                          {/* Header with title and grade */}
+                          <div className="flex items-start justify-between mb-2 -mt-6">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-xs font-semibold text-gray-900 line-clamp-2 leading-tight">
+                                {mealPlan[day][meal]?.title}
+                              </h4>
                             </div>
-                            <span className="text-xs font-medium line-clamp-2">
-                              {mealPlan[day][meal]?.title}
+                            <div
+                              className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ml-2 flex-shrink-0 ${getGradeStyles(mealPlan[day][meal]?.grade || "A")}`}
+                            >
+                              {mealPlan[day][meal]?.grade}
+                            </div>
+                          </div>
+
+                          {/* Info Row */}
+                          <div className="flex items-center justify-between mb-2 text-xs text-gray-600">
+                            <div className="flex items-center gap-1">
+                              <User className="w-3 h-3" />
+                              <span>{mealPlan[day][meal]?.servings}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-3 h-3" />
+                              <span>{mealPlan[day][meal]?.cookingTime}m</span>
+                            </div>
+                          </div>
+
+                          {/* Calories */}
+                          <div className="flex items-center gap-1 mb-2 text-xs">
+                            <Zap className="w-3 h-3 text-orange-500" />
+                            <span className="font-medium">
+                              {mealPlan[day][meal]?.calories} cal
                             </span>
                           </div>
-                        </>
+
+                          {/* Macros */}
+                          <div className="flex items-center gap-1 flex-wrap mt-auto">
+                            <div
+                              className={`px-1.5 py-0.5 rounded text-xs font-medium border ${getMacroStyles("protein")}`}
+                            >
+                              P {mealPlan[day][meal]?.macros.protein}g
+                            </div>
+                            <div
+                              className={`px-1.5 py-0.5 rounded text-xs font-medium border ${getMacroStyles("carbs")}`}
+                            >
+                              C {mealPlan[day][meal]?.macros.carbs}g
+                            </div>
+                            <div
+                              className={`px-1.5 py-0.5 rounded text-xs font-medium border ${getMacroStyles("fat")}`}
+                            >
+                              F {mealPlan[day][meal]?.macros.fat}g
+                            </div>
+                          </div>
+                        </div>
                       ) : (
                         <div className="h-full flex items-center justify-center">
                           <div className="text-center text-gray-400">
@@ -493,56 +654,102 @@ export default function MealPlanPage() {
         {/* Mobile Meal Cards - Full screen width, no scrolling */}
         <div className="flex-1 px-4 pt-4 pb-4 flex flex-col gap-3 overflow-hidden min-h-0">
           {MEAL_SLOTS.map((meal) => {
-            // Use Monday as default day since we removed day navigation
-            const currentDay = "Monday";
+            // Use current day from navigation
+            const currentDay = DAYS_OF_WEEK[currentDayIndex];
             const mealKey = `${currentDay}-${meal}`;
             const assignedMeal = mealAssignments[mealKey];
 
             return (
               <Card
                 key={meal}
-                className="flex-1 w-full border-2 border-gray-200 rounded-xl min-h-0"
+                className="flex-1 w-full border-2 border-gray-200 rounded-xl min-h-0 cursor-pointer hover:shadow-md transition-shadow"
+                onClick={() => handleSlotClick(currentDay, meal)}
               >
-                <CardContent className="p-3 h-full flex flex-col">
-                  <div className="text-center flex-1 flex flex-col justify-center">
-                    <div className="mb-2">
-                      <span className="text-base font-semibold text-gray-700 capitalize">
-                        {meal}
-                      </span>
-                    </div>
-
-                    {assignedMeal ? (
-                      <div className="flex flex-col items-center justify-center flex-1">
-                        <div className="text-2xl mb-1">
-                          {assignedMeal.image}
-                        </div>
-                        <div className="text-center">
-                          <p className="text-sm font-medium text-gray-900 line-clamp-1">
+                <CardContent className="p-4 h-full flex flex-col">
+                  {assignedMeal ? (
+                    <div className="flex flex-col h-full">
+                      {/* Header with meal type, title and grade */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                            {meal}
+                          </div>
+                          <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 leading-tight">
                             {assignedMeal.title}
-                          </p>
-                          <p className="text-xs text-gray-500 mt-1 line-clamp-1">
-                            {assignedMeal.description}
-                          </p>
+                          </h3>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeMeal(mealKey)}
-                          className="mt-1 text-red-500 hover:text-red-600 hover:bg-red-50 h-7 px-2 text-xs"
+                        <div
+                          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ml-3 flex-shrink-0 ${getGradeStyles(assignedMeal.grade)}`}
                         >
-                          <X className="h-3 w-3 mr-1" />
-                          Remove
-                        </Button>
+                          {assignedMeal.grade}
+                        </div>
                       </div>
-                    ) : (
+
+                      {/* Info Row */}
+                      <div className="flex items-center gap-4 mb-3 text-xs text-gray-600">
+                        <div className="flex items-center gap-1">
+                          <User className="w-3 h-3" />
+                          <span>Servings: {assignedMeal.servings}</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          <span>{assignedMeal.cookingTime} min</span>
+                        </div>
+                      </div>
+
+                      {/* Calories */}
+                      <div className="flex items-center gap-1 mb-3 text-xs">
+                        <Zap className="w-3 h-3 text-orange-500" />
+                        <span className="font-medium">
+                          {assignedMeal.calories} cal
+                        </span>
+                      </div>
+
+                      {/* Macros */}
+                      <div className="flex items-center gap-2 mb-4">
+                        <div
+                          className={`px-2 py-1 rounded-md text-xs font-medium border ${getMacroStyles("protein")}`}
+                        >
+                          P {assignedMeal.macros.protein}g
+                        </div>
+                        <div
+                          className={`px-2 py-1 rounded-md text-xs font-medium border ${getMacroStyles("carbs")}`}
+                        >
+                          C {assignedMeal.macros.carbs}g
+                        </div>
+                        <div
+                          className={`px-2 py-1 rounded-md text-xs font-medium border ${getMacroStyles("fat")}`}
+                        >
+                          F {assignedMeal.macros.fat}g
+                        </div>
+                      </div>
+
+                      {/* Remove Button */}
+                      {/* <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => removeMeal(mealKey)}
+                        className="mt-auto text-red-500 hover:text-red-600 hover:bg-red-50 h-7 px-2 text-xs self-start"
+                      >
+                        <X className="h-3 w-3 mr-1" />
+                        Raemove
+                      </Button> */}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full text-center">
+                      <div className="mb-3">
+                        <span className="text-base font-semibold text-gray-700 capitalize">
+                          {meal}
+                        </span>
+                      </div>
                       <div className="flex flex-col items-center justify-center flex-1">
                         <div className="w-12 h-12 mx-auto mb-2 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center">
                           <Plus className="h-5 w-5 text-gray-400" />
                         </div>
                         <p className="text-sm text-gray-500">Add {meal}</p>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             );
@@ -611,4 +818,3 @@ export default function MealPlanPage() {
     </div>
   );
 }
-
