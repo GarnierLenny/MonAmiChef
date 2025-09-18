@@ -26,6 +26,8 @@ import ChatPage from "./pages/ChatPage";
 import AuthCallback from "./components/AuthCallback";
 import SavedRecipes from "./pages/SavedRecipes";
 import RecipeHistoryPage from "./pages/RecipeHistory";
+import NotFoundPage from "./pages/NotFoundPage";
+import CanonicalUrl from "./components/CanonicalUrl";
 import { Toaster } from "@/components/ui/toaster";
 import { AppErrorBoundary, ComponentErrorBoundary } from "./components/ErrorBoundary";
 
@@ -162,6 +164,7 @@ function App() {
   // Anonymous-first: we do NOT block the app if not logged in.
   return (
     <AppErrorBoundary>
+      <CanonicalUrl />
       <div className="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
       {!isRecipePage && !isChatPage && (
         <MobileTopBar onMenuClick={() => setIsMobileSidebarOpen(true)} />
@@ -241,7 +244,7 @@ function App() {
             }
           />
 
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>
 
