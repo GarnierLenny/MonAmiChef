@@ -6,7 +6,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { BookmarkIcon, Sparkles, User, Clock, Zap, Eye, RotateCcw, Trash2 } from "lucide-react";
+import { BookmarkIcon, Sparkles, User, Clock, Zap, Eye, RotateCcw, Trash2, Loader2 } from "lucide-react";
 import { getGradeStyles } from "./utils";
 import type { Meal, MealSlot } from "./constants";
 
@@ -19,6 +19,7 @@ interface SimpleMealCardProps {
   onRegenerate?: () => void;
   onDelete?: () => void;
   isGenerating?: boolean;
+  isRegenerating?: boolean;
 }
 
 export const SimpleMealCard = ({
@@ -30,9 +31,12 @@ export const SimpleMealCard = ({
   onRegenerate,
   onDelete,
   isGenerating = false,
+  isRegenerating = false,
 }: SimpleMealCardProps) => {
+  const isCurrentlyGenerating = isGenerating || isRegenerating;
+
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-2">
+    <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-2 relative">
       {/* Meal Type Header */}
       <div className="text-left">
         <h3 className="font-semibold text-gray-400 uppercase tracking-wide text-xs">
@@ -149,10 +153,10 @@ export const SimpleMealCard = ({
             <ContextMenuItem
               onClick={onRegenerate}
               className="flex items-center gap-2 cursor-pointer"
-              disabled={isGenerating}
+              disabled={isCurrentlyGenerating}
             >
               <RotateCcw className="w-4 h-4" />
-              <span>{isGenerating ? "Generating..." : "Regenerate"}</span>
+              <span>{isCurrentlyGenerating ? "Generating..." : "Regenerate"}</span>
             </ContextMenuItem>
             <ContextMenuItem
               onClick={onDelete}
@@ -193,6 +197,16 @@ export const SimpleMealCard = ({
             </Button>
           </div>
         </>
+      )}
+
+      {/* Loading Overlay */}
+      {isCurrentlyGenerating && (
+        <div className="absolute inset-0 bg-white/90 rounded-xl flex flex-col items-center justify-center z-10">
+          <Loader2 className="w-8 h-8 animate-spin text-orange-500 mb-2" />
+          <p className="text-sm text-gray-600 font-medium">
+            Generating exquisite recipe...
+          </p>
+        </div>
       )}
     </div>
   );

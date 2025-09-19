@@ -40,6 +40,7 @@ export default function MealPlanPage() {
   // Input state
   const [inputValue, setInputValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatingSlots, setGeneratingSlots] = useState<Set<string>>(new Set());
 
   // Meal plan state
   const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date()));
@@ -287,7 +288,8 @@ export default function MealPlanPage() {
 
   // Handle meal slot click
   const handleSlotClick = async (day: string, meal: MealSlot) => {
-    setIsGenerating(true);
+    const slotKey = `${day}-${meal}`;
+    setGeneratingSlots(prev => new Set(prev).add(slotKey));
     setError(null);
 
     try {
@@ -364,7 +366,11 @@ export default function MealPlanPage() {
       console.error('Failed to generate meal:', err);
       setError((err as Error).message || 'Failed to generate meal');
     } finally {
-      setIsGenerating(false);
+      setGeneratingSlots(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(slotKey);
+        return newSet;
+      });
     }
   };
 
@@ -577,6 +583,7 @@ export default function MealPlanPage() {
           onShowRecipe={handleShowRecipe}
           onRegenerate={handleRegenerate}
           onDeleteMeal={handleDeleteMeal}
+          generatingSlots={generatingSlots}
         />
       </div>
 

@@ -24,6 +24,7 @@ interface NewMobileMealLayoutProps {
   onShowRecipe?: (day: string, meal: MealSlot) => void;
   onRegenerate?: (day: string, meal: MealSlot) => void;
   onDeleteMeal?: (day: string, meal: MealSlot) => void;
+  generatingSlots?: Set<string>;
 }
 
 export const NewMobileMealLayout = ({
@@ -40,6 +41,7 @@ export const NewMobileMealLayout = ({
   onShowRecipe,
   onRegenerate,
   onDeleteMeal,
+  generatingSlots = new Set(),
 }: NewMobileMealLayoutProps) => {
   const weekStart = startOfWeek(currentWeek);
   const currentDay = DAYS_OF_WEEK[currentDayIndex];
@@ -77,6 +79,8 @@ export const NewMobileMealLayout = ({
       <div className="flex-1 px-4 space-y-4 overflow-y-auto">
         {MEAL_SLOTS.map((mealSlot) => {
           const meal = mealPlan[currentDay]?.[mealSlot];
+          const slotKey = `${currentDay}-${mealSlot}`;
+          const isSlotGenerating = generatingSlots.has(slotKey);
 
           return (
             <SimpleMealCard
@@ -88,7 +92,8 @@ export const NewMobileMealLayout = ({
               onShowRecipe={() => onShowRecipe?.(currentDay, mealSlot)}
               onRegenerate={() => onRegenerate?.(currentDay, mealSlot)}
               onDelete={() => onDeleteMeal?.(currentDay, mealSlot)}
-              isGenerating={isGenerating}
+              isGenerating={!meal && isSlotGenerating}
+              isRegenerating={meal && isSlotGenerating}
             />
           );
         })}
