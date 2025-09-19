@@ -2,7 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Calendar, Utensils } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { MealCard } from "./MealCard";
-import { DAYS_OF_WEEK, MEAL_SLOTS, type MealPlan, type MealSlot } from "./constants";
+import {
+  DAYS_OF_WEEK,
+  MEAL_SLOTS,
+  type MealPlan,
+  type MealSlot,
+} from "./constants";
 
 interface MealGridProps {
   currentWeek: Date;
@@ -71,7 +76,7 @@ export const MealGrid = ({
           {DAYS_OF_WEEK.map((day, index) => {
             const dayDate = addDays(currentWeek, index);
             return (
-              <div key={day} className="text-center">
+              <div key={index} className="text-center">
                 <div className="text-sm text-gray-500">
                   {format(dayDate, "EEE")}
                 </div>
@@ -83,22 +88,19 @@ export const MealGrid = ({
           })}
 
           {/* Grid rows */}
-          {MEAL_SLOTS.map((meal) => (
+          {MEAL_SLOTS.map((meal, index) => (
             <>
               {/* Meal label */}
-              <div
-                key={`${meal}-label`}
-                className="flex items-center justify-center"
-              >
+              <div key={index} className="flex items-center justify-center">
                 <span className="text-sm font-medium text-gray-700 capitalize">
                   {meal}
                 </span>
               </div>
 
               {/* Meal slots for each day */}
-              {DAYS_OF_WEEK.map((day) => (
+              {DAYS_OF_WEEK.map((day, index) => (
                 <MealCard
-                  key={`${day}-${meal}`}
+                  key={index}
                   meal={mealPlan[day]?.[meal]}
                   mealSlot={meal}
                   onClick={() => onSlotClick(day, meal)}
@@ -113,3 +115,4 @@ export const MealGrid = ({
     </div>
   );
 };
+

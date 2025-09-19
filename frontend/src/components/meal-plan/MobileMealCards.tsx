@@ -3,7 +3,12 @@ import { Send } from "lucide-react";
 import { format, addDays, startOfWeek } from "date-fns";
 import { MealCard } from "./MealCard";
 import { ProgressCard } from "./ProgressCard";
-import { DAYS_OF_WEEK, MEAL_SLOTS, type MealPlan, type MealSlot } from "./constants";
+import {
+  DAYS_OF_WEEK,
+  MEAL_SLOTS,
+  type MealPlan,
+  type MealSlot,
+} from "./constants";
 
 interface MobileMealCardsProps {
   currentWeek: Date;
@@ -34,7 +39,10 @@ export const MobileMealCards = ({
   const currentDay = DAYS_OF_WEEK[currentDayIndex];
 
   // Convert meal plan to assignments format for mobile
-  const mealAssignments: Record<string, typeof mealPlan[string][keyof typeof mealPlan[string]]> = {};
+  const mealAssignments: Record<
+    string,
+    (typeof mealPlan)[string][keyof (typeof mealPlan)[string]]
+  > = {};
   Object.entries(mealPlan).forEach(([day, meals]) => {
     Object.entries(meals).forEach(([meal, mealData]) => {
       mealAssignments[`${day}-${meal}`] = mealData;
@@ -55,13 +63,13 @@ export const MobileMealCards = ({
 
       {/* Mobile Meal Cards - Full screen width, no scrolling */}
       <div className="flex-1 px-4 pb-4 flex flex-col gap-3 overflow-hidden min-h-0">
-        {MEAL_SLOTS.map((meal) => {
+        {MEAL_SLOTS.map((meal, index) => {
           const mealKey = `${currentDay}-${meal}`;
           const assignedMeal = mealAssignments[mealKey];
 
           return (
             <MealCard
-              key={meal}
+              key={index}
               meal={assignedMeal}
               mealSlot={meal}
               onClick={() => onSlotClick(currentDay, meal)}
@@ -76,9 +84,7 @@ export const MobileMealCards = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() =>
-              setCurrentDayIndex(Math.max(0, currentDayIndex - 1))
-            }
+            onClick={() => setCurrentDayIndex(Math.max(0, currentDayIndex - 1))}
             disabled={currentDayIndex === 0}
             className="w-8 h-8 rounded-full p-0"
           >
@@ -94,9 +100,7 @@ export const MobileMealCards = ({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() =>
-              setCurrentDayIndex(Math.min(6, currentDayIndex + 1))
-            }
+            onClick={() => setCurrentDayIndex(Math.min(6, currentDayIndex + 1))}
             disabled={currentDayIndex === 6}
             className="w-8 h-8 rounded-full p-0"
           >
@@ -132,3 +136,4 @@ export const MobileMealCards = ({
     </div>
   );
 };
+
