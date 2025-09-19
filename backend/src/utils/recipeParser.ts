@@ -18,15 +18,43 @@ export interface ParsedRecipeForDB {
  * Parse AI response text to extract recipe information
  */
 export function parseRecipeFromText(text: string): ParsedRecipe | null {
-  // Check if the text contains recipe-like content
-  const hasRecipeIndicators = /\b(ingredients?|instructions?|steps?|recipe|cook|preparation|ingredients list)\b/i.test(text);
+  // Check if the text contains recipe-like content (more lenient)
+  const hasRecipeIndicators = /\b(ingredients?|instructions?|steps?|recipe|cook|preparation|ingredients list|make|directions|method|serves?|serving|cal|calories|protein|carb|fat)\b/i.test(text);
   if (!hasRecipeIndicators) {
     return null;
   }
 
-  // Extract title - look for markdown heading or first line
-  const titleMatch = text.match(/^#\s+(.+)$/m) || text.match(/^\*\*(.+)\*\*$/m);
-  const title = titleMatch ? titleMatch[1].trim() : extractTitleFromContent(text);
+  // Extract title - look for various patterns
+  let title = '';
+
+  // Try multiple title patterns
+  const titlePatterns = [
+    /^#\s+(.+)$/m,                           // # Title
+    /^\*\*(.+)\*\*$/m,                       // **Title**
+    /^##?\s*(.+)$/m,                         // ## Title or # Title
+    /(?:^|\n)\s*\*\*([^*]+)\*\*(?:\s*\n|$)/m, // **Title** anywhere
+    /Recipe:\s*(.+?)(?:\n|$)/i,              // Recipe: Title
+    /^(.+)\s+Recipe/im,                      // Title Recipe
+    /(.+?)\s*(?:\n|$)/                       // First line fallback
+  ];
+
+  for (const pattern of titlePatterns) {
+    const match = text.match(pattern);
+    if (match && match[1] && match[1].trim()) {
+      title = match[1].trim();
+      // Clean up common title artifacts
+      title = title.replace(/^(Recipe:?\s*|Cook:?\s*|Make:?\s*)/i, '');
+      title = title.replace(/\s+Recipe\s*$/i, '');
+      if (title.length > 3 && title.length < 100) { // Reasonable title length
+        break;
+      }
+    }
+  }
+
+  // Final fallback
+  if (!title) {
+    title = extractTitleFromContent(text);
+  }
 
   // Extract ingredients
   const ingredients = extractIngredients(text);
@@ -34,9 +62,10 @@ export function parseRecipeFromText(text: string): ParsedRecipe | null {
   // Extract instructions
   const instructions = extractInstructions(text);
   
-  // If we don't have basic recipe components, it's probably not a recipe
+  // If we don't have basic recipe components, still try to create a recipe with the title
   if (ingredients.length === 0 && instructions.length === 0) {
-    return null;
+    console.warn('Recipe parsing: No ingredients or instructions found, but title exists:', title);
+    // Don't return null - create a minimal recipe structure
   }
 
   // Extract tips/variations
@@ -245,21 +274,31 @@ function generateTags(text: string): string[] {
  * Parse AI response text to extract recipe information for database storage
  */
 export function parseRecipeFromAI(text: string): ParsedRecipeForDB {
+  console.log('Parsing AI recipe text:', text.substring(0, 200) + '...');
+
   const parsed = parseRecipeFromText(text);
 
   if (!parsed) {
-    // Fallback for non-recipe responses
+    // Try to extract at least a title from the first line or fall back to a better default
+    const firstLine = text.split('\n')[0]?.trim();
+    const fallbackTitle = firstLine && firstLine.length > 3 && firstLine.length < 100
+      ? firstLine.replace(/^[#*\s]+/, '').replace(/[#*\s]+$/, '')
+      : 'Delicious Recipe';
+
+    console.warn('Recipe parsing failed, using fallback title:', fallbackTitle);
+
     return {
-      title: 'AI Generated Recipe',
+      title: fallbackTitle,
       content_json: {
-        title: 'AI Generated Recipe',
-        ingredients: ['Recipe parsing failed'],
-        instructions: ['Please try again with a different request'],
+        title: fallbackTitle,
+        ingredients: ['Recipe parsing failed - please regenerate'],
+        instructions: ['Please try generating again'],
       },
       tags: ['ai-generated'],
     };
   }
 
+  console.log('Successfully parsed recipe:', parsed.title);
   return {
     title: parsed.title,
     content_json: parsed.content,
