@@ -5,6 +5,7 @@ import { startOfWeek, addWeeks, subWeeks } from "date-fns";
 // Import components
 import { MealGrid } from "@/components/meal-plan/MealGrid";
 import { MobileMealCards } from "@/components/meal-plan/MobileMealCards";
+import { NewMobileMealLayout } from "@/components/meal-plan/NewMobileMealLayout";
 import { ProgressCard } from "@/components/meal-plan/ProgressCard";
 import { ProgressModal } from "@/components/meal-plan/ProgressModal";
 
@@ -449,8 +450,8 @@ export default function MealPlanPage() {
       </div>
 
       {/* Mobile Layout */}
-      <div className="md:hidden h-screen w-full flex flex-col bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 overflow-hidden fixed inset-0 pt-20">
-        <MobileMealCards
+      <div className="md:hidden h-screen w-full flex flex-col bg-gray-50 overflow-hidden fixed inset-0 pt-20">
+        <NewMobileMealLayout
           currentWeek={currentWeek}
           currentDayIndex={currentDayIndex}
           setCurrentDayIndex={setCurrentDayIndex}
