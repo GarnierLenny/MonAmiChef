@@ -7,6 +7,7 @@ import type {
   UpdateMealPlanItemRequest
 } from './api/mealPlanApi';
 import type { MealPlan, Meal, MealSlot } from '@/components/meal-plan/constants';
+import type { Recipe } from './api/recipeApi';
 
 // Convert day names to backend day numbers (0-6, Sunday-Saturday)
 const DAY_NAME_TO_NUMBER: Record<string, number> = {
@@ -117,4 +118,84 @@ export function requiresAuthentication(error: unknown): boolean {
   const err = error as { message?: string; statusCode?: number };
   return err?.message?.includes?.('only available for registered users') ||
          err?.statusCode === 401;
+}
+
+// Convert recipe to meal format for display
+export function convertRecipeToMeal(recipe: Recipe): Meal {
+  const nutrition = recipe.nutrition;
+  const content = recipe.content_json;
+
+  // Extract emoji from title if present, default based on meal type
+  const emojiMatch = recipe.title.match(/([🍳🥣🍽️🥗🌯🍲🥪🍝🐟🍜🌮🍛🍕🥤🥑])/);
+  const emoji = emojiMatch ? emojiMatch[1] : getDefaultEmojiForTags(recipe.tags);
+
+  // Calculate grade based on nutrition (simple heuristic)
+  let grade: "A" | "B" | "C" | "D" = "B"; // Default
+  if (nutrition?.calories) {
+    if (nutrition.calories <= 400 && nutrition.protein && nutrition.protein >= 15) {
+      grade = "A";
+    } else if (nutrition.calories > 600) {
+      grade = "C";
+    }
+  }
+
+  return {
+    id: recipe.id,
+    title: recipe.title.replace(/[🍳🥣🍽️🥗🌯🍲🥪🍝🐟🍜🌮🍛🍕🥤🥑]/g, '').trim(),
+    image: emoji,
+    description: content.ingredients.slice(0, 3).join(', ') + (content.ingredients.length > 3 ? '...' : ''),
+    servings: content.servings || 1,
+    cookingTime: parseCookingTime(content.cookTime || content.totalTime) || 20,
+    calories: nutrition?.calories || 350,
+    grade,
+    macros: {
+      protein: nutrition?.protein || 15,
+      carbs: nutrition?.carbs || 30,
+      fat: nutrition?.fat || 10,
+    },
+  };
+}
+
+// Get default emoji based on recipe tags
+function getDefaultEmojiForTags(tags: string[]): string {
+  const emojiMap: Record<string, string> = {
+    'breakfast': '🥣',
+    'lunch': '🍽️',
+    'dinner': '🍽️',
+    'snack': '🥨',
+    'italian': '🍝',
+    'asian': '🍜',
+    'mexican': '🌮',
+    'mediterranean': '🥗',
+    'grilled': '🔥',
+    'baked': '🍞',
+    'salad': '🥗',
+    'soup': '🍲',
+    'pasta': '🍝',
+    'rice': '🍛',
+    'sandwich': '🥪',
+    'stir-fry': '🍜',
+  };
+
+  for (const tag of tags) {
+    if (emojiMap[tag.toLowerCase()]) {
+      return emojiMap[tag.toLowerCase()];
+    }
+  }
+
+  return '🍽️'; // Default emoji
+}
+
+// Parse cooking time string to minutes
+function parseCookingTime(timeStr?: string): number | undefined {
+  if (!timeStr) return undefined;
+
+  const hourMatch = timeStr.match(/(\d+)\s*(?:hrs?|hours?)/i);
+  const minMatch = timeStr.match(/(\d+)\s*(?:mins?|minutes?)/i);
+
+  let minutes = 0;
+  if (hourMatch) minutes += parseInt(hourMatch[1]) * 60;
+  if (minMatch) minutes += parseInt(minMatch[1]);
+
+  return minutes > 0 ? minutes : undefined;
 }

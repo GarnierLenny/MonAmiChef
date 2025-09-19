@@ -7,6 +7,13 @@ export interface ParsedRecipe {
   tags: string[];
 }
 
+export interface ParsedRecipeForDB {
+  title: string;
+  content_json: RecipeContent;
+  nutrition?: RecipeNutrition;
+  tags: string[];
+}
+
 /**
  * Parse AI response text to extract recipe information
  */
@@ -232,4 +239,31 @@ function generateTags(text: string): string[] {
   }
 
   return [...new Set(tags)]; // Remove duplicates
+}
+
+/**
+ * Parse AI response text to extract recipe information for database storage
+ */
+export function parseRecipeFromAI(text: string): ParsedRecipeForDB {
+  const parsed = parseRecipeFromText(text);
+
+  if (!parsed) {
+    // Fallback for non-recipe responses
+    return {
+      title: 'AI Generated Recipe',
+      content_json: {
+        title: 'AI Generated Recipe',
+        ingredients: ['Recipe parsing failed'],
+        instructions: ['Please try again with a different request'],
+      },
+      tags: ['ai-generated'],
+    };
+  }
+
+  return {
+    title: parsed.title,
+    content_json: parsed.content,
+    nutrition: parsed.nutrition,
+    tags: parsed.tags,
+  };
 }

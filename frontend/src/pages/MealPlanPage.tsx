@@ -12,13 +12,13 @@ import { ProgressModal } from "@/components/meal-plan/ProgressModal";
 import {
   DAYS_OF_WEEK,
   MEAL_SLOTS,
-  FAKE_MEALS,
   type MealPlan,
   type MealSlot,
 } from "@/components/meal-plan/constants";
 
 // Import API and utilities
 import { mealPlanApi, type BackendMealPlan } from "@/lib/api/mealPlanApi";
+import { recipeApi } from "@/lib/api/recipeApi";
 import {
   createMealPlanRequest,
   createMealPlanItemRequest,
@@ -26,6 +26,7 @@ import {
   findMealPlanForWeek,
   findMealPlanItem,
   requiresAuthentication,
+  convertRecipeToMeal,
 } from "@/lib/mealPlanUtils";
 
 // interface MealPlanPageProps {
@@ -120,35 +121,67 @@ export default function MealPlanPage() {
     return weekPlan;
   };
 
-  // Generate fake meal plan (fallback for unauthenticated users)
-  const generateFakeMealPlan = useCallback(() => {
-    const newPlan: MealPlan = {};
-    DAYS_OF_WEEK.forEach((day) => {
-      newPlan[day] = {};
-      MEAL_SLOTS.forEach((meal) => {
-        const mealOptions = FAKE_MEALS[meal];
-        const randomMeal =
-          mealOptions[Math.floor(Math.random() * mealOptions.length)];
-        newPlan[day][meal] = randomMeal;
-      });
-    });
-    setMealPlan(newPlan);
-  }, []);
+  // Generate AI meal plan for current week
+  const generateAIMealPlan = useCallback(async () => {
+    setIsGenerating(true);
+    setError(null);
+
+    try {
+      const newPlan: MealPlan = { ...mealPlan };
+
+      // Generate AI recipes for each meal slot
+      for (const day of DAYS_OF_WEEK) {
+        if (!newPlan[day]) newPlan[day] = {};
+
+        for (const meal of MEAL_SLOTS) {
+          try {
+            const recipe = await recipeApi.generateMealRecipe({
+              mealType: meal,
+              preferences: "Healthy and nutritious",
+            });
+
+            const mealData = convertRecipeToMeal(recipe);
+            newPlan[day][meal] = mealData;
+
+            // Update meal plan in backend if user is authenticated
+            if (!isUnauthenticated && currentBackendPlan) {
+              const itemRequest = createMealPlanItemRequest(day, meal, recipe.id);
+              await mealPlanApi.addMealPlanItem(currentBackendPlan.id, itemRequest);
+            }
+          } catch (err) {
+            console.error(`Failed to generate ${meal} for ${day}:`, err);
+            // Continue with other meals even if one fails
+          }
+        }
+      }
+
+      setMealPlan(newPlan);
+    } catch (err: unknown) {
+      console.error('Failed to generate meal plan:', err);
+      setError((err as Error).message || 'Failed to generate meal plan');
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [mealPlan, isUnauthenticated, currentBackendPlan]);
 
   // Handle meal generation from user input
-  const handleMealGeneration = (text: string) => {
+  const handleMealGeneration = async (text: string) => {
     setIsGenerating(true);
+    setError(null);
 
-    // Simulate AI processing and meal generation
-    setTimeout(() => {
+    try {
       // Generate meals based on user input for current day
-      generateMealsForCurrentDay(text);
+      await generateMealsForCurrentDay(text);
+    } catch (err: unknown) {
+      console.error('Failed to generate meals:', err);
+      setError((err as Error).message || 'Failed to generate meals');
+    } finally {
       setIsGenerating(false);
-    }, 2000);
+    }
   };
 
   // Generate meals for current day based on user input
-  const generateMealsForCurrentDay = () => {
+  const generateMealsForCurrentDay = async (userInput: string) => {
     const currentDay = DAYS_OF_WEEK[currentDayIndex];
     const newPlan = { ...mealPlan };
 
@@ -157,69 +190,89 @@ export default function MealPlanPage() {
       newPlan[currentDay] = {};
     }
 
-    // Generate meals based on input for each meal slot
-    MEAL_SLOTS.forEach((meal) => {
-      const mealOptions = FAKE_MEALS[meal];
-      const randomMeal = mealOptions[Math.floor(Math.random() * mealOptions.length)];
-      newPlan[currentDay][meal] = randomMeal;
-    });
+    // Generate AI recipes for each meal slot with user preferences
+    for (const meal of MEAL_SLOTS) {
+      try {
+        const recipe = await recipeApi.generateMealRecipe({
+          mealType: meal,
+          preferences: userInput,
+        });
+
+        const mealData = convertRecipeToMeal(recipe);
+        newPlan[currentDay][meal] = mealData;
+
+        // Save to backend if user is authenticated
+        if (!isUnauthenticated) {
+          try {
+            const weekPlan = await ensureCurrentWeekMealPlan();
+            if (weekPlan) {
+              const itemRequest = createMealPlanItemRequest(currentDay, meal, recipe.id);
+              await mealPlanApi.addMealPlanItem(weekPlan.id, itemRequest);
+            }
+          } catch (backendErr) {
+            console.warn(`Failed to save ${meal} to backend:`, backendErr);
+          }
+        }
+      } catch (err) {
+        console.error(`Failed to generate ${meal} for ${currentDay}:`, err);
+        // Continue with other meals even if one fails
+      }
+    }
 
     setMealPlan(newPlan);
   };
 
   // Handle mobile input submission
-  const handleMobileSubmit = (e: React.FormEvent) => {
+  const handleMobileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isGenerating || !inputValue.trim()) return;
-    handleMealGeneration(inputValue.trim());
+    await handleMealGeneration(inputValue.trim());
     setInputValue("");
   };
 
   // Handle meal slot click
   const handleSlotClick = async (day: string, meal: MealSlot) => {
-    if (isUnauthenticated) {
-      // Fallback to fake data for unauthenticated users
-      const mealOptions = FAKE_MEALS[meal];
-      const randomMeal =
-        mealOptions[Math.floor(Math.random() * mealOptions.length)];
-
-      setMealPlan((prev) => ({
-        ...prev,
-        [day]: {
-          ...prev[day],
-          [meal]: randomMeal,
-        },
-      }));
-      return;
-    }
+    setIsGenerating(true);
+    setError(null);
 
     try {
-      // Ensure we have a meal plan for this week
-      const weekPlan = await ensureCurrentWeekMealPlan();
-      if (!weekPlan) return;
+      // Generate AI recipe for this meal slot
+      const recipe = await recipeApi.generateMealRecipe({
+        mealType: meal,
+        preferences: "Healthy and nutritious",
+      });
 
-      // For now, we'll use fake meals as placeholders since we don't have recipe creation integrated yet
-      const mealOptions = FAKE_MEALS[meal];
-      const randomMeal = mealOptions[Math.floor(Math.random() * mealOptions.length)];
-
-      // Create a meal plan item request (without recipeId for now)
-      const itemRequest = createMealPlanItemRequest(day, meal);
-      await mealPlanApi.addMealPlanItem(weekPlan.id, itemRequest);
+      const mealData = convertRecipeToMeal(recipe);
 
       // Update local state immediately
       setMealPlan((prev) => ({
         ...prev,
         [day]: {
           ...prev[day],
-          [meal]: randomMeal,
+          [meal]: mealData,
         },
       }));
 
-      // Note: We're not calling loadMealPlans() here because it would overwrite our local fake data
-      // In the future, when we have recipe integration, we would save the actual recipe to backend
+      // Save to backend if user is authenticated
+      if (!isUnauthenticated) {
+        try {
+          // Ensure we have a meal plan for this week
+          const weekPlan = await ensureCurrentWeekMealPlan();
+          if (weekPlan) {
+            // Create a meal plan item with the recipe ID
+            const itemRequest = createMealPlanItemRequest(day, meal, recipe.id);
+            await mealPlanApi.addMealPlanItem(weekPlan.id, itemRequest);
+          }
+        } catch (backendErr) {
+          console.warn('Failed to save to backend, but keeping local state:', backendErr);
+          // Don't show error to user since the meal is still displayed locally
+        }
+      }
     } catch (err: unknown) {
-      console.error('Failed to add meal to plan:', err);
-      setError((err as Error).message || 'Failed to add meal to plan');
+      console.error('Failed to generate meal:', err);
+      setError((err as Error).message || 'Failed to generate meal');
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -354,7 +407,7 @@ export default function MealPlanPage() {
           mealPlan={mealPlan}
           onSlotClick={handleSlotClick}
           onRemoveMeal={removeMeal}
-          onGeneratePlan={generateFakeMealPlan}
+          onGeneratePlan={generateAIMealPlan}
           onPreviousWeek={goToPreviousWeek}
           onNextWeek={goToNextWeek}
         />
@@ -362,10 +415,10 @@ export default function MealPlanPage() {
         {/* Desktop Input Bar */}
         <div className="p-6 border-t border-gray-200 bg-white">
           <form
-            onSubmit={(e) => {
+            onSubmit={async (e) => {
               e.preventDefault();
               if (isGenerating || !inputValue.trim()) return;
-              handleMealGeneration(inputValue.trim());
+              await handleMealGeneration(inputValue.trim());
               setInputValue("");
             }}
             className="flex items-center gap-4 p-2 pl-5 bg-white flex-1 shadow-lg shadow-orange-500/30 border border-gray-300 focus-within:ring-2 focus-within:ring-orange-500 rounded-full transition-colors"

@@ -597,4 +597,110 @@ export class ChatController extends Controller {
       throw new APIError(errorResponse.statusCode, errorResponse.message);
     }
   }
+
+  /**
+   * Generate a recipe for a specific meal slot
+   */
+  @Post("generate-meal-recipe")
+  @Security("optionalAuth")
+  @Response<ErrorResponse>(400, "Bad Request")
+  @Response<ErrorResponse>(500, "Internal Server Error")
+  @Response<ErrorResponse>(503, "Service Unavailable")
+  public async generateMealRecipe(
+    @Request() request: express.Request,
+    @Body() body: {
+      mealType: "breakfast" | "lunch" | "dinner" | "snack";
+      preferences?: string;
+      dietaryRestrictions?: string[];
+    }
+  ): Promise<{
+    recipe: {
+      id: string;
+      title: string;
+      content_json: any;
+      nutrition: any;
+      tags: string[];
+      created_at: string;
+    };
+  }> {
+    try {
+      // Validate input
+      if (!body.mealType || !["breakfast", "lunch", "dinner", "snack"].includes(body.mealType)) {
+        throw new ValidationError("Invalid meal type. Must be: breakfast, lunch, dinner, or snack");
+      }
+
+      const owner = await resolveOptimizedOwner(request, request.res, this);
+
+      // Build meal-specific prompt
+      const dietaryInfo = body.dietaryRestrictions?.length
+        ? `Dietary restrictions: ${body.dietaryRestrictions.join(", ")}. `
+        : "";
+
+      const userPrefs = body.preferences
+        ? `User preferences: ${body.preferences}. `
+        : "";
+
+      const mealPrompt = `Generate a ${body.mealType} recipe. ${dietaryInfo}${userPrefs}Make it nutritious and appropriate for ${body.mealType}. Provide a complete recipe with ingredients, instructions, tips, and nutrition info.`;
+
+      // Use Gemini to generate the recipe
+      const chat = ai.chats.create({
+        model: GEMINI_MODEL,
+        history: [],
+        config: {
+          systemInstruction: geminiCookAssistantPrompt,
+        },
+      });
+
+      const response = await chat.sendMessage({
+        message: mealPrompt,
+      });
+
+      const text = response.text;
+
+      if (!text || text.trim().length === 0) {
+        throw new ServiceUnavailableError("AI service returned empty response");
+      }
+
+      // Parse the AI response to extract recipe components
+      const { parseRecipeFromAI } = require('../utils/recipeParser');
+      const parsedRecipe = parseRecipeFromAI(text);
+
+      // Create recipe in database
+      const recipe = await prisma.recipe.create({
+        data: {
+          title: parsedRecipe.title,
+          content_json: parsedRecipe.content_json as any,
+          nutrition: parsedRecipe.nutrition as any,
+          tags: parsedRecipe.tags,
+        },
+      });
+
+      // Add to recipe history if user is authenticated
+      if (owner.userId) {
+        await prisma.recipeHistory.create({
+          data: {
+            ...ownerWhereOptimized(owner),
+            recipe_id: recipe.id,
+          },
+        });
+      }
+
+      this.setStatus(201);
+      return {
+        recipe: {
+          id: recipe.id,
+          title: recipe.title,
+          content_json: recipe.content_json as any,
+          nutrition: recipe.nutrition as any,
+          tags: recipe.tags,
+          created_at: recipe.created_at.toISOString(),
+        },
+      };
+    } catch (error) {
+      console.error("Error generating meal recipe:", error);
+      const errorResponse = handleControllerError(error, request.path);
+      this.setStatus(errorResponse.statusCode);
+      throw new APIError(errorResponse.statusCode, errorResponse.message);
+    }
+  }
 }
