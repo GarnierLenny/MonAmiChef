@@ -14,7 +14,6 @@ import MobileTopBar from "./components/MobileTopBar";
 import NavigationSidebar from "./components/NavigationSidebar";
 import NutritionView from "./components/NutritionView";
 import CookingToolsView from "./components/CookingToolsView";
-import MealPlanningView from "./components/MealPlanningView";
 import ExploreView from "./components/ExploreView";
 import ComingSoonView from "./components/ComingSoonView";
 import AuthModal from "./components/AuthModal";
@@ -23,6 +22,7 @@ import SuccessPage from "./components/SuccessPage";
 import RecipePage from "./components/RecipePage";
 import UserProfile from "./components/UserProfile";
 import ChatPage from "./pages/ChatPage";
+import MealPlanPage from "./pages/MealPlanPage";
 import AuthCallback from "./components/AuthCallback";
 import SavedRecipes from "./pages/SavedRecipes";
 import RecipeHistoryPage from "./pages/RecipeHistory";
@@ -49,6 +49,7 @@ function App() {
   const location = useLocation();
   const isRecipePage = location.pathname.startsWith("/recipe/");
   const isChatPage = location.pathname === "/";
+  const isMealPlanPage = location.pathname === "/meal-plan-chat";
 
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
@@ -220,12 +221,12 @@ function App() {
             element={<CookingToolsView currentSubView="notifications" />}
           />
           <Route
-            path="/weekly-planner"
-            element={<MealPlanningView currentSubView="weekly-planner" />}
-          />
-          <Route
-            path="/plan-week"
-            element={<MealPlanningView currentSubView="plan-week" />}
+            path="/meal-plan-chat"
+            element={
+              <ComponentErrorBoundary componentName="MealPlanPage">
+                <MealPlanPage />
+              </ComponentErrorBoundary>
+            }
           />
           <Route path="/explore" element={<ExploreView />} />
           <Route path="/coming-soon" element={<ComingSoonView />} />

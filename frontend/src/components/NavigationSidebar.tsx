@@ -11,6 +11,7 @@ import {
   UserPlus,
   Home,
   ChefHat,
+  CalendarDays,
 } from "lucide-react";
 import { User as UserType } from "../types/types";
 
@@ -93,6 +94,15 @@ export function NavigationSidebar({
               >
                 <Home className="h-4 w-4" />
                 Home
+              </Button>
+
+              <Button
+                variant={isActivePath("/meal-plan-chat") ? "secondary" : "ghost"}
+                className="w-full justify-start gap-3"
+                onClick={() => handleNavigation("/meal-plan-chat")}
+              >
+                <CalendarDays className="h-4 w-4" />
+                Meal Planning
               </Button>
 
               {user && (
