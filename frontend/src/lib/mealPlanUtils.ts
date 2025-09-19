@@ -136,15 +136,8 @@ export function convertRecipeToMeal(recipe: Recipe): Meal {
   const emojiMatch = recipe.title.match(/([🍳🥣🍽️🥗🌯🍲🥪🍝🐟🍜🌮🍛🍕🥤🥑])/);
   const emoji = emojiMatch ? emojiMatch[1] : getDefaultEmojiForTags(recipe.tags);
 
-  // Calculate grade based on nutrition (simple heuristic)
-  let grade: "A" | "B" | "C" | "D" = "B"; // Default
-  if (nutrition?.calories) {
-    if (nutrition.calories <= 400 && nutrition.protein && nutrition.protein >= 15) {
-      grade = "A";
-    } else if (nutrition.calories > 600) {
-      grade = "C";
-    }
-  }
+  // Use AI-provided nutrition rating, fallback to calculated grade
+  let grade: "A" | "B" | "C" | "D" = nutrition?.rating || "B";
 
   return {
     id: recipe.id,

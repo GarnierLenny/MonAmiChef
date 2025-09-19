@@ -20,6 +20,7 @@ export interface RecipeNutrition {
   fat?: number;
   fiber?: number;
   sugar?: number;
+  rating?: "A" | "B" | "C" | "D";
 }
 
 export interface Recipe {

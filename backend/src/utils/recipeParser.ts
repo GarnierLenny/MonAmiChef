@@ -122,47 +122,82 @@ function extractTitleFromContent(text: string): string {
 
 function extractIngredients(text: string): string[] {
   const ingredients: string[] = [];
-  
-  // Look for ingredients section
-  const ingredientsMatch = text.match(/\*\*ingredients?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is);
+
+  console.log('=== EXTRACTING INGREDIENTS ===');
+
+  // More flexible patterns for ingredients section
+  const ingredientsMatch = text.match(/\*\*ingredients?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is) ||
+                          text.match(/ingredients?:?(.*?)(?=\n\n|\*\*\w|instructions?|directions?|method|steps)/is);
+
+  console.log('Ingredients section found:', !!ingredientsMatch);
+
   if (ingredientsMatch) {
     const ingredientsText = ingredientsMatch[1];
+    console.log('Ingredients text:', ingredientsText);
     const lines = ingredientsText.split('\n');
-    
+
     for (const line of lines) {
       const trimmed = line.trim();
-      if (trimmed.match(/^[\-\*•]\s+(.+)/) || trimmed.match(/^\d+\.\s+(.+)/)) {
-        const ingredient = trimmed.replace(/^[\-\*•\d\.]\s*/, '').trim();
-        if (ingredient.length > 0) {
+      // More flexible patterns for ingredient lines
+      if (trimmed.match(/^[\-\*•]\s+(.+)/) ||
+          trimmed.match(/^\d+\.\s+(.+)/) ||
+          trimmed.match(/^[•]\s+(.+)/) ||
+          (trimmed.length > 3 && !trimmed.match(/^\*\*/) && trimmed.includes(' '))) {
+
+        let ingredient = trimmed.replace(/^[\-\*•\d\.]\s*/, '').trim();
+        // Skip lines that look like headers or are too short
+        if (ingredient.length > 2 &&
+            !ingredient.match(/^(ingredients?|instructions?|directions?|method|steps|tips?|variations?)/i)) {
           ingredients.push(ingredient);
+          console.log('Extracted ingredient:', ingredient);
         }
       }
     }
   }
 
+  console.log('Total ingredients extracted:', ingredients.length);
   return ingredients;
 }
 
 function extractInstructions(text: string): string[] {
   const instructions: string[] = [];
-  
-  // Look for instructions section
-  const instructionsMatch = text.match(/\*\*instructions?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is);
+
+  console.log('=== EXTRACTING INSTRUCTIONS ===');
+
+  // More flexible patterns for instructions section
+  const instructionsMatch = text.match(/\*\*instructions?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is) ||
+                           text.match(/instructions?:?(.*?)(?=\n\n|\*\*\w|tips?|variations?|nutrition)/is) ||
+                           text.match(/\*\*directions?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is) ||
+                           text.match(/\*\*method\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is) ||
+                           text.match(/\*\*steps\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is);
+
+  console.log('Instructions section found:', !!instructionsMatch);
+
   if (instructionsMatch) {
     const instructionsText = instructionsMatch[1];
+    console.log('Instructions text:', instructionsText);
     const lines = instructionsText.split('\n');
-    
+
     for (const line of lines) {
       const trimmed = line.trim();
-      if (trimmed.match(/^\d+\.\s+(.+)/) || trimmed.match(/^[\-\*•]\s+(.+)/)) {
-        const instruction = trimmed.replace(/^[\d\.\-\*•]\s*/, '').trim();
-        if (instruction.length > 0) {
+      // More flexible patterns for instruction lines
+      if (trimmed.match(/^\d+\.\s+(.+)/) ||
+          trimmed.match(/^[\-\*•]\s+(.+)/) ||
+          trimmed.match(/^step\s*\d+:?\s*(.+)/i) ||
+          (trimmed.length > 5 && !trimmed.match(/^\*\*/) && !trimmed.match(/^(instructions?|directions?|method|steps|tips?|variations?|nutrition)/i))) {
+
+        let instruction = trimmed.replace(/^[\d\.\-\*•]\s*/, '').replace(/^step\s*\d+:?\s*/i, '').trim();
+        // Skip lines that look like headers or are too short
+        if (instruction.length > 3 &&
+            !instruction.match(/^(instructions?|directions?|method|steps|tips?|variations?|nutrition)/i)) {
           instructions.push(instruction);
+          console.log('Extracted instruction:', instruction);
         }
       }
     }
   }
 
+  console.log('Total instructions extracted:', instructions.length);
   return instructions;
 }
 
@@ -190,14 +225,24 @@ function extractTips(text: string): string[] {
 }
 
 function extractServings(text: string): number | undefined {
-  const servingsMatch = text.match(/servings?:?\s*(\d+)/i) || text.match(/serves?\s+(\d+)/i);
+  const servingsMatch = text.match(/servings?:?\s*(\d+)/i) ||
+                       text.match(/serves?\s+(\d+)/i) ||
+                       text.match(/(?:for|makes)\s+(\d+)\s+(?:people|persons?|servings?)/i) ||
+                       text.match(/yield:?\s*(\d+)/i);
   return servingsMatch ? parseInt(servingsMatch[1]) : undefined;
 }
 
 function extractTimes(text: string): { prepTime?: string; cookTime?: string; totalTime?: string } {
-  const prepMatch = text.match(/prep(?:aration)?\s*time:?\s*(\d+\s*(?:min|minutes?|hrs?|hours?))/i);
-  const cookMatch = text.match(/cook(?:ing)?\s*time:?\s*(\d+\s*(?:min|minutes?|hrs?|hours?))/i);
-  const totalMatch = text.match(/total\s*time:?\s*(\d+\s*(?:min|minutes?|hrs?|hours?))/i);
+  // More flexible patterns for time extraction
+  const prepMatch = text.match(/prep(?:aration)?\s*time:?\s*(\d+\s*(?:min|minutes?|hrs?|hours?))/i) ||
+                   text.match(/prep:?\s*(\d+\s*(?:min|minutes?|hrs?|hours?))/i);
+
+  const cookMatch = text.match(/cook(?:ing)?\s*time:?\s*(\d+\s*(?:min|minutes?|hrs?|hours?))/i) ||
+                   text.match(/cook:?\s*(\d+\s*(?:min|minutes?|hrs?|hours?))/i) ||
+                   text.match(/bake:?\s*(\d+\s*(?:min|minutes?|hrs?|hours?))/i);
+
+  const totalMatch = text.match(/total\s*time:?\s*(\d+\s*(?:min|minutes?|hrs?|hours?))/i) ||
+                    text.match(/(?:ready\s+in|takes):?\s*(\d+\s*(?:min|minutes?|hrs?|hours?))/i);
 
   return {
     prepTime: prepMatch?.[1],
@@ -207,8 +252,45 @@ function extractTimes(text: string): { prepTime?: string; cookTime?: string; tot
 }
 
 function extractNutrition(text: string): RecipeNutrition | undefined {
-  const nutritionMatch = text.match(/\*\*nutrition.*?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is);
-  if (!nutritionMatch) return undefined;
+  console.log('=== EXTRACTING NUTRITION ===');
+
+  // More flexible pattern to match various nutrition section formats
+  const nutritionMatch = text.match(/\*\*nutrition(?:\s*\([^)]*\))?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is) ||
+                        text.match(/nutrition(?:\s*\([^)]*\))?:?(.*?)(?:\n\n|$)/is);
+
+  console.log('Nutrition section found:', !!nutritionMatch);
+  if (nutritionMatch) {
+    console.log('Nutrition text:', nutritionMatch[1]);
+  }
+
+  if (!nutritionMatch) {
+    // Also try to find nutrition info anywhere in the text without a specific header
+    const directPatterns = {
+      calories: /(\d+)\s*(?:kcal|cal|calories?)/i,
+      protein: /(\d+)g?\s*protein/i,
+      carbs: /(\d+)g?\s*carb?s?/i,
+      fat: /(\d+)g?\s*fat/i,
+    };
+
+    const nutrition: RecipeNutrition = {};
+    for (const [key, pattern] of Object.entries(directPatterns)) {
+      const match = text.match(pattern);
+      if (match) {
+        (nutrition as any)[key] = parseInt(match[1]);
+      }
+    }
+
+    // Extract nutrition rating even when no nutrition header found
+    const ratingMatch = text.match(/\*\*nutrition\s*rating\*\*:?\s*([A-D])/i) ||
+                       text.match(/nutrition\s*rating:?\s*([A-D])/i) ||
+                       text.match(/rating:?\s*([A-D])/i);
+
+    if (ratingMatch) {
+      nutrition.rating = ratingMatch[1].toUpperCase() as "A" | "B" | "C" | "D";
+    }
+
+    return Object.keys(nutrition).length > 0 ? nutrition : undefined;
+  }
 
   const nutritionText = nutritionMatch[1];
   const nutrition: RecipeNutrition = {};
@@ -225,10 +307,22 @@ function extractNutrition(text: string): RecipeNutrition | undefined {
   for (const [key, pattern] of Object.entries(patterns)) {
     const match = nutritionText.match(pattern);
     if (match) {
-      nutrition[key as keyof RecipeNutrition] = parseInt(match[1]);
+      (nutrition as any)[key] = parseInt(match[1]);
+      console.log(`Extracted ${key}: ${match[1]}`);
     }
   }
 
+  // Extract nutrition rating
+  const ratingMatch = text.match(/\*\*nutrition\s*rating\*\*:?\s*([A-D])/i) ||
+                     text.match(/nutrition\s*rating:?\s*([A-D])/i) ||
+                     text.match(/rating:?\s*([A-D])/i);
+
+  if (ratingMatch) {
+    nutrition.rating = ratingMatch[1].toUpperCase() as "A" | "B" | "C" | "D";
+    console.log(`Extracted rating: ${nutrition.rating}`);
+  }
+
+  console.log('Final nutrition object:', nutrition);
   return Object.keys(nutrition).length > 0 ? nutrition : undefined;
 }
 
@@ -274,6 +368,9 @@ function generateTags(text: string): string[] {
  * Parse AI response text to extract recipe information for database storage
  */
 export function parseRecipeFromAI(text: string): ParsedRecipeForDB {
+  console.log('=== FULL AI RESPONSE ===');
+  console.log(text);
+  console.log('=== END AI RESPONSE ===');
   console.log('Parsing AI recipe text:', text.substring(0, 200) + '...');
 
   const parsed = parseRecipeFromText(text);

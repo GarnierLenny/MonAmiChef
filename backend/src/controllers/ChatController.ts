@@ -62,7 +62,8 @@ const geminiCookAssistantPrompt = `
       - **Ingredients** (bulleted, quantities in metric)
       - **Instructions** (numbered, 5–10 tight steps)
       - **Tips/Variations** (bulleted, 3 items)
-      - **Nutrition (approx.)** per serving: kcal, protein, carbs, fat
+      - **Nutrition (approx.)** per serving: Calculate SPECIFIC values based on the actual ingredients and quantities listed above. Provide: calories (kcal), protein (g), carbs (g), fat (g). Do NOT use generic values.
+      - **Nutrition Rating** (A, B, C, or D): Rate the overall nutritional quality considering balance, health benefits, and macronutrient distribution
     3) **Idea List** — 1–3 options, each with: title + 1–2 line pitch.
 
     ## Style & Constraints

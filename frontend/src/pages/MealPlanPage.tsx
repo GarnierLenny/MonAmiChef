@@ -4,7 +4,6 @@ import { startOfWeek, addWeeks, subWeeks } from "date-fns";
 
 // Import components
 import { MealGrid } from "@/components/meal-plan/MealGrid";
-import { MobileMealCards } from "@/components/meal-plan/MobileMealCards";
 import { NewMobileMealLayout } from "@/components/meal-plan/NewMobileMealLayout";
 import { ProgressCard } from "@/components/meal-plan/ProgressCard";
 import { ProgressModal } from "@/components/meal-plan/ProgressModal";
@@ -17,6 +16,7 @@ import {
   type MealPlan,
   type MealSlot,
 } from "@/components/meal-plan/constants";
+import { parseMealSlots } from "@/lib/mealSlotParser";
 
 // Import API and utilities
 import { mealPlanApi, type BackendMealPlan } from "@/lib/api/mealPlanApi";
@@ -40,7 +40,9 @@ export default function MealPlanPage() {
   // Input state
   const [inputValue, setInputValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generatingSlots, setGeneratingSlots] = useState<Set<string>>(new Set());
+  const [generatingSlots, setGeneratingSlots] = useState<Set<string>>(
+    new Set(),
+  );
 
   // Meal plan state
   const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date()));
@@ -48,8 +50,11 @@ export default function MealPlanPage() {
   const [currentDayIndex, setCurrentDayIndex] = useState(0);
 
   // Backend state
-  const [backendMealPlans, setBackendMealPlans] = useState<BackendMealPlan[]>([]);
-  const [currentBackendPlan, setCurrentBackendPlan] = useState<BackendMealPlan | null>(null);
+  const [backendMealPlans, setBackendMealPlans] = useState<BackendMealPlan[]>(
+    [],
+  );
+  const [currentBackendPlan, setCurrentBackendPlan] =
+    useState<BackendMealPlan | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isUnauthenticated, setIsUnauthenticated] = useState(false);
@@ -100,20 +105,20 @@ export default function MealPlanPage() {
         if (weekPlan) {
           const frontendMealPlan = convertBackendToFrontendMealPlan(weekPlan);
           // Merge with existing meal plan data (in case user has local-only data)
-          setMealPlan(prevPlan => ({
+          setMealPlan((prevPlan) => ({
             ...frontendMealPlan,
             ...prevPlan, // Keep any local changes that aren't in backend
           }));
         }
       }
     } catch (err: unknown) {
-      console.error('Failed to load meal plans:', err);
+      console.error("Failed to load meal plans:", err);
       if (requiresAuthentication(err)) {
         setIsUnauthenticated(true);
         // For unauthenticated users, keep their local meal plan data
         // Don't clear it here
       } else {
-        setError((err as Error).message || 'Failed to load meal plans');
+        setError((err as Error).message || "Failed to load meal plans");
       }
     } finally {
       setIsLoading(false);
@@ -121,25 +126,26 @@ export default function MealPlanPage() {
   };
 
   // Create a meal plan for the current week if it doesn't exist
-  const ensureCurrentWeekMealPlan = async (): Promise<BackendMealPlan | null> => {
-    if (isUnauthenticated) return null;
+  const ensureCurrentWeekMealPlan =
+    async (): Promise<BackendMealPlan | null> => {
+      if (isUnauthenticated) return null;
 
-    let weekPlan = findMealPlanForWeek(backendMealPlans, currentWeek);
+      let weekPlan = findMealPlanForWeek(backendMealPlans, currentWeek);
 
-    if (!weekPlan) {
-      try {
-        const request = createMealPlanRequest(currentWeek);
-        weekPlan = await mealPlanApi.createMealPlan(request);
-        setBackendMealPlans(prev => [...prev, weekPlan!]);
-      } catch (err: unknown) {
-        console.error('Failed to create meal plan:', err);
-        setError((err as Error).message || 'Failed to create meal plan');
-        return null;
+      if (!weekPlan) {
+        try {
+          const request = createMealPlanRequest(currentWeek);
+          weekPlan = await mealPlanApi.createMealPlan(request);
+          setBackendMealPlans((prev) => [...prev, weekPlan!]);
+        } catch (err: unknown) {
+          console.error("Failed to create meal plan:", err);
+          setError((err as Error).message || "Failed to create meal plan");
+          return null;
+        }
       }
-    }
 
-    return weekPlan;
-  };
+      return weekPlan;
+    };
 
   // Generate AI meal plan for current week
   const generateAIMealPlan = useCallback(async () => {
@@ -165,8 +171,15 @@ export default function MealPlanPage() {
 
             // Update meal plan in backend if user is authenticated
             if (!isUnauthenticated && currentBackendPlan) {
-              const itemRequest = createMealPlanItemRequest(day, meal, recipe.id);
-              await mealPlanApi.addMealPlanItem(currentBackendPlan.id, itemRequest);
+              const itemRequest = createMealPlanItemRequest(
+                day,
+                meal,
+                recipe.id,
+              );
+              await mealPlanApi.addMealPlanItem(
+                currentBackendPlan.id,
+                itemRequest,
+              );
             }
           } catch (err) {
             console.error(`Failed to generate ${meal} for ${day}:`, err);
@@ -177,8 +190,8 @@ export default function MealPlanPage() {
 
       setMealPlan(newPlan);
     } catch (err: unknown) {
-      console.error('Failed to generate meal plan:', err);
-      setError((err as Error).message || 'Failed to generate meal plan');
+      console.error("Failed to generate meal plan:", err);
+      setError((err as Error).message || "Failed to generate meal plan");
     } finally {
       setIsGenerating(false);
     }
@@ -190,18 +203,24 @@ export default function MealPlanPage() {
     setError(null);
 
     try {
+      // Parse user input to determine which meal slots to target
+      const targetSlots = parseMealSlots(text);
+
       // Generate meals based on user input for current day
-      await generateMealsForCurrentDay(text);
+      await generateMealsForCurrentDay(text, targetSlots);
     } catch (err: unknown) {
-      console.error('Failed to generate meals:', err);
-      setError((err as Error).message || 'Failed to generate meals');
+      console.error("Failed to generate meals:", err);
+      setError((err as Error).message || "Failed to generate meals");
     } finally {
       setIsGenerating(false);
     }
   };
 
   // Generate meals for current day based on user input
-  const generateMealsForCurrentDay = async (userInput: string) => {
+  const generateMealsForCurrentDay = async (
+    userInput: string,
+    targetSlots?: MealSlot[],
+  ) => {
     const currentDay = DAYS_OF_WEEK[currentDayIndex];
     const newPlan = { ...mealPlan };
 
@@ -210,8 +229,21 @@ export default function MealPlanPage() {
       newPlan[currentDay] = {};
     }
 
-    // Generate AI recipes for each meal slot with user preferences
-    for (const meal of MEAL_SLOTS) {
+    // Use provided target slots or default to all slots
+    const slotsToGenerate = targetSlots || MEAL_SLOTS;
+
+    // Track which slots are being generated
+    const generatingSlotKeys = slotsToGenerate.map(
+      (meal) => `${currentDay}-${meal}`,
+    );
+    setGeneratingSlots((prev) => {
+      const newSet = new Set(prev);
+      generatingSlotKeys.forEach((key) => newSet.add(key));
+      return newSet;
+    });
+
+    // Generate AI recipes for specified meal slots with user preferences
+    const generationPromises = slotsToGenerate.map(async (meal) => {
       try {
         const recipe = await recipeApi.generateMealRecipe({
           mealType: meal,
@@ -226,54 +258,75 @@ export default function MealPlanPage() {
           try {
             const weekPlan = await ensureCurrentWeekMealPlan();
             if (weekPlan) {
-              const itemRequest = createMealPlanItemRequest(currentDay, meal, recipe.id);
+              const itemRequest = createMealPlanItemRequest(
+                currentDay,
+                meal,
+                recipe.id,
+              );
               await mealPlanApi.addMealPlanItem(weekPlan.id, itemRequest);
 
               // Update the backend meal plan state to include the new recipe item
-              setBackendMealPlans(prev => prev.map(plan => {
-                if (plan.id === weekPlan.id) {
-                  const updatedItems = plan.items || [];
-                  const existingItemIndex = updatedItems.findIndex(item =>
-                    item.day === itemRequest.day && item.mealSlot === itemRequest.mealSlot
-                  );
+              setBackendMealPlans((prev) =>
+                prev.map((plan) => {
+                  if (plan.id === weekPlan.id) {
+                    const updatedItems = plan.items || [];
+                    const existingItemIndex = updatedItems.findIndex(
+                      (item) =>
+                        item.day === itemRequest.day &&
+                        item.mealSlot === itemRequest.mealSlot,
+                    );
 
-                  const newItem = {
-                    id: `temp-${Date.now()}-${meal}`, // Temporary ID
-                    mealPlanId: weekPlan.id,
-                    day: itemRequest.day,
-                    mealSlot: itemRequest.mealSlot,
-                    recipeId: recipe.id,
-                    createdAt: new Date(),
-                    recipe: {
-                      id: recipe.id,
-                      title: recipe.title,
-                      content_json: recipe.content_json,
-                      nutrition: recipe.nutrition,
-                      tags: recipe.tags,
-                      created_at: recipe.created_at,
+                    const newItem = {
+                      id: `temp-${Date.now()}-${meal}`, // Temporary ID
+                      mealPlanId: weekPlan.id,
+                      day: itemRequest.day,
+                      mealSlot: itemRequest.mealSlot,
+                      recipeId: recipe.id,
+                      createdAt: new Date(),
+                      recipe: {
+                        id: recipe.id,
+                        title: recipe.title,
+                        content_json: recipe.content_json,
+                        nutrition: recipe.nutrition,
+                        tags: recipe.tags,
+                        created_at: recipe.created_at,
+                      },
+                    };
+
+                    if (existingItemIndex >= 0) {
+                      updatedItems[existingItemIndex] = newItem;
+                    } else {
+                      updatedItems.push(newItem);
                     }
-                  };
 
-                  if (existingItemIndex >= 0) {
-                    updatedItems[existingItemIndex] = newItem;
-                  } else {
-                    updatedItems.push(newItem);
+                    return { ...plan, items: updatedItems };
                   }
-
-                  return { ...plan, items: updatedItems };
-                }
-                return plan;
-              }));
+                  return plan;
+                }),
+              );
             }
           } catch (backendErr) {
             console.warn(`Failed to save ${meal} to backend:`, backendErr);
           }
         }
+
+        return { meal, success: true };
       } catch (err) {
         console.error(`Failed to generate ${meal} for ${currentDay}:`, err);
-        // Continue with other meals even if one fails
+        return { meal, success: false, error: err };
+      } finally {
+        // Remove this slot from generating state
+        const slotKey = `${currentDay}-${meal}`;
+        setGeneratingSlots((prev) => {
+          const newSet = new Set(prev);
+          newSet.delete(slotKey);
+          return newSet;
+        });
       }
-    }
+    });
+
+    // Wait for all generations to complete
+    await Promise.allSettled(generationPromises);
 
     setMealPlan(newPlan);
   };
@@ -289,7 +342,7 @@ export default function MealPlanPage() {
   // Handle meal slot click
   const handleSlotClick = async (day: string, meal: MealSlot) => {
     const slotKey = `${day}-${meal}`;
-    setGeneratingSlots(prev => new Set(prev).add(slotKey));
+    setGeneratingSlots((prev) => new Set(prev).add(slotKey));
     setError(null);
 
     try {
@@ -322,51 +375,58 @@ export default function MealPlanPage() {
 
             // Update the backend meal plan state to include the new recipe item
             // This prevents the useEffect from overwriting our local state
-            setBackendMealPlans(prev => prev.map(plan => {
-              if (plan.id === weekPlan.id) {
-                const updatedItems = plan.items || [];
-                const existingItemIndex = updatedItems.findIndex(item =>
-                  item.day === itemRequest.day && item.mealSlot === itemRequest.mealSlot
-                );
+            setBackendMealPlans((prev) =>
+              prev.map((plan) => {
+                if (plan.id === weekPlan.id) {
+                  const updatedItems = plan.items || [];
+                  const existingItemIndex = updatedItems.findIndex(
+                    (item) =>
+                      item.day === itemRequest.day &&
+                      item.mealSlot === itemRequest.mealSlot,
+                  );
 
-                const newItem = {
-                  id: `temp-${Date.now()}`, // Temporary ID
-                  mealPlanId: weekPlan.id,
-                  day: itemRequest.day,
-                  mealSlot: itemRequest.mealSlot,
-                  recipeId: recipe.id,
-                  createdAt: new Date(),
-                  recipe: {
-                    id: recipe.id,
-                    title: recipe.title,
-                    content_json: recipe.content_json,
-                    nutrition: recipe.nutrition,
-                    tags: recipe.tags,
-                    created_at: recipe.created_at,
+                  const newItem = {
+                    id: `temp-${Date.now()}`, // Temporary ID
+                    mealPlanId: weekPlan.id,
+                    day: itemRequest.day,
+                    mealSlot: itemRequest.mealSlot,
+                    recipeId: recipe.id,
+                    createdAt: new Date(),
+                    recipe: {
+                      id: recipe.id,
+                      title: recipe.title,
+                      content_json: recipe.content_json,
+                      nutrition: recipe.nutrition,
+                      tags: recipe.tags,
+                      created_at: recipe.created_at,
+                    },
+                  };
+
+                  if (existingItemIndex >= 0) {
+                    updatedItems[existingItemIndex] = newItem;
+                  } else {
+                    updatedItems.push(newItem);
                   }
-                };
 
-                if (existingItemIndex >= 0) {
-                  updatedItems[existingItemIndex] = newItem;
-                } else {
-                  updatedItems.push(newItem);
+                  return { ...plan, items: updatedItems };
                 }
-
-                return { ...plan, items: updatedItems };
-              }
-              return plan;
-            }));
+                return plan;
+              }),
+            );
           }
         } catch (backendErr) {
-          console.warn('Failed to save to backend, but keeping local state:', backendErr);
+          console.warn(
+            "Failed to save to backend, but keeping local state:",
+            backendErr,
+          );
           // Don't show error to user since the meal is still displayed locally
         }
       }
     } catch (err: unknown) {
-      console.error('Failed to generate meal:', err);
-      setError((err as Error).message || 'Failed to generate meal');
+      console.error("Failed to generate meal:", err);
+      setError((err as Error).message || "Failed to generate meal");
     } finally {
-      setGeneratingSlots(prev => {
+      setGeneratingSlots((prev) => {
         const newSet = new Set(prev);
         newSet.delete(slotKey);
         return newSet;
@@ -435,8 +495,8 @@ export default function MealPlanPage() {
       // Note: We're not calling loadMealPlans() here to avoid overwriting local changes
       // The backend meal plan item has been removed, so local state is authoritative for display
     } catch (err: unknown) {
-      console.error('Failed to remove meal from plan:', err);
-      setError((err as Error).message || 'Failed to remove meal from plan');
+      console.error("Failed to remove meal from plan:", err);
+      setError((err as Error).message || "Failed to remove meal from plan");
     }
   };
 
@@ -471,7 +531,7 @@ export default function MealPlanPage() {
   // Show loading state
   if (isLoading) {
     return (
-      <div className="flex h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 items-center justify-center">
+      <div className="flex h-screen w-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Loading meal plans...</p>
@@ -500,7 +560,9 @@ export default function MealPlanPage() {
       {/* Unauthenticated Message */}
       {isUnauthenticated && (
         <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg">
-          <p className="text-sm">Sign in to save your meal plans to the cloud</p>
+          <p className="text-sm">
+            Sign in to save your meal plans to the cloud
+          </p>
         </div>
       )}
       {/* Desktop Meal Plan Grid */}
@@ -543,7 +605,7 @@ export default function MealPlanPage() {
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Tell me what you'd like to eat today..."
+              placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
               disabled={isGenerating}
               className="min-w-0 grow basis-0 bg-transparent outline-none focus:ring-0"
             />
@@ -555,8 +617,14 @@ export default function MealPlanPage() {
               {isGenerating ? (
                 <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
               ) : (
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="m22 2-7 20-4-9-9-4Z"/>
+                <svg
+                  className="w-4 h-4"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <path d="m22 2-7 20-4-9-9-4Z" />
                 </svg>
               )}
             </button>
@@ -604,3 +672,4 @@ export default function MealPlanPage() {
     </div>
   );
 }
+

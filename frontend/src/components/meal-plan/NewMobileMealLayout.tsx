@@ -138,7 +138,7 @@ export const NewMobileMealLayout = ({
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Tell me what you'd like to eat today..."
+              placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
               disabled={isGenerating}
               className="flex-1 bg-transparent outline-none text-gray-900 placeholder-gray-500"
             />
