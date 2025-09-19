@@ -24,6 +24,7 @@ interface NewMobileMealLayoutProps {
   onShowRecipe?: (day: string, meal: MealSlot) => void;
   onRegenerate?: (day: string, meal: MealSlot) => void;
   onDeleteMeal?: (day: string, meal: MealSlot) => void;
+  onSavedMeals?: (day: string, meal: MealSlot) => void;
   generatingSlots?: Set<string>;
 }
 
@@ -41,6 +42,7 @@ export const NewMobileMealLayout = ({
   onShowRecipe,
   onRegenerate,
   onDeleteMeal,
+  onSavedMeals,
   generatingSlots = new Set(),
 }: NewMobileMealLayoutProps) => {
   const weekStart = startOfWeek(currentWeek);
@@ -59,8 +61,7 @@ export const NewMobileMealLayout = ({
   };
 
   const handleSavedMeals = (mealSlot: MealSlot) => {
-    // TODO: Implement saved meals functionality
-    console.log(`Show saved meals for ${mealSlot}`);
+    onSavedMeals?.(currentDay, mealSlot);
   };
 
   return (

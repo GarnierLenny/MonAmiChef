@@ -8,6 +8,7 @@ import { NewMobileMealLayout } from "@/components/meal-plan/NewMobileMealLayout"
 import { ProgressCard } from "@/components/meal-plan/ProgressCard";
 import { ProgressModal } from "@/components/meal-plan/ProgressModal";
 import { RecipeModal } from "@/components/meal-plan/RecipeModal";
+import { SavedRecipesModal } from "@/components/meal-plan/SavedRecipesModal";
 
 // Import constants and utils
 import {
@@ -15,12 +16,14 @@ import {
   MEAL_SLOTS,
   type MealPlan,
   type MealSlot,
+  type Meal,
 } from "@/components/meal-plan/constants";
 import { parseMealSlots } from "@/lib/mealSlotParser";
 
 // Import API and utilities
 import { mealPlanApi, type BackendMealPlan } from "@/lib/api/mealPlanApi";
 import { recipeApi } from "@/lib/api/recipeApi";
+import type { SavedRecipe } from "@/types/recipe";
 import {
   createMealPlanRequest,
   createMealPlanItemRequest,
@@ -66,6 +69,10 @@ export default function MealPlanPage() {
   // Recipe modal state
   const [showRecipeModal, setShowRecipeModal] = useState(false);
   const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
+
+  // Saved recipes modal state
+  const [showSavedRecipesModal, setShowSavedRecipesModal] = useState(false);
+  const [savedRecipeTargetSlot, setSavedRecipeTargetSlot] = useState<{day: string, meal: MealSlot} | null>(null);
 
   // Load meal plans on component mount
   useEffect(() => {
@@ -518,6 +525,45 @@ export default function MealPlanPage() {
     await removeMeal(day, meal);
   };
 
+  const handleSavedMeals = (day: string, meal: MealSlot) => {
+    setSavedRecipeTargetSlot({ day, meal });
+    setShowSavedRecipesModal(true);
+  };
+
+  const handleSelectSavedRecipe = async (savedRecipe: SavedRecipe) => {
+    if (!savedRecipeTargetSlot) return;
+
+    const { day, meal } = savedRecipeTargetSlot;
+
+    // Convert saved recipe to meal format
+    const mealFromRecipe = convertRecipeToMeal(savedRecipe.recipe);
+
+    // Update local state
+    setMealPlan((prev) => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        [meal]: mealFromRecipe,
+      },
+    }));
+
+    // Save to backend if user is authenticated
+    if (!isUnauthenticated) {
+      try {
+        const weekPlan = await ensureCurrentWeekMealPlan();
+        if (weekPlan) {
+          const itemRequest = createMealPlanItemRequest(day, meal, savedRecipe.recipe);
+          await mealPlanApi.addMealPlanItem(weekPlan.id, itemRequest);
+        }
+      } catch (err) {
+        console.warn("Failed to save to backend:", err);
+      }
+    }
+
+    // Reset modal state
+    setSavedRecipeTargetSlot(null);
+  };
+
   // Week navigation
   const goToPreviousWeek = () => setCurrentWeek((prev) => subWeeks(prev, 1));
   const goToNextWeek = () => setCurrentWeek((prev) => addWeeks(prev, 1));
@@ -651,6 +697,7 @@ export default function MealPlanPage() {
           onShowRecipe={handleShowRecipe}
           onRegenerate={handleRegenerate}
           onDeleteMeal={handleDeleteMeal}
+          onSavedMeals={handleSavedMeals}
           generatingSlots={generatingSlots}
         />
       </div>
@@ -668,6 +715,14 @@ export default function MealPlanPage() {
         isOpen={showRecipeModal}
         onClose={() => setShowRecipeModal(false)}
         meal={selectedMeal}
+      />
+
+      {/* Saved Recipes Modal */}
+      <SavedRecipesModal
+        isOpen={showSavedRecipesModal}
+        onClose={() => setShowSavedRecipesModal(false)}
+        onSelectRecipe={handleSelectSavedRecipe}
+        isAuthenticated={!isUnauthenticated}
       />
     </div>
   );
