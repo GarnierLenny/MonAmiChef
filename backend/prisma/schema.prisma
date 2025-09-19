@@ -115,8 +115,7 @@ model MealPlanItem {
 
   // Relations
   mealPlan MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
-  // If you have a Recipe model in public schema, you can add:
-  // recipe     Recipe?  @relation(fields: [recipeId], references: [id])
+  recipe   Recipe?  @relation(fields: [recipeId], references: [id])
 
   // One row per (plan, day, meal)
   @@unique([mealPlanId, day, mealSlot], map: "meal_plan_day_slot_unique")
@@ -148,6 +147,7 @@ model Recipe {
   created_at    DateTime        @default(now())
   SavedRecipe   SavedRecipe[]
   RecipeHistory RecipeHistory[]
+  MealPlanItem  MealPlanItem[]
 
   @@schema("public")
 }

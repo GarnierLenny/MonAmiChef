@@ -46,6 +46,9 @@ export class MealPlanController extends Controller {
       where: { userId: owner.userId },
       include: {
         items: {
+          include: {
+            recipe: true // Include the actual recipe data
+          },
           orderBy: [
             { day: 'asc' },
             { mealSlot: 'asc' }
@@ -72,6 +75,14 @@ export class MealPlanController extends Controller {
         mealSlot: item.mealSlot,
         recipeId: item.recipeId || undefined,
         createdAt: item.createdAt,
+        recipe: item.recipe ? {
+          id: item.recipe.id,
+          title: item.recipe.title,
+          content_json: item.recipe.content_json as any,
+          nutrition: item.recipe.nutrition as any,
+          tags: item.recipe.tags,
+          created_at: item.recipe.created_at.toISOString(),
+        } : undefined,
       }))
     }));
   }
@@ -162,6 +173,9 @@ export class MealPlanController extends Controller {
       },
       include: {
         items: {
+          include: {
+            recipe: true // Include the actual recipe data
+          },
           orderBy: [
             { day: 'asc' },
             { mealSlot: 'asc' }
@@ -192,6 +206,14 @@ export class MealPlanController extends Controller {
         mealSlot: item.mealSlot,
         recipeId: item.recipeId || undefined,
         createdAt: item.createdAt,
+        recipe: item.recipe ? {
+          id: item.recipe.id,
+          title: item.recipe.title,
+          content_json: item.recipe.content_json as any,
+          nutrition: item.recipe.nutrition as any,
+          tags: item.recipe.tags,
+          created_at: item.recipe.created_at.toISOString(),
+        } : undefined,
       }))
     };
   }
@@ -236,6 +258,9 @@ export class MealPlanController extends Controller {
       },
       include: {
         items: {
+          include: {
+            recipe: true
+          },
           orderBy: [
             { day: 'asc' },
             { mealSlot: 'asc' }
@@ -261,6 +286,14 @@ export class MealPlanController extends Controller {
         mealSlot: item.mealSlot,
         recipeId: item.recipeId || undefined,
         createdAt: item.createdAt,
+        recipe: item.recipe ? {
+          id: item.recipe.id,
+          title: item.recipe.title,
+          content_json: item.recipe.content_json as any,
+          nutrition: item.recipe.nutrition as any,
+          tags: item.recipe.tags,
+          created_at: item.recipe.created_at.toISOString(),
+        } : undefined,
       }))
     };
   }

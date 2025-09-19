@@ -31,6 +31,14 @@ export interface BackendMealPlanItem {
   mealSlot: "breakfast" | "lunch" | "dinner" | "snack";
   recipeId?: string;
   createdAt: Date;
+  recipe?: {
+    id: string;
+    title: string;
+    content_json: any;
+    nutrition?: any;
+    tags: string[];
+    created_at: string;
+  };
 }
 
 export interface CreateMealPlanRequest {

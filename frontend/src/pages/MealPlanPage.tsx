@@ -66,17 +66,17 @@ export default function MealPlanPage() {
     const weekPlan = findMealPlanForWeek(backendMealPlans, currentWeek);
     setCurrentBackendPlan(weekPlan || null);
 
-    // Only clear meal plan if we're switching to a week with no backend plan
-    // Don't overwrite existing local meal data when a backend plan exists
     if (!weekPlan) {
       // No plan for this week, clear the meal plan only if user is authenticated
       // For unauthenticated users, keep their local data
       if (!isUnauthenticated) {
         setMealPlan({});
       }
+    } else {
+      // We have a backend plan for this week, populate the frontend meal plan
+      const frontendMealPlan = convertBackendToFrontendMealPlan(weekPlan);
+      setMealPlan(frontendMealPlan);
     }
-    // Note: We don't automatically populate from backend here because
-    // the backend only stores meal plan structure, not the actual meal content
   }, [backendMealPlans, currentWeek, isUnauthenticated]);
 
   // Load meal plans from backend
@@ -87,6 +87,19 @@ export default function MealPlanPage() {
       const plans = await mealPlanApi.getUserMealPlans();
       setBackendMealPlans(plans);
       setIsUnauthenticated(false);
+
+      // Populate the frontend meal plan with data from the backend
+      if (plans.length > 0) {
+        const weekPlan = findMealPlanForWeek(plans, currentWeek);
+        if (weekPlan) {
+          const frontendMealPlan = convertBackendToFrontendMealPlan(weekPlan);
+          // Merge with existing meal plan data (in case user has local-only data)
+          setMealPlan(prevPlan => ({
+            ...frontendMealPlan,
+            ...prevPlan, // Keep any local changes that aren't in backend
+          }));
+        }
+      }
     } catch (err: unknown) {
       console.error('Failed to load meal plans:', err);
       if (requiresAuthentication(err)) {
@@ -94,7 +107,7 @@ export default function MealPlanPage() {
         // For unauthenticated users, keep their local meal plan data
         // Don't clear it here
       } else {
-        setError(err.message || 'Failed to load meal plans');
+        setError((err as Error).message || 'Failed to load meal plans');
       }
     } finally {
       setIsLoading(false);
@@ -209,6 +222,42 @@ export default function MealPlanPage() {
             if (weekPlan) {
               const itemRequest = createMealPlanItemRequest(currentDay, meal, recipe.id);
               await mealPlanApi.addMealPlanItem(weekPlan.id, itemRequest);
+
+              // Update the backend meal plan state to include the new recipe item
+              setBackendMealPlans(prev => prev.map(plan => {
+                if (plan.id === weekPlan.id) {
+                  const updatedItems = plan.items || [];
+                  const existingItemIndex = updatedItems.findIndex(item =>
+                    item.day === itemRequest.day && item.mealSlot === itemRequest.mealSlot
+                  );
+
+                  const newItem = {
+                    id: `temp-${Date.now()}-${meal}`, // Temporary ID
+                    mealPlanId: weekPlan.id,
+                    day: itemRequest.day,
+                    mealSlot: itemRequest.mealSlot,
+                    recipeId: recipe.id,
+                    createdAt: new Date(),
+                    recipe: {
+                      id: recipe.id,
+                      title: recipe.title,
+                      content_json: recipe.content_json,
+                      nutrition: recipe.nutrition,
+                      tags: recipe.tags,
+                      created_at: recipe.created_at,
+                    }
+                  };
+
+                  if (existingItemIndex >= 0) {
+                    updatedItems[existingItemIndex] = newItem;
+                  } else {
+                    updatedItems.push(newItem);
+                  }
+
+                  return { ...plan, items: updatedItems };
+                }
+                return plan;
+              }));
             }
           } catch (backendErr) {
             console.warn(`Failed to save ${meal} to backend:`, backendErr);
@@ -263,6 +312,43 @@ export default function MealPlanPage() {
             // Create a meal plan item with the recipe ID
             const itemRequest = createMealPlanItemRequest(day, meal, recipe.id);
             await mealPlanApi.addMealPlanItem(weekPlan.id, itemRequest);
+
+            // Update the backend meal plan state to include the new recipe item
+            // This prevents the useEffect from overwriting our local state
+            setBackendMealPlans(prev => prev.map(plan => {
+              if (plan.id === weekPlan.id) {
+                const updatedItems = plan.items || [];
+                const existingItemIndex = updatedItems.findIndex(item =>
+                  item.day === itemRequest.day && item.mealSlot === itemRequest.mealSlot
+                );
+
+                const newItem = {
+                  id: `temp-${Date.now()}`, // Temporary ID
+                  mealPlanId: weekPlan.id,
+                  day: itemRequest.day,
+                  mealSlot: itemRequest.mealSlot,
+                  recipeId: recipe.id,
+                  createdAt: new Date(),
+                  recipe: {
+                    id: recipe.id,
+                    title: recipe.title,
+                    content_json: recipe.content_json,
+                    nutrition: recipe.nutrition,
+                    tags: recipe.tags,
+                    created_at: recipe.created_at,
+                  }
+                };
+
+                if (existingItemIndex >= 0) {
+                  updatedItems[existingItemIndex] = newItem;
+                } else {
+                  updatedItems.push(newItem);
+                }
+
+                return { ...plan, items: updatedItems };
+              }
+              return plan;
+            }));
           }
         } catch (backendErr) {
           console.warn('Failed to save to backend, but keeping local state:', backendErr);

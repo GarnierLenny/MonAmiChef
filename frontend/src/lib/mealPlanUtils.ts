@@ -60,8 +60,7 @@ export function createMealPlanItemRequest(
 
 // Convert backend meal plan to frontend format
 export function convertBackendToFrontendMealPlan(
-  backendPlan: BackendMealPlan,
-  meals: Record<string, Meal> = {}
+  backendPlan: BackendMealPlan
 ): MealPlan {
   const frontendPlan: MealPlan = {};
 
@@ -72,9 +71,17 @@ export function convertBackendToFrontendMealPlan(
         frontendPlan[dayName] = {};
       }
 
-      // If we have a recipeId, try to find the corresponding meal
-      if (item.recipeId && meals[item.recipeId]) {
-        frontendPlan[dayName][item.mealSlot as MealSlot] = meals[item.recipeId];
+      // If we have a recipe, convert it to meal format
+      if (item.recipe) {
+        const recipe: Recipe = {
+          id: item.recipe.id,
+          title: item.recipe.title,
+          content_json: item.recipe.content_json,
+          nutrition: item.recipe.nutrition,
+          tags: item.recipe.tags,
+          created_at: item.recipe.created_at,
+        };
+        frontendPlan[dayName][item.mealSlot as MealSlot] = convertRecipeToMeal(recipe);
       }
       // Note: We don't create placeholder meals here because the frontend
       // manages display meals separately from backend meal plan structure
