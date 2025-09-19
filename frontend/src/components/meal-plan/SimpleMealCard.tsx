@@ -55,23 +55,26 @@ export const SimpleMealCard = ({
             </div>
           </div>
 
-          {/* Calories */}
-          <div className="flex items-center gap-1">
-            <Zap className="w-4 h-4 text-orange-500" />
-            <span className="font-semibold text-lg text-gray-900">{meal.calories} cal</span>
-          </div>
+          {/* Calories and Macros */}
+          <div className="flex items-center justify-between">
+            {/* Calories */}
+            <div className="flex items-center gap-1">
+              <Zap className="w-4 h-4 text-orange-500" />
+              <span className="font-semibold text-lg text-gray-900">{meal.calories} cal</span>
+            </div>
 
-          {/* Macros */}
-          <div className="flex items-center gap-1.5">
-            <Badge className="bg-green-500 hover:bg-green-600 text-white px-2 py-0.5 text-xs">
-              P {meal.macros.protein}g
-            </Badge>
-            <Badge className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-0.5 text-xs">
-              C {meal.macros.carbs}g
-            </Badge>
-            <Badge className="bg-orange-500 hover:bg-orange-600 text-white px-2 py-0.5 text-xs">
-              F {meal.macros.fat}g
-            </Badge>
+            {/* Macros */}
+            <div className="flex items-center gap-1.5">
+              <Badge className="bg-green-500 hover:bg-green-600 text-white px-2 py-0.5 text-xs">
+                P {meal.macros.protein}g
+              </Badge>
+              <Badge className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-0.5 text-xs">
+                C {meal.macros.carbs}g
+              </Badge>
+              <Badge className="bg-orange-500 hover:bg-orange-600 text-white px-2 py-0.5 text-xs">
+                F {meal.macros.fat}g
+              </Badge>
+            </div>
           </div>
         </div>
       ) : (
