@@ -8,6 +8,7 @@ import { MobileMealCards } from "@/components/meal-plan/MobileMealCards";
 import { NewMobileMealLayout } from "@/components/meal-plan/NewMobileMealLayout";
 import { ProgressCard } from "@/components/meal-plan/ProgressCard";
 import { ProgressModal } from "@/components/meal-plan/ProgressModal";
+import { RecipeModal } from "@/components/meal-plan/RecipeModal";
 
 // Import constants and utils
 import {
@@ -55,6 +56,10 @@ export default function MealPlanPage() {
   // Progress modal state
   const [showProgressDetails, setShowProgressDetails] = useState(false);
   const [modalDay, setModalDay] = useState<string | null>(null);
+
+  // Recipe modal state
+  const [showRecipeModal, setShowRecipeModal] = useState(false);
+  const [selectedMeal, setSelectedMeal] = useState<Meal | null>(null);
 
   // Load meal plans on component mount
   useEffect(() => {
@@ -429,6 +434,24 @@ export default function MealPlanPage() {
     }
   };
 
+  // Context menu actions for filled meal cards
+  const handleShowRecipe = (day: string, meal: MealSlot) => {
+    const mealData = mealPlan[day]?.[meal];
+    if (mealData) {
+      setSelectedMeal(mealData);
+      setShowRecipeModal(true);
+    }
+  };
+
+  const handleRegenerate = async (day: string, meal: MealSlot) => {
+    // Use the same logic as handleSlotClick to regenerate the meal
+    await handleSlotClick(day, meal);
+  };
+
+  const handleDeleteMeal = async (day: string, meal: MealSlot) => {
+    await removeMeal(day, meal);
+  };
+
   // Week navigation
   const goToPreviousWeek = () => setCurrentWeek((prev) => subWeeks(prev, 1));
   const goToNextWeek = () => setCurrentWeek((prev) => addWeeks(prev, 1));
@@ -551,6 +574,9 @@ export default function MealPlanPage() {
             setModalDay(DAYS_OF_WEEK[currentDayIndex]);
             setShowProgressDetails(true);
           }}
+          onShowRecipe={handleShowRecipe}
+          onRegenerate={handleRegenerate}
+          onDeleteMeal={handleDeleteMeal}
         />
       </div>
 
@@ -560,6 +586,13 @@ export default function MealPlanPage() {
         onClose={setShowProgressDetails}
         mealPlan={mealPlan}
         currentDay={modalDay || getCurrentDay()}
+      />
+
+      {/* Recipe Details Modal */}
+      <RecipeModal
+        isOpen={showRecipeModal}
+        onClose={() => setShowRecipeModal(false)}
+        meal={selectedMeal}
       />
     </div>
   );

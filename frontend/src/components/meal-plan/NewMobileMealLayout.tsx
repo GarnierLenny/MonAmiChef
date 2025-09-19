@@ -21,6 +21,9 @@ interface NewMobileMealLayoutProps {
   setInputValue: (value: string) => void;
   isGenerating: boolean;
   onProgressDetailsClick: () => void;
+  onShowRecipe?: (day: string, meal: MealSlot) => void;
+  onRegenerate?: (day: string, meal: MealSlot) => void;
+  onDeleteMeal?: (day: string, meal: MealSlot) => void;
 }
 
 export const NewMobileMealLayout = ({
@@ -34,6 +37,9 @@ export const NewMobileMealLayout = ({
   setInputValue,
   isGenerating,
   onProgressDetailsClick,
+  onShowRecipe,
+  onRegenerate,
+  onDeleteMeal,
 }: NewMobileMealLayoutProps) => {
   const weekStart = startOfWeek(currentWeek);
   const currentDay = DAYS_OF_WEEK[currentDayIndex];
@@ -79,6 +85,9 @@ export const NewMobileMealLayout = ({
               meal={meal}
               onGenerate={() => onSlotClick(currentDay, mealSlot)}
               onSaved={() => handleSavedMeals(mealSlot)}
+              onShowRecipe={() => onShowRecipe?.(currentDay, mealSlot)}
+              onRegenerate={() => onRegenerate?.(currentDay, mealSlot)}
+              onDelete={() => onDeleteMeal?.(currentDay, mealSlot)}
               isGenerating={isGenerating}
             />
           );

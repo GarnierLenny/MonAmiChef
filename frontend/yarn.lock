@@ -991,7 +991,7 @@
 
 "@radix-ui/react-context-menu@^2.2.16":
   version "2.2.16"
-  resolved "https://registry.npmjs.org/@radix-ui/react-context-menu/-/react-context-menu-2.2.16.tgz"
+  resolved "https://registry.npmjs.org/@radix-ui/react-context-menu/-/react-context-menu-2.2.16.tgz#e7bf94a457b68af08f24ad696949144530faab50"
   integrity sha512-O8morBEW+HsVG28gYDZPTrT9UUovQUlJue5YO836tiTJhuIWBm/zQHc7j388sHWtdH/xUZurK9olD2+pcqx5ww==
   dependencies:
     "@radix-ui/primitive" "1.1.3"
