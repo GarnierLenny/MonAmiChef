@@ -1,5 +1,5 @@
 // src/pages/MealPlanPage.tsx
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { startOfWeek, addWeeks, subWeeks } from "date-fns";
 
 // Import components
@@ -17,6 +17,17 @@ import {
   type MealSlot,
 } from "@/components/meal-plan/constants";
 
+// Import API and utilities
+import { mealPlanApi, type BackendMealPlan } from "@/lib/api/mealPlanApi";
+import {
+  createMealPlanRequest,
+  createMealPlanItemRequest,
+  convertBackendToFrontendMealPlan,
+  findMealPlanForWeek,
+  findMealPlanItem,
+  requiresAuthentication,
+} from "@/lib/mealPlanUtils";
+
 // interface MealPlanPageProps {
 //   user?: User | null;
 //   onAuthClick?: () => void;
@@ -32,11 +43,81 @@ export default function MealPlanPage() {
   const [mealPlan, setMealPlan] = useState<MealPlan>({});
   const [currentDayIndex, setCurrentDayIndex] = useState(0);
 
+  // Backend state
+  const [backendMealPlans, setBackendMealPlans] = useState<BackendMealPlan[]>([]);
+  const [currentBackendPlan, setCurrentBackendPlan] = useState<BackendMealPlan | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isUnauthenticated, setIsUnauthenticated] = useState(false);
+
   // Progress modal state
   const [showProgressDetails, setShowProgressDetails] = useState(false);
   const [modalDay, setModalDay] = useState<string | null>(null);
 
-  // Generate fake meal plan
+  // Load meal plans on component mount
+  useEffect(() => {
+    loadMealPlans();
+  }, []);
+
+  // Update current backend plan when week changes
+  useEffect(() => {
+    const weekPlan = findMealPlanForWeek(backendMealPlans, currentWeek);
+    setCurrentBackendPlan(weekPlan || null);
+
+    if (weekPlan) {
+      // Convert backend plan to frontend format
+      const frontendPlan = convertBackendToFrontendMealPlan(weekPlan);
+      setMealPlan(frontendPlan);
+    } else {
+      // No plan for this week, clear the meal plan
+      setMealPlan({});
+    }
+  }, [backendMealPlans, currentWeek]);
+
+  // Load meal plans from backend
+  const loadMealPlans = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const plans = await mealPlanApi.getUserMealPlans();
+      setBackendMealPlans(plans);
+      setIsUnauthenticated(false);
+    } catch (err: unknown) {
+      console.error('Failed to load meal plans:', err);
+      if (requiresAuthentication(err)) {
+        setIsUnauthenticated(true);
+        // For unauthenticated users, use fake data
+        setMealPlan({});
+      } else {
+        setError(err.message || 'Failed to load meal plans');
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Create a meal plan for the current week if it doesn't exist
+  const ensureCurrentWeekMealPlan = async (): Promise<BackendMealPlan | null> => {
+    if (isUnauthenticated) return null;
+
+    let weekPlan = findMealPlanForWeek(backendMealPlans, currentWeek);
+
+    if (!weekPlan) {
+      try {
+        const request = createMealPlanRequest(currentWeek);
+        weekPlan = await mealPlanApi.createMealPlan(request);
+        setBackendMealPlans(prev => [...prev, weekPlan!]);
+      } catch (err: unknown) {
+        console.error('Failed to create meal plan:', err);
+        setError((err as Error).message || 'Failed to create meal plan');
+        return null;
+      }
+    }
+
+    return weekPlan;
+  };
+
+  // Generate fake meal plan (fallback for unauthenticated users)
   const generateFakeMealPlan = useCallback(() => {
     const newPlan: MealPlan = {};
     DAYS_OF_WEEK.forEach((day) => {
@@ -64,7 +145,7 @@ export default function MealPlanPage() {
   };
 
   // Generate meals for current day based on user input
-  const generateMealsForCurrentDay = (userInput: string) => {
+  const generateMealsForCurrentDay = () => {
     const currentDay = DAYS_OF_WEEK[currentDayIndex];
     const newPlan = { ...mealPlan };
 
@@ -92,41 +173,117 @@ export default function MealPlanPage() {
   };
 
   // Handle meal slot click
-  const handleSlotClick = (day: string, meal: MealSlot) => {
-    const mealOptions = FAKE_MEALS[meal];
-    const randomMeal =
-      mealOptions[Math.floor(Math.random() * mealOptions.length)];
+  const handleSlotClick = async (day: string, meal: MealSlot) => {
+    if (isUnauthenticated) {
+      // Fallback to fake data for unauthenticated users
+      const mealOptions = FAKE_MEALS[meal];
+      const randomMeal =
+        mealOptions[Math.floor(Math.random() * mealOptions.length)];
 
-    setMealPlan((prev) => ({
-      ...prev,
-      [day]: {
-        ...prev[day],
-        [meal]: randomMeal,
-      },
-    }));
+      setMealPlan((prev) => ({
+        ...prev,
+        [day]: {
+          ...prev[day],
+          [meal]: randomMeal,
+        },
+      }));
+      return;
+    }
+
+    try {
+      // Ensure we have a meal plan for this week
+      const weekPlan = await ensureCurrentWeekMealPlan();
+      if (!weekPlan) return;
+
+      // For now, we'll use fake meals as placeholders since we don't have recipe creation integrated yet
+      const mealOptions = FAKE_MEALS[meal];
+      const randomMeal = mealOptions[Math.floor(Math.random() * mealOptions.length)];
+
+      // Create a meal plan item request (without recipeId for now)
+      const itemRequest = createMealPlanItemRequest(day, meal);
+      await mealPlanApi.addMealPlanItem(weekPlan.id, itemRequest);
+
+      // Update local state
+      setMealPlan((prev) => ({
+        ...prev,
+        [day]: {
+          ...prev[day],
+          [meal]: randomMeal,
+        },
+      }));
+
+      // Refresh meal plans to sync with backend
+      await loadMealPlans();
+    } catch (err: unknown) {
+      console.error('Failed to add meal to plan:', err);
+      setError((err as Error).message || 'Failed to add meal to plan');
+    }
   };
 
   // Remove meal from slot
-  const removeMeal = (dayOrKey: string, meal?: MealSlot) => {
-    setMealPlan((prev) => {
-      const newPlan = { ...prev };
+  const removeMeal = async (dayOrKey: string, meal?: MealSlot) => {
+    if (isUnauthenticated) {
+      // Fallback to local state for unauthenticated users
+      setMealPlan((prev) => {
+        const newPlan = { ...prev };
+
+        if (meal) {
+          // Desktop format: removeMeal(day, meal)
+          const day = dayOrKey;
+          if (newPlan[day]) {
+            delete newPlan[day][meal];
+          }
+        } else {
+          // Mobile format: removeMeal(mealKey)
+          const [day, mealType] = dayOrKey.split("-");
+          if (newPlan[day]) {
+            delete newPlan[day][mealType as MealSlot];
+          }
+        }
+
+        return newPlan;
+      });
+      return;
+    }
+
+    try {
+      if (!currentBackendPlan) return;
+
+      let day: string;
+      let mealSlot: MealSlot;
 
       if (meal) {
         // Desktop format: removeMeal(day, meal)
-        const day = dayOrKey;
-        if (newPlan[day]) {
-          delete newPlan[day][meal];
-        }
+        day = dayOrKey;
+        mealSlot = meal;
       } else {
         // Mobile format: removeMeal(mealKey)
-        const [day, mealType] = dayOrKey.split("-");
-        if (newPlan[day]) {
-          delete newPlan[day][mealType as MealSlot];
-        }
+        const [dayPart, mealType] = dayOrKey.split("-");
+        day = dayPart;
+        mealSlot = mealType as MealSlot;
       }
 
-      return newPlan;
-    });
+      // Find the meal plan item to remove
+      const item = findMealPlanItem(currentBackendPlan, day, mealSlot);
+      if (item) {
+        await mealPlanApi.removeMealPlanItem(currentBackendPlan.id, item.id);
+      }
+
+      // Update local state
+      setMealPlan((prev) => {
+        const newPlan = { ...prev };
+        if (newPlan[day]) {
+          delete newPlan[day][mealSlot];
+        }
+        return newPlan;
+      });
+
+      // Refresh meal plans to sync with backend
+      await loadMealPlans();
+    } catch (err: unknown) {
+      console.error('Failed to remove meal from plan:', err);
+      setError((err as Error).message || 'Failed to remove meal from plan');
+    }
   };
 
   // Week navigation
@@ -139,8 +296,41 @@ export default function MealPlanPage() {
     return DAYS_OF_WEEK[today.getDay() === 0 ? 6 : today.getDay() - 1];
   };
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 items-center justify-center">
+        <div className="text-center">
+          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-gray-600">Loading meal plans...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
+      {/* Error Message */}
+      {error && (
+        <div className="absolute top-4 right-4 z-50 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg">
+          <div className="flex items-center gap-2">
+            <span>{error}</span>
+            <button
+              onClick={() => setError(null)}
+              className="text-white hover:text-gray-200"
+            >
+              ×
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Unauthenticated Message */}
+      {isUnauthenticated && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg">
+          <p className="text-sm">Sign in to save your meal plans to the cloud</p>
+        </div>
+      )}
       {/* Desktop Meal Plan Grid */}
       <div className="hidden md:flex w-full flex-col overflow-hidden">
         {/* Today's Progress Card - Desktop */}
