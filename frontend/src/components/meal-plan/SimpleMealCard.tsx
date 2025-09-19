@@ -23,7 +23,7 @@ export const SimpleMealCard = ({
     <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-2">
       {/* Meal Type Header */}
       <div className="text-left">
-        <h3 className="text-lg font-semibold text-gray-700 uppercase tracking-wide text-sm">
+        <h3 className="font-semibold text-gray-400 uppercase tracking-wide text-xs">
           {mealSlot}
         </h3>
       </div>
@@ -33,7 +33,7 @@ export const SimpleMealCard = ({
         <div className="space-y-2">
           {/* Recipe Title and Grade */}
           <div className="flex items-start justify-between">
-            <h4 className="font-semibold text-gray-900 text-base leading-tight flex-1">
+            <h4 className="font-semibold text-gray-900 text-sm leading-tight flex-1">
               {meal.title}
             </h4>
             <div
@@ -60,7 +60,9 @@ export const SimpleMealCard = ({
             {/* Calories */}
             <div className="flex items-center gap-1">
               <Zap className="w-4 h-4 text-orange-500" />
-              <span className="font-semibold text-lg text-gray-900">{meal.calories} cal</span>
+              <span className="font-semibold text-md text-gray-900">
+                {meal.calories} cal
+              </span>
             </div>
 
             {/* Macros */}
@@ -92,11 +94,11 @@ export const SimpleMealCard = ({
               disabled={isGenerating}
             >
               <BookmarkIcon className="w-4 h-4" />
-              <span className="text-sm font-medium">Saved</span>
+              <span className="text-sm font-medium">Choose saved</span>
             </Button>
 
             <Button
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-gray-900 hover:bg-gray-800"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-orange-500 hover:bg-gray-800"
               onClick={onGenerate}
               disabled={isGenerating}
             >
@@ -111,3 +113,4 @@ export const SimpleMealCard = ({
     </div>
   );
 };
+
