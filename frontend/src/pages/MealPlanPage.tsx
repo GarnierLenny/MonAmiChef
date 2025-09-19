@@ -1,10 +1,8 @@
 // src/pages/MealPlanPage.tsx
 import { useState, useCallback } from "react";
 import { startOfWeek, addWeeks, subWeeks } from "date-fns";
-import type { ChatMessage } from "../types/types";
 
 // Import components
-import { ChatPanel } from "@/components/meal-plan/ChatPanel";
 import { MealGrid } from "@/components/meal-plan/MealGrid";
 import { MobileMealCards } from "@/components/meal-plan/MobileMealCards";
 import { ProgressCard } from "@/components/meal-plan/ProgressCard";
@@ -24,16 +22,8 @@ import {
 //   onAuthClick?: () => void;
 // }
 
-const initialChatMessage: ChatMessage = {
-  id: "initial",
-  role: "model",
-  text: "Hi! I'm your AI meal planning assistant. Tell me about your dietary preferences, cooking goals, or what you'd like to eat this week, and I'll help you plan amazing meals!",
-  timestamp: new Date(),
-};
-
 export default function MealPlanPage() {
-  // Chat state
-  const [messages, setMessages] = useState<ChatMessage[]>([initialChatMessage]);
+  // Input state
   const [inputValue, setInputValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -61,51 +51,43 @@ export default function MealPlanPage() {
     setMealPlan(newPlan);
   }, []);
 
-  // Handle chat message submission
-  const handleMessageSubmit = (text: string) => {
-    // Add user message
-    const userMessage: ChatMessage = {
-      id: `user-${Date.now()}`,
-      role: "user",
-      text,
-      timestamp: new Date(),
-    };
-    setMessages((prev) => [...prev, userMessage]);
+  // Handle meal generation from user input
+  const handleMealGeneration = (text: string) => {
     setIsGenerating(true);
 
-    // Simulate AI response for meal planning
+    // Simulate AI processing and meal generation
     setTimeout(() => {
-      const responses = [
-        "Great! Based on your preferences, I'll update your meal plan with some delicious options. Let me add some variety to your week!",
-        "Perfect! I've analyzed your request and I'm updating your meal grid with personalized recommendations.",
-        "Excellent choice! I'm refreshing your meal plan with options that match what you're looking for.",
-        "I love that idea! Let me update your weekly meal grid with some fantastic recipes that fit your requirements.",
-        "That sounds delicious! I'm adding some great meal options to your calendar based on your preferences.",
-      ];
-
-      const randomResponse =
-        responses[Math.floor(Math.random() * responses.length)];
-
-      const aiMessage: ChatMessage = {
-        id: `ai-${Date.now()}`,
-        role: "model",
-        text: randomResponse,
-        timestamp: new Date(),
-      };
-
-      setMessages((prev) => [...prev, aiMessage]);
+      // Generate meals based on user input for current day
+      generateMealsForCurrentDay(text);
       setIsGenerating(false);
-
-      // Update meal plan after AI response
-      generateFakeMealPlan();
     }, 2000);
   };
 
-  // Handle mobile chat submission
+  // Generate meals for current day based on user input
+  const generateMealsForCurrentDay = (userInput: string) => {
+    const currentDay = DAYS_OF_WEEK[currentDayIndex];
+    const newPlan = { ...mealPlan };
+
+    // Initialize day if it doesn't exist
+    if (!newPlan[currentDay]) {
+      newPlan[currentDay] = {};
+    }
+
+    // Generate meals based on input for each meal slot
+    MEAL_SLOTS.forEach((meal) => {
+      const mealOptions = FAKE_MEALS[meal];
+      const randomMeal = mealOptions[Math.floor(Math.random() * mealOptions.length)];
+      newPlan[currentDay][meal] = randomMeal;
+    });
+
+    setMealPlan(newPlan);
+  };
+
+  // Handle mobile input submission
   const handleMobileSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isGenerating || !inputValue.trim()) return;
-    handleMessageSubmit(inputValue.trim());
+    handleMealGeneration(inputValue.trim());
     setInputValue("");
   };
 
@@ -159,15 +141,8 @@ export default function MealPlanPage() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
-      {/* Left Chat Panel */}
-      <ChatPanel
-        messages={messages}
-        onMessageSubmit={handleMessageSubmit}
-        isGenerating={isGenerating}
-      />
-
-      {/* Right Meal Plan Grid */}
-      <div className="hidden md:flex md:flex-1 flex-col overflow-hidden">
+      {/* Desktop Meal Plan Grid */}
+      <div className="hidden md:flex w-full flex-col overflow-hidden">
         {/* Today's Progress Card - Desktop */}
         <div className="px-6 pb-4 pt-6">
           <ProgressCard
@@ -190,6 +165,41 @@ export default function MealPlanPage() {
           onPreviousWeek={goToPreviousWeek}
           onNextWeek={goToNextWeek}
         />
+
+        {/* Desktop Input Bar */}
+        <div className="p-6 border-t border-gray-200 bg-white">
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (isGenerating || !inputValue.trim()) return;
+              handleMealGeneration(inputValue.trim());
+              setInputValue("");
+            }}
+            className="flex items-center gap-4 p-2 pl-5 bg-white flex-1 shadow-lg shadow-orange-500/30 border border-gray-300 focus-within:ring-2 focus-within:ring-orange-500 rounded-full transition-colors"
+          >
+            <input
+              type="text"
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+              placeholder="Tell me what you'd like to eat today..."
+              disabled={isGenerating}
+              className="min-w-0 grow basis-0 bg-transparent outline-none focus:ring-0"
+            />
+            <button
+              type="submit"
+              disabled={isGenerating || !inputValue.trim()}
+              className="shrink-0 rounded-full px-4 py-4 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white flex items-center justify-center"
+            >
+              {isGenerating ? (
+                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="m22 2-7 20-4-9-9-4Z"/>
+                </svg>
+              )}
+            </button>
+          </form>
+        </div>
       </div>
 
       {/* Mobile Layout */}
