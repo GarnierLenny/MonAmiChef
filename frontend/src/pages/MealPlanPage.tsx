@@ -64,15 +64,18 @@ export default function MealPlanPage() {
     const weekPlan = findMealPlanForWeek(backendMealPlans, currentWeek);
     setCurrentBackendPlan(weekPlan || null);
 
-    if (weekPlan) {
-      // Convert backend plan to frontend format
-      const frontendPlan = convertBackendToFrontendMealPlan(weekPlan);
-      setMealPlan(frontendPlan);
-    } else {
-      // No plan for this week, clear the meal plan
-      setMealPlan({});
+    // Only clear meal plan if we're switching to a week with no backend plan
+    // Don't overwrite existing local meal data when a backend plan exists
+    if (!weekPlan) {
+      // No plan for this week, clear the meal plan only if user is authenticated
+      // For unauthenticated users, keep their local data
+      if (!isUnauthenticated) {
+        setMealPlan({});
+      }
     }
-  }, [backendMealPlans, currentWeek]);
+    // Note: We don't automatically populate from backend here because
+    // the backend only stores meal plan structure, not the actual meal content
+  }, [backendMealPlans, currentWeek, isUnauthenticated]);
 
   // Load meal plans from backend
   const loadMealPlans = async () => {
@@ -86,8 +89,8 @@ export default function MealPlanPage() {
       console.error('Failed to load meal plans:', err);
       if (requiresAuthentication(err)) {
         setIsUnauthenticated(true);
-        // For unauthenticated users, use fake data
-        setMealPlan({});
+        // For unauthenticated users, keep their local meal plan data
+        // Don't clear it here
       } else {
         setError(err.message || 'Failed to load meal plans');
       }
@@ -203,7 +206,7 @@ export default function MealPlanPage() {
       const itemRequest = createMealPlanItemRequest(day, meal);
       await mealPlanApi.addMealPlanItem(weekPlan.id, itemRequest);
 
-      // Update local state
+      // Update local state immediately
       setMealPlan((prev) => ({
         ...prev,
         [day]: {
@@ -212,8 +215,8 @@ export default function MealPlanPage() {
         },
       }));
 
-      // Refresh meal plans to sync with backend
-      await loadMealPlans();
+      // Note: We're not calling loadMealPlans() here because it would overwrite our local fake data
+      // In the future, when we have recipe integration, we would save the actual recipe to backend
     } catch (err: unknown) {
       console.error('Failed to add meal to plan:', err);
       setError((err as Error).message || 'Failed to add meal to plan');
@@ -278,8 +281,8 @@ export default function MealPlanPage() {
         return newPlan;
       });
 
-      // Refresh meal plans to sync with backend
-      await loadMealPlans();
+      // Note: We're not calling loadMealPlans() here to avoid overwriting local changes
+      // The backend meal plan item has been removed, so local state is authoritative for display
     } catch (err: unknown) {
       console.error('Failed to remove meal from plan:', err);
       setError((err as Error).message || 'Failed to remove meal from plan');

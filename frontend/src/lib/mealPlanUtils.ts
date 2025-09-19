@@ -72,10 +72,11 @@ export function convertBackendToFrontendMealPlan(
       }
 
       // If we have a recipeId, try to find the corresponding meal
-      // For now, we'll create a placeholder meal - this can be enhanced with actual recipe data
       if (item.recipeId && meals[item.recipeId]) {
         frontendPlan[dayName][item.mealSlot as MealSlot] = meals[item.recipeId];
       }
+      // Note: We don't create placeholder meals here because the frontend
+      // manages display meals separately from backend meal plan structure
     });
   }
 
