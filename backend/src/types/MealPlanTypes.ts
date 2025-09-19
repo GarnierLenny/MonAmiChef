@@ -43,3 +43,16 @@ export interface CreateAIMealPlanRequest {
   cooking_time_max?: string;
   servings?: number;
 }
+
+export interface UpdateMealPlanItemRequest {
+  day: number; // 0-6 (Sunday-Saturday)
+  mealSlot: "breakfast" | "lunch" | "dinner" | "snack";
+  recipeId?: string; // Optional for removing items
+}
+
+export interface UpdateMealPlanRequest {
+  title?: string;
+  generationPrompt?: string;
+  generationMethod?: "manual" | "ai_generated" | "ai_assisted";
+  aiPreferences?: AIPreferences;
+}
