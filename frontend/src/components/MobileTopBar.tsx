@@ -10,7 +10,7 @@ interface MobileTopBarProps {
 
 export function MobileTopBar({ onMenuClick, rightIcon, onRightIconClick }: MobileTopBarProps) {
   return (
-    <header className="md:hidden sticky top-0 z-50 p-4">
+    <header className="md:hidden sticky top-0 z-50 p-4 pt-safe">
       {/* Island container */}
       <div className="mx-auto max-w-sm">
         <div className="flex items-center justify-between bg-background/80 backdrop-blur-md border border-border/50 rounded-2xl px-4 py-3 shadow-lg">

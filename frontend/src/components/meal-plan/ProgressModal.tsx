@@ -25,7 +25,7 @@ export const ProgressModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="rounded-sm max-w-sm w-[calc(100vw-2rem)] pb-7 max-h-[85vh] mx-auto overflow-hidden border-none shadow-lg focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 sm:mx-auto">
+      <DialogContent className="rounded-sm max-w-sm w-[calc(100vw-2rem)] pb-7 max-h-[85dvh] mx-auto overflow-hidden border-none shadow-lg focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 sm:mx-auto">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold text-gray-900">
             Progress Details

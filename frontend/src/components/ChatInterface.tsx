@@ -227,8 +227,8 @@ export default function ChatInterface({
   const canSend = inputValue.trim() !== "" || hasSelectedPreferences;
 
   return (
-    <div className="flex-1 flex flex-col h-full">
-      <div className="flex-1 flex flex-col min-h-0">
+    <div className="flex-1 flex flex-col h-full overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {messages.map((message, index) => {
@@ -348,8 +348,8 @@ export default function ChatInterface({
         </div>
 
         {/* Input - Now sticky at bottom dont put border-t */}
-        <div className="flex-shrink-0">
-          <div className="p-3">
+        <div className="flex-shrink-0 bg-white border-t border-gray-200 chat-input-container">
+          <div className="p-3 pb-safe">
             {/* Selected Preferences Tags */}
             {selectedTags.length > 0 && (
               <div className="mb-4">
@@ -412,7 +412,7 @@ export default function ChatInterface({
                 type="text"
                 value={inputValue}
                 onChange={(e) => onInputChange(e.target.value)}
-                placeholder="Tell me what you crave"
+                placeholder="Tdell me what you crave"
                 maxLength={maxCharacters}
                 disabled={isGenerating}
                 className="min-w-0 grow basis-0 bg-transparent outline-none focus:ring-0"

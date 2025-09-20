@@ -126,7 +126,7 @@ export const SavedRecipesModal = ({
         </DialogHeader>
 
         {/* Content */}
-        <ScrollArea className="flex-1 h-[50vh] ">
+        <ScrollArea className="flex-1 h-[50dvh] ">
           <div className="p-6">
             {isLoading ? (
               <div className="flex items-center justify-center h-32">
