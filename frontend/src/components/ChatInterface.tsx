@@ -1,5 +1,5 @@
 import { useLayoutEffect, useEffect, useRef, useState } from "react";
-import { Send, Loader2, Sparkles, X, Heart } from "lucide-react";
+import { Loader2, Sparkles, X, Heart } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
@@ -8,6 +8,7 @@ import { ChatMessage } from "../types/types";
 import { parseRecipeFromText } from "../utils/recipeParser";
 import { recipeService } from "../services/recipeService";
 import { useToast } from "@/hooks/use-toast";
+import { ChatInput } from "@/components/ui/chat-input";
 
 interface ChatInterfaceProps {
   preferences: {
@@ -153,28 +154,29 @@ export default function ChatInterface({
 
   const handleSaveRecipe = async (messageText: string, messageId?: string) => {
     if (!messageId) return;
-    
+
     // Check if user is authenticated
     if (!user) {
       // Show registration prompt for guest users with toast
       toast({
         title: "Sign up to save recipes",
-        description: "Recipe saving is only available for registered users. Sign up to start saving your favorite recipes!",
+        description:
+          "Recipe saving is only available for registered users. Sign up to start saving your favorite recipes!",
         duration: 5000,
       });
-      
+
       // Open the authentication modal
       if (onAuthClick) {
         onAuthClick();
       }
       return;
     }
-    
+
     // Parse the message text to see if it contains a recipe
     const parsedRecipe = parseRecipeFromText(messageText);
     if (!parsedRecipe) return;
 
-    setSavingRecipes(prev => new Set([...prev, messageId]));
+    setSavingRecipes((prev) => new Set([...prev, messageId]));
 
     try {
       // Create recipe on backend
@@ -187,9 +189,9 @@ export default function ChatInterface({
 
       // Save the recipe for the user
       const result = await recipeService.saveRecipe(recipe.id);
-      
+
       if (result.is_saved) {
-        setSavedRecipes(prev => new Set([...prev, messageId]));
+        setSavedRecipes((prev) => new Set([...prev, messageId]));
         toast({
           title: "Recipe saved!",
           description: "Your recipe has been added to your saved recipes.",
@@ -197,7 +199,7 @@ export default function ChatInterface({
         });
       }
     } catch (error) {
-      console.error('Failed to save recipe:', error);
+      console.error("Failed to save recipe:", error);
       toast({
         title: "Failed to save recipe",
         description: "Something went wrong. Please try again.",
@@ -205,7 +207,7 @@ export default function ChatInterface({
         duration: 4000,
       });
     } finally {
-      setSavingRecipes(prev => {
+      setSavingRecipes((prev) => {
         const newSet = new Set(prev);
         newSet.delete(messageId);
         return newSet;
@@ -233,10 +235,11 @@ export default function ChatInterface({
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {messages.map((message, index) => {
             const messageId = message.id ?? `${index}-${message.role}`;
-            const isRecipe = message.role === "model" && parseRecipeFromText(message.text);
+            const isRecipe =
+              message.role === "model" && parseRecipeFromText(message.text);
             const isSaved = savedRecipes.has(messageId);
             const isSaving = savingRecipes.has(messageId);
-            
+
             return (
               <div
                 key={messageId}
@@ -259,7 +262,9 @@ export default function ChatInterface({
                       </div>
                       {isRecipe && (
                         <button
-                          onClick={() => handleSaveRecipe(message.text, messageId)}
+                          onClick={() =>
+                            handleSaveRecipe(message.text, messageId)
+                          }
                           disabled={isSaving}
                           className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
                             isSaved
@@ -270,9 +275,17 @@ export default function ChatInterface({
                           {isSaving ? (
                             <Loader2 className="w-3 h-3 animate-spin" />
                           ) : (
-                            <Heart className={`w-3 h-3 ${isSaved ? "fill-current" : ""}`} />
+                            <Heart
+                              className={`w-3 h-3 ${isSaved ? "fill-current" : ""}`}
+                            />
                           )}
-                          <span>{isSaving ? "Saving..." : isSaved ? "Saved" : "Save Recipe"}</span>
+                          <span>
+                            {isSaving
+                              ? "Saving..."
+                              : isSaved
+                                ? "Saved"
+                                : "Save Recipe"}
+                          </span>
                         </button>
                       )}
                     </div>
@@ -348,89 +361,20 @@ export default function ChatInterface({
         </div>
 
         {/* Input - Now sticky at bottom dont put border-t */}
-        <div className="flex-shrink-0 bg-white border-t border-gray-200 chat-input-container">
-          <div className="p-3 pb-safe">
-            {/* Selected Preferences Tags */}
-            {selectedTags.length > 0 && (
-              <div className="mb-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">
-                    Selected Preferences:
-                  </span>
-                  <button
-                    onClick={clearAllPreferences}
-                    className="text-xs text-gray-500 hover:text-red-600 transition-colors"
-                  >
-                    Clear all
-                  </button>
-                </div>
-                <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
-                  {selectedTags.map((tag, index) => (
-                    <div
-                      key={index}
-                      className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium ${tag.color} border border-current/20`}
-                    >
-                      <span>{tag.label}</span>
-                      <button
-                        onClick={() => handleRemoveTag(tag.category, tag.value)}
-                        className="hover:bg-current/20 rounded-full p-0.5 transition-colors"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/*<div className="hidden md:block flex justify-between items-center">
-            <span
-              className={`text-sm font-medium ${
-                isOverLimit
-                  ? "text-red-600"
-                  : remainingCharacters <= 5
-                    ? "text-orange-600"
-                    : "text-gray-500"
-              }`}
-            >
-              {remainingCharacters} characters left
-            </span>
-          </div>*/}
-
-            <form
-              onSubmit={handleSubmit}
-              className={`flex items-center gap-4 mb-2 p-2 pl-5 bg-white flex-1 shadow-lg shadow-orange-500/30 border rounded-full transition-colors
-              ${
-                isOverLimit
-                  ? "border-red-300 bg-red-50 focus-within:ring-2 focus-within:ring-red-500"
-                  : "border-gray-300 focus-within:ring-2 focus-within:ring-orange-500"
-              }
-            `}
-            >
-              <input
-                ref={inputRef}
-                type="text"
-                value={inputValue}
-                onChange={(e) => onInputChange(e.target.value)}
-                placeholder="Tdell me what you crave"
-                maxLength={maxCharacters}
-                disabled={isGenerating}
-                className="min-w-0 grow basis-0 bg-transparent outline-none focus:ring-0"
-              />
-              <button
-                type="submit"
-                disabled={!canSend || isGenerating || isOverLimit}
-                className={`shrink-0 rounded-full px-4 py-4 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2 ${
-                  isOverLimit
-                    ? "bg-gray-400"
-                    : "bg-orange-500 hover:bg-orange-600"
-                }`}
-              >
-                <Send className="w-4 h-4" />
-              </button>
-            </form>
-          </div>
-        </div>
+        <ChatInput
+          inputValue={inputValue}
+          onInputChange={onInputChange}
+          onSubmit={handleSubmit}
+          isGenerating={isGenerating}
+          isOverLimit={isOverLimit}
+          maxCharacters={maxCharacters}
+          placeholder="Tell me what you crave"
+          canSend={canSend}
+          inputRef={inputRef}
+          tags={selectedTags}
+          onRemoveTag={handleRemoveTag}
+          onClearAllTags={clearAllPreferences}
+        />
       </div>
     </div>
   );

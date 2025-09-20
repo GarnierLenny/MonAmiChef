@@ -1,8 +1,9 @@
 import { Button } from "@/components/ui/button";
-import { Send, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { format, addDays, startOfWeek } from "date-fns";
 import { SimpleMealCard } from "./SimpleMealCard";
 import { ProgressCard } from "./ProgressCard";
+import { ChatInput } from "@/components/ui/chat-input";
 import {
   DAYS_OF_WEEK,
   MEAL_SLOTS,
@@ -132,32 +133,14 @@ export const NewMobileMealLayout = ({
       </div>
 
       {/* Input Bar */}
-      <div className="p-4 pt-0 chat-input-container bg-white pb-safe">
-        <form onSubmit={onSubmit} className="w-full">
-          <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 shadow-sm">
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
-              disabled={isGenerating}
-              className="flex-1 bg-transparent outline-none text-gray-900 placeholder-gray-500"
-            />
-            <Button
-              type="submit"
-              disabled={isGenerating || !inputValue.trim()}
-              className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg px-4 py-2"
-            >
-              {isGenerating ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Send className="w-4 h-4" />
-              )}
-            </Button>
-          </div>
-        </form>
-      </div>
+      <ChatInput
+        inputValue={inputValue}
+        onInputChange={setInputValue}
+        onSubmit={onSubmit}
+        isGenerating={isGenerating}
+        placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
+        canSend={inputValue.trim() !== ""}
+      />
     </div>
   );
 };
-
