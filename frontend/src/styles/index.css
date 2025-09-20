@@ -128,8 +128,21 @@
     }
   }
 
-  /* Ensure input area stays above keyboard on mobile */
+  /* Mobile-specific layout fixes */
   @media (max-width: 768px) {
+    /* Prevent document scrolling on mobile */
+    html, body {
+      overflow: hidden;
+      height: 100dvh;
+      position: fixed;
+      width: 100%;
+    }
+
+    #root {
+      height: 100dvh;
+      overflow: hidden;
+    }
+
     .chat-input-container {
       /* Use small viewport units when available for keyboard compatibility */
       position: fixed;

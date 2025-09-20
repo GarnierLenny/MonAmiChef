@@ -65,7 +65,7 @@ export const NewMobileMealLayout = ({
   };
 
   return (
-    <div className="flex flex-col h-full bg-gray-50">
+    <div className="flex flex-col h-full bg-gray-50 overflow-hidden">
       {/* Progress Card */}
       <div className="p-4">
         <ProgressCard
@@ -132,7 +132,7 @@ export const NewMobileMealLayout = ({
       </div>
 
       {/* Input Bar */}
-      <div className="p-4 pt-0">
+      <div className="p-4 pt-0 chat-input-container bg-white pb-safe">
         <form onSubmit={onSubmit} className="w-full">
           <div className="flex items-center gap-3 p-3 bg-white rounded-xl border border-gray-200 shadow-sm">
             <input

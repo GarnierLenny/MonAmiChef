@@ -153,7 +153,7 @@ function App() {
 
   if (isLoadingAuth) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
+      <div className="flex items-center justify-center mobile-viewport bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
@@ -166,7 +166,7 @@ function App() {
   return (
     <AppErrorBoundary>
       <CanonicalUrl />
-      <div className="flex flex-col h-screen overflow-hidden bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
+      <div className="flex flex-col mobile-viewport overflow-hidden bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
       {!isRecipePage && !isChatPage && (
         <MobileTopBar onMenuClick={() => setIsMobileSidebarOpen(true)} />
       )}
@@ -186,7 +186,7 @@ function App() {
       )}
 
       <div
-        className={`flex ${isRecipePage ? "h-screen" : "flex-1"} overflow-y-auto`}
+        className={`flex ${isRecipePage ? "mobile-viewport" : "flex-1"} ${isChatPage || isMealPlanPage ? "overflow-hidden" : "overflow-y-auto"}`}
       >
         <Routes>
           {/* Public routes */}

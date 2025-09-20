@@ -228,7 +228,7 @@ export default function ChatInterface({
 
   return (
     <div className="flex-1 flex flex-col h-full overflow-hidden">
-      <div className="flex-1 flex flex-col min-h-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-h-0">
         {/* Messages */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {messages.map((message, index) => {

@@ -360,7 +360,7 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
   return (
     <>
       {isMobile ? (
-        <div className="flex flex-col mobile-viewport min-h-0 relative">
+        <div className="flex flex-col mobile-viewport min-h-0 relative overflow-hidden">
           <MobileTopBar
             onMenuClick={() => setIsMobileSidebarOpen(true)}
             rightIcon={<ArrowLeftFromLine className="h-5 w-5" />}
@@ -402,7 +402,7 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
             clearAllPreferences={clearAllPreferences}
           />
 
-          <div className="flex-1 flex flex-col overflow-hidden mobile-content">
+          <div className="flex-1 flex flex-col overflow-hidden mobile-content min-h-0">
             {isLoadingChat && (
               <div className="pointer-events-none absolute inset-0 flex items-start justify-center pt-4">
                 <div className="rounded-full h-6 w-6 border-2 border-gray-300 border-t-transparent animate-spin" />
