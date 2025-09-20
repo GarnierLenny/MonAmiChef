@@ -12,6 +12,7 @@ import {
   Home,
   ChefHat,
   CalendarDays,
+  X,
 } from "lucide-react";
 import { User as UserType } from "../types/types";
 
@@ -62,79 +63,111 @@ export function NavigationSidebar({
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="left" className="w-80 p-0 bg-background border-r">
         <div className="flex flex-col h-full">
-          {/* Header */}
-          <div className="p-6 border-b">
-            <div className="flex items-center gap-3">
-              <img
-                src="/lovable-uploads/2db14320-f76b-4b9d-978c-1761722e2695.png"
-                alt="Chef Logo"
-                className="h-8 w-auto"
-              />
-              <span className="text-foreground font-semibold text-lg tracking-wide">
-                Mon Ami Chef
-              </span>
+          {/* Orange Header */}
+          <div className="bg-orange-500 p-6 text-white">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                {/* Try image first, fallback to icon */}
+                <img
+                  src="/favicon.png"
+                  alt="Chef Logo"
+                  className="h-6 w-auto"
+                  onError={(e) => {
+                    e.currentTarget.style.display = "none";
+                    e.currentTarget.nextElementSibling.style.display = "block";
+                  }}
+                />
+                <ChefHat
+                  className="h-6 w-6 text-white"
+                  style={{ display: "none" }}
+                />
+                <span className="font-semibold text-lg tracking-wide">
+                  Mon Ami Chef
+                </span>
+              </div>
             </div>
             {user && (
-              <div className="mt-4 p-3 bg-accent/20 rounded-lg">
-                <p className="text-sm font-medium text-foreground">
-                  {user.name}
-                </p>
-                <p className="text-xs text-muted-foreground">{user.email}</p>
+              <div className="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">
+                    <User className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <p className="font-medium text-white">{user.name}</p>
+                    <p className="text-sm text-white/80">{user.email}</p>
+                  </div>
+                </div>
               </div>
             )}
           </div>
 
           {/* Navigation */}
-          <div className="flex-1 py-4">
-            <nav className="space-y-1 px-4">
+          <div className="flex-1 py-6">
+            <nav className="space-y-2 px-6">
               <Button
-                variant={isActivePath("/") ? "secondary" : "ghost"}
-                className="w-full justify-start gap-3"
+                variant="ghost"
+                className={`w-full justify-start gap-4 h-12 text-left font-medium ${
+                  isActivePath("/")
+                    ? "bg-green-100 text-green-700"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
                 onClick={() => handleNavigation("/")}
               >
-                <Home className="h-4 w-4" />
+                <Home className="h-5 w-5" />
                 Home
               </Button>
 
               <Button
-                variant={isActivePath("/meal-plan-chat") ? "secondary" : "ghost"}
-                className="w-full justify-start gap-3"
+                variant="ghost"
+                className={`w-full justify-start gap-4 h-12 text-left font-medium ${
+                  isActivePath("/meal-plan-chat")
+                    ? "bg-green-100 text-green-700"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
                 onClick={() => handleNavigation("/meal-plan-chat")}
               >
-                <CalendarDays className="h-4 w-4" />
+                <CalendarDays className="h-5 w-5" />
                 Meal Planning
               </Button>
 
               {user && (
                 <>
                   <Button
-                    variant={
-                      isActivePath("/recipes/saved") ? "secondary" : "ghost"
-                    }
-                    className="w-full justify-start gap-3"
+                    variant="ghost"
+                    className={`w-full justify-start gap-4 h-12 text-left font-medium ${
+                      isActivePath("/recipes/saved")
+                        ? "bg-green-100 text-green-700"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    }`}
                     onClick={() => handleNavigation("/recipes/saved")}
                   >
-                    <Heart className="h-4 w-4" />
+                    <Heart className="h-5 w-5" />
                     Saved Recipes
                   </Button>
 
                   <Button
-                    variant={
-                      isActivePath("/recipes/history") ? "secondary" : "ghost"
-                    }
-                    className="w-full justify-start gap-3"
+                    variant="ghost"
+                    className={`w-full justify-start gap-4 h-12 text-left font-medium ${
+                      isActivePath("/recipes/history")
+                        ? "bg-green-100 text-green-700"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    }`}
                     onClick={() => handleNavigation("/recipes/history")}
                   >
-                    <History className="h-4 w-4" />
+                    <History className="h-5 w-5" />
                     Recipe History
                   </Button>
 
                   <Button
-                    variant={isActivePath("/profile") ? "secondary" : "ghost"}
-                    className="w-full justify-start gap-3"
+                    variant="ghost"
+                    className={`w-full justify-start gap-4 h-12 text-left font-medium ${
+                      isActivePath("/profile")
+                        ? "bg-green-100 text-green-700"
+                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                    }`}
                     onClick={() => handleNavigation("/profile")}
                   >
-                    <User className="h-4 w-4" />
+                    <User className="h-5 w-5" />
                     Profile
                   </Button>
                 </>
@@ -143,33 +176,33 @@ export function NavigationSidebar({
           </div>
 
           {/* Footer */}
-          <div className="border-t p-4">
+          <div className="border-t p-6">
             {user ? (
               <Button
                 variant="ghost"
-                className="w-full justify-start gap-3 text-destructive hover:text-destructive hover:bg-destructive/10"
+                className="w-full justify-start gap-4 h-12 text-left font-medium text-red-600 hover:text-red-700 hover:bg-red-50"
                 onClick={handleSignOut}
                 disabled={isSigningOut}
               >
-                <LogOut className="h-4 w-4" />
+                <LogOut className="h-5 w-5" />
                 {isSigningOut ? "Signing out..." : "Sign Out"}
               </Button>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <Button
                   variant="default"
-                  className="w-full justify-start gap-3"
+                  className="w-full justify-start gap-4 h-12 bg-orange-500 hover:bg-orange-600 text-white"
                   onClick={handleAuthClick}
                 >
-                  <LogIn className="h-4 w-4" />
+                  <LogIn className="h-5 w-5" />
                   Sign In
                 </Button>
                 <Button
                   variant="outline"
-                  className="w-full justify-start gap-3"
+                  className="w-full justify-start gap-4 h-12 border-gray-300 text-gray-600 hover:bg-gray-50"
                   onClick={handleAuthClick}
                 >
-                  <UserPlus className="h-4 w-4" />
+                  <UserPlus className="h-5 w-5" />
                   Sign Up
                 </Button>
               </div>
@@ -182,4 +215,3 @@ export function NavigationSidebar({
 }
 
 export default NavigationSidebar;
-
