@@ -65,7 +65,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="h-[90vh] max-w-4xl w-[calc(100vw-2rem)] p-0 gap-0 mx-auto">
+      <DialogContent className="h-[90dvh] max-w-4xl w-[calc(100vw-2rem)] p-0 gap-0 mx-auto">
         {/* Header */}
         <DialogHeader className="p-6 pb-4 space-y-4">
           <div className="flex items-start justify-between">
