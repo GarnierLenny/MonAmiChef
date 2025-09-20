@@ -1,6 +1,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
+import { CountUp } from "@/components/ui/count-up";
+import { AnimatedProgress } from "@/components/ui/animated-progress";
 import { Zap, Utensils, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DonutChart } from "./DonutChart";
@@ -62,26 +63,30 @@ export const ProgressModal = ({
                   <div className="flex-1 grid grid-cols-3 gap-2 text-xs">
                     <div className="text-center">
                       <p className="text-gray-500">Consumed</p>
-                      <p className="font-semibold text-gray-900">
-                        {dayProgress.calories.used}
-                      </p>
+                      <CountUp
+                        end={dayProgress.calories.used}
+                        duration={700}
+                        className="font-semibold text-gray-900"
+                      />
                     </div>
                     <div className="text-center">
                       <p className="text-gray-500">Goal</p>
-                      <p className="font-semibold text-gray-900">
-                        {dayProgress.calories.goal}
-                      </p>
+                      <CountUp
+                        end={dayProgress.calories.goal}
+                        duration={700}
+                        className="font-semibold text-gray-900"
+                      />
                     </div>
                     <div className="text-center">
                       <p className="text-gray-500">Left</p>
-                      <p
-                        className={`font-semibold ${getProgressStatus(dayProgress.calories.percentage).color}`}
-                      >
-                        {Math.max(
+                      <CountUp
+                        end={Math.max(
                           0,
                           dayProgress.calories.goal - dayProgress.calories.used
                         )}
-                      </p>
+                        duration={700}
+                        className={`font-semibold ${getProgressStatus(dayProgress.calories.percentage).color}`}
+                      />
                     </div>
                   </div>
                 </div>
@@ -116,11 +121,25 @@ export const ProgressModal = ({
                               {label}
                             </span>
                             <span className="text-xs text-gray-500">
-                              {macro.used}g / {macro.goal}g
+                              <CountUp
+                                end={macro.used}
+                                duration={700}
+                                decimals={1}
+                                suffix="g"
+                              />
+                              {" / "}
+                              <CountUp
+                                end={macro.goal}
+                                duration={700}
+                                decimals={1}
+                                suffix="g"
+                              />
                             </span>
                           </div>
-                          <Progress
+                          <AnimatedProgress
                             value={Math.min(macro.percentage, 100)}
+                            duration={800}
+                            delay={200}
                             className={cn(
                               "h-2",
                               getMacroProgressClass(key as "protein" | "carbs" | "fat")

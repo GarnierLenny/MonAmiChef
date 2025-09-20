@@ -55,13 +55,14 @@ export const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
       <div
         ref={ref}
         className={cn(
-          "flex-shrink-0 chat-input-container",
+          "flex-shrink-0",
+          !className?.includes("meal-plan-input") && "chat-input-container",
           !className?.includes("bg-") && "bg-orange-50",
           !className?.includes("border-") && "border-gray-200",
           className,
         )}
       >
-        <div className="p-3 pb-safe">
+        <div className="p-3 bg-orange-50 pb-safe">
           {/* Selected Tags */}
           {tags.length > 0 && (
             <div className="mb-4">
@@ -145,4 +146,3 @@ export const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
 );
 
 ChatInput.displayName = "ChatInput";
-

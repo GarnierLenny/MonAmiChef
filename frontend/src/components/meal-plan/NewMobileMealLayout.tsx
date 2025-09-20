@@ -102,20 +102,20 @@ export const NewMobileMealLayout = ({
       </div>
 
       {/* Day Navigation */}
-      <div className="p-4">
-        <div className="flex items-center justify-between bg-white rounded-xl px-4 py-3 border border-gray-200">
+      <div className="px-4">
+        <div className="flex items-center justify-between px-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={handlePreviousDay}
             disabled={currentDayIndex === 0}
-            className="p-2"
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <ChevronLeft className="w-5 h-5" />
+            <ChevronLeft className="w-5 h-5 text-gray-600" />
           </Button>
 
           <div className="text-center">
-            <div className="font-semibold text-gray-900">
+            <div className="font-medium text-gray-900 text-md">
               {format(addDays(weekStart, currentDayIndex), "EEEE, MMM d")}
             </div>
           </div>
@@ -125,9 +125,9 @@ export const NewMobileMealLayout = ({
             size="sm"
             onClick={handleNextDay}
             disabled={currentDayIndex === 6}
-            className="p-2"
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
           >
-            <ChevronRight className="w-5 h-5" />
+            <ChevronRight className="w-5 h-5 text-gray-600" />
           </Button>
         </div>
       </div>
@@ -140,6 +140,7 @@ export const NewMobileMealLayout = ({
         isGenerating={isGenerating}
         placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
         canSend={inputValue.trim() !== ""}
+        className="p-4 pt-0 bg-white pb-safe meal-plan-input"
       />
     </div>
   );

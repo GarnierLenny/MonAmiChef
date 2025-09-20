@@ -151,6 +151,15 @@
       right: 0;
       z-index: 50;
     }
+
+    /* Exception for meal plan input - don't use fixed positioning */
+    .meal-plan-input {
+      position: relative !important;
+      bottom: auto !important;
+      left: auto !important;
+      right: auto !important;
+      z-index: auto !important;
+    }
   }
 }
 
@@ -222,6 +231,20 @@
 
   .progress-fat {
     --color-primary: oklch(0.72 0.15 45);
+  }
+
+  /* Calories progress bar - green color */
+  .progress-calories [data-state="complete"],
+  .progress-calories .bg-primary,
+  .progress-calories > div > div,
+  .progress-calories [role="progressbar"] > div,
+  .progress-calories div[data-state="complete"],
+  .progress-calories * {
+    background-color: #10b981 !important;
+  }
+
+  .progress-calories {
+    --color-primary: #10b981;
   }
 
   /* Remove orange outline from dialogs and center them */
