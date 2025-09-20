@@ -65,7 +65,7 @@ export const NewMobileMealLayout = ({
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-orange-500 pb-15 overflow-hidden">
+    <div className="flex flex-col h-full w-screen pb-15 bg-transparent overflow-hidden">
       {/* Progress Card */}
       <div className="p-4">
         <ProgressCard
