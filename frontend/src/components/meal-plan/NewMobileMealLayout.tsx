@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import { format, addDays, startOfWeek } from "date-fns";
+import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { format, addDays, startOfWeek, differenceInDays } from "date-fns";
 import { SimpleMealCard } from "./SimpleMealCard";
 import { ProgressCard } from "./ProgressCard";
+import { CalendarModal } from "./CalendarModal";
 import { ChatInput } from "@/components/ui/chat-input";
 import {
   DAYS_OF_WEEK,
@@ -15,6 +17,7 @@ interface NewMobileMealLayoutProps {
   currentWeek: Date;
   currentDayIndex: number;
   setCurrentDayIndex: (index: number) => void;
+  setCurrentWeek: (week: Date) => void;
   mealPlan: MealPlan;
   onSlotClick: (day: string, meal: MealSlot) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -33,6 +36,7 @@ export const NewMobileMealLayout = ({
   currentWeek,
   currentDayIndex,
   setCurrentDayIndex,
+  setCurrentWeek,
   mealPlan,
   onSlotClick,
   onSubmit,
@@ -46,7 +50,8 @@ export const NewMobileMealLayout = ({
   onSavedMeals,
   generatingSlots = new Set(),
 }: NewMobileMealLayoutProps) => {
-  const weekStart = startOfWeek(currentWeek);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const currentDay = DAYS_OF_WEEK[currentDayIndex];
 
   const handlePreviousDay = () => {
@@ -63,6 +68,18 @@ export const NewMobileMealLayout = ({
 
   const handleSavedMeals = (mealSlot: MealSlot) => {
     onSavedMeals?.(currentDay, mealSlot);
+  };
+
+  const handleDateSelect = (date: Date) => {
+    // Calculate the week that contains the selected date (start from Monday)
+    const selectedWeekStart = startOfWeek(date, { weekStartsOn: 1 });
+
+    // Calculate the day index within that week (0=Monday, 6=Sunday)
+    const selectedDayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1;
+
+    // Update both the week and the day index
+    setCurrentWeek(selectedWeekStart);
+    setCurrentDayIndex(selectedDayIndex);
   };
 
   return (
@@ -103,31 +120,42 @@ export const NewMobileMealLayout = ({
 
       {/* Day Navigation */}
       <div className="px-4">
-        <div className="flex items-center justify-between px-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handlePreviousDay}
-            disabled={currentDayIndex === 0}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <ChevronLeft className="w-5 h-5 text-gray-600" />
-          </Button>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-1 px-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handlePreviousDay}
+              disabled={currentDayIndex === 0}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-600" />
+            </Button>
 
-          <div className="text-center">
-            <div className="font-medium text-gray-900 text-md">
-              {format(addDays(weekStart, currentDayIndex), "EEEE, MMM d")}
+            <div className="text-center">
+              <div className="font-medium text-gray-900 text-md">
+                {format(addDays(weekStart, currentDayIndex), "EEEE, MMM d")}
+              </div>
             </div>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={handleNextDay}
+              disabled={currentDayIndex === 6}
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <ChevronRight className="w-5 h-5 text-gray-600" />
+            </Button>
           </div>
 
           <Button
             variant="ghost"
             size="sm"
-            onClick={handleNextDay}
-            disabled={currentDayIndex === 6}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+            onClick={() => setIsCalendarOpen(true)}
+            className="p-1 hover:bg-gray-100 rounded-full transition-colors ml-2"
           >
-            <ChevronRight className="w-5 h-5 text-gray-600" />
+            <Calendar className="w-5 h-5 text-gray-600" />
           </Button>
         </div>
       </div>
@@ -141,6 +169,15 @@ export const NewMobileMealLayout = ({
         placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
         canSend={inputValue.trim() !== ""}
         className="p-4 pt-0 bg-white pb-safe meal-plan-input"
+      />
+
+      {/* Calendar Modal */}
+      <CalendarModal
+        isOpen={isCalendarOpen}
+        onClose={() => setIsCalendarOpen(false)}
+        onDateSelect={handleDateSelect}
+        currentDate={addDays(weekStart, currentDayIndex)}
+        mealPlan={mealPlan}
       />
     </div>
   );

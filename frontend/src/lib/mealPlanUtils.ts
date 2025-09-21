@@ -96,7 +96,7 @@ export function findMealPlanForWeek(
   mealPlans: BackendMealPlan[],
   weekStart: Date
 ): BackendMealPlan | undefined {
-  const weekStartStr = startOfWeek(weekStart).toISOString().split('T')[0];
+  const weekStartStr = startOfWeek(weekStart, { weekStartsOn: 1 }).toISOString().split('T')[0];
 
   return mealPlans.find(plan => {
     const planWeekStart = new Date(plan.weekStartDate).toISOString().split('T')[0];

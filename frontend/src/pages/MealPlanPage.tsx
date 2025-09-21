@@ -48,7 +48,7 @@ export default function MealPlanPage() {
   );
 
   // Meal plan state
-  const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date()));
+  const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [mealPlan, setMealPlan] = useState<MealPlan>({});
   const [currentDayIndex, setCurrentDayIndex] = useState(0);
 
@@ -686,6 +686,7 @@ export default function MealPlanPage() {
           currentWeek={currentWeek}
           currentDayIndex={currentDayIndex}
           setCurrentDayIndex={setCurrentDayIndex}
+          setCurrentWeek={setCurrentWeek}
           mealPlan={mealPlan}
           onSlotClick={handleSlotClick}
           onSubmit={handleMobileSubmit}
