@@ -66,6 +66,7 @@ export const mealPlanApi = {
   async getUserMealPlans(): Promise<BackendMealPlan[]> {
     return apiFetch<BackendMealPlan[]>('/meal-plans', {
       method: 'GET',
+      auth: 'optional',
     });
   },
 

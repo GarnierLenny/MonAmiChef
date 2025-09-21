@@ -103,11 +103,11 @@ export default function MealPlanPage() {
       setIsLoading(true);
       setError(null);
       const plans = await mealPlanApi.getUserMealPlans();
-      setBackendMealPlans(plans);
+      setBackendMealPlans(plans || []);
       setIsUnauthenticated(false);
 
       // Populate the frontend meal plan with data from the backend
-      if (plans.length > 0) {
+      if (plans && plans.length > 0) {
         const weekPlan = findMealPlanForWeek(plans, currentWeek);
         if (weekPlan) {
           const frontendMealPlan = convertBackendToFrontendMealPlan(weekPlan);
@@ -122,8 +122,10 @@ export default function MealPlanPage() {
       console.error("Failed to load meal plans:", err);
       if (requiresAuthentication(err)) {
         setIsUnauthenticated(true);
+        setBackendMealPlans([]);
         // For unauthenticated users, keep their local meal plan data
-        // Don't clear it here
+        // Don't clear it here or set error message
+        console.log("Guest mode: Using local meal planning only");
       } else {
         setError((err as Error).message || "Failed to load meal plans");
       }

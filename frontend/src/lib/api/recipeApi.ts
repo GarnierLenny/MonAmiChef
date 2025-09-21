@@ -49,6 +49,7 @@ export const recipeApi = {
     const response = await apiFetch<GenerateMealRecipeResponse>('/chat/generate-meal-recipe', {
       method: 'POST',
       body: data,
+      auth: 'optional',
     });
     return response.recipe;
   },
