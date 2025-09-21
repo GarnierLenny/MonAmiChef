@@ -14,6 +14,7 @@ import {
   CalendarDays,
   Calculator,
   Timer,
+  BarChart3,
   X,
 } from "lucide-react";
 import { User as UserType } from "../types/types";
@@ -156,6 +157,19 @@ export function NavigationSidebar({
               >
                 <Timer className="h-5 w-5" />
                 Cooking Timer
+              </Button>
+
+              <Button
+                variant="ghost"
+                className={`w-full justify-start gap-4 h-12 text-left font-medium ${
+                  isActivePath("/dashboard")
+                    ? "bg-green-100 text-green-700"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
+                onClick={() => handleNavigation("/dashboard")}
+              >
+                <BarChart3 className="h-5 w-5" />
+                Dashboard
               </Button>
 
               {user && (

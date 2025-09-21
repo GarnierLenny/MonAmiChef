@@ -14,6 +14,7 @@ import MobileTopBar from "./components/MobileTopBar";
 import NavigationSidebar from "./components/NavigationSidebar";
 import NutritionView from "./components/NutritionView";
 import CookingToolsView from "./components/CookingToolsView";
+import Dashboard from "./components/Dashboard";
 import ExploreView from "./components/ExploreView";
 import ComingSoonView from "./components/ComingSoonView";
 import AuthModal from "./components/AuthModal";
@@ -219,6 +220,10 @@ function App() {
           <Route
             path="/notifications"
             element={<CookingToolsView currentSubView="notifications" />}
+          />
+          <Route
+            path="/dashboard"
+            element={<Dashboard currentSubView="overview" />}
           />
           <Route
             path="/meal-plan-chat"
