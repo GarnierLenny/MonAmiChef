@@ -551,176 +551,159 @@ export default function NutritionView({ currentSubView }: NutritionViewProps) {
   };
 
   const renderBMICalculator = () => (
-    <div className="mt-8 space-y-8">
-      {/* BMI Calculator Form */}
-      <div className="bg-gradient-to-br from-orange-50 to-pink-50 p-8 rounded-xl border border-orange-200">
-        <div className="flex items-center space-x-3 mb-8">
-          <Calculator className="w-6 h-6 text-orange-600" />
-          <h3 className="text-xl font-bold text-gray-900">
-            BMI & Calorie Calculator
+    <div className="mobile-viewport bg-gray-50 overflow-y-auto">
+      {/* Mobile-First Calculator Form */}
+      <div className="p-4 space-y-4">
+        {/* Personal Information Card */}
+        <div className="bg-white rounded-lg p-4 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Personal Information
           </h3>
-        </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Personal Information */}
-          <div className="space-y-6">
-            <h4 className="text-lg font-semibold text-gray-900 mb-4">
-              Personal Information
-            </h4>
-
-            {/* Metric Selector */}
-            <div className="mb-6 p-4 bg-white rounded-xl border border-orange-200">
-              <h5 className="text-sm font-semibold text-gray-700 mb-3">
-                Measurement System
-              </h5>
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => {
-                    handleInputChange("heightUnit", "cm");
-                    handleInputChange("weightUnit", "kg");
-                  }}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm ${
-                    bmiData.heightUnit === "cm" && bmiData.weightUnit === "kg"
-                      ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  Metric (kg/cm)
-                </button>
-                <button
-                  onClick={() => {
-                    handleInputChange("heightUnit", "ft");
-                    handleInputChange("weightUnit", "lbs");
-                  }}
-                  className={`flex-1 py-2 px-4 rounded-lg font-medium transition-all duration-200 text-sm ${
-                    bmiData.heightUnit === "ft" && bmiData.weightUnit === "lbs"
-                      ? "bg-gradient-to-r from-orange-500 to-pink-500 text-white shadow-lg"
-                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  Imperial (lbs/ft)
-                </button>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Age
-                </label>
-                <input
-                  type="number"
-                  value={bmiData.age}
-                  onChange={(e) =>
-                    handleInputChange("age", Number(e.target.value))
-                  }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-lg"
-                  min="10"
-                  max="100"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Gender
-                </label>
-                <select
-                  value={bmiData.gender}
-                  onChange={(e) => handleInputChange("gender", e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-lg"
-                >
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Height
-                </label>
-                <input
-                  type="number"
-                  value={bmiData.height}
-                  onChange={(e) =>
-                    handleInputChange("height", Number(e.target.value))
-                  }
-                  placeholder={
-                    bmiData.heightUnit === "cm"
-                      ? "Height in cm"
-                      : "Height in feet"
-                  }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-lg"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Weight
-                </label>
-                <input
-                  type="number"
-                  value={bmiData.weight}
-                  onChange={(e) =>
-                    handleInputChange("weight", Number(e.target.value))
-                  }
-                  placeholder={
-                    bmiData.weightUnit === "kg"
-                      ? "Weight in kg"
-                      : "Weight in lbs"
-                  }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-lg"
-                />
-              </div>
+          {/* Measurement System */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Measurement System
+            </label>
+            <div className="flex rounded-lg overflow-hidden border border-gray-300">
+              <button
+                onClick={() => {
+                  handleInputChange("heightUnit", "cm");
+                  handleInputChange("weightUnit", "kg");
+                }}
+                className={`flex-1 py-2 px-4 text-sm font-medium transition-colors ${
+                  bmiData.heightUnit === "cm" && bmiData.weightUnit === "kg"
+                    ? "bg-orange-500 text-white"
+                    : "bg-gray-50 text-gray-700"
+                }`}
+              >
+                Metric (kg/cm)
+              </button>
+              <button
+                onClick={() => {
+                  handleInputChange("heightUnit", "ft");
+                  handleInputChange("weightUnit", "lbs");
+                }}
+                className={`flex-1 py-2 px-4 text-sm font-medium transition-colors ${
+                  bmiData.heightUnit === "ft" && bmiData.weightUnit === "lbs"
+                    ? "bg-orange-500 text-white"
+                    : "bg-gray-50 text-gray-700"
+                }`}
+              >
+                Imperial (lbs/ft)
+              </button>
             </div>
           </div>
 
-          {/* Activity Level */}
-          <div className="space-y-6">
-            <h4 className="text-lg font-semibold text-gray-900 mb-4">
-              Activity Level
-            </h4>
-            <div className="space-y-3">
-              {activityLevels.map((level) => (
-                <label
-                  key={level.id}
-                  className={`flex items-start space-x-4 p-4 rounded-lg cursor-pointer transition-all duration-200 ${
-                    bmiData.activityLevel === level.id
-                      ? "bg-gradient-to-r from-orange-100 to-pink-100 border-2 border-orange-300 shadow-sm"
-                      : "bg-white border-2 border-gray-200 hover:border-orange-200 hover:bg-orange-50"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="activityLevel"
-                    value={level.id}
-                    checked={bmiData.activityLevel === level.id}
-                    onChange={(e) =>
-                      handleInputChange("activityLevel", e.target.value)
-                    }
-                    className="mt-1 text-orange-600 focus:ring-orange-500"
-                  />
-                  <div className="flex-1">
-                    <div className="font-semibold text-gray-900">
-                      {level.label}
-                    </div>
-                    <div className="text-sm text-gray-600 mt-1">
-                      {level.description}
-                    </div>
+          {/* Age and Gender */}
+          <div className="grid grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Age
+              </label>
+              <input
+                type="number"
+                value={bmiData.age}
+                onChange={(e) =>
+                  handleInputChange("age", Number(e.target.value))
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                min="10"
+                max="100"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Gender
+              </label>
+              <select
+                value={bmiData.gender}
+                onChange={(e) => handleInputChange("gender", e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none bg-white"
+              >
+                <option value="male">Male</option>
+                <option value="female">Female</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Height and Weight */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Height ({bmiData.heightUnit})
+              </label>
+              <input
+                type="number"
+                value={bmiData.height}
+                onChange={(e) =>
+                  handleInputChange("height", Number(e.target.value))
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Weight ({bmiData.weightUnit})
+              </label>
+              <input
+                type="number"
+                value={bmiData.weight}
+                onChange={(e) =>
+                  handleInputChange("weight", Number(e.target.value))
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Activity Level Card */}
+        <div className="bg-white rounded-lg p-4 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Activity Level
+          </h3>
+          <div className="space-y-3">
+            {activityLevels.map((level) => (
+              <label
+                key={level.id}
+                className={`flex items-start p-3 rounded-lg cursor-pointer transition-colors ${
+                  bmiData.activityLevel === level.id
+                    ? "bg-orange-50 border border-orange-200"
+                    : "bg-gray-50 border border-gray-200"
+                }`}
+              >
+                <input
+                  type="radio"
+                  name="activityLevel"
+                  value={level.id}
+                  checked={bmiData.activityLevel === level.id}
+                  onChange={(e) =>
+                    handleInputChange("activityLevel", e.target.value)
+                  }
+                  className="mt-1 mr-3 text-orange-600 focus:ring-orange-500"
+                />
+                <div className="flex-1">
+                  <div className="font-medium text-gray-900">
+                    {level.label}
                   </div>
-                </label>
-              ))}
-            </div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    {level.description}
+                  </div>
+                </div>
+              </label>
+            ))}
           </div>
         </div>
 
-        <div className="mt-8 text-center">
-          <button
-            onClick={calculateBMI}
-            className="px-8 py-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-xl font-semibold hover:from-orange-600 hover:to-pink-600 transition-all duration-200 text-lg shadow-lg hover:shadow-xl"
-          >
-            Calculate BMI & Daily Calories
-          </button>
-        </div>
+        {/* Calculate Button */}
+        <button
+          onClick={calculateBMI}
+          className="w-full py-4 bg-green-500 text-white text-lg font-semibold rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
+        >
+          <Calculator className="w-5 h-5" />
+          Calculate My Calories
+        </button>
       </div>
 
       {/* Results Section */}
@@ -1056,21 +1039,8 @@ export default function NutritionView({ currentSubView }: NutritionViewProps) {
   );
 
   const renderCalorieEstimates = () => (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="bg-white rounded-2xl shadow-lg p-8">
-        <div className="flex items-center space-x-3 mb-8">
-          <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-3 rounded-xl">
-            <Calculator className="w-8 h-8 text-white" />
-          </div>
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900">
-              Calorie Calculator
-            </h2>
-            <p className="text-gray-600">
-              Calculate your daily caloric needs and BMI
-            </p>
-          </div>
-        </div>
+    <div className="md:max-w-6xl md:mx-auto md:p-6">
+      <div className="md:bg-white md:rounded-2xl md:shadow-lg md:p-8">
         {renderBMICalculator()}
       </div>
     </div>
