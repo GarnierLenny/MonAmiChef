@@ -13,6 +13,7 @@ import {
   ChefHat,
   CalendarDays,
   Calculator,
+  Timer,
   X,
 } from "lucide-react";
 import { User as UserType } from "../types/types";
@@ -142,6 +143,19 @@ export function NavigationSidebar({
               >
                 <Calculator className="h-5 w-5" />
                 Calorie Calculator
+              </Button>
+
+              <Button
+                variant="ghost"
+                className={`w-full justify-start gap-4 h-12 text-left font-medium ${
+                  isActivePath("/timer")
+                    ? "bg-green-100 text-green-700"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
+                onClick={() => handleNavigation("/timer")}
+              >
+                <Timer className="h-5 w-5" />
+                Cooking Timer
               </Button>
 
               {user && (

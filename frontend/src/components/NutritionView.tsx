@@ -551,7 +551,7 @@ export default function NutritionView({ currentSubView }: NutritionViewProps) {
   };
 
   const renderBMICalculator = () => (
-    <div className="mobile-viewport bg-gray-50 overflow-y-auto">
+    <div className="mobile-viewport overflow-y-auto">
       {/* Mobile-First Calculator Form */}
       <div className="p-4 space-y-4">
         {/* Personal Information Card */}
@@ -684,9 +684,7 @@ export default function NutritionView({ currentSubView }: NutritionViewProps) {
                   className="mt-1 mr-3 text-orange-600 focus:ring-orange-500"
                 />
                 <div className="flex-1">
-                  <div className="font-medium text-gray-900">
-                    {level.label}
-                  </div>
+                  <div className="font-medium text-gray-900">{level.label}</div>
                   <div className="text-sm text-gray-600 mt-1">
                     {level.description}
                   </div>
@@ -1065,7 +1063,7 @@ export default function NutritionView({ currentSubView }: NutritionViewProps) {
   );
 
   const renderExportOptions = () => (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl bg-orange-50 mx-auto p-6">
       <div className="bg-white rounded-2xl shadow-lg p-8">
         <div className="flex items-center space-x-3 mb-8">
           <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-3 rounded-xl">

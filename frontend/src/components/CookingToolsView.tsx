@@ -6,6 +6,7 @@ import {
   Pause,
   RotateCcw,
   Plus,
+  Minus,
   Calendar,
 } from "lucide-react";
 
@@ -28,6 +29,7 @@ export default function CookingToolsView({
 
   const [newTimerName, setNewTimerName] = useState("");
   const [newTimerDuration, setNewTimerDuration] = useState(10);
+  const [newTimerSeconds, setNewTimerSeconds] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -36,7 +38,8 @@ export default function CookingToolsView({
           if (timer.isRunning && timer.remaining > 0) {
             const newRemaining = timer.remaining - 1;
             if (newRemaining === 0) {
-              // Timer finished - could trigger notification here
+              // Timer finished - play notification sound
+              playNotificationSound();
               return { ...timer, remaining: 0, isRunning: false };
             }
             return { ...timer, remaining: newRemaining };
@@ -49,19 +52,49 @@ export default function CookingToolsView({
     return () => clearInterval(interval);
   }, []);
 
-  const addTimer = () => {
-    if (newTimerName.trim()) {
-      const newTimer = {
-        id: Date.now().toString(),
-        name: newTimerName,
-        duration: newTimerDuration * 60,
-        remaining: newTimerDuration * 60,
-        isRunning: false,
-      };
-      setTimers((prev) => [...prev, newTimer]);
-      setNewTimerName("");
-      setNewTimerDuration(10);
+  const playNotificationSound = () => {
+    try {
+      // Create a simple beep sound using Web Audio API
+      const audioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      oscillator.frequency.value = 800; // 800Hz tone
+      oscillator.type = "sine";
+
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(
+        0.01,
+        audioContext.currentTime + 1,
+      );
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 1);
+    } catch (error) {
+      console.log("Audio notification not available:", error);
     }
+  };
+
+  const addTimer = () => {
+    const totalSeconds = newTimerDuration * 60 + newTimerSeconds;
+    if (totalSeconds === 0) return; // Don't create timer with 0 duration
+
+    const timerName = newTimerName.trim() || `Timer ${timers.length + 1}`;
+    const newTimer = {
+      id: Date.now().toString(),
+      name: timerName,
+      duration: totalSeconds,
+      remaining: totalSeconds,
+      isRunning: false,
+    };
+    setTimers((prev) => [...prev, newTimer]);
+    setNewTimerName("");
+    setNewTimerDuration(10);
+    setNewTimerSeconds(0);
   };
 
   const toggleTimer = (id: string) => {
@@ -89,106 +122,172 @@ export default function CookingToolsView({
   };
 
   const renderCookingTimer = () => (
-    <div className="max-w-6xl mx-auto p-6">
-      <div className="bg-white rounded-2xl shadow-lg p-8">
-        <div className="flex items-center space-x-3 mb-8">
-          <div className="bg-gradient-to-r from-orange-500 to-red-600 p-3 rounded-xl">
-            <Timer className="w-8 h-8 text-white" />
-          </div>
-          <div>
-            <h2 className="text-3xl font-bold text-gray-900">Cooking Timers</h2>
-            <p className="text-gray-600">
-              Keep track of multiple cooking processes
-            </p>
-          </div>
-        </div>
-
-        {/* Add New Timer */}
-        <div className="bg-gradient-to-r from-orange-50 to-pink-50 p-6 rounded-xl mb-8 border border-orange-200">
-          <h3 className="text-lg font-bold text-gray-900 mb-4">
+    <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
+      <div className="p-4 space-y-4">
+        {/* Add New Timer Card */}
+        <div className="bg-white rounded-lg p-4 shadow-sm">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
             Add New Timer
           </h3>
-          <div className="flex flex-col sm:flex-row gap-4">
+
+          <div className="space-y-4">
             <input
               type="text"
               value={newTimerName}
               onChange={(e) => setNewTimerName(e.target.value)}
-              placeholder="Timer name (e.g., Pasta, Chicken)"
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+              placeholder="Timer name (e.g., Pasta, Chicken...)"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
             />
-            <div className="flex items-center space-x-2">
-              <input
-                type="number"
-                value={newTimerDuration}
-                onChange={(e) => setNewTimerDuration(Number(e.target.value))}
-                min="1"
-                max="180"
-                className="w-20 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              />
-              <span className="text-gray-600">minutes</span>
+
+            <div className="space-y-3">
+              {/* Minutes */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setNewTimerDuration(Math.max(0, newTimerDuration - 1))
+                  }
+                  className="p-2 bg-orange-500 flex-1 flex justify-center rounded-sm hover:bg-gray-50 transition-colors"
+                >
+                  <Minus className="w-4 h-4 text-white" />
+                </button>
+                <input
+                  type="number"
+                  value={newTimerDuration}
+                  onChange={(e) =>
+                    setNewTimerDuration(
+                      Math.max(0, Math.min(180, Number(e.target.value))),
+                    )
+                  }
+                  min="0"
+                  max="180"
+                  className="w-20 px-3 py-2 flex-4 flex justify-center rounded-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent text-center"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setNewTimerDuration(Math.min(180, newTimerDuration + 1))
+                  }
+                  className="flex p-2 flex-1 justify-center bg-orange-500 rounded-sm hover:bg-gray-50 transition-colors"
+                >
+                  <Plus className="w-4 h-4 text-white" />
+                </button>
+                <span className="text-gray-600">minutes</span>
+              </div>
+
+              {/* Seconds */}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setNewTimerSeconds(Math.max(0, newTimerSeconds - 1))
+                  }
+                  className="p-2 bg-orange-500 flex-1 flex justify-center rounded-sm hover:bg-gray-50 transition-colors"
+                >
+                  <Minus className="w-4 h-4 text-white" />
+                </button>
+                <input
+                  type="number"
+                  value={newTimerSeconds}
+                  onChange={(e) =>
+                    setNewTimerSeconds(
+                      Math.max(0, Math.min(59, Number(e.target.value))),
+                    )
+                  }
+                  min="0"
+                  max="59"
+                  className="w-20 px-3 py-2 flex-4 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-center"
+                />
+                <button
+                  type="button"
+                  onClick={() =>
+                    setNewTimerSeconds(Math.min(59, newTimerSeconds + 1))
+                  }
+                  className="p-2 bg-orange-500  flex flex-1 justify-center rounded-sm hover:bg-gray-50 transition-colors"
+                >
+                  <Plus className="w-4 h-4 text-white" />
+                </button>
+                <span className="text-gray-600">seconds</span>
+              </div>
             </div>
+
             <button
               onClick={addTimer}
-              className="px-6 py-2 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg hover:from-orange-600 hover:to-pink-600 transition-all duration-200 flex items-center space-x-2"
+              className="w-full py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg font-medium hover:from-orange-600 hover:to-pink-600 transition-colors flex items-center justify-center gap-2"
             >
-              <Plus className="w-4 h-4" />
-              <span>Add Timer</span>
+              <Plus className="w-5 h-5" />
+              Add Timer
             </button>
           </div>
         </div>
 
         {/* Active Timers */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {timers.map((timer) => (
-            <div
-              key={timer.id}
-              className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200"
-            >
-              <h4 className="text-lg font-bold text-gray-900 mb-2">
-                {timer.name}
-              </h4>
-              <div className="text-4xl font-bold text-center mb-4">
-                <span
-                  className={
-                    timer.remaining === 0 ? "text-red-600" : "text-green-600"
-                  }
-                >
-                  {formatTime(timer.remaining)}
-                </span>
-              </div>
-              <div className="flex justify-center space-x-2">
-                <button
-                  onClick={() => toggleTimer(timer.id)}
-                  className={`p-2 rounded-lg transition-colors ${
-                    timer.isRunning
-                      ? "bg-red-100 text-red-600 hover:bg-red-200"
-                      : "bg-green-100 text-green-600 hover:bg-green-200"
-                  }`}
-                >
-                  {timer.isRunning ? (
-                    <Pause className="w-5 h-5" />
-                  ) : (
-                    <Play className="w-5 h-5" />
+        {timers.length > 0 && (
+          <div className="space-y-3">
+            {timers.map((timer) => (
+              <div key={timer.id} className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-lg font-medium text-gray-900">
+                    {timer.name}
+                  </h4>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => toggleTimer(timer.id)}
+                      className={`p-2 rounded-lg transition-colors ${
+                        timer.isRunning
+                          ? "bg-red-100 text-red-600 hover:bg-red-200"
+                          : "bg-green-100 text-green-600 hover:bg-green-200"
+                      }`}
+                    >
+                      {timer.isRunning ? (
+                        <Pause className="w-5 h-5" />
+                      ) : (
+                        <Play className="w-5 h-5" />
+                      )}
+                    </button>
+                    <button
+                      onClick={() => resetTimer(timer.id)}
+                      className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
+                    >
+                      <RotateCcw className="w-5 h-5" />
+                    </button>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <div className="text-4xl font-bold mb-2">
+                    <span
+                      className={
+                        timer.remaining === 0
+                          ? "text-red-600"
+                          : "text-green-600"
+                      }
+                    >
+                      {formatTime(timer.remaining)}
+                    </span>
+                  </div>
+                  {timer.remaining === 0 && (
+                    <div className="text-red-600 font-medium">
+                      Timer Finished!
+                    </div>
                   )}
-                </button>
-                <button
-                  onClick={() => resetTimer(timer.id)}
-                  className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  <RotateCcw className="w-5 h-5" />
-                </button>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
+        {/* No Timers State */}
         {timers.length === 0 && (
-          <div className="text-center py-12">
-            <Timer className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No Active Timers
-            </h3>
-            <p className="text-gray-600">Add a timer above to get started</p>
+          <div className="bg-white rounded-lg p-8 shadow-sm">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Timer className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                No Active Timers
+              </h3>
+              <p className="text-gray-600">Add a timer above to get started</p>
+            </div>
           </div>
         )}
       </div>
