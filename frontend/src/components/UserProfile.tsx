@@ -8,6 +8,12 @@ import {
   LogOut,
   Loader2,
   AlertCircle,
+  ChefHat,
+  Heart,
+  Clock,
+  Trophy,
+  MapPin,
+  Edit,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { getProductByPriceId } from "../stripe-config";
@@ -130,186 +136,73 @@ export default function UserProfile({ user, onSignOut }: UserProfileProps) {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-        {/* Header */}
-        <div className="bg-gradient-to-r from-orange-500 to-pink-500 p-8 text-white">
-          <div className="flex items-center space-x-4">
-            <div className="bg-white/20 p-4 rounded-full">
-              <User className="w-8 h-8" />
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold">{user.name}</h1>
-              <p className="text-orange-100">{user.email}</p>
+    <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
+      <div className="relative">
+        {/* Profile section */}
+        <div className="px-6 pb-6 bg-orange-50 relative">
+          <div className="flex justify-center mt-4 mb-4">
+            <div className="bg-orange-500 p-4 rounded-full shadow-lg">
+              <User className="w-8 h-8 text-white" />
             </div>
           </div>
-        </div>
 
-        {/* Content */}
-        <div className="p-8">
-          {/* Subscription Section */}
-          <div className="mb-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-              <Crown className="w-6 h-6 mr-2 text-orange-500" />
-              Subscription Status
-            </h2>
+          {/* User info */}
+          <div className="text-center mb-6">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">
+              {user.name}
+            </h1>
+            {/*<p className="text-gray-600 text-sm mb-3">
+              Passionate home chef exploring flavors from around the world 🌍
+            </p>*/}
 
-            {isLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="w-8 h-8 animate-spin text-orange-500" />
-                <span className="ml-2 text-gray-600">
-                  Loading subscription data...
-                </span>
+            {/* Location and badge */}
+            <div className="flex items-center justify-center gap-4">
+              <div className="flex items-center gap-1">
+                <MapPin className="w-4 h-4 text-gray-500" />
+                <span className="text-gray-600 text-sm">Paris, France</span>
               </div>
-            ) : error ? (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-3">
-                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
-                <div>
-                  <p className="text-red-700 font-medium">
-                    Error loading subscription
-                  </p>
-                  <p className="text-red-600 text-sm">{error}</p>
-                </div>
+              <div className="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-medium">
+                Pro Chef
               </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Current Plan */}
-                <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-xl p-6 border border-orange-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                    Current Plan
-                  </h3>
-
-                  <div className="space-y-4">
-                    <div>
-                      <div
-                        className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getSubscriptionStatusColor(
-                          subscription?.subscription_status || "not_started",
-                        )}`}
-                      >
-                        {getSubscriptionStatusText(
-                          subscription?.subscription_status || "not_started",
-                        )}
-                      </div>
-                    </div>
-
-                    {subscription?.price_id && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">Plan</p>
-                        <p className="font-semibold text-gray-900">
-                          {getProductByPriceId(subscription.price_id)?.name ||
-                            "Premium Plan"}
-                        </p>
-                      </div>
-                    )}
-
-                    {subscription?.subscription_status === "not_started" && (
-                      <div>
-                        <p className="font-semibold text-gray-900">Free Plan</p>
-                        <p className="text-sm text-gray-600">
-                          Basic features included
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {/* Billing Information */}
-                <div className="bg-gray-50 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
-                    <CreditCard className="w-5 h-5 mr-2" />
-                    Billing Information
-                  </h3>
-
-                  <div className="space-y-4">
-                    {subscription?.current_period_end && (
-                      <div>
-                        <p className="text-sm text-gray-600 mb-1">
-                          Next billing date
-                        </p>
-                        <p className="font-semibold text-gray-900">
-                          {formatDate(subscription.current_period_end)}
-                        </p>
-                      </div>
-                    )}
-
-                    {subscription?.payment_method_brand &&
-                      subscription?.payment_method_last4 && (
-                        <div>
-                          <p className="text-sm text-gray-600 mb-1">
-                            Payment method
-                          </p>
-                          <p className="font-semibold text-gray-900">
-                            {subscription.payment_method_brand.toUpperCase()}{" "}
-                            •••• {subscription.payment_method_last4}
-                          </p>
-                        </div>
-                      )}
-
-                    {subscription?.cancel_at_period_end && (
-                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                        <p className="text-yellow-800 text-sm font-medium">
-                          Your subscription will cancel at the end of the
-                          current period
-                        </p>
-                      </div>
-                    )}
-
-                    {(!subscription ||
-                      subscription.subscription_status === "not_started") && (
-                      <div>
-                        <p className="text-sm text-gray-600">
-                          No active subscription
-                        </p>
-                        <button className="mt-2 text-orange-600 hover:text-orange-700 font-medium text-sm">
-                          Upgrade to Premium
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
+            </div>
           </div>
 
-          {/* Account Actions */}
-          <div className="border-t border-gray-200 pt-8">
-            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center">
-              <Settings className="w-6 h-6 mr-2 text-gray-500" />
-              Account Settings
-            </h2>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left">
-                <Calendar className="w-5 h-5 text-gray-500" />
-                <div>
-                  <p className="font-medium text-gray-900">
-                    Manage Subscription
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    Update billing and plan details
-                  </p>
-                </div>
-              </button>
-
-              <button className="flex items-center space-x-3 p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors text-left">
-                <User className="w-5 h-5 text-gray-500" />
-                <div>
-                  <p className="font-medium text-gray-900">Account Settings</p>
-                  <p className="text-sm text-gray-600">
-                    Update profile and preferences
-                  </p>
-                </div>
-              </button>
+          {/* Stats grid */}
+          <div className="grid grid-cols-2 gap-4">
+            {/* Recipes Cooked */}
+            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+              <div className="bg-orange-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                <ChefHat className="w-6 h-6 text-orange-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900 mb-1">0</div>
+              <div className="text-gray-600 text-sm">Recipes Cooked</div>
             </div>
 
-            <div className="mt-6">
-              <button
-                onClick={handleSignOut}
-                className="flex items-center space-x-2 px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-              >
-                <LogOut className="w-5 h-5" />
-                <span>Sign Out</span>
-              </button>
+            {/* Favorites */}
+            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+              <div className="bg-red-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Heart className="w-6 h-6 text-red-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900 mb-1">0</div>
+              <div className="text-gray-600 text-sm">Favorites</div>
+            </div>
+
+            {/* Cooking Hours */}
+            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+              <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Clock className="w-6 h-6 text-green-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900 mb-1">0</div>
+              <div className="text-gray-600 text-sm">Cooking Hours</div>
+            </div>
+
+            {/* Achievements */}
+            <div className="bg-white rounded-2xl p-6 text-center shadow-sm">
+              <div className="bg-yellow-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
+                <Trophy className="w-6 h-6 text-yellow-600" />
+              </div>
+              <div className="text-2xl font-bold text-gray-900 mb-1">0</div>
+              <div className="text-gray-600 text-sm">Achievements</div>
             </div>
           </div>
         </div>
