@@ -9,6 +9,7 @@ import { ProgressCard } from "@/components/meal-plan/ProgressCard";
 import { ProgressModal } from "@/components/meal-plan/ProgressModal";
 import { RecipeModal } from "@/components/meal-plan/RecipeModal";
 import { SavedRecipesModal } from "@/components/meal-plan/SavedRecipesModal";
+import { GuestMealPlanningCTA } from "@/components/meal-plan/GuestMealPlanningCTA";
 
 // Import constants and utils
 import {
@@ -34,12 +35,12 @@ import {
   convertRecipeToMeal,
 } from "@/lib/mealPlanUtils";
 
-// interface MealPlanPageProps {
-//   user?: User | null;
-//   onAuthClick?: () => void;
-// }
+interface MealPlanPageProps {
+  onSignUp?: () => void;
+  onSignIn?: () => void;
+}
 
-export default function MealPlanPage() {
+export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps = {}) {
   // Input state
   const [inputValue, setInputValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -585,6 +586,16 @@ export default function MealPlanPage() {
           <p className="text-gray-600">Loading meal plans...</p>
         </div>
       </div>
+    );
+  }
+
+  // Show guest CTA if user is unauthenticated
+  if (isUnauthenticated) {
+    return (
+      <GuestMealPlanningCTA
+        onSignUp={onSignUp}
+        onSignIn={onSignIn}
+      />
     );
   }
 

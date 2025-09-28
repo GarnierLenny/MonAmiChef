@@ -36,10 +36,11 @@ export class MealPlanController extends Controller {
   ): Promise<MealPlan[]> {
     const owner = await resolveOptimizedOwner(request, request.res, this);
 
-    // Only authenticated users can have meal plans for now
+    // Only authenticated users can have meal plans
     if (!owner.userId) {
-      this.setStatus(401);
-      throw new Error("Meal plans are only available for registered users. Please sign up or log in.");
+      // Return empty array for guests instead of throwing error
+      // Frontend should handle the authentication check
+      return [];
     }
 
     const mealPlans = await prisma.mealPlan.findMany({
@@ -102,7 +103,7 @@ export class MealPlanController extends Controller {
     // Only authenticated users can create meal plans
     if (!owner.userId) {
       this.setStatus(401);
-      throw new Error("Meal plans are only available for registered users. Please sign up or log in.");
+      throw new Error("Please sign up or log in to create meal plans.");
     }
 
     // Validate date
@@ -163,7 +164,7 @@ export class MealPlanController extends Controller {
 
     if (!owner.userId) {
       this.setStatus(401);
-      throw new Error("Meal plans are only available for registered users. Please sign up or log in.");
+      throw new Error("Please sign up or log in to access meal plans.");
     }
 
     const mealPlan = await prisma.mealPlan.findFirst({
@@ -232,7 +233,7 @@ export class MealPlanController extends Controller {
 
     if (!owner.userId) {
       this.setStatus(401);
-      throw new Error("Meal plans are only available for registered users. Please sign up or log in.");
+      throw new Error("Please sign up or log in to access meal plans.");
     }
 
     // Check if meal plan exists and belongs to user
@@ -311,7 +312,7 @@ export class MealPlanController extends Controller {
 
     if (!owner.userId) {
       this.setStatus(401);
-      throw new Error("Meal plans are only available for registered users. Please sign up or log in.");
+      throw new Error("Please sign up or log in to access meal plans.");
     }
 
     const mealPlan = await prisma.mealPlan.findFirst({
@@ -347,7 +348,7 @@ export class MealPlanController extends Controller {
 
     if (!owner.userId) {
       this.setStatus(401);
-      throw new Error("Meal plans are only available for registered users. Please sign up or log in.");
+      throw new Error("Please sign up or log in to access meal plans.");
     }
 
     // Validate inputs
@@ -411,7 +412,7 @@ export class MealPlanController extends Controller {
 
     if (!owner.userId) {
       this.setStatus(401);
-      throw new Error("Meal plans are only available for registered users. Please sign up or log in.");
+      throw new Error("Please sign up or log in to access meal plans.");
     }
 
     // Verify meal plan ownership

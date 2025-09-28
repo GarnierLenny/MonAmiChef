@@ -46,6 +46,8 @@ model Profile {
   GuestConversion GuestConversion[]
   SavedRecipe     SavedRecipe[]
   RecipeHistory   RecipeHistory[]
+  HealthMetric    HealthMetric[]
+  UserGoals       UserGoals?
 
   @@schema("public")
 }
@@ -181,5 +183,36 @@ model RecipeHistory {
 
   @@unique([owner_profile_id, recipe_id])
   @@unique([owner_guest_id, recipe_id])
+  @@schema("public")
+}
+
+/// Health metrics tracking for profile users only
+model HealthMetric {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profile_id  String   @db.Uuid
+  weight      Decimal? @db.Decimal(5, 2) // e.g., 999.99 kg
+  body_fat    Decimal? @db.Decimal(4, 2) // e.g., 99.99 %
+  recorded_at DateTime @db.Date
+  created_at  DateTime @default(now())
+  Profile     Profile  @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+
+  @@index([profile_id, recorded_at])
+  @@schema("public")
+}
+
+/// User health goals for profile users only
+model UserGoals {
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  profile_id           String   @unique @db.Uuid
+  target_weight        Decimal? @db.Decimal(5, 2)
+  target_body_fat      Decimal? @db.Decimal(4, 2)
+  daily_protein_goal   Int?     // grams
+  daily_carbs_goal     Int?     // grams
+  daily_fat_goal       Int?     // grams
+  daily_calories_goal  Int?     // kcal
+  created_at           DateTime @default(now())
+  updated_at           DateTime @updatedAt
+  Profile              Profile  @relation(fields: [profile_id], references: [id], onDelete: Cascade)
+
   @@schema("public")
 }

@@ -223,13 +223,16 @@ function App() {
           />
           <Route
             path="/dashboard"
-            element={<Dashboard currentSubView="overview" />}
+            element={<Dashboard currentSubView="overview" user={user} session={session} />}
           />
           <Route
             path="/meal-plan-chat"
             element={
               <ComponentErrorBoundary componentName="MealPlanPage">
-                <MealPlanPage />
+                <MealPlanPage
+                  onSignUp={() => setIsAuthModalOpen(true)}
+                  onSignIn={() => setIsAuthModalOpen(true)}
+                />
               </ComponentErrorBoundary>
             }
           />
