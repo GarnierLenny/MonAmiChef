@@ -32,9 +32,10 @@ interface NutritionViewProps {
   currentSubView: string;
   recipe?: any;
   session?: Session | null;
+  user?: any;
 }
 
-export default function NutritionView({ currentSubView, session }: NutritionViewProps) {
+export default function NutritionView({ currentSubView, session, user }: NutritionViewProps) {
   const [bmiData, setBmiData] = React.useState<BMIData>({
     age: 25,
     height: 170,
@@ -191,8 +192,17 @@ export default function NutritionView({ currentSubView, session }: NutritionView
   const setAsGoal = async (goalType: string, calories: number) => {
     if (!session) {
       toast({
-        title: "Authentication Required",
+        title: "Sign In Required",
         description: "Please sign in to set your goals.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!user) {
+      toast({
+        title: "Registration Required",
+        description: "Please create an account to set your nutrition goals.",
         variant: "destructive",
       });
       return;
@@ -216,14 +226,46 @@ export default function NutritionView({ currentSubView, session }: NutritionView
       });
     } catch (error) {
       console.error("Failed to update goals:", error);
+
+      // Provide more specific error messages based on the error type
+      let title = "Failed to Update Goals";
+      let description = "Please try again later.";
+
+      if (error instanceof Error) {
+        if (error.message.includes("401") || error.message.includes("unauthorized")) {
+          title = "Authentication Error";
+          description = "Please sign in again to set your goals.";
+        } else if (error.message.includes("403") || error.message.includes("forbidden")) {
+          title = "Permission Denied";
+          description = "You don't have permission to update goals. Please make sure you're signed in as a registered user.";
+        } else if (error.message.includes("400") || error.message.includes("validation")) {
+          title = "Invalid Data";
+          description = "The goal values are invalid. Please try different values.";
+        } else if (error.message.includes("network") || error.message.includes("fetch")) {
+          title = "Network Error";
+          description = "Please check your internet connection and try again.";
+        }
+      }
+
       toast({
-        title: "Failed to Update Goals",
-        description: "Please try again later.",
+        title,
+        description,
         variant: "destructive",
       });
     } finally {
       setSettingGoal(null);
     }
+  };
+
+  // Helper function to determine button state and text
+  const getButtonState = () => {
+    if (!session) {
+      return { show: false, text: "", disabled: true };
+    }
+    if (!user) {
+      return { show: true, text: "Sign Up to Set Goals", disabled: false };
+    }
+    return { show: true, text: "Set as Goal", disabled: false };
   };
 
   const renderSavedRecipesList = () => {
@@ -962,20 +1004,25 @@ export default function NutritionView({ currentSubView, session }: NutritionView
                 })()}
 
                 {/* Set as Goal Button */}
-                {session && (
-                  <button
-                    onClick={() => setAsGoal("aggressive-loss", calculatedData.dailyCalories - 1000)}
-                    disabled={settingGoal === "aggressive-loss"}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {settingGoal === "aggressive-loss" ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <Target className="w-3 h-3" />
-                    )}
-                    Set as Goal
-                  </button>
-                )}
+                {(() => {
+                  const buttonState = getButtonState();
+                  if (!buttonState.show) return null;
+
+                  return (
+                    <button
+                      onClick={() => setAsGoal("aggressive-loss", calculatedData.dailyCalories - 1000)}
+                      disabled={settingGoal === "aggressive-loss"}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {settingGoal === "aggressive-loss" ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Target className="w-3 h-3" />
+                      )}
+                      {buttonState.text}
+                    </button>
+                  );
+                })()}
               </div>
 
               {/* Moderate Weight Loss */}
@@ -1022,20 +1069,25 @@ export default function NutritionView({ currentSubView, session }: NutritionView
                 })()}
 
                 {/* Set as Goal Button */}
-                {session && (
-                  <button
-                    onClick={() => setAsGoal("moderate-loss", calculatedData.dailyCalories - 500)}
-                    disabled={settingGoal === "moderate-loss"}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-orange-600 text-white text-xs font-medium rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {settingGoal === "moderate-loss" ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <Target className="w-3 h-3" />
-                    )}
-                    Set as Goal
-                  </button>
-                )}
+                {(() => {
+                  const buttonState = getButtonState();
+                  if (!buttonState.show) return null;
+
+                  return (
+                    <button
+                      onClick={() => setAsGoal("moderate-loss", calculatedData.dailyCalories - 500)}
+                      disabled={settingGoal === "moderate-loss"}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-orange-600 text-white text-xs font-medium rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {settingGoal === "moderate-loss" ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Target className="w-3 h-3" />
+                      )}
+                      {buttonState.text}
+                    </button>
+                  );
+                })()}
               </div>
 
               {/* Slow Weight Loss */}
@@ -1082,20 +1134,25 @@ export default function NutritionView({ currentSubView, session }: NutritionView
                 })()}
 
                 {/* Set as Goal Button */}
-                {session && (
-                  <button
-                    onClick={() => setAsGoal("slow-loss", calculatedData.dailyCalories - 250)}
-                    disabled={settingGoal === "slow-loss"}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-yellow-600 text-white text-xs font-medium rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {settingGoal === "slow-loss" ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <Target className="w-3 h-3" />
-                    )}
-                    Set as Goal
-                  </button>
-                )}
+                {(() => {
+                  const buttonState = getButtonState();
+                  if (!buttonState.show) return null;
+
+                  return (
+                    <button
+                      onClick={() => setAsGoal("slow-loss", calculatedData.dailyCalories - 250)}
+                      disabled={settingGoal === "slow-loss"}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-yellow-600 text-white text-xs font-medium rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {settingGoal === "slow-loss" ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Target className="w-3 h-3" />
+                      )}
+                      {buttonState.text}
+                    </button>
+                  );
+                })()}
               </div>
 
               {/* Maintenance */}
@@ -1142,20 +1199,25 @@ export default function NutritionView({ currentSubView, session }: NutritionView
                 })()}
 
                 {/* Set as Goal Button */}
-                {session && (
-                  <button
-                    onClick={() => setAsGoal("maintenance", calculatedData.dailyCalories)}
-                    disabled={settingGoal === "maintenance"}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {settingGoal === "maintenance" ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <Target className="w-3 h-3" />
-                    )}
-                    Set as Goal
-                  </button>
-                )}
+                {(() => {
+                  const buttonState = getButtonState();
+                  if (!buttonState.show) return null;
+
+                  return (
+                    <button
+                      onClick={() => setAsGoal("maintenance", calculatedData.dailyCalories)}
+                      disabled={settingGoal === "maintenance"}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {settingGoal === "maintenance" ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Target className="w-3 h-3" />
+                      )}
+                      {buttonState.text}
+                    </button>
+                  );
+                })()}
               </div>
 
               {/* Slow Weight Gain */}
@@ -1202,20 +1264,25 @@ export default function NutritionView({ currentSubView, session }: NutritionView
                 })()}
 
                 {/* Set as Goal Button */}
-                {session && (
-                  <button
-                    onClick={() => setAsGoal("slow-gain", calculatedData.dailyCalories + 250)}
-                    disabled={settingGoal === "slow-gain"}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {settingGoal === "slow-gain" ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <Target className="w-3 h-3" />
-                    )}
-                    Set as Goal
-                  </button>
-                )}
+                {(() => {
+                  const buttonState = getButtonState();
+                  if (!buttonState.show) return null;
+
+                  return (
+                    <button
+                      onClick={() => setAsGoal("slow-gain", calculatedData.dailyCalories + 250)}
+                      disabled={settingGoal === "slow-gain"}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {settingGoal === "slow-gain" ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Target className="w-3 h-3" />
+                      )}
+                      {buttonState.text}
+                    </button>
+                  );
+                })()}
               </div>
 
               {/* Moderate Weight Gain */}
@@ -1262,20 +1329,25 @@ export default function NutritionView({ currentSubView, session }: NutritionView
                 })()}
 
                 {/* Set as Goal Button */}
-                {session && (
-                  <button
-                    onClick={() => setAsGoal("moderate-gain", calculatedData.dailyCalories + 500)}
-                    disabled={settingGoal === "moderate-gain"}
-                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    {settingGoal === "moderate-gain" ? (
-                      <Loader2 className="w-3 h-3 animate-spin" />
-                    ) : (
-                      <Target className="w-3 h-3" />
-                    )}
-                    Set as Goal
-                  </button>
-                )}
+                {(() => {
+                  const buttonState = getButtonState();
+                  if (!buttonState.show) return null;
+
+                  return (
+                    <button
+                      onClick={() => setAsGoal("moderate-gain", calculatedData.dailyCalories + 500)}
+                      disabled={settingGoal === "moderate-gain"}
+                      className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {settingGoal === "moderate-gain" ? (
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <Target className="w-3 h-3" />
+                      )}
+                      {buttonState.text}
+                    </button>
+                  );
+                })()}
               </div>
             </div>
 
