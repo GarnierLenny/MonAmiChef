@@ -66,7 +66,7 @@ export function NavigationSidebar({
         <div className="flex flex-col h-full">
           {/* Orange Header */}
           <div className="bg-orange-500 p-6 text-white">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 {/* Try image first, fallback to icon */}
                 <img
@@ -87,7 +87,7 @@ export function NavigationSidebar({
                 </span>
               </div>
             </div>
-            {user && (
+            {/*{user && (
               <div className="bg-white/20 rounded-lg p-4 backdrop-blur-sm">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 bg-white/30 rounded-full flex items-center justify-center">
@@ -99,7 +99,7 @@ export function NavigationSidebar({
                   </div>
                 </div>
               </div>
-            )}
+            )}*/}
           </div>
 
           {/* Navigation */}
@@ -184,7 +184,6 @@ export function NavigationSidebar({
                     <Heart className="h-5 w-5" />
                     Saved Recipes
                   </Button>
-
 
                   <Button
                     variant="ghost"
