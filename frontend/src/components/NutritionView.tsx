@@ -11,7 +11,12 @@ import {
   Bookmark,
   Eye,
   Users,
+  CheckCircle,
+  Loader2,
 } from "lucide-react";
+import { healthApi } from "../lib/api/healthApi";
+import type { Session } from "@supabase/supabase-js";
+import { useToast } from "@/hooks/use-toast";
 
 interface BMIData {
   age: number;
@@ -26,9 +31,10 @@ interface BMIData {
 interface NutritionViewProps {
   currentSubView: string;
   recipe?: any;
+  session?: Session | null;
 }
 
-export default function NutritionView({ currentSubView }: NutritionViewProps) {
+export default function NutritionView({ currentSubView, session }: NutritionViewProps) {
   const [bmiData, setBmiData] = React.useState<BMIData>({
     age: 25,
     height: 170,
@@ -51,6 +57,8 @@ export default function NutritionView({ currentSubView }: NutritionViewProps) {
     };
   } | null>(null);
 
+  const [settingGoal, setSettingGoal] = React.useState<string | null>(null);
+  const { toast } = useToast();
   const resultsRef = React.useRef<HTMLDivElement>(null);
 
   const activityLevels = [
@@ -167,6 +175,55 @@ export default function NutritionView({ currentSubView }: NutritionViewProps) {
 
   const handleInputChange = (field: keyof BMIData, value: any) => {
     setBmiData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  // Helper function to calculate macros for a given calorie target
+  const calculateMacrosForCalories = (calories: number) => {
+    const protein = Math.round((calories * 0.25) / 4); // 25% of calories, 4 cal/gram
+    const carbs = Math.round((calories * 0.45) / 4); // 45% of calories, 4 cal/gram
+    const fat = Math.round((calories * 0.30) / 9); // 30% of calories, 9 cal/gram
+    const fiber = Math.round((calories / 1000) * 14); // 14g per 1000 calories
+
+    return { protein, carbs, fat, fiber };
+  };
+
+  // Function to set calorie and macro goals
+  const setAsGoal = async (goalType: string, calories: number) => {
+    if (!session) {
+      toast({
+        title: "Authentication Required",
+        description: "Please sign in to set your goals.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setSettingGoal(goalType);
+
+    try {
+      const macros = calculateMacrosForCalories(calories);
+
+      await healthApi.updateGoals({
+        daily_calories_goal: calories,
+        daily_protein_goal: macros.protein,
+        daily_carbs_goal: macros.carbs,
+        daily_fat_goal: macros.fat,
+      });
+
+      toast({
+        title: "Goals Updated Successfully!",
+        description: `Your daily calorie goal has been set to ${calories} calories with recommended macros.`,
+      });
+    } catch (error) {
+      console.error("Failed to update goals:", error);
+      toast({
+        title: "Failed to Update Goals",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setSettingGoal(null);
+    }
   };
 
   const renderSavedRecipesList = () => {
@@ -875,9 +932,50 @@ export default function NutritionView({ currentSubView }: NutritionViewProps) {
                   {calculatedData.dailyCalories - 1000}
                 </div>
                 <div className="text-xs text-gray-600 mb-2">calories/day</div>
-                <div className="text-xs text-red-600">
+                <div className="text-xs text-red-600 mb-3">
                   <strong>Deficit:</strong> -1000 cal/day
                 </div>
+
+                {/* Macros */}
+                {(() => {
+                  const macros = calculateMacrosForCalories(calculatedData.dailyCalories - 1000);
+                  return (
+                    <div className="space-y-1 mb-3">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Protein:</span>
+                        <span className="font-medium">{macros.protein}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Carbs:</span>
+                        <span className="font-medium">{macros.carbs}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Fat:</span>
+                        <span className="font-medium">{macros.fat}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Fiber:</span>
+                        <span className="font-medium">{macros.fiber}g</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Set as Goal Button */}
+                {session && (
+                  <button
+                    onClick={() => setAsGoal("aggressive-loss", calculatedData.dailyCalories - 1000)}
+                    disabled={settingGoal === "aggressive-loss"}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {settingGoal === "aggressive-loss" ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Target className="w-3 h-3" />
+                    )}
+                    Set as Goal
+                  </button>
+                )}
               </div>
 
               {/* Moderate Weight Loss */}
@@ -894,9 +992,50 @@ export default function NutritionView({ currentSubView }: NutritionViewProps) {
                   {calculatedData.dailyCalories - 500}
                 </div>
                 <div className="text-xs text-gray-600 mb-2">calories/day</div>
-                <div className="text-xs text-orange-600">
+                <div className="text-xs text-orange-600 mb-3">
                   <strong>Deficit:</strong> -500 cal/day
                 </div>
+
+                {/* Macros */}
+                {(() => {
+                  const macros = calculateMacrosForCalories(calculatedData.dailyCalories - 500);
+                  return (
+                    <div className="space-y-1 mb-3">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Protein:</span>
+                        <span className="font-medium">{macros.protein}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Carbs:</span>
+                        <span className="font-medium">{macros.carbs}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Fat:</span>
+                        <span className="font-medium">{macros.fat}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Fiber:</span>
+                        <span className="font-medium">{macros.fiber}g</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Set as Goal Button */}
+                {session && (
+                  <button
+                    onClick={() => setAsGoal("moderate-loss", calculatedData.dailyCalories - 500)}
+                    disabled={settingGoal === "moderate-loss"}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-orange-600 text-white text-xs font-medium rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {settingGoal === "moderate-loss" ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Target className="w-3 h-3" />
+                    )}
+                    Set as Goal
+                  </button>
+                )}
               </div>
 
               {/* Slow Weight Loss */}
@@ -913,9 +1052,50 @@ export default function NutritionView({ currentSubView }: NutritionViewProps) {
                   {calculatedData.dailyCalories - 250}
                 </div>
                 <div className="text-xs text-gray-600 mb-2">calories/day</div>
-                <div className="text-xs text-yellow-600">
+                <div className="text-xs text-yellow-600 mb-3">
                   <strong>Deficit:</strong> -250 cal/day
                 </div>
+
+                {/* Macros */}
+                {(() => {
+                  const macros = calculateMacrosForCalories(calculatedData.dailyCalories - 250);
+                  return (
+                    <div className="space-y-1 mb-3">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Protein:</span>
+                        <span className="font-medium">{macros.protein}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Carbs:</span>
+                        <span className="font-medium">{macros.carbs}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Fat:</span>
+                        <span className="font-medium">{macros.fat}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Fiber:</span>
+                        <span className="font-medium">{macros.fiber}g</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Set as Goal Button */}
+                {session && (
+                  <button
+                    onClick={() => setAsGoal("slow-loss", calculatedData.dailyCalories - 250)}
+                    disabled={settingGoal === "slow-loss"}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-yellow-600 text-white text-xs font-medium rounded-lg hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {settingGoal === "slow-loss" ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Target className="w-3 h-3" />
+                    )}
+                    Set as Goal
+                  </button>
+                )}
               </div>
 
               {/* Maintenance */}
@@ -932,9 +1112,50 @@ export default function NutritionView({ currentSubView }: NutritionViewProps) {
                   {calculatedData.dailyCalories}
                 </div>
                 <div className="text-xs text-gray-600 mb-2">calories/day</div>
-                <div className="text-xs text-green-600">
+                <div className="text-xs text-green-600 mb-3">
                   <strong>Balance:</strong> Maintain current weight
                 </div>
+
+                {/* Macros */}
+                {(() => {
+                  const macros = calculateMacrosForCalories(calculatedData.dailyCalories);
+                  return (
+                    <div className="space-y-1 mb-3">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Protein:</span>
+                        <span className="font-medium">{macros.protein}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Carbs:</span>
+                        <span className="font-medium">{macros.carbs}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Fat:</span>
+                        <span className="font-medium">{macros.fat}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Fiber:</span>
+                        <span className="font-medium">{macros.fiber}g</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Set as Goal Button */}
+                {session && (
+                  <button
+                    onClick={() => setAsGoal("maintenance", calculatedData.dailyCalories)}
+                    disabled={settingGoal === "maintenance"}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-green-600 text-white text-xs font-medium rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {settingGoal === "maintenance" ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Target className="w-3 h-3" />
+                    )}
+                    Set as Goal
+                  </button>
+                )}
               </div>
 
               {/* Slow Weight Gain */}
@@ -951,9 +1172,50 @@ export default function NutritionView({ currentSubView }: NutritionViewProps) {
                   {calculatedData.dailyCalories + 250}
                 </div>
                 <div className="text-xs text-gray-600 mb-2">calories/day</div>
-                <div className="text-xs text-blue-600">
+                <div className="text-xs text-blue-600 mb-3">
                   <strong>Surplus:</strong> +250 cal/day
                 </div>
+
+                {/* Macros */}
+                {(() => {
+                  const macros = calculateMacrosForCalories(calculatedData.dailyCalories + 250);
+                  return (
+                    <div className="space-y-1 mb-3">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Protein:</span>
+                        <span className="font-medium">{macros.protein}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Carbs:</span>
+                        <span className="font-medium">{macros.carbs}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Fat:</span>
+                        <span className="font-medium">{macros.fat}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Fiber:</span>
+                        <span className="font-medium">{macros.fiber}g</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Set as Goal Button */}
+                {session && (
+                  <button
+                    onClick={() => setAsGoal("slow-gain", calculatedData.dailyCalories + 250)}
+                    disabled={settingGoal === "slow-gain"}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {settingGoal === "slow-gain" ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Target className="w-3 h-3" />
+                    )}
+                    Set as Goal
+                  </button>
+                )}
               </div>
 
               {/* Moderate Weight Gain */}
@@ -970,9 +1232,50 @@ export default function NutritionView({ currentSubView }: NutritionViewProps) {
                   {calculatedData.dailyCalories + 500}
                 </div>
                 <div className="text-xs text-gray-600 mb-2">calories/day</div>
-                <div className="text-xs text-indigo-600">
+                <div className="text-xs text-indigo-600 mb-3">
                   <strong>Surplus:</strong> +500 cal/day
                 </div>
+
+                {/* Macros */}
+                {(() => {
+                  const macros = calculateMacrosForCalories(calculatedData.dailyCalories + 500);
+                  return (
+                    <div className="space-y-1 mb-3">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Protein:</span>
+                        <span className="font-medium">{macros.protein}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Carbs:</span>
+                        <span className="font-medium">{macros.carbs}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Fat:</span>
+                        <span className="font-medium">{macros.fat}g</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span className="text-gray-600">Fiber:</span>
+                        <span className="font-medium">{macros.fiber}g</span>
+                      </div>
+                    </div>
+                  );
+                })()}
+
+                {/* Set as Goal Button */}
+                {session && (
+                  <button
+                    onClick={() => setAsGoal("moderate-gain", calculatedData.dailyCalories + 500)}
+                    disabled={settingGoal === "moderate-gain"}
+                    className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-indigo-600 text-white text-xs font-medium rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {settingGoal === "moderate-gain" ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Target className="w-3 h-3" />
+                    )}
+                    Set as Goal
+                  </button>
+                )}
               </div>
             </div>
 

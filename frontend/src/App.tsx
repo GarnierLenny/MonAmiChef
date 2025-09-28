@@ -205,12 +205,12 @@ function App() {
           />
           <Route
             path="/macros"
-            element={<NutritionView currentSubView="macros" recipe={null} />}
+            element={<NutritionView currentSubView="macros" recipe={null} session={session} />}
           />
           <Route path="/recipe/:id" element={<RecipePage />} />
           <Route
             path="/calories"
-            element={<NutritionView currentSubView="calories" recipe={null} />}
+            element={<NutritionView currentSubView="calories" recipe={null} session={session} />}
           />
           <Route
             path="/timer"
