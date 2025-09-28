@@ -12,7 +12,7 @@ import Cookies from "universal-cookie";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
 import { apiFetch } from "../lib/apiClient";
-import { ArrowLeftFromLine } from "lucide-react";
+import { Settings2 } from "lucide-react";
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -363,7 +363,7 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
         <div className="flex flex-col mobile-viewport min-h-0 relative overflow-hidden">
           <MobileTopBar
             onMenuClick={() => setIsMobileSidebarOpen(true)}
-            rightIcon={<ArrowLeftFromLine className="h-5 w-5" />}
+            rightIcon={<Settings2 className="h-5 w-5" />}
             onRightIconClick={() => setIsChatSidebarOpen(true)}
           />
 

@@ -2,10 +2,7 @@ import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  History,
-  CircleDot,
-} from "lucide-react";
+import { History, CircleDot } from "lucide-react";
 import { ChatItem, Preferences } from "@/types/types";
 import PreferencesSidebar from "./PreferenceSidebar";
 import ChatHistorySidebar from "./ChatHistorySidebar";
@@ -68,9 +65,9 @@ export function ChatSidebar({
         side="right"
         className="w-80 p-0 bg-background border-l mb-5"
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col mt-6 h-full">
           {/* Header with Tabs */}
-          <div className="p-4 border-b">
+          <div className="bg-orange-50 p-4">
             <Tabs
               value={activeTab}
               onValueChange={setActiveTab}

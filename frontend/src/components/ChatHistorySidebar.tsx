@@ -66,7 +66,7 @@ export default function ChatHistorySidebar({
 
   return (
     <div
-      className={`bg-gradient-to-b from-pink-50 to-rose-50 border-l border-pink-200 h-full overflow-hidden transition-all duration-300 ease-in-out ${
+      className={`bg-orange-50 h-full overflow-hidden transition-all duration-300 ease-in-out ${
         isOpen ? "w-80 opacity-100" : "w-0 opacity-0"
       }`}
     >
@@ -76,22 +76,24 @@ export default function ChatHistorySidebar({
         }`}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-pink-200 bg-pink-50/50">
+        <div className="flex items-center justify-between p-4 bg-orange-50/50">
           <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-r from-pink-400 to-rose-500 p-2 rounded-lg">
+            <div className="bg-gradient-to-r from-orange-400 to-orange-500 p-2 rounded-lg">
               <MessageSquare className="w-5 h-5 text-white" />
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-900">
                 Chat History
               </h2>
-              <p className="text-sm text-pink-700">Your recent conversations</p>
+              <p className="text-sm text-orange-700">
+                Your recent conversations
+              </p>
             </div>
           </div>
           {!isMobile && (
             <button
               onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-pink-100"
+              className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded-lg hover:bg-orange-100"
               type="button"
             >
               <X className="w-5 h-5" />
@@ -100,7 +102,7 @@ export default function ChatHistorySidebar({
         </div>
 
         {/* New Chat Button */}
-        <div className="p-4 border-b border-pink-200">
+        <div className="p-4">
           <button
             onClick={() => {
               onNewChat();
@@ -108,7 +110,7 @@ export default function ChatHistorySidebar({
                 onClose();
               }
             }}
-            className="w-full flex items-center justify-center space-x-3 px-4 py-3 bg-gradient-to-r from-pink-500 to-rose-500 text-white rounded-xl hover:from-pink-600 hover:to-rose-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 group"
+            className="w-full flex items-center justify-center space-x-3 px-4 py-3 bg-gradient-to-r from-orange-400 to-orange-500 text-white rounded-xl hover:from-orange-600 hover:to-rose-600 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 group"
             type="button"
           >
             <div className="bg-white/20 p-1 rounded-lg group-hover:bg-white/30 transition-colors">
@@ -123,8 +125,8 @@ export default function ChatHistorySidebar({
         <div className="flex-1 overflow-y-auto">
           {chats.length === 0 ? (
             <div className="text-center py-12 px-4">
-              <div className="w-16 h-16 bg-pink-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Clock className="w-8 h-8 text-pink-400" />
+              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Clock className="w-8 h-8 text-orange-400" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 No Chat History Yet
@@ -156,15 +158,15 @@ export default function ChatHistorySidebar({
                         pathname: location.pathname,
                         search: `?${params.toString()}`,
                       }}
-                      className={`flex items-center justify-between p-3 rounded-lg hover:bg-pink-100/50 transition-colors duration-200 ${
-                        isActive ? "bg-pink-100/70" : "cursor-pointer"
+                      className={`flex items-center justify-between p-3 rounded-lg hover:bg-orange-100/50 transition-colors duration-200 ${
+                        isActive ? "bg-orange-100/70" : "cursor-pointer"
                       }`}
                     >
                       <div className="flex-1 min-w-0 pr-2">
-                        <h4 className="text-sm font-medium text-gray-900 truncate group-hover:text-pink-800 transition-colors">
+                        <h4 className="text-sm font-medium text-gray-900 truncate group-hover:text-orange-800 transition-colors">
                           {chat.title || "Untitled"}
                         </h4>
-                        <p className="text-xs text-pink-600 mt-1">
+                        <p className="text-xs text-orange-600 mt-1">
                           {formatTimestamp(new Date(chat.timestamp)) ??
                             "timestamp"}
                         </p>
@@ -178,7 +180,7 @@ export default function ChatHistorySidebar({
                           e.stopPropagation();
                           toggleDropdown(chat.id);
                         }}
-                        className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-pink-200 transition-all duration-200 text-gray-500 hover:text-gray-700"
+                        className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-orange-200 transition-all duration-200 text-gray-500 hover:text-gray-700"
                         aria-label="Chat actions"
                         title="Actions"
                       >
@@ -280,7 +282,7 @@ export default function ChatHistorySidebar({
                   cancelRename();
                 }
               }}
-              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-pink-500"
+              className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
               placeholder="Enter a new title"
             />
             <div className="mt-4 flex justify-end gap-2">
@@ -294,7 +296,7 @@ export default function ChatHistorySidebar({
               <button
                 type="button"
                 onClick={saveRename}
-                className="px-4 py-2 rounded-lg bg-pink-600 text-white hover:bg-pink-700"
+                className="px-4 py-2 rounded-lg bg-orange-600 text-white hover:bg-orange-700"
               >
                 Save
               </button>
