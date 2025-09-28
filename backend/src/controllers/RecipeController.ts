@@ -17,7 +17,6 @@ import {
   CreateRecipeRequest,
   RecipeResponse,
   SavedRecipeResponse,
-  RecipeHistoryResponse,
 } from "../types/RecipeTypes";
 
 @Route("recipes")
@@ -44,13 +43,6 @@ export class RecipeController extends Controller {
       },
     });
 
-    // Automatically add to history for the user
-    await prisma.recipeHistory.create({
-      data: {
-        ...ownerWhereOptimized(owner),
-        recipe_id: recipe.id,
-      },
-    });
 
     return {
       id: recipe.id,
@@ -105,56 +97,6 @@ export class RecipeController extends Controller {
     }));
   }
 
-  /**
-   * Get user's recipe history
-   */
-  @Get("history")
-  @Security("optionalAuth")
-  public async getRecipeHistory(
-    @Request() request: express.Request,
-  ): Promise<RecipeHistoryResponse[]> {
-    const owner = await resolveOptimizedOwner(request, request.res, this);
-    
-    // Check if user is authenticated (not a guest)
-    if (!owner.userId) {
-      this.setStatus(401);
-      throw new Error("Recipe history is only available for registered users. Please sign up or log in.");
-    }
-    
-    const historyRecipes = await prisma.recipeHistory.findMany({
-      where: {
-        ...ownerWhereOptimized(owner),
-      },
-      include: {
-        Recipe: {
-          include: {
-            SavedRecipe: {
-              where: {
-                ...ownerWhereOptimized(owner),
-              },
-            },
-          },
-        },
-      },
-      orderBy: {
-        created_at: "desc",
-      },
-    });
-
-    return historyRecipes.map(history => ({
-      id: history.id,
-      recipe: {
-        id: history.Recipe.id,
-        title: history.Recipe.title,
-        content_json: history.Recipe.content_json as any,
-        nutrition: history.Recipe.nutrition as any,
-        tags: history.Recipe.tags,
-        created_at: history.Recipe.created_at.toISOString(),
-        is_saved: history.Recipe.SavedRecipe.length > 0,
-      },
-      created_at: history.created_at.toISOString(),
-    }));
-  }
 
   /**
    * Get a single recipe by ID

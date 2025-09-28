@@ -1,4 +1,4 @@
-import { Recipe, SavedRecipe, RecipeHistory, CreateRecipeRequest } from '../types/recipe';
+import { Recipe, SavedRecipe, CreateRecipeRequest } from '../types/recipe';
 import { supabase } from '../lib/supabase';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8888';
@@ -67,10 +67,6 @@ class RecipeService {
     return response.json();
   }
 
-  async getRecipeHistory(): Promise<RecipeHistory[]> {
-    const response = await this.makeRequest('/recipes/history');
-    return response.json();
-  }
 }
 
 export const recipeService = new RecipeService();

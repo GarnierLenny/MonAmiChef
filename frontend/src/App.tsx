@@ -26,7 +26,6 @@ import ChatPage from "./pages/ChatPage";
 import MealPlanPage from "./pages/MealPlanPage";
 import AuthCallback from "./components/AuthCallback";
 import SavedRecipes from "./pages/SavedRecipes";
-import RecipeHistoryPage from "./pages/RecipeHistory";
 import NotFoundPage from "./pages/NotFoundPage";
 import CanonicalUrl from "./components/CanonicalUrl";
 import { Toaster } from "@/components/ui/toaster";
@@ -241,7 +240,6 @@ function App() {
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/recipes/saved" element={<SavedRecipes />} />
-          <Route path="/recipes/history" element={<RecipeHistoryPage />} />
 
           {/* Private */}
           <Route

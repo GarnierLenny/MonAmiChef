@@ -3,19 +3,14 @@ import {
   ChefHat,
   Calculator,
   Timer,
-  Bell,
-  Calendar,
   CalendarDays,
   Compass,
-  Clock,
   Bookmark,
-  Utensils,
   Zap,
   User,
   Crown,
   LogIn,
   LogOut,
-  History,
   Heart,
 } from "lucide-react";
 
@@ -58,7 +53,6 @@ export default function Navbar({
       color: "text-green-600",
       dropdown: [
         { id: "recipes/saved", label: "Saved Recipes", icon: Heart },
-        { id: "recipes/history", label: "Recipe History", icon: History },
       ],
     },
     {

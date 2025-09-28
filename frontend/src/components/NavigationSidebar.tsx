@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Heart,
-  History,
   User,
   LogOut,
   LogIn,
@@ -15,7 +14,6 @@ import {
   Calculator,
   Timer,
   BarChart3,
-  X,
 } from "lucide-react";
 import { User as UserType } from "../types/types";
 
@@ -187,18 +185,6 @@ export function NavigationSidebar({
                     Saved Recipes
                   </Button>
 
-                  <Button
-                    variant="ghost"
-                    className={`w-full justify-start gap-4 h-12 text-left font-medium ${
-                      isActivePath("/recipes/history")
-                        ? "bg-green-100 text-green-700"
-                        : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                    }`}
-                    onClick={() => handleNavigation("/recipes/history")}
-                  >
-                    <History className="h-5 w-5" />
-                    Recipe History
-                  </Button>
 
                   <Button
                     variant="ghost"

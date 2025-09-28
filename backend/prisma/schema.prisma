@@ -45,7 +45,6 @@ model Profile {
   Guest           Guest[]
   GuestConversion GuestConversion[]
   SavedRecipe     SavedRecipe[]
-  RecipeHistory   RecipeHistory[]
   HealthMetric    HealthMetric[]
   UserGoals       UserGoals?
 
@@ -64,7 +63,6 @@ model Guest {
   Profile              Profile?          @relation(fields: [converted_user_id], references: [id])
   GuestConversion      GuestConversion[]
   SavedRecipe          SavedRecipe[]
-  RecipeHistory        RecipeHistory[]
 
   @@schema("public")
 }
@@ -148,7 +146,6 @@ model Recipe {
   tags          String[]
   created_at    DateTime        @default(now())
   SavedRecipe   SavedRecipe[]
-  RecipeHistory RecipeHistory[]
   MealPlanItem  MealPlanItem[]
 
   @@schema("public")
@@ -170,21 +167,6 @@ model SavedRecipe {
   @@schema("public")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
-model RecipeHistory {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  owner_profile_id String?  @db.Uuid
-  owner_guest_id   String?  @db.Uuid
-  recipe_id        String   @db.Uuid
-  created_at       DateTime @default(now())
-  Recipe           Recipe   @relation(fields: [recipe_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  Profile          Profile? @relation(fields: [owner_profile_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  Guest            Guest?   @relation(fields: [owner_guest_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
-
-  @@unique([owner_profile_id, recipe_id])
-  @@unique([owner_guest_id, recipe_id])
-  @@schema("public")
-}
 
 /// Health metrics tracking for profile users only
 model HealthMetric {

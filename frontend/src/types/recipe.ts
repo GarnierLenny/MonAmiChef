@@ -35,11 +35,6 @@ export interface SavedRecipe {
   created_at: string;
 }
 
-export interface RecipeHistory {
-  id: string;
-  recipe: Recipe;
-  created_at: string;
-}
 
 export interface CreateRecipeRequest {
   title: string;

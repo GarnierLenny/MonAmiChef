@@ -676,15 +676,6 @@ export class ChatController extends Controller {
         },
       });
 
-      // Add to recipe history if user is authenticated
-      if (owner.userId) {
-        await prisma.recipeHistory.create({
-          data: {
-            ...ownerWhereOptimized(owner),
-            recipe_id: recipe.id,
-          },
-        });
-      }
 
       this.setStatus(201);
       return {

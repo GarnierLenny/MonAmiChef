@@ -75,9 +75,6 @@ export async function cleanupTestUser(userId: string): Promise<void> {
     where: { owner_profile_id: userId }
   });
 
-  await prisma.recipeHistory.deleteMany({
-    where: { owner_profile_id: userId }
-  });
 
   await prisma.chatMessage.deleteMany({
     where: {
@@ -104,9 +101,6 @@ export async function cleanupTestGuest(guestId: string): Promise<void> {
     where: { owner_guest_id: guestId }
   });
 
-  await prisma.recipeHistory.deleteMany({
-    where: { owner_guest_id: guestId }
-  });
 
   await prisma.chatMessage.deleteMany({
     where: {

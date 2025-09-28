@@ -42,8 +42,3 @@ export interface SavedRecipeResponse {
   created_at: string;
 }
 
-export interface RecipeHistoryResponse {
-  id: string;
-  recipe: RecipeResponse;
-  created_at: string;
-}
