@@ -51,10 +51,10 @@ const Settings = () => {
                       {t("navigation.language")}
                     </CardTitle>
                     <CardDescription>
-                      Choose your preferred language for the application
+                      {t('settings.languageDescription')}
                       {isUsingBrowserDefault && (
                         <span className="block text-green-600 text-sm mt-1">
-                          ✓ Using your browser's language ({navigator.language})
+                          ✓ {t('settings.usingBrowserLanguage')} ({navigator.language})
                         </span>
                       )}
                     </CardDescription>
@@ -96,10 +96,10 @@ const Settings = () => {
                   </div>
                   <div>
                     <CardTitle className="text-chef-brown">
-                      Account Settings
+                      {t('settings.accountSettings')}
                     </CardTitle>
                     <CardDescription>
-                      Manage your profile and account preferences (Coming Soon)
+                      {t('settings.accountDescription')}
                     </CardDescription>
                   </div>
                 </div>
@@ -115,10 +115,10 @@ const Settings = () => {
                   </div>
                   <div>
                     <CardTitle className="text-chef-brown">
-                      Notifications
+                      {t('settings.notifications')}
                     </CardTitle>
                     <CardDescription>
-                      Configure your notification preferences (Coming Soon)
+                      {t('settings.notificationsDescription')}
                     </CardDescription>
                   </div>
                 </div>

@@ -18,6 +18,7 @@
     "confirm": "Confirmer"
   },
   "navigation": {
+    "home": "Accueil",
     "dashboard": "Tableau de bord",
     "mealPlan": "Plan de repas",
     "recipes": "Recettes",
@@ -25,6 +26,8 @@
     "profile": "Profil",
     "settings": "Paramètres",
     "language": "Langue",
+    "calorieCalculator": "Calculateur de calories",
+    "cookingTimer": "Minuteur de cuisine",
     "logout": "Déconnexion",
     "login": "Connexion",
     "register": "S'inscrire"
@@ -79,7 +82,10 @@
     "minute": "minute",
     "minutes": "minutes",
     "hour": "heure",
-    "hours": "heures"
+    "hours": "heures",
+    "noIngredients": "Aucun ingrédient disponible",
+    "noInstructions": "Aucune instruction disponible",
+    "noData": "Aucune donnée de recette disponible"
   },
   "dashboard": {
     "welcomeBack": "Bon retour",
@@ -129,5 +135,13 @@
   "languages": {
     "en": "English",
     "fr": "Français"
+  },
+  "settings": {
+    "languageDescription": "Choisissez votre langue préférée pour l'application",
+    "usingBrowserLanguage": "Utilise la langue de votre navigateur",
+    "accountSettings": "Paramètres du compte",
+    "accountDescription": "Gérez votre profil et vos préférences de compte (Bientôt disponible)",
+    "notifications": "Notifications",
+    "notificationsDescription": "Configurez vos préférences de notification (Bientôt disponible)"
   }
 }

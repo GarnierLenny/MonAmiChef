@@ -247,7 +247,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                     })
                   ) : (
                     <div className="col-span-2 text-center py-8">
-                      <p className="text-gray-500">No ingredients available</p>
+                      <p className="text-gray-500">{t('recipe.noIngredients')}</p>
                     </div>
                   )}
                 </div>
@@ -313,7 +313,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                     })
                   ) : (
                     <div className="text-center py-8">
-                      <p className="text-gray-500">No instructions available</p>
+                      <p className="text-gray-500">{t('recipe.noInstructions')}</p>
                     </div>
                   )}
                 </div>
@@ -336,7 +336,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
             </div>
           ) : (
             <div className="flex items-center justify-center h-64">
-              <p className="text-gray-600">No recipe data available</p>
+              <p className="text-gray-600">{t('recipe.noData')}</p>
             </div>
           )}
           </div>

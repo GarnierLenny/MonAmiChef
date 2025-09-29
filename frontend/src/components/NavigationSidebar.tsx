@@ -119,7 +119,7 @@ export function NavigationSidebar({
                 onClick={() => handleNavigation("/")}
               >
                 <Home className="h-5 w-5" />
-                Home
+                {t('navigation.home')}
               </Button>
 
               <Button
@@ -158,7 +158,7 @@ export function NavigationSidebar({
                 onClick={() => handleNavigation("/calories")}
               >
                 <Calculator className="h-5 w-5" />
-                Calorie Calculator
+                {t('navigation.calorieCalculator')}
               </Button>
 
               <Button
@@ -171,7 +171,7 @@ export function NavigationSidebar({
                 onClick={() => handleNavigation("/timer")}
               >
                 <Timer className="h-5 w-5" />
-                Cooking Timer
+                {t('navigation.cookingTimer')}
               </Button>
 
               {user && (
