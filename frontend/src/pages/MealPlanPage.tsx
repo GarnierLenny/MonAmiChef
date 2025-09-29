@@ -24,6 +24,7 @@ import { parseMealSlots } from "@/lib/mealSlotParser";
 // Import API and utilities
 import { mealPlanApi, type BackendMealPlan } from "@/lib/api/mealPlanApi";
 import { recipeApi } from "@/lib/api/recipeApi";
+import { healthApi, type UserGoals } from "@/lib/api/healthApi";
 import type { SavedRecipe } from "@/types/recipe";
 import {
   createMealPlanRequest,
@@ -48,6 +49,42 @@ export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps =
     new Set(),
   );
 
+  // Reset scroll position when component mounts
+  useEffect(() => {
+    const resetScroll = () => {
+      // Reset window scroll
+      window.scrollTo(0, 0);
+
+      // Reset document scroll
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+
+      // Find and reset all scrollable elements
+      const allElements = document.querySelectorAll('*');
+      allElements.forEach((element) => {
+        if (element instanceof HTMLElement && element.scrollTop > 0) {
+          element.scrollTop = 0;
+        }
+      });
+
+      // Force reset specific containers
+      const containers = document.querySelectorAll('.mobile-viewport, [class*="overflow"]');
+      containers.forEach((container) => {
+        if (container instanceof HTMLElement) {
+          container.scrollTop = 0;
+        }
+      });
+    };
+
+    // Run immediately
+    resetScroll();
+
+    // Run after a short delay to catch any delayed renders
+    const timeoutId = setTimeout(resetScroll, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, []);
+
   // Meal plan state
   const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
   const [mealPlan, setMealPlan] = useState<MealPlan>({});
@@ -63,6 +100,10 @@ export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps =
   const [error, setError] = useState<string | null>(null);
   const [isUnauthenticated, setIsUnauthenticated] = useState(false);
 
+  // User goals state
+  const [userGoals, setUserGoals] = useState<UserGoals | null>(null);
+  const [isLoadingGoals, setIsLoadingGoals] = useState(true);
+
   // Progress modal state
   const [showProgressDetails, setShowProgressDetails] = useState(false);
   const [modalDay, setModalDay] = useState<string | null>(null);
@@ -75,9 +116,10 @@ export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps =
   const [showSavedRecipesModal, setShowSavedRecipesModal] = useState(false);
   const [savedRecipeTargetSlot, setSavedRecipeTargetSlot] = useState<{day: string, meal: MealSlot} | null>(null);
 
-  // Load meal plans on component mount
+  // Load meal plans and user goals on component mount
   useEffect(() => {
     loadMealPlans();
+    loadUserGoals();
   }, []);
 
   // Update current backend plan when week changes
@@ -132,6 +174,21 @@ export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps =
       }
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // Load user goals from health API
+  const loadUserGoals = async () => {
+    try {
+      setIsLoadingGoals(true);
+      const goals = await healthApi.getGoals();
+      setUserGoals(goals);
+    } catch (err: unknown) {
+      console.warn("Failed to load user goals:", err);
+      // Don't show error for goals as they're optional
+      setUserGoals(null);
+    } finally {
+      setIsLoadingGoals(false);
     }
   };
 
@@ -635,6 +692,7 @@ export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps =
               setModalDay(getCurrentDay());
               setShowProgressDetails(true);
             }}
+            userGoals={userGoals}
           />
         </div>
 
@@ -713,6 +771,7 @@ export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps =
           onDeleteMeal={handleDeleteMeal}
           onSavedMeals={handleSavedMeals}
           generatingSlots={generatingSlots}
+          userGoals={userGoals}
         />
       </div>
 

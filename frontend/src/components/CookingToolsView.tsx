@@ -168,11 +168,11 @@ export default function CookingToolsView({
                   onClick={() =>
                     setNewTimerDuration(Math.min(180, newTimerDuration + 1))
                   }
-                  className="flex p-2 flex-1 justify-center bg-orange-500 rounded-sm hover:bg-gray-50 transition-colors"
+                  className="flex p-2 flex-1 font-medium justify-center bg-orange-500 rounded-sm hover:bg-gray-50 transition-colors"
                 >
                   <Plus className="w-4 h-4 text-white" />
                 </button>
-                <span className="text-gray-600">minutes</span>
+                <span className="text-gray-600 font-medium">minutes</span>
               </div>
 
               {/* Seconds */}
@@ -182,7 +182,7 @@ export default function CookingToolsView({
                   onClick={() =>
                     setNewTimerSeconds(Math.max(0, newTimerSeconds - 1))
                   }
-                  className="p-2 bg-orange-500 flex-1 flex justify-center rounded-sm hover:bg-gray-50 transition-colors"
+                  className="p-2 bg-orange-500 font-medium flex-1 flex justify-center rounded-sm hover:bg-gray-50 transition-colors"
                 >
                   <Minus className="w-4 h-4 text-white" />
                 </button>
@@ -207,7 +207,7 @@ export default function CookingToolsView({
                 >
                   <Plus className="w-4 h-4 text-white" />
                 </button>
-                <span className="text-gray-600">seconds</span>
+                <span className="text-gray-600 font-medium">seconds</span>
               </div>
             </div>
 

@@ -1,124 +1,77 @@
 import { useState, useEffect } from "react";
 import {
   User,
-  Crown,
-  Calendar,
-  CreditCard,
-  Settings,
-  LogOut,
-  Loader2,
-  AlertCircle,
   ChefHat,
   Heart,
   Clock,
   Trophy,
   MapPin,
-  Edit,
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
-import { getProductByPriceId } from "../stripe-config";
+import { healthApi, type UserGoals, type DashboardData } from "../lib/api/healthApi";
+import { UserGoalsSection } from "./profile/UserGoalsSection";
+import { GoalsCTA } from "./profile/GoalsCTA";
+import { TodayProgress } from "./profile/TodayProgress";
 
 interface UserProfileProps {
   user: { email: string; name: string } | null;
   onSignOut: () => void;
 }
 
-interface Subscription {
-  customer_id: string;
-  subscription_id: string | null;
-  subscription_status: string;
-  price_id: string | null;
-  current_period_start: number | null;
-  current_period_end: number | null;
-  cancel_at_period_end: boolean;
-  payment_method_brand: string | null;
-  payment_method_last4: string | null;
-}
-
-export default function UserProfile({ user, onSignOut }: UserProfileProps) {
-  const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+export default function UserProfile({ user }: UserProfileProps) {
+  // Health goals state
+  const [userGoals, setUserGoals] = useState<UserGoals | null>(null);
+  const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+  const [isLoadingGoals, setIsLoadingGoals] = useState(true);
+  const [isLoadingDashboard, setIsLoadingDashboard] = useState(true);
 
   useEffect(() => {
     if (user) {
-      fetchSubscription();
+      fetchHealthData();
     }
   }, [user]);
 
-  const fetchSubscription = async () => {
+  const fetchHealthData = async () => {
     try {
-      setIsLoading(true);
-      setError(null);
+      setIsLoadingGoals(true);
+      setIsLoadingDashboard(true);
 
-      const { data, error: fetchError } = await supabase
-        .from("stripe_user_subscriptions")
-        .select("*")
-        .maybeSingle();
+      // Fetch user goals
+      const goals = await healthApi.getGoals();
+      setUserGoals(goals);
 
-      if (fetchError) {
-        throw fetchError;
+      // Fetch dashboard data if goals exist
+      if (goals) {
+        try {
+          const dashboard = await healthApi.getDashboardData();
+          setDashboardData(dashboard);
+        } catch (dashboardError) {
+          console.warn("Failed to load dashboard data:", dashboardError);
+          // Don't set error, just proceed without dashboard data
+        }
       }
-
-      setSubscription(data);
-    } catch (err: any) {
-      console.error("Error fetching subscription:", err);
-      setError(err.message || "Failed to load subscription data");
+    } catch (err: unknown) {
+      console.error("Error fetching health data:", err);
+      // Don't show error for health data as it's optional
     } finally {
-      setIsLoading(false);
+      setIsLoadingGoals(false);
+      setIsLoadingDashboard(false);
     }
   };
 
-  const handleSignOut = async () => {
-    try {
-      await supabase.auth.signOut();
-      onSignOut();
-    } catch (error) {
-      console.error("Error signing out:", error);
-    }
+  const handleSetGoals = () => {
+    // Navigate to calorie calculator
+    window.location.href = "/calories";
   };
 
-  const formatDate = (timestamp: number | null) => {
-    if (!timestamp) return "N/A";
-    return new Date(timestamp * 1000).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+  const handleEditGoals = () => {
+    // Navigate to calorie calculator
+    window.location.href = "/calories";
   };
 
-  const getSubscriptionStatusColor = (status: string) => {
-    switch (status) {
-      case "active":
-        return "bg-green-100 text-green-700 border-green-200";
-      case "trialing":
-        return "bg-blue-100 text-blue-700 border-blue-200";
-      case "past_due":
-        return "bg-yellow-100 text-yellow-700 border-yellow-200";
-      case "canceled":
-        return "bg-red-100 text-red-700 border-red-200";
-      case "not_started":
-        return "bg-gray-100 text-gray-700 border-gray-200";
-      default:
-        return "bg-gray-100 text-gray-700 border-gray-200";
-    }
-  };
-
-  const getSubscriptionStatusText = (status: string) => {
-    switch (status) {
-      case "active":
-        return "Active";
-      case "trialing":
-        return "Trial Period";
-      case "past_due":
-        return "Past Due";
-      case "canceled":
-        return "Canceled";
-      case "not_started":
-        return "Free Plan";
-      default:
-        return status.charAt(0).toUpperCase() + status.slice(1);
-    }
+  const handleViewMealPlan = () => {
+    // Navigate to meal planning page
+    window.location.href = "/meal-plan-chat";
   };
 
   if (!user) {
@@ -166,6 +119,31 @@ export default function UserProfile({ user, onSignOut }: UserProfileProps) {
               </div>
             </div>
           </div>
+
+          {/* Goals Section */}
+          <div className="mb-6">
+            {userGoals ? (
+              <UserGoalsSection
+                goals={userGoals}
+                isLoading={isLoadingGoals}
+                onEditGoals={handleEditGoals}
+              />
+            ) : (
+              <GoalsCTA onSetGoals={handleSetGoals} />
+            )}
+          </div>
+
+          {/* Today's Progress */}
+          {userGoals && userGoals.daily_calories_goal && userGoals.daily_calories_goal > 0 && (
+            <div className="mb-6">
+              <TodayProgress
+                goals={userGoals}
+                dashboardData={dashboardData}
+                isLoading={isLoadingDashboard}
+                onViewMealPlan={handleViewMealPlan}
+              />
+            </div>
+          )}
 
           {/* Stats grid */}
           <div className="grid grid-cols-2 gap-4">
