@@ -1,5 +1,6 @@
 import type { MealPlan } from "./constants";
 import { DAILY_GOALS } from "./constants";
+import type { UserGoals } from "../../lib/api/healthApi";
 
 // Helper function for grade badge styling
 export const getGradeStyles = (grade: "A" | "B" | "C" | "D") => {
@@ -60,7 +61,7 @@ export const getMacroColor = (type: "protein" | "carbs" | "fat") => {
 };
 
 // Helper function to calculate today's progress
-export const calculateDayProgress = (mealPlan: MealPlan, day: string) => {
+export const calculateDayProgress = (mealPlan: MealPlan, day: string, userGoals?: UserGoals | null) => {
   const dayMeals = mealPlan[day] || {};
   const consumed = {
     calories: 0,
@@ -78,26 +79,34 @@ export const calculateDayProgress = (mealPlan: MealPlan, day: string) => {
     }
   });
 
+  // Use user goals if available, otherwise fall back to default goals
+  const goals = {
+    calories: userGoals?.daily_calories_goal || DAILY_GOALS.calories,
+    protein: userGoals?.daily_protein_goal || DAILY_GOALS.protein,
+    carbs: userGoals?.daily_carbs_goal || DAILY_GOALS.carbs,
+    fat: userGoals?.daily_fat_goal || DAILY_GOALS.fat,
+  };
+
   const progress = {
     calories: {
       used: consumed.calories,
-      goal: DAILY_GOALS.calories,
-      percentage: Math.round((consumed.calories / DAILY_GOALS.calories) * 100),
+      goal: goals.calories,
+      percentage: Math.round((consumed.calories / goals.calories) * 100),
     },
     protein: {
       used: consumed.protein,
-      goal: DAILY_GOALS.protein,
-      percentage: Math.round((consumed.protein / DAILY_GOALS.protein) * 100),
+      goal: goals.protein,
+      percentage: Math.round((consumed.protein / goals.protein) * 100),
     },
     carbs: {
       used: consumed.carbs,
-      goal: DAILY_GOALS.carbs,
-      percentage: Math.round((consumed.carbs / DAILY_GOALS.carbs) * 100),
+      goal: goals.carbs,
+      percentage: Math.round((consumed.carbs / goals.carbs) * 100),
     },
     fat: {
       used: consumed.fat,
-      goal: DAILY_GOALS.fat,
-      percentage: Math.round((consumed.fat / DAILY_GOALS.fat) * 100),
+      goal: goals.fat,
+      percentage: Math.round((consumed.fat / goals.fat) * 100),
     },
   };
 

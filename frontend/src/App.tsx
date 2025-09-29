@@ -77,6 +77,57 @@ function App() {
     setChatResetKey((k) => k + 1); // remount ChatPage
   }, []);
 
+  // Scroll to top on route change
+  useEffect(() => {
+    // Use requestAnimationFrame to ensure DOM is ready
+    requestAnimationFrame(() => {
+      // Reset window scroll
+      window.scrollTo(0, 0);
+
+      // Reset document scroll
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+
+      // Reset all potentially scrollable elements
+      const allElements = document.querySelectorAll('*');
+      allElements.forEach((element) => {
+        if (element instanceof HTMLElement) {
+          const style = window.getComputedStyle(element);
+          const isScrollable =
+            style.overflow === 'auto' ||
+            style.overflow === 'scroll' ||
+            style.overflowY === 'auto' ||
+            style.overflowY === 'scroll' ||
+            element.classList.contains('mobile-viewport') ||
+            element.scrollTop > 0;
+
+          if (isScrollable) {
+            element.scrollTop = 0;
+          }
+        }
+      });
+
+      // Additional targeted resets for common patterns
+      const targets = [
+        '.mobile-viewport',
+        '[class*="overflow-y-auto"]',
+        '[class*="overflow-auto"]',
+        '#root',
+        'body',
+        'html'
+      ];
+
+      targets.forEach(selector => {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach((element) => {
+          if (element instanceof HTMLElement) {
+            element.scrollTop = 0;
+          }
+        });
+      });
+    });
+  }, [location.pathname]);
+
   useEffect(() => {
     let unsubscribed = false;
 
@@ -226,7 +277,7 @@ function App() {
                 <div className="px-4 pt-4">
                   <Breadcrumb />
                 </div>
-                <NutritionView currentSubView="macros" recipe={null} />
+                <NutritionView currentSubView="macros" recipe={null} session={session} user={user} />
               </div>
             }
           />
@@ -243,7 +294,7 @@ function App() {
                 <div className="px-4 pt-4">
                   <Breadcrumb />
                 </div>
-                <NutritionView currentSubView="calories" recipe={null} />
+                <NutritionView currentSubView="calories" recipe={null} session={session} user={user} />
               </div>
             }
           />

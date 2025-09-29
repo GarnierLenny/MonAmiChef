@@ -14,6 +14,7 @@ import { prisma } from "../app";
 import { Request as ExpressRequest } from "express";
 import { z } from "zod";
 import { MacroCalculationService } from "../services/MacroCalculationService";
+import { resolveOwner } from "../utils/owner";
 
 // Type definitions
 interface HealthMetric {
@@ -107,13 +108,13 @@ export class UserHealthController extends Controller {
     @Query() endDate?: string,
     @Query() limit?: number
   ): Promise<HealthMetric[]> {
-    const userId = (request as any).user?.sub;
-    if (!userId) {
+    const owner = await resolveOwner(request);
+    if (!owner.userId) {
       this.setStatus(401);
       throw new Error("User not authenticated");
     }
 
-    const whereClause: any = { profile_id: userId };
+    const whereClause: any = { profile_id: owner.userId };
 
     if (startDate || endDate) {
       whereClause.recorded_at = {};
@@ -145,8 +146,8 @@ export class UserHealthController extends Controller {
     @Request() request: ExpressRequest,
     @Body() body: LogMetricRequest
   ): Promise<HealthMetric> {
-    const userId = (request as any).user?.sub;
-    if (!userId) {
+    const owner = await resolveOwner(request);
+    if (!owner.userId) {
       this.setStatus(401);
       throw new Error("User not authenticated");
     }
@@ -161,7 +162,7 @@ export class UserHealthController extends Controller {
     // Check if metric already exists for this date
     const existingMetric = await prisma.healthMetric.findFirst({
       where: {
-        profile_id: userId,
+        profile_id: owner.userId,
         recorded_at: recordedAt,
       },
     });
@@ -180,7 +181,7 @@ export class UserHealthController extends Controller {
       // Create new metric
       metric = await prisma.healthMetric.create({
         data: {
-          profile_id: userId,
+          profile_id: owner.userId,
           weight: validatedData.weight,
           body_fat: validatedData.body_fat,
           recorded_at: recordedAt,
@@ -203,14 +204,14 @@ export class UserHealthController extends Controller {
    */
   @Get("goals")
   public async getGoals(@Request() request: ExpressRequest): Promise<UserGoals | null> {
-    const userId = (request as any).user?.sub;
-    if (!userId) {
+    const owner = await resolveOwner(request);
+    if (!owner.userId) {
       this.setStatus(401);
       throw new Error("User not authenticated");
     }
 
     const goals = await prisma.userGoals.findUnique({
-      where: { profile_id: userId },
+      where: { profile_id: owner.userId },
     });
 
     if (!goals) return null;
@@ -237,8 +238,8 @@ export class UserHealthController extends Controller {
     @Request() request: ExpressRequest,
     @Body() body: UpdateGoalsRequest
   ): Promise<UserGoals> {
-    const userId = (request as any).user?.sub;
-    if (!userId) {
+    const owner = await resolveOwner(request);
+    if (!owner.userId) {
       this.setStatus(401);
       throw new Error("User not authenticated");
     }
@@ -247,10 +248,10 @@ export class UserHealthController extends Controller {
     const validatedData = updateGoalsSchema.parse(body);
 
     const goals = await prisma.userGoals.upsert({
-      where: { profile_id: userId },
+      where: { profile_id: owner.userId },
       update: validatedData,
       create: {
-        profile_id: userId,
+        profile_id: owner.userId,
         ...validatedData,
       },
     });
@@ -274,15 +275,15 @@ export class UserHealthController extends Controller {
    */
   @Get("dashboard")
   public async getDashboardData(@Request() request: ExpressRequest): Promise<DashboardData> {
-    const userId = (request as any).user?.sub;
-    if (!userId) {
+    const owner = await resolveOwner(request);
+    if (!owner.userId) {
       this.setStatus(401);
       throw new Error("User not authenticated");
     }
 
     // Get latest health metrics
     const latestMetrics = await prisma.healthMetric.findMany({
-      where: { profile_id: userId },
+      where: { profile_id: owner.userId },
       orderBy: { recorded_at: "desc" },
       take: 2,
     });
@@ -293,7 +294,7 @@ export class UserHealthController extends Controller {
 
     const historicalMetrics = await prisma.healthMetric.findMany({
       where: {
-        profile_id: userId,
+        profile_id: owner.userId,
         recorded_at: { gte: thirtyDaysAgo },
       },
       orderBy: { recorded_at: "asc" },
@@ -301,7 +302,7 @@ export class UserHealthController extends Controller {
 
     // Get user goals
     const goals = await prisma.userGoals.findUnique({
-      where: { profile_id: userId },
+      where: { profile_id: owner.userId },
     });
 
     // Calculate current stats and changes
@@ -323,7 +324,7 @@ export class UserHealthController extends Controller {
     }
 
     // Calculate today's macros from meal plans
-    const calculatedMacros = await MacroCalculationService.calculateTodayMacros(userId);
+    const calculatedMacros = await MacroCalculationService.calculateTodayMacros(owner.userId);
     const todayMacros = {
       protein: { current: calculatedMacros.protein, goal: goals?.daily_protein_goal || undefined },
       carbs: { current: calculatedMacros.carbs, goal: goals?.daily_carbs_goal || undefined },
@@ -347,7 +348,7 @@ export class UserHealthController extends Controller {
       }));
 
     // Calculate weekly calories from meal plans
-    const weekMacros = await MacroCalculationService.calculateWeekMacros(userId);
+    const weekMacros = await MacroCalculationService.calculateWeekMacros(owner.userId);
     const caloriesWeek = weekMacros.map(dayData => ({
       day: dayData.day,
       calories: dayData.macros.calories,
