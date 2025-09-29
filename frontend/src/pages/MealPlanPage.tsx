@@ -245,6 +245,7 @@ export default function MealPlanPage({
             const recipe = await recipeApi.generateMealRecipe({
               mealType: meal,
               preferences: "Healthy and nutritious",
+              day: day,
             });
 
             const mealData = convertRecipeToMeal(recipe);
@@ -329,6 +330,7 @@ export default function MealPlanPage({
         const recipe = await recipeApi.generateMealRecipe({
           mealType: meal,
           preferences: userInput,
+          day: currentDay,
         });
 
         const mealData = convertRecipeToMeal(recipe);
@@ -464,6 +466,7 @@ export default function MealPlanPage({
       const recipe = await recipeApi.generateMealRecipe({
         mealType: meal,
         preferences: "Healthy and nutritious",
+        day: day,
       });
 
       const mealData = convertRecipeToMeal(recipe);

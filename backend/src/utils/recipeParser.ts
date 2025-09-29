@@ -126,7 +126,8 @@ function extractIngredients(text: string): string[] {
   console.log('=== EXTRACTING INGREDIENTS ===');
 
   // More flexible patterns for ingredients section
-  const ingredientsMatch = text.match(/\*\*ingredients?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is) ||
+  const ingredientsMatch = text.match(/###\s*ingredients?\s*\n(.*?)(?=###|$)/is) ||
+                          text.match(/\*\*ingredients?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is) ||
                           text.match(/ingredients?:?(.*?)(?=\n\n|\*\*\w|instructions?|directions?|method|steps)/is);
 
   console.log('Ingredients section found:', !!ingredientsMatch);
@@ -165,7 +166,8 @@ function extractInstructions(text: string): string[] {
   console.log('=== EXTRACTING INSTRUCTIONS ===');
 
   // More flexible patterns for instructions section
-  const instructionsMatch = text.match(/\*\*instructions?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is) ||
+  const instructionsMatch = text.match(/###\s*instructions?\s*\n(.*?)(?=###|$)/is) ||
+                           text.match(/\*\*instructions?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is) ||
                            text.match(/instructions?:?(.*?)(?=\n\n|\*\*\w|tips?|variations?|nutrition)/is) ||
                            text.match(/\*\*directions?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is) ||
                            text.match(/\*\*method\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is) ||
@@ -225,11 +227,24 @@ function extractTips(text: string): string[] {
 }
 
 function extractServings(text: string): number | undefined {
-  const servingsMatch = text.match(/servings?:?\s*(\d+)/i) ||
-                       text.match(/serves?\s+(\d+)/i) ||
-                       text.match(/(?:for|makes)\s+(\d+)\s+(?:people|persons?|servings?)/i) ||
-                       text.match(/yield:?\s*(\d+)/i);
-  return servingsMatch ? parseInt(servingsMatch[1]) : undefined;
+  // More precise patterns that avoid nutrition calculation numbers
+  const servingsMatch = text.match(/(?:^|\n)\s*(?:servings?|serves?):\s*(\d+)/im) ||
+                       text.match(/(?:^|\n)\s*(?:serves?|for)\s+(\d+)\s+(?:people|persons?|servings?)/im) ||
+                       text.match(/(?:^|\n)\s*yield:\s*(\d+)/im);
+
+  if (servingsMatch) {
+    const servings = parseInt(servingsMatch[1]);
+    // Hard constraint: meal planning should always be 1 serving
+    // If AI generates more than 1, force it to 1
+    if (servings > 1) {
+      console.warn(`AI generated ${servings} servings, forcing to 1 for meal planning`);
+      return 1;
+    }
+    return servings;
+  }
+
+  // Default to 1 serving for meal planning
+  return 1;
 }
 
 function extractTimes(text: string): { prepTime?: string; cookTime?: string; totalTime?: string } {
@@ -254,9 +269,10 @@ function extractTimes(text: string): { prepTime?: string; cookTime?: string; tot
 function extractNutrition(text: string): RecipeNutrition | undefined {
   console.log('=== EXTRACTING NUTRITION ===');
 
-  // More flexible pattern to match various nutrition section formats
-  const nutritionMatch = text.match(/\*\*nutrition(?:\s*\([^)]*\))?\*\*:?(.*?)(?=\*\*\w|\n\n|$)/is) ||
-                        text.match(/nutrition(?:\s*\([^)]*\))?:?(.*?)(?:\n\n|$)/is);
+  // More flexible pattern to match various nutrition section formats, including calculation breakdowns
+  const nutritionMatch = text.match(/###\s*nutrition(?:\s*\([^)]*\))?\s*\n(.*?)(?=###|$)/is) ||
+                        text.match(/\*\*nutrition(?:\s*\([^)]*\))?\*\*:?(.*?)(?=\*\*\w|\n\s*\n|$)/is) ||
+                        text.match(/nutrition(?:\s*\([^)]*\))?:?(.*?)(?=\n\s*\n|\*\*\w|$)/is);
 
   console.log('Nutrition section found:', !!nutritionMatch);
   if (nutritionMatch) {
@@ -295,20 +311,35 @@ function extractNutrition(text: string): RecipeNutrition | undefined {
   const nutritionText = nutritionMatch[1];
   const nutrition: RecipeNutrition = {};
 
-  const patterns = {
-    calories: /(\d+)\s*(?:kcal|cal|calories?)/i,
-    protein: /(\d+)g?\s*protein/i,
-    carbs: /(\d+)g?\s*carb?s?/i,
-    fat: /(\d+)g?\s*fat/i,
-    fiber: /(\d+)g?\s*fiber/i,
-    sugar: /(\d+)g?\s*sugar/i,
-  };
+  // First try to extract from Total line with specific format variations
+  const totalMatch = nutritionText.match(/\*\*Total per serving:\*\*\s*(\d+)\s*(?:kcal|cal|calories?),?\s*(\d+(?:\.\d+)?)g?\s*protein,?\s*(\d+(?:\.\d+)?)g?\s*carb?s?,?\s*(\d+(?:\.\d+)?)g?\s*fat/i) ||
+                    nutritionText.match(/Total.*?:\s*\*?\*?(\d+)\s*(?:kcal|cal|calories?),?\s*(\d+(?:\.\d+)?)g?\s*protein,?\s*(\d+(?:\.\d+)?)g?\s*carb?s?,?\s*(\d+(?:\.\d+)?)g?\s*fat/i) ||
+                    nutritionText.match(/=\s*Total.*?:\s*\*?\*?(\d+)\s*(?:kcal|cal|calories?),?\s*(\d+(?:\.\d+)?)g?\s*protein,?\s*(\d+(?:\.\d+)?)g?\s*carb?s?,?\s*(\d+(?:\.\d+)?)g?\s*fat/i) ||
+                    nutritionText.match(/\*\*Total.*?:\*\*\s*(\d+)\s*(?:kcal|cal|calories?),?\s*(\d+(?:\.\d+)?)g?\s*protein,?\s*(\d+(?:\.\d+)?)g?\s*carb?s?,?\s*(\d+(?:\.\d+)?)g?\s*fat/i);
 
-  for (const [key, pattern] of Object.entries(patterns)) {
-    const match = nutritionText.match(pattern);
-    if (match) {
-      (nutrition as any)[key] = parseInt(match[1]);
-      console.log(`Extracted ${key}: ${match[1]}`);
+  if (totalMatch) {
+    nutrition.calories = parseInt(totalMatch[1]);
+    nutrition.protein = Math.round(parseFloat(totalMatch[2]));
+    nutrition.carbs = Math.round(parseFloat(totalMatch[3]));
+    nutrition.fat = Math.round(parseFloat(totalMatch[4]));
+    console.log(`Extracted from total line - calories: ${totalMatch[1]}, protein: ${totalMatch[2]}, carbs: ${totalMatch[3]}, fat: ${totalMatch[4]}`);
+  } else {
+    // Fallback to individual patterns if no total line found
+    const patterns = {
+      calories: /(\d+)\s*(?:kcal|cal|calories?)/i,
+      protein: /(\d+)g?\s*protein/i,
+      carbs: /(\d+)g?\s*carb?s?/i,
+      fat: /(\d+)g?\s*fat/i,
+      fiber: /(\d+)g?\s*fiber/i,
+      sugar: /(\d+)g?\s*sugar/i,
+    };
+
+    for (const [key, pattern] of Object.entries(patterns)) {
+      const match = nutritionText.match(pattern);
+      if (match) {
+        (nutrition as any)[key] = parseInt(match[1]);
+        console.log(`Extracted ${key}: ${match[1]}`);
+      }
     }
   }
 

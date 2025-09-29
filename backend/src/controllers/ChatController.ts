@@ -29,15 +29,16 @@ import { Prisma } from "@prisma/client";
 import * as express from "express";
 import type { AuthUser } from '../authentication';
 import { resolveOptimizedOwner, ownerWhereOptimized } from '../utils/optimizedOwner';
-import { 
-  APIError, 
-  NotFoundError, 
-  ServiceUnavailableError, 
+import {
+  APIError,
+  NotFoundError,
+  ServiceUnavailableError,
   ValidationError,
   InternalServerError,
   handleControllerError,
-  type ErrorResponse 
+  type ErrorResponse
 } from '../types/ErrorTypes';
+import { GoalAwareMealService } from '../services/GoalAwareMealService';
 
 const GEMINI_MODEL = "gemini-2.5-flash";
 
@@ -62,7 +63,13 @@ const geminiCookAssistantPrompt = `
       - **Ingredients** (bulleted, quantities in metric)
       - **Instructions** (numbered, 5–10 tight steps)
       - **Tips/Variations** (bulleted, 3 items)
-      - **Nutrition (approx.)** per serving: Calculate SPECIFIC values based on the actual ingredients and quantities listed above. Provide: calories (kcal), protein (g), carbs (g), fat (g). Do NOT use generic values.
+      - **Nutrition (per serving)**: Calculate macros by analyzing each ingredient individually:
+        1. For each ingredient with quantity, determine: calories, protein (g), carbs (g), fat (g)
+        2. Sum all values to get recipe totals
+        3. Divide by number of servings for per-serving values
+        4. Show calculation breakdown: "2 eggs (140 cal, 12g protein, 1g carbs, 10g fat) + 50g spinach (10 cal, 2g protein, 2g carbs, 0g fat) = Total per serving: 150 cal, 14g protein, 3g carbs, 10g fat"
+        5. Final format: calories (kcal), protein (g), carbs (g), fat (g)
+        IMPORTANT: Base calculations on standard nutrition values for each specific ingredient and quantity - do NOT use generic estimates.
       - **Nutrition Rating** (A, B, C, or D): Rate the overall nutritional quality considering balance, health benefits, and macronutrient distribution
     3) **Idea List** — 1–3 options, each with: title + 1–2 line pitch.
 
@@ -137,6 +144,19 @@ export class ChatController extends Controller {
       let fullSystemInstruction = geminiCookAssistantPrompt;
       if (hasPrefs) {
         fullSystemInstruction += `\n\nUser Preferences:\n${preferencesSummary}`;
+      }
+
+      // Add goal context for authenticated users
+      if (!owner.isGuest && owner.userId) {
+        const goalService = new GoalAwareMealService();
+        try {
+          const goalContext = await goalService.getGoalContext(owner.userId, "");
+          if (goalContext.hasGoals && goalContext.goalMessage) {
+            fullSystemInstruction += `\n\nUSER GOALS: ${goalContext.goalMessage}`;
+          }
+        } catch (error) {
+          console.warn('Failed to get goal context for chat:', error);
+        }
       }
 
       let modelResponse: string;
@@ -241,10 +261,11 @@ export class ChatController extends Controller {
 
       let conversationHistory = [];
       let conversationMessages: Prisma.InputJsonValue[] = [];
+      let owner;
 
       // Get conversation history with proper error handling
       try {
-        const owner = await resolveOptimizedOwner(request, request.res, this);
+        owner = await resolveOptimizedOwner(request, request.res, this);
         
         // Verify conversation exists and belongs to user
         const conversation = await prisma.conversation.findFirst({
@@ -290,6 +311,19 @@ export class ChatController extends Controller {
         let fullSystemInstruction = geminiCookAssistantPrompt;
         if (hasPrefs) {
           fullSystemInstruction += `\n\nUser Preferences:\n${preferencesSummary}`;
+        }
+
+        // Add goal context for authenticated users
+        if (owner && !owner.isGuest && owner.userId) {
+          const goalService = new GoalAwareMealService();
+          try {
+            const goalContext = await goalService.getGoalContext(owner.userId, "");
+            if (goalContext.hasGoals && goalContext.goalMessage) {
+              fullSystemInstruction += `\n\nUSER GOALS: ${goalContext.goalMessage}`;
+            }
+          } catch (error) {
+            console.warn('Failed to get goal context for chat:', error);
+          }
         }
 
         const chat = ai.chats.create({
@@ -613,6 +647,7 @@ export class ChatController extends Controller {
       mealType: "breakfast" | "lunch" | "dinner" | "snack";
       preferences?: string;
       dietaryRestrictions?: string[];
+      day?: string;
     }
   ): Promise<{
     recipe: {
@@ -632,6 +667,25 @@ export class ChatController extends Controller {
 
       const owner = await resolveOptimizedOwner(request, request.res, this);
 
+      // Get goal context for meal generation
+      const goalService = new GoalAwareMealService();
+      let goalContext = { hasGoals: false, goalMessage: "Generate a balanced, nutritious meal." };
+
+      if (!owner.isGuest && owner.userId && body.day) {
+        try {
+          goalContext = await goalService.getGoalContext(owner.userId, body.day);
+        } catch (error) {
+          console.warn('Failed to get goal context:', error);
+          // Continue without goal context if service fails
+        }
+      } else if (body.day) {
+        // For guests or when no authenticated goals exist, apply default high-calorie meal generation
+        goalContext = {
+          hasGoals: true,
+          goalMessage: "The user wants substantial, high-calorie meals. CRITICAL: This meal MUST contain approximately 800-900 calories. This is NOT optional - it's required for proper meal planning. SERVING SIZE CONSTRAINT: Always set servings = 1. To reach the calorie target, use calorie-dense ingredients (nuts, oils, dairy, proteins), larger portions, and multiple dishes. Examples: avocado toast + protein smoothie + fruit, or salmon + quinoa + vegetables with olive oil. The meal should be filling and substantial for ONE person."
+        };
+      }
+
       // Build meal-specific prompt
       const dietaryInfo = body.dietaryRestrictions?.length
         ? `Dietary restrictions: ${body.dietaryRestrictions.join(", ")}. `
@@ -641,20 +695,55 @@ export class ChatController extends Controller {
         ? `User preferences: ${body.preferences}. `
         : "";
 
-      const mealPrompt = `Generate a ${body.mealType} recipe. ${dietaryInfo}${userPrefs}Make it nutritious and appropriate for ${body.mealType}. Provide a complete recipe with ingredients, instructions, tips, and nutrition info.`;
+      const goalInfo = goalContext.hasGoals && goalContext.goalMessage
+        ? `${goalContext.goalMessage} `
+        : "";
 
-      // Use Gemini to generate the recipe
-      const chat = ai.chats.create({
-        model: GEMINI_MODEL,
-        history: [],
-        config: {
-          systemInstruction: geminiCookAssistantPrompt,
-        },
-      });
+      const mealPrompt = `${goalInfo}Generate a calorie-rich, substantial ${body.mealType} recipe for 1 serving. ${dietaryInfo}${userPrefs}Create multiple dishes or components for this meal to increase calories (e.g., for breakfast: protein smoothie + avocado toast + nuts, for lunch: hearty salad + protein + healthy fats, etc.). Use calorie-dense ingredients like nuts, oils, cheese, proteins, whole grains. MANDATORY: Always set servings to 1 and create filling, high-calorie portions for ONE person. Make it nutritious and appropriate for ${body.mealType}. Provide a complete recipe with ingredients, instructions, tips, and nutrition info.`;
 
-      const response = await chat.sendMessage({
-        message: mealPrompt,
-      });
+      console.log('=== DEBUG: Full prompt sent to AI ===');
+      console.log('Goal context:', goalContext);
+      console.log('Final meal prompt:', mealPrompt);
+      console.log('=== End DEBUG ===');
+
+      // Use Gemini to generate the recipe with timeout and retry
+      const generateRecipeWithTimeout = async (retryCount = 0): Promise<any> => {
+        const timeoutMs = 25000; // 25 second timeout
+        const maxRetries = 2;
+
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
+        });
+
+        try {
+          const chat = ai.chats.create({
+            model: GEMINI_MODEL,
+            history: [],
+            config: {
+              systemInstruction: geminiCookAssistantPrompt,
+            },
+          });
+
+          const aiPromise = chat.sendMessage({
+            message: mealPrompt,
+          });
+
+          const response = await Promise.race([aiPromise, timeoutPromise]);
+          return response;
+        } catch (error) {
+          console.warn(`AI request attempt ${retryCount + 1} failed:`, error);
+
+          if (retryCount < maxRetries && (error instanceof Error && (error.message === 'Request timeout' || (error as any).code === 'DEADLINE_EXCEEDED'))) {
+            console.log(`Retrying AI request (attempt ${retryCount + 2}/${maxRetries + 1})...`);
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+            return generateRecipeWithTimeout(retryCount + 1);
+          }
+
+          throw error;
+        }
+      };
+
+      const response = await generateRecipeWithTimeout();
 
       const text = response.text;
 

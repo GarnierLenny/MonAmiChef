@@ -36,6 +36,7 @@ export interface GenerateMealRecipeRequest {
   mealType: "breakfast" | "lunch" | "dinner" | "snack";
   preferences?: string;
   dietaryRestrictions?: string[];
+  day?: string;
 }
 
 export interface GenerateMealRecipeResponse {

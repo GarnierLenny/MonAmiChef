@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -20,6 +21,7 @@ import {
 } from "lucide-react";
 import { getGradeStyles } from "./utils";
 import type { Meal, MealSlot } from "./constants";
+import { getRandomLoadingText } from "@/lib/utils/randomWords";
 
 interface SimpleMealCardProps {
   mealSlot: MealSlot;
@@ -49,6 +51,16 @@ export const SimpleMealCard = ({
   onMealSelection,
 }: SimpleMealCardProps) => {
   const isCurrentlyGenerating = isGenerating || isRegenerating;
+
+  // Random words state for Claude-like dynamic text (only for loading)
+  const [loadingData, setLoadingData] = useState(getRandomLoadingText());
+
+  // Generate new random adjective when generation starts
+  useEffect(() => {
+    if (isCurrentlyGenerating) {
+      setLoadingData(getRandomLoadingText());
+    }
+  }, [isCurrentlyGenerating]);
 
   return (
     <div
@@ -242,7 +254,14 @@ export const SimpleMealCard = ({
         <div className="absolute inset-0 bg-white/90 rounded-xl flex flex-col items-center justify-center z-10">
           <Loader2 className="w-8 h-8 animate-spin text-orange-500 mb-2" />
           <p className="text-sm text-gray-600 font-medium">
-            Generating exquisite recipe...
+            Generating{" "}
+            <span className="relative inline-block">
+              <span className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 bg-clip-text text-transparent font-bold animate-pulse">
+                {loadingData.adjective}
+              </span>
+              <span className="absolute inset-0 bg-gradient-to-r from-yellow-400/20 via-orange-400/20 to-red-400/20 blur-sm animate-bounce rounded-md"></span>
+            </span>{" "}
+            recipe...
           </p>
         </div>
       )}
