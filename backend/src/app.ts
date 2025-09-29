@@ -46,7 +46,7 @@ const corsCfg = cors({
     cb(null, ok);
   },
   credentials: true,
-  methods: ["GET", "POST", "PATCH", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: ["Authorization", "Content-Type", "Cookie"],
 });
 
