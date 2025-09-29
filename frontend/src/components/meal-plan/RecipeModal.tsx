@@ -24,6 +24,8 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
+  const [checkedInstructions, setCheckedInstructions] = useState<Set<number>>(new Set());
 
   // Fetch recipe data when modal opens and meal changes
   useEffect(() => {
@@ -51,6 +53,8 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
     if (!isOpen) {
       setRecipe(null);
       setError(null);
+      setCheckedIngredients(new Set());
+      setCheckedInstructions(new Set());
     }
   }, [isOpen]);
 
@@ -58,8 +62,48 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
   useEffect(() => {
     if (meal?.id && recipe?.id !== meal.id) {
       setRecipe(null);
+      setCheckedIngredients(new Set());
+      setCheckedInstructions(new Set());
     }
   }, [meal?.id, recipe?.id]);
+
+  // Toggle ingredient checked state
+  const toggleIngredientCheck = (index: number) => {
+    setCheckedIngredients(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
+
+  // Toggle instruction checked state
+  const toggleInstructionCheck = (index: number) => {
+    setCheckedInstructions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(index)) {
+        newSet.delete(index);
+      } else {
+        newSet.add(index);
+      }
+      return newSet;
+    });
+  };
+
+  // Simple markdown renderer for bold text
+  const renderMarkdown = (text: string) => {
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    return parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        const boldText = part.slice(2, -2);
+        return <strong key={index}>{boldText}</strong>;
+      }
+      return part;
+    });
+  };
 
   if (!meal) return null;
 
@@ -152,23 +196,53 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
 
               {/* Ingredients Section */}
               <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <ChefHat className="w-5 h-5 text-gray-700" />
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    Ingredients
-                  </h3>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <ChefHat className="w-5 h-5 text-gray-700" />
+                    <h3 className="text-xl font-semibold text-gray-900">
+                      Ingredients
+                    </h3>
+                  </div>
+                  {recipe.content_json.ingredients && recipe.content_json.ingredients.length > 0 && (
+                    <div className={`text-sm transition-colors ${
+                      checkedIngredients.size === recipe.content_json.ingredients.length
+                        ? 'text-green-600 font-medium'
+                        : 'text-gray-500'
+                    }`}>
+                      {checkedIngredients.size === recipe.content_json.ingredients.length
+                        ? '✅ All ingredients ready!'
+                        : `${checkedIngredients.size} / ${recipe.content_json.ingredients.length} checked`
+                      }
+                    </div>
+                  )}
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   {recipe.content_json.ingredients && recipe.content_json.ingredients.length > 0 ? (
-                    recipe.content_json.ingredients.map((ingredient, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
-                      >
-                        <div className="w-2 h-2 bg-gray-400 rounded-full flex-shrink-0"></div>
-                        <span className="text-gray-700">{ingredient}</span>
-                      </div>
-                    ))
+                    recipe.content_json.ingredients.map((ingredient, index) => {
+                      const isChecked = checkedIngredients.has(index);
+                      return (
+                        <label
+                          key={index}
+                          className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => toggleIngredientCheck(index)}
+                            className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2 flex-shrink-0"
+                          />
+                          <span
+                            className={`transition-all duration-200 ${
+                              isChecked
+                                ? 'text-green-600 line-through'
+                                : 'text-gray-700'
+                            }`}
+                          >
+                            {ingredient}
+                          </span>
+                        </label>
+                      );
+                    })
                   ) : (
                     <div className="col-span-2 text-center py-8">
                       <p className="text-gray-500">No ingredients available</p>
@@ -181,26 +255,60 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
 
               {/* Instructions Section */}
               <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <Utensils className="w-5 h-5 text-gray-700" />
-                  <h3 className="text-xl font-semibold text-gray-900">
-                    Instructions
-                  </h3>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Utensils className="w-5 h-5 text-gray-700" />
+                    <h3 className="text-xl font-semibold text-gray-900">
+                      Instructions
+                    </h3>
+                  </div>
+                  {recipe.content_json.instructions && recipe.content_json.instructions.length > 0 && (
+                    <div className={`text-sm transition-colors ${
+                      checkedInstructions.size === recipe.content_json.instructions.length
+                        ? 'text-green-600 font-medium'
+                        : 'text-gray-500'
+                    }`}>
+                      {checkedInstructions.size === recipe.content_json.instructions.length
+                        ? '🎉 Recipe completed!'
+                        : `${checkedInstructions.size} / ${recipe.content_json.instructions.length} steps done`
+                      }
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-4">
                   {recipe.content_json.instructions && recipe.content_json.instructions.length > 0 ? (
-                    recipe.content_json.instructions.map((instruction, index) => (
-                      <div key={index} className="flex gap-4">
-                        <div className="flex-shrink-0 w-8 h-8 bg-orange-500 text-white rounded-full flex items-center justify-center font-semibold text-sm">
-                          {index + 1}
-                        </div>
-                        <div className="flex-1 pt-1">
-                          <p className="text-gray-700 leading-relaxed">
-                            {instruction}
-                          </p>
-                        </div>
-                      </div>
-                    ))
+                    recipe.content_json.instructions.map((instruction, index) => {
+                      const isChecked = checkedInstructions.has(index);
+                      return (
+                        <label
+                          key={index}
+                          className="flex gap-4 cursor-pointer hover:bg-gray-50 rounded-lg p-3 transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={() => toggleInstructionCheck(index)}
+                            className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2 flex-shrink-0 mt-1"
+                          />
+                          <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${
+                            isChecked
+                              ? 'bg-green-500 text-white'
+                              : 'bg-orange-500 text-white'
+                          }`}>
+                            {isChecked ? '✓' : index + 1}
+                          </div>
+                          <div className="flex-1 pt-1">
+                            <p className={`leading-relaxed transition-all duration-200 ${
+                              isChecked
+                                ? 'text-green-600 line-through'
+                                : 'text-gray-700'
+                            }`}>
+                              {renderMarkdown(instruction)}
+                            </p>
+                          </div>
+                        </label>
+                      );
+                    })
                   ) : (
                     <div className="text-center py-8">
                       <p className="text-gray-500">No instructions available</p>
