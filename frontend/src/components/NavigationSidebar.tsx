@@ -1,7 +1,15 @@
 import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Heart,
   User,
@@ -14,6 +22,7 @@ import {
   Calculator,
   Timer,
   BarChart3,
+  Languages,
 } from "lucide-react";
 import { User as UserType } from "../types/types";
 
@@ -34,6 +43,7 @@ export function NavigationSidebar({
 }: NavigationSidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, i18n } = useTranslation();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleNavigation = (path: string) => {
@@ -56,6 +66,10 @@ export function NavigationSidebar({
   const handleAuthClick = () => {
     onAuthClick();
     onClose();
+  };
+
+  const handleLanguageChange = (language: string) => {
+    i18n.changeLanguage(language);
   };
 
   const isActivePath = (path: string) => location.pathname === path;
@@ -128,7 +142,7 @@ export function NavigationSidebar({
                 onClick={() => handleNavigation("/dashboard")}
               >
                 <BarChart3 className="h-5 w-5" />
-                Dashboard
+                {t('navigation.dashboard')}
               </Button>
 
               <Button
@@ -141,7 +155,7 @@ export function NavigationSidebar({
                 onClick={() => handleNavigation("/meal-plan-chat")}
               >
                 <CalendarDays className="h-5 w-5" />
-                Meal Planning
+                {t('navigation.mealPlan')}
               </Button>
 
               <Button
@@ -170,6 +184,33 @@ export function NavigationSidebar({
                 Cooking Timer
               </Button>
 
+              {/* Language Selector */}
+              <div className="space-y-2">
+                <div className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-gray-600">
+                  <Languages className="h-4 w-4" />
+                  {t('navigation.language')}
+                </div>
+                <div className="px-4">
+                  <Select value={i18n.language} onValueChange={handleLanguageChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t('navigation.language')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">
+                        <span className="flex items-center gap-2">
+                          🇺🇸 {t('languages.en')}
+                        </span>
+                      </SelectItem>
+                      <SelectItem value="fr">
+                        <span className="flex items-center gap-2">
+                          🇫🇷 {t('languages.fr')}
+                        </span>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
               {user && (
                 <>
                   <Button
@@ -182,7 +223,7 @@ export function NavigationSidebar({
                     onClick={() => handleNavigation("/recipes/saved")}
                   >
                     <Heart className="h-5 w-5" />
-                    Saved Recipes
+                    {t('navigation.recipes')}
                   </Button>
 
                   <Button
@@ -195,7 +236,7 @@ export function NavigationSidebar({
                     onClick={() => handleNavigation("/profile")}
                   >
                     <User className="h-5 w-5" />
-                    Profile
+                    {t('navigation.profile')}
                   </Button>
                 </>
               )}
@@ -212,7 +253,7 @@ export function NavigationSidebar({
                 disabled={isSigningOut}
               >
                 <LogOut className="h-5 w-5" />
-                {isSigningOut ? "Signing out..." : "Sign Out"}
+                {isSigningOut ? t('auth.signingOut') : t('navigation.logout')}
               </Button>
             ) : (
               <div className="space-y-3">
@@ -222,7 +263,7 @@ export function NavigationSidebar({
                   onClick={handleAuthClick}
                 >
                   <LogIn className="h-5 w-5" />
-                  Sign In
+                  {t('navigation.login')}
                 </Button>
                 <Button
                   variant="outline"
@@ -230,7 +271,7 @@ export function NavigationSidebar({
                   onClick={handleAuthClick}
                 >
                   <UserPlus className="h-5 w-5" />
-                  Sign Up
+                  {t('navigation.register')}
                 </Button>
               </div>
             )}

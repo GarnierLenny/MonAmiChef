@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
 import "./styles/index.css";
+import "./lib/i18n";
 import { PostHogProvider } from "posthog-js/react";
 import * as Sentry from "@sentry/react";
 
