@@ -174,19 +174,6 @@ export function NavigationSidebar({
                 Cooking Timer
               </Button>
 
-              <Button
-                variant="ghost"
-                className={`w-full justify-start gap-4 h-12 text-left font-medium ${
-                  isActivePath("/settings")
-                    ? "bg-green-100 text-green-700"
-                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
-                }`}
-                onClick={() => handleNavigation("/settings")}
-              >
-                <Settings className="h-5 w-5" />
-                {t('navigation.settings')}
-              </Button>
-
               {user && (
                 <>
                   <Button
@@ -221,6 +208,19 @@ export function NavigationSidebar({
 
           {/* Footer */}
           <div className="border-t p-6">
+            <Button
+              variant="ghost"
+              className={`w-full justify-start gap-4 h-12 text-left font-medium mb-2 ${
+                isActivePath("/settings")
+                  ? "bg-green-100 text-green-700"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              }`}
+              onClick={() => handleNavigation("/settings")}
+            >
+              <Settings className="h-5 w-5" />
+              {t('navigation.settings')}
+            </Button>
+
             {user ? (
               <Button
                 variant="ghost"
