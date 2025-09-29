@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import Navigation from "@/components/Navigation";
 import {
   Select,
   SelectContent,
@@ -20,19 +18,8 @@ const Settings = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-chef-cream to-background">
-      <Navigation />
-      <main className="container mx-auto px-4 py-16">
-        <div className="max-w-4xl mx-auto space-y-8">
-          {/* Header */}
-          <div className="text-center space-y-4">
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-chef-orange via-chef-yellow to-chef-green bg-clip-text text-transparent">
-              {t('navigation.settings')}
-            </h1>
-            <p className="text-lg text-chef-brown/80">
-              Customize your MonAmiChef experience
-            </p>
-          </div>
-
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto space-y-6">
           {/* Settings Cards */}
           <div className="grid gap-6">
             {/* Language Settings */}
