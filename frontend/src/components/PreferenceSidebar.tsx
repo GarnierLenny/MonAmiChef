@@ -450,7 +450,7 @@ export default function PreferenceSidebar({
 
   return (
     <div
-      className="w-80 bg-gradient-to-b from-orange-50 to-pink-50 border-r border-orange-200 h-full overflow-y-auto p-6"
+      className="bg-gradient-to-b from-orange-50 to-pink-50 border-r border-orange-200 h-full overflow-y-auto p-6"
       style={{ scrollBehavior: "auto" }}
     >
       <div className="mb-8">
@@ -936,10 +936,10 @@ export default function PreferenceSidebar({
       </div>*/}
 
       {/* Clear All Button */}
-      <div className="pt-4 border-t border-gray-200">
+      <div className="py-2 mb-22 border-t border-black">
         <button
           onClick={clearAllPreferences}
-          className="w-full py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
+          className="w-full py-2 text-sm text-black transition-colors"
         >
           Clear All Preferences
         </button>

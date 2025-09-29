@@ -246,48 +246,18 @@ export default function ChatInterface({
                 className={`flex text-sm ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-3xl rounded-2xl px-6 py-4 relative ${
+                  className={`max-w-3xl rounded-2xl px-6 py-4 mb-10 relative ${
                     message.role === "user"
                       ? "bg-orange-500 text-white"
                       : "bg-gray-100 text-gray-900"
                   }`}
                 >
                   {message.role === "model" && (
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="flex items-center space-x-2">
-                        <Sparkles className="w-4 h-4 text-orange-500" />
-                        <span className="text-sm font-medium text-orange-600">
-                          AI Chef
-                        </span>
-                      </div>
-                      {isRecipe && (
-                        <button
-                          onClick={() =>
-                            handleSaveRecipe(message.text, messageId)
-                          }
-                          disabled={isSaving}
-                          className={`flex items-center space-x-1 px-2 py-1 rounded-lg text-xs font-medium transition-colors ${
-                            isSaved
-                              ? "bg-red-100 text-red-700 hover:bg-red-200"
-                              : "bg-orange-100 text-orange-700 hover:bg-orange-200"
-                          } ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
-                        >
-                          {isSaving ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            <Heart
-                              className={`w-3 h-3 ${isSaved ? "fill-current" : ""}`}
-                            />
-                          )}
-                          <span>
-                            {isSaving
-                              ? "Saving..."
-                              : isSaved
-                                ? "Saved"
-                                : "Save Recipe"}
-                          </span>
-                        </button>
-                      )}
+                    <div className="flex items-center space-x-2 mb-2">
+                      <Sparkles className="w-4 h-4 text-orange-500" />
+                      <span className="text-sm font-medium text-orange-600">
+                        AI Chef
+                      </span>
                     </div>
                   )}
 
@@ -332,6 +302,38 @@ export default function ChatInterface({
                       >
                         {message.text}
                       </ReactMarkdown>
+
+                      {/* Save Recipe Button at the end of AI messages */}
+                      {isRecipe && (
+                        <div className="mt-4 py-3 border-t border-gray-200">
+                          <button
+                            onClick={() =>
+                              handleSaveRecipe(message.text, messageId)
+                            }
+                            disabled={isSaving}
+                            className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                              isSaved
+                                ? "bg-green-100 text-green-700 hover:bg-green-200"
+                                : "bg-orange-100 text-orange-700 hover:bg-orange-200 hover:scale-105"
+                            } ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
+                          >
+                            {isSaving ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Heart
+                                className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`}
+                              />
+                            )}
+                            <span>
+                              {isSaving
+                                ? "Saving Recipe..."
+                                : isSaved
+                                  ? "Recipe Saved"
+                                  : "Save Recipe"}
+                            </span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -340,7 +342,7 @@ export default function ChatInterface({
           })}
 
           {isGenerating && (
-            <div className="flex justify-start">
+            <div className="flex mb-18 justify-start">
               <div className="max-w-3xl rounded-2xl px-6 py-4 bg-gray-100">
                 <div className="flex items-center space-x-2 mb-2">
                   <Sparkles className="w-4 h-4 text-orange-500" />

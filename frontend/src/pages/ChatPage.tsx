@@ -277,6 +277,15 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
     void handleSubmitMessage(text);
   };
 
+  const handleSubmitPreferencesOnly = async () => {
+    if (isGenerating) return;
+    if (!hasSelectedPreferences) return;
+
+    // Submit with a default message when only preferences are selected
+    const defaultMessage = "Generate a recipe based on my preferences";
+    await handleSubmitMessage(defaultMessage);
+  };
+
   const handleSubmitMessage = async (text: string) => {
     setInputValue("");
 
@@ -400,6 +409,8 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
               )
             }
             clearAllPreferences={clearAllPreferences}
+            onSubmitPreferences={handleSubmitPreferencesOnly}
+            hasSelectedPreferences={hasSelectedPreferences}
           />
 
           <div className="flex-1 flex flex-col overflow-hidden mobile-content min-h-0">
