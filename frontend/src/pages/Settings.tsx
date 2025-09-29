@@ -6,7 +6,13 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Languages, User, Bell } from "lucide-react";
 
 const Settings = () => {
@@ -16,9 +22,20 @@ const Settings = () => {
     i18n.changeLanguage(language);
   };
 
+  // Get browser's preferred language for display
+  const getBrowserLanguage = () => {
+    const browserLang = navigator.language || 'en';
+    if (browserLang.startsWith('fr')) return 'fr';
+    if (browserLang.startsWith('en')) return 'en';
+    return 'en';
+  };
+
+  const browserLang = getBrowserLanguage();
+  const isUsingBrowserDefault = i18n.language === browserLang;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-chef-cream to-background">
-      <main className="container mx-auto px-4 py-8">
+    <div className="min-h-screen w-screen overflow-y-hidden bg-orange-50">
+      <main className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Settings Cards */}
           <div className="grid gap-6">
@@ -31,29 +48,37 @@ const Settings = () => {
                   </div>
                   <div>
                     <CardTitle className="text-chef-brown">
-                      {t('navigation.language')}
+                      {t("navigation.language")}
                     </CardTitle>
                     <CardDescription>
                       Choose your preferred language for the application
+                      {isUsingBrowserDefault && (
+                        <span className="block text-green-600 text-sm mt-1">
+                          ✓ Using your browser's language ({navigator.language})
+                        </span>
+                      )}
                     </CardDescription>
                   </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-0">
                 <div className="max-w-xs">
-                  <Select value={i18n.language} onValueChange={handleLanguageChange}>
+                  <Select
+                    value={i18n.language}
+                    onValueChange={handleLanguageChange}
+                  >
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t('navigation.language')} />
+                      <SelectValue placeholder={t("navigation.language")} />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="en">
                         <div className="flex items-center gap-2">
-                          🇺🇸 <span>{t('languages.en')}</span>
+                          🇺🇸 <span>{t("languages.en")}</span>
                         </div>
                       </SelectItem>
                       <SelectItem value="fr">
                         <div className="flex items-center gap-2">
-                          🇫🇷 <span>{t('languages.fr')}</span>
+                          🇫🇷 <span>{t("languages.fr")}</span>
                         </div>
                       </SelectItem>
                     </SelectContent>
@@ -107,3 +132,4 @@ const Settings = () => {
 };
 
 export default Settings;
+
