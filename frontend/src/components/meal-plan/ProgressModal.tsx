@@ -1,12 +1,24 @@
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { CountUp } from "@/components/ui/count-up";
 import { AnimatedProgress } from "@/components/ui/animated-progress";
-import { Zap, Utensils, TrendingUp } from "lucide-react";
+import { Zap, Utensils, TrendingUp, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { DonutChart } from "./DonutChart";
-import { calculateDayProgress, getProgressStatus, getMacroBadgeClass, getMacroProgressClass } from "./utils";
+import {
+  calculateDayProgress,
+  getProgressStatus,
+  getMacroBadgeClass,
+  getMacroProgressClass,
+} from "./utils";
 import type { MealPlan } from "./constants";
+import { useState, useEffect } from "react";
+import { healthApi, type UserGoals } from "@/lib/api/healthApi";
 
 interface ProgressModalProps {
   isOpen: boolean;
@@ -21,7 +33,41 @@ export const ProgressModal = ({
   mealPlan,
   currentDay,
 }: ProgressModalProps) => {
-  const dayProgress = calculateDayProgress(mealPlan, currentDay);
+  const [userGoals, setUserGoals] = useState<UserGoals | null>(null);
+  const [isLoadingGoals, setIsLoadingGoals] = useState(false);
+  const [goalsError, setGoalsError] = useState<string | null>(null);
+
+  // Fetch user goals when modal opens
+  useEffect(() => {
+    if (isOpen && !userGoals) {
+      setIsLoadingGoals(true);
+      setGoalsError(null);
+
+      healthApi
+        .getGoals()
+        .then((goals) => {
+          setUserGoals(goals);
+        })
+        .catch((error) => {
+          console.error("Failed to fetch user goals:", error);
+          setGoalsError("Failed to load goals");
+          setUserGoals(null);
+        })
+        .finally(() => {
+          setIsLoadingGoals(false);
+        });
+    }
+  }, [isOpen, userGoals]);
+
+  // Reset state when modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      setUserGoals(null);
+      setGoalsError(null);
+    }
+  }, [isOpen]);
+
+  const dayProgress = calculateDayProgress(mealPlan, currentDay, userGoals);
   const hasMeals = Object.keys(mealPlan[currentDay] || {}).length > 0;
 
   return (
@@ -34,7 +80,26 @@ export const ProgressModal = ({
         </DialogHeader>
 
         <div className="space-y-4 max-h-80 overflow-y-auto">
-          {!hasMeals ? (
+          {isLoadingGoals ? (
+            <div className="text-center py-8">
+              <div className="flex items-center justify-center gap-3 mb-3">
+                <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
+                <span className="text-gray-600">Loading your goals...</span>
+              </div>
+            </div>
+          ) : goalsError ? (
+            <div className="text-center py-8">
+              <div className="mx-auto w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-3">
+                <TrendingUp className="w-6 h-6 text-red-400" />
+              </div>
+              <h3 className="text-base font-medium text-gray-900 mb-1">
+                Failed to Load Goals
+              </h3>
+              <p className="text-sm text-gray-500">
+                Using default goals for calculation
+              </p>
+            </div>
+          ) : !hasMeals ? (
             <div className="text-center py-8">
               <div className="mx-auto w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-3">
                 <TrendingUp className="w-6 h-6 text-gray-400" />
@@ -82,7 +147,7 @@ export const ProgressModal = ({
                       <CountUp
                         end={Math.max(
                           0,
-                          dayProgress.calories.goal - dayProgress.calories.used
+                          dayProgress.calories.goal - dayProgress.calories.used,
                         )}
                         duration={700}
                         className={`font-semibold ${getProgressStatus(dayProgress.calories.percentage).color}`}
@@ -110,7 +175,9 @@ export const ProgressModal = ({
                         <Badge
                           className={cn(
                             "w-6 h-6 p-0 flex items-center justify-center text-xs shrink-0",
-                            getMacroBadgeClass(key as "protein" | "carbs" | "fat")
+                            getMacroBadgeClass(
+                              key as "protein" | "carbs" | "fat",
+                            ),
                           )}
                         >
                           {key.charAt(0).toUpperCase()}
@@ -142,7 +209,9 @@ export const ProgressModal = ({
                             delay={200}
                             className={cn(
                               "h-2",
-                              getMacroProgressClass(key as "protein" | "carbs" | "fat")
+                              getMacroProgressClass(
+                                key as "protein" | "carbs" | "fat",
+                              ),
                             )}
                           />
                         </div>
@@ -158,3 +227,4 @@ export const ProgressModal = ({
     </Dialog>
   );
 };
+
