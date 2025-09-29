@@ -1,8 +1,18 @@
 import { useNavigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 
 const NotFoundPage = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    // Set proper 404 title and meta
+    document.title = "Page Not Found - Mon Ami Chef";
+    const metaDescription = document.querySelector('meta[name="description"]');
+    if (metaDescription) {
+      metaDescription.setAttribute('content', "The page you're looking for doesn't exist. Discover AI-generated recipes and cooking tools at Mon Ami Chef.");
+    }
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 px-4">

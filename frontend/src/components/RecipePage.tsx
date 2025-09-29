@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useLocation, useParams, Link } from "react-router-dom";
+import Breadcrumb from "./Breadcrumb";
+import RecipeStructuredData from "./RecipeStructuredData";
 import {
   ArrowLeft,
   Clock,
@@ -224,6 +226,9 @@ export default function RecipePage() {
 
   return (
     <div className="w-full h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50 flex flex-col overflow-hidden">
+      {/* Structured Data for SEO */}
+      <RecipeStructuredData recipe={recipe} />
+
       {/* Floating Back Button */}
       <Link
         to="/"
@@ -232,6 +237,16 @@ export default function RecipePage() {
         <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
         <span className="font-medium">Back</span>
       </Link>
+
+      {/* Breadcrumb */}
+      <div className="absolute top-20 left-6 z-40 bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg">
+        <Breadcrumb
+          customItems={[
+            { name: 'Recipes', href: '/recipes/saved' },
+            { name: recipe.title, href: `/recipe/${id}` }
+          ]}
+        />
+      </div>
 
       {/* Enhanced Header with Progress */}
       <div className="pl-12 flex-shrink-0 relative overflow-hidden bg-gradient-to-r from-orange-400 via-pink-500 to-purple-600">

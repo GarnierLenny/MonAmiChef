@@ -1,0 +1,12 @@
+# Handle legacy/old URLs with proper redirects
+/weekly-planner /meal-plan-chat 301
+/plan-week /meal-plan-chat 301
+/recipes/history /recipes/saved 301
+/history /recipes/saved 301
+/planner /meal-plan-chat 301
+/meal-planner /meal-plan-chat 301
+/cooking-tools /timer 301
+/nutrition /calories 301
+
+# SPA fallback - must be last
+/* /index.html 200
