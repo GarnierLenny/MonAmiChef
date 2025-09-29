@@ -19,6 +19,7 @@ import {
 import type { MealPlan } from "./constants";
 import { useState, useEffect } from "react";
 import { healthApi, type UserGoals } from "@/lib/api/healthApi";
+import { useTranslation } from "react-i18next";
 
 interface ProgressModalProps {
   isOpen: boolean;
@@ -33,6 +34,7 @@ export const ProgressModal = ({
   mealPlan,
   currentDay,
 }: ProgressModalProps) => {
+  const { t } = useTranslation();
   const [userGoals, setUserGoals] = useState<UserGoals | null>(null);
   const [isLoadingGoals, setIsLoadingGoals] = useState(false);
   const [goalsError, setGoalsError] = useState<string | null>(null);
@@ -75,7 +77,7 @@ export const ProgressModal = ({
       <DialogContent className="rounded-sm max-w-sm w-[calc(100vw-2rem)] pb-7 max-h-[85dvh] mx-auto overflow-hidden border-none shadow-lg focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0 sm:mx-auto">
         <DialogHeader>
           <DialogTitle className="text-lg font-semibold text-gray-900">
-            Progress Details
+            {t('mealPlan.progressDetails')}
           </DialogTitle>
         </DialogHeader>
 
@@ -84,7 +86,7 @@ export const ProgressModal = ({
             <div className="text-center py-8">
               <div className="flex items-center justify-center gap-3 mb-3">
                 <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
-                <span className="text-gray-600">Loading your goals...</span>
+                <span className="text-gray-600">{t('progress.loadingGoals')}</span>
               </div>
             </div>
           ) : goalsError ? (
@@ -93,10 +95,10 @@ export const ProgressModal = ({
                 <TrendingUp className="w-6 h-6 text-red-400" />
               </div>
               <h3 className="text-base font-medium text-gray-900 mb-1">
-                Failed to Load Goals
+                {t('progress.failedToLoadGoals')}
               </h3>
               <p className="text-sm text-gray-500">
-                Using default goals for calculation
+                {t('progress.usingDefaultGoalsForCalculation')}
               </p>
             </div>
           ) : !hasMeals ? (
@@ -105,10 +107,10 @@ export const ProgressModal = ({
                 <TrendingUp className="w-6 h-6 text-gray-400" />
               </div>
               <h3 className="text-base font-medium text-gray-900 mb-1">
-                No Progress Yet
+                {t('progress.noProgressYet')}
               </h3>
               <p className="text-sm text-gray-500">
-                Add meals to track your progress
+                {t('mealPlan.addMealsToTrackProgress')}
               </p>
             </div>
           ) : (
@@ -117,7 +119,7 @@ export const ProgressModal = ({
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <Zap className="w-4 h-4 text-orange-500" />
-                  <h3 className="font-semibold text-gray-900">Calories</h3>
+                  <h3 className="font-semibold text-gray-900">{t('mealPlan.calories')}</h3>
                 </div>
                 <div className="flex items-center gap-4">
                   <DonutChart
@@ -127,7 +129,7 @@ export const ProgressModal = ({
                   />
                   <div className="flex-1 grid grid-cols-3 gap-2 text-xs">
                     <div className="text-center">
-                      <p className="text-gray-500">Consumed</p>
+                      <p className="text-gray-500">{t('progress.consumed')}</p>
                       <CountUp
                         end={dayProgress.calories.used}
                         duration={700}
@@ -135,7 +137,7 @@ export const ProgressModal = ({
                       />
                     </div>
                     <div className="text-center">
-                      <p className="text-gray-500">Goal</p>
+                      <p className="text-gray-500">{t('progress.goal')}</p>
                       <CountUp
                         end={dayProgress.calories.goal}
                         duration={700}
@@ -143,7 +145,7 @@ export const ProgressModal = ({
                       />
                     </div>
                     <div className="text-center">
-                      <p className="text-gray-500">Left</p>
+                      <p className="text-gray-500">{t('progress.left')}</p>
                       <CountUp
                         end={Math.max(
                           0,
@@ -161,7 +163,7 @@ export const ProgressModal = ({
               <div>
                 <div className="flex items-center gap-2 mb-3">
                   <Utensils className="w-4 h-4 text-gray-600" />
-                  <h3 className="font-semibold text-gray-900">Macros</h3>
+                  <h3 className="font-semibold text-gray-900">{t('mealPlan.macros')}</h3>
                 </div>
                 <div className="space-y-3">
                   {[

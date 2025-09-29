@@ -10,6 +10,7 @@ import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Clock, Users, Zap, X, ChefHat, Utensils, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import type { Meal } from "./constants";
 import type { Recipe } from "@/lib/api/recipeApi";
 import { recipeApi } from "@/lib/api/recipeApi";
@@ -21,6 +22,7 @@ interface RecipeModalProps {
 }
 
 export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
+  const { t } = useTranslation();
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -137,13 +139,13 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
           {/* Nutrition Macros */}
           <div className="flex items-center gap-2">
             <Badge className="bg-green-500 hover:bg-green-600 text-white px-3 py-1">
-              Protein {meal.macros.protein}g
+              {t('mealPlan.protein')} {meal.macros.protein}g
             </Badge>
             <Badge className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1">
-              Carbs {meal.macros.carbs}g
+              {t('mealPlan.carbs')} {meal.macros.carbs}g
             </Badge>
             <Badge className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1">
-              Fat {meal.macros.fat}g
+              {t('mealPlan.fat')} {meal.macros.fat}g
             </Badge>
           </div>
         </DialogHeader>
@@ -157,7 +159,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
             <div className="flex items-center justify-center h-64">
               <div className="flex items-center gap-3">
                 <Loader2 className="w-6 h-6 animate-spin text-orange-500" />
-                <span className="text-gray-600">Loading recipe details...</span>
+                <span className="text-gray-600">{t('common.loading')}</span>
               </div>
             </div>
           ) : error ? (
@@ -200,7 +202,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                   <div className="flex items-center gap-2">
                     <ChefHat className="w-5 h-5 text-gray-700" />
                     <h3 className="text-xl font-semibold text-gray-900">
-                      Ingredients
+                      {t('mealPlan.ingredients')}
                     </h3>
                   </div>
                   {recipe.content_json.ingredients && recipe.content_json.ingredients.length > 0 && (
@@ -210,7 +212,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                         : 'text-gray-500'
                     }`}>
                       {checkedIngredients.size === recipe.content_json.ingredients.length
-                        ? '✅ All ingredients ready!'
+                        ? `✅ ${t('mealPlan.allIngredientsReady')}`
                         : `${checkedIngredients.size} / ${recipe.content_json.ingredients.length} checked`
                       }
                     </div>
@@ -245,7 +247,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                     })
                   ) : (
                     <div className="col-span-2 text-center py-8">
-                      <p className="text-gray-500">No ingredients available</p>
+                      <p className="text-gray-500">{t('recipe.noIngredients')}</p>
                     </div>
                   )}
                 </div>
@@ -259,7 +261,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                   <div className="flex items-center gap-2">
                     <Utensils className="w-5 h-5 text-gray-700" />
                     <h3 className="text-xl font-semibold text-gray-900">
-                      Instructions
+                      {t('mealPlan.instructions')}
                     </h3>
                   </div>
                   {recipe.content_json.instructions && recipe.content_json.instructions.length > 0 && (
@@ -269,7 +271,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                         : 'text-gray-500'
                     }`}>
                       {checkedInstructions.size === recipe.content_json.instructions.length
-                        ? '🎉 Recipe completed!'
+                        ? `🎉 ${t('mealPlan.recipeCompleted')}`
                         : `${checkedInstructions.size} / ${recipe.content_json.instructions.length} steps done`
                       }
                     </div>
@@ -311,7 +313,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                     })
                   ) : (
                     <div className="text-center py-8">
-                      <p className="text-gray-500">No instructions available</p>
+                      <p className="text-gray-500">{t('recipe.noInstructions')}</p>
                     </div>
                   )}
                 </div>
@@ -322,7 +324,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                 recipe.content_json.tips.length > 0 && (
                   <div className="bg-blue-50 rounded-lg p-6">
                     <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                      💡 Chef's Tips
+                      💡 {t('recipe.chefsTips')}
                     </h3>
                     <ul className="space-y-2 text-gray-700">
                       {recipe.content_json.tips.map((tip, index) => (
@@ -334,7 +336,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
             </div>
           ) : (
             <div className="flex items-center justify-center h-64">
-              <p className="text-gray-600">No recipe data available</p>
+              <p className="text-gray-600">{t('recipe.noData')}</p>
             </div>
           )}
           </div>

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Heart,
   User,
@@ -14,6 +15,7 @@ import {
   Calculator,
   Timer,
   BarChart3,
+  Settings,
 } from "lucide-react";
 import { User as UserType } from "../types/types";
 
@@ -34,6 +36,7 @@ export function NavigationSidebar({
 }: NavigationSidebarProps) {
   const navigate = useNavigate();
   const location = useLocation();
+  const { t, i18n } = useTranslation();
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const handleNavigation = (path: string) => {
@@ -57,6 +60,7 @@ export function NavigationSidebar({
     onAuthClick();
     onClose();
   };
+
 
   const isActivePath = (path: string) => location.pathname === path;
 
@@ -115,7 +119,7 @@ export function NavigationSidebar({
                 onClick={() => handleNavigation("/")}
               >
                 <Home className="h-5 w-5" />
-                Home
+                {t('navigation.home')}
               </Button>
 
               <Button
@@ -128,7 +132,7 @@ export function NavigationSidebar({
                 onClick={() => handleNavigation("/dashboard")}
               >
                 <BarChart3 className="h-5 w-5" />
-                Dashboard
+                {t('navigation.dashboard')}
               </Button>
 
               <Button
@@ -141,7 +145,7 @@ export function NavigationSidebar({
                 onClick={() => handleNavigation("/meal-plan-chat")}
               >
                 <CalendarDays className="h-5 w-5" />
-                Meal Planning
+                {t('navigation.mealPlan')}
               </Button>
 
               <Button
@@ -154,7 +158,7 @@ export function NavigationSidebar({
                 onClick={() => handleNavigation("/calories")}
               >
                 <Calculator className="h-5 w-5" />
-                Calorie Calculator
+                {t('navigation.calorieCalculator')}
               </Button>
 
               <Button
@@ -167,7 +171,7 @@ export function NavigationSidebar({
                 onClick={() => handleNavigation("/timer")}
               >
                 <Timer className="h-5 w-5" />
-                Cooking Timer
+                {t('navigation.cookingTimer')}
               </Button>
 
               {user && (
@@ -182,7 +186,7 @@ export function NavigationSidebar({
                     onClick={() => handleNavigation("/recipes/saved")}
                   >
                     <Heart className="h-5 w-5" />
-                    Saved Recipes
+                    {t('navigation.recipes')}
                   </Button>
 
                   <Button
@@ -195,7 +199,7 @@ export function NavigationSidebar({
                     onClick={() => handleNavigation("/profile")}
                   >
                     <User className="h-5 w-5" />
-                    Profile
+                    {t('navigation.profile')}
                   </Button>
                 </>
               )}
@@ -204,6 +208,19 @@ export function NavigationSidebar({
 
           {/* Footer */}
           <div className="border-t p-6">
+            <Button
+              variant="ghost"
+              className={`w-full justify-start gap-4 h-12 text-left font-medium mb-2 ${
+                isActivePath("/settings")
+                  ? "bg-green-100 text-green-700"
+                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+              }`}
+              onClick={() => handleNavigation("/settings")}
+            >
+              <Settings className="h-5 w-5" />
+              {t('navigation.settings')}
+            </Button>
+
             {user ? (
               <Button
                 variant="ghost"
@@ -212,7 +229,7 @@ export function NavigationSidebar({
                 disabled={isSigningOut}
               >
                 <LogOut className="h-5 w-5" />
-                {isSigningOut ? "Signing out..." : "Sign Out"}
+                {isSigningOut ? t('auth.signingOut') : t('navigation.logout')}
               </Button>
             ) : (
               <div className="space-y-3">
@@ -222,7 +239,7 @@ export function NavigationSidebar({
                   onClick={handleAuthClick}
                 >
                   <LogIn className="h-5 w-5" />
-                  Sign In
+                  {t('navigation.login')}
                 </Button>
                 <Button
                   variant="outline"
@@ -230,7 +247,7 @@ export function NavigationSidebar({
                   onClick={handleAuthClick}
                 >
                   <UserPlus className="h-5 w-5" />
-                  Sign Up
+                  {t('navigation.register')}
                 </Button>
               </div>
             )}
