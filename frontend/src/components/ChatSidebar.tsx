@@ -61,10 +61,7 @@ export function ChatSidebar({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent
-        side="right"
-        className="w-80 p-0 bg-background border-l mb-5"
-      >
+      <SheetContent side="right" className="w-80 p-0 bg-orange-50 border-l">
         <div className="flex flex-col mt-6 h-full">
           {/* Header with Tabs */}
           <div className="bg-orange-50 p-4">

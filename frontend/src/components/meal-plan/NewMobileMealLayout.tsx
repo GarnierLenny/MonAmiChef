@@ -12,6 +12,7 @@ import {
   type MealPlan,
   type MealSlot,
 } from "./constants";
+import type { UserGoals } from "../../lib/api/healthApi";
 
 interface NewMobileMealLayoutProps {
   currentWeek: Date;
@@ -30,6 +31,7 @@ interface NewMobileMealLayoutProps {
   onDeleteMeal?: (day: string, meal: MealSlot) => void;
   onSavedMeals?: (day: string, meal: MealSlot) => void;
   generatingSlots?: Set<string>;
+  userGoals?: UserGoals | null;
 }
 
 export const NewMobileMealLayout = ({
@@ -49,6 +51,7 @@ export const NewMobileMealLayout = ({
   onDeleteMeal,
   onSavedMeals,
   generatingSlots = new Set(),
+  userGoals,
 }: NewMobileMealLayoutProps) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
@@ -84,44 +87,10 @@ export const NewMobileMealLayout = ({
 
   return (
     <div className="flex flex-col h-full w-screen pb-18 bg-orange-50 overflow-hidden">
-      {/* Progress Card */}
-      <div className="p-4">
-        <ProgressCard
-          mealPlan={mealPlan}
-          currentDay={currentDay}
-          onDetailsClick={onProgressDetailsClick}
-          isMobile
-        />
-      </div>
-
-      {/* Meal Cards */}
-      <div className="flex-1 px-4 space-y-4 overflow-y-auto">
-        {MEAL_SLOTS.map((mealSlot) => {
-          const meal = mealPlan[currentDay]?.[mealSlot];
-          const slotKey = `${currentDay}-${mealSlot}`;
-          const isSlotGenerating = generatingSlots.has(slotKey);
-
-          return (
-            <SimpleMealCard
-              key={mealSlot}
-              mealSlot={mealSlot}
-              meal={meal}
-              onGenerate={() => onSlotClick(currentDay, mealSlot)}
-              onSaved={() => handleSavedMeals(mealSlot)}
-              onShowRecipe={() => onShowRecipe?.(currentDay, mealSlot)}
-              onRegenerate={() => onRegenerate?.(currentDay, mealSlot)}
-              onDelete={() => onDeleteMeal?.(currentDay, mealSlot)}
-              isGenerating={!meal && isSlotGenerating}
-              isRegenerating={meal && isSlotGenerating}
-            />
-          );
-        })}
-      </div>
-
       {/* Day Navigation */}
-      <div className="px-4">
+      <div className="px-4 mt-2">
         <div className="flex items-center justify-between">
-          <div className="flex items-center justify-between flex-1 px-2">
+          <div className="flex items-center border-2 border-orange-300 bg-white rounded-full justify-between flex-1 px-2">
             <Button
               variant="ghost"
               size="sm"
@@ -153,11 +122,46 @@ export const NewMobileMealLayout = ({
             variant="ghost"
             size="sm"
             onClick={() => setIsCalendarOpen(true)}
-            className="p-1 hover:bg-gray-100 rounded-full transition-colors ml-2"
+            className="p-1 bg-white px-2 hover:bg-gray-100 border-2 border-orange-300 rounded-full transition-colors ml-2"
           >
             <Calendar className="w-5 h-5 text-gray-600" />
           </Button>
         </div>
+      </div>
+
+      {/* Progress Card */}
+      <div className="p-4">
+        <ProgressCard
+          mealPlan={mealPlan}
+          currentDay={currentDay}
+          onDetailsClick={onProgressDetailsClick}
+          isMobile
+          userGoals={userGoals}
+        />
+      </div>
+
+      {/* Meal Cards */}
+      <div className="flex-1 px-4 space-y-4 overflow-y-auto">
+        {MEAL_SLOTS.map((mealSlot) => {
+          const meal = mealPlan[currentDay]?.[mealSlot];
+          const slotKey = `${currentDay}-${mealSlot}`;
+          const isSlotGenerating = generatingSlots.has(slotKey);
+
+          return (
+            <SimpleMealCard
+              key={mealSlot}
+              mealSlot={mealSlot}
+              meal={meal}
+              onGenerate={() => onSlotClick(currentDay, mealSlot)}
+              onSaved={() => handleSavedMeals(mealSlot)}
+              onShowRecipe={() => onShowRecipe?.(currentDay, mealSlot)}
+              onRegenerate={() => onRegenerate?.(currentDay, mealSlot)}
+              onDelete={() => onDeleteMeal?.(currentDay, mealSlot)}
+              isGenerating={!meal && isSlotGenerating}
+              isRegenerating={meal && isSlotGenerating}
+            />
+          );
+        })}
       </div>
 
       {/* Input Bar */}
@@ -168,7 +172,7 @@ export const NewMobileMealLayout = ({
         isGenerating={isGenerating}
         placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
         canSend={inputValue.trim() !== ""}
-        className="p-4 pt-0 bg-white pb-safe meal-plan-input"
+        className="p-4 pt-0 bg-orange-50 pb-safe meal-plan-input"
       />
 
       {/* Calendar Modal */}
