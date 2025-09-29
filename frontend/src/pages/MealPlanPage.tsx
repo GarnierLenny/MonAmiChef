@@ -434,8 +434,21 @@ export default function MealPlanPage({
   // Handle mobile input submission
   const handleMobileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isGenerating || !inputValue.trim()) return;
-    await handleMealGeneration(inputValue.trim());
+    if (isGenerating || (!inputValue.trim() && selectedMeals.size === 0)) return;
+
+    // Append selected meals to the input behind the scenes
+    let finalInput = inputValue.trim();
+    if (selectedMeals.size > 0) {
+      const mealTypes = Array.from(selectedMeals).map(mealKey => {
+        const [day, slot] = mealKey.split('-');
+        return slot; // Just the meal type (breakfast, lunch, dinner)
+      });
+      const uniqueMealTypes = [...new Set(mealTypes)];
+      const mealSuffix = ` for ${uniqueMealTypes.join(' and ')}`;
+      finalInput = finalInput ? `${finalInput}${mealSuffix}` : `something${mealSuffix}`;
+    }
+
+    await handleMealGeneration(finalInput);
     setInputValue("");
     setSelectedMeals(new Set()); // Clear selected meals after submission
   };
@@ -799,7 +812,20 @@ export default function MealPlanPage({
                 (!inputValue.trim() && selectedMeals.size === 0)
               )
                 return;
-              await handleMealGeneration(inputValue.trim());
+
+              // Append selected meals to the input behind the scenes
+              let finalInput = inputValue.trim();
+              if (selectedMeals.size > 0) {
+                const mealTypes = Array.from(selectedMeals).map(mealKey => {
+                  const [day, slot] = mealKey.split('-');
+                  return slot; // Just the meal type (breakfast, lunch, dinner)
+                });
+                const uniqueMealTypes = [...new Set(mealTypes)];
+                const mealSuffix = ` for ${uniqueMealTypes.join(' and ')}`;
+                finalInput = finalInput ? `${finalInput}${mealSuffix}` : `something${mealSuffix}`;
+              }
+
+              await handleMealGeneration(finalInput);
               setInputValue("");
               setSelectedMeals(new Set()); // Clear selected meals after submission
             }}

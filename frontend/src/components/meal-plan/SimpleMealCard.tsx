@@ -6,7 +6,18 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { BookmarkIcon, Sparkles, User, Clock, Zap, Eye, RotateCcw, Trash2, Loader2, CheckCircle } from "lucide-react";
+import {
+  BookmarkIcon,
+  Sparkles,
+  User,
+  Clock,
+  Zap,
+  Eye,
+  RotateCcw,
+  Trash2,
+  Loader2,
+  CheckCircle,
+} from "lucide-react";
 import { getGradeStyles } from "./utils";
 import type { Meal, MealSlot } from "./constants";
 
@@ -40,11 +51,13 @@ export const SimpleMealCard = ({
   const isCurrentlyGenerating = isGenerating || isRegenerating;
 
   return (
-    <div className={`bg-white rounded-xl border p-3 space-y-2 relative transition-all duration-200 ${
-      isSelected
-        ? 'border-orange-500 bg-orange-50 shadow-md'
-        : 'border-gray-200 hover:border-gray-300'
-    }`}>
+    <div
+      className={`bg-white rounded-xl border p-3 space-y-2 relative transition-all duration-200 ${
+        isSelected
+          ? "border-orange-500 bg-orange-50 shadow-md"
+          : "border-gray-200 hover:border-gray-300"
+      }`}
+    >
       {/* Meal Type Header */}
       <div className="flex items-center justify-between">
         <h3 className="font-semibold text-gray-400 uppercase tracking-wide text-xs">
@@ -56,8 +69,8 @@ export const SimpleMealCard = ({
             onClick={onMealSelection}
             className={`p-1 rounded-full transition-all duration-200 ${
               isSelected
-                ? 'bg-orange-500 text-white hover:bg-orange-600'
-                : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'
+                ? "bg-orange-500 text-white hover:bg-orange-600"
+                : "bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
             }`}
           >
             <CheckCircle className="w-4 h-4" />
@@ -96,7 +109,7 @@ export const SimpleMealCard = ({
                       endEvent.preventDefault();
                       endEvent.stopPropagation();
 
-                      const contextMenuEvent = new MouseEvent('contextmenu', {
+                      const contextMenuEvent = new MouseEvent("contextmenu", {
                         bubbles: true,
                         cancelable: true,
                         clientX: startX,
@@ -107,11 +120,13 @@ export const SimpleMealCard = ({
                   }
 
                   // Clean up event listener
-                  document.removeEventListener('touchend', handleTouchEnd);
+                  document.removeEventListener("touchend", handleTouchEnd);
                 };
 
                 // Add touch end listener
-                document.addEventListener('touchend', handleTouchEnd, { once: true });
+                document.addEventListener("touchend", handleTouchEnd, {
+                  once: true,
+                });
               }}
             >
               {/* Recipe Title and Grade */}
@@ -177,7 +192,9 @@ export const SimpleMealCard = ({
               disabled={isCurrentlyGenerating}
             >
               <RotateCcw className="w-4 h-4" />
-              <span>{isCurrentlyGenerating ? "Generating..." : "Regenerate"}</span>
+              <span>
+                {isCurrentlyGenerating ? "Generating..." : "Regenerate"}
+              </span>
             </ContextMenuItem>
             <ContextMenuItem
               onClick={onDelete}
@@ -232,4 +249,3 @@ export const SimpleMealCard = ({
     </div>
   );
 };
-

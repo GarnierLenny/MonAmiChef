@@ -234,7 +234,7 @@ export const NewMobileMealLayout = ({
         onSubmit={onSubmit}
         isGenerating={isGenerating}
         placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
-        canSend={inputValue.trim() !== "" || mealTags.length > 0}
+        canSend={inputValue.trim() !== "" || selectedMeals.size > 0}
         className="p-4 pt-0 bg-orange-50 pb-safe meal-plan-input"
       />
 
