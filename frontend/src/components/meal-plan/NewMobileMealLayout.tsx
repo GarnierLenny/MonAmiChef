@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar, X } from "lucide-react";
 import { format, addDays, startOfWeek, differenceInDays } from "date-fns";
 import { SimpleMealCard } from "./SimpleMealCard";
 import { ProgressCard } from "./ProgressCard";
@@ -32,6 +32,9 @@ interface NewMobileMealLayoutProps {
   onSavedMeals?: (day: string, meal: MealSlot) => void;
   generatingSlots?: Set<string>;
   userGoals?: UserGoals | null;
+  selectedMeals?: Set<string>;
+  onMealSelection?: (day: string, mealSlot: MealSlot) => void;
+  onClearSelectedMeals?: () => void;
 }
 
 export const NewMobileMealLayout = ({
@@ -52,6 +55,9 @@ export const NewMobileMealLayout = ({
   onSavedMeals,
   generatingSlots = new Set(),
   userGoals,
+  selectedMeals = new Set(),
+  onMealSelection,
+  onClearSelectedMeals,
 }: NewMobileMealLayoutProps) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
@@ -72,6 +78,26 @@ export const NewMobileMealLayout = ({
   const handleSavedMeals = (mealSlot: MealSlot) => {
     onSavedMeals?.(currentDay, mealSlot);
   };
+
+  // Convert selected meals to tags format
+  const mealTags = Array.from(selectedMeals).map((mealKey, index) => {
+    const [day, slot] = mealKey.split("-");
+    const slotName = slot.charAt(0).toUpperCase() + slot.slice(1);
+
+    // Vary colors for different tags
+    const colors = [
+      "bg-orange-100 text-orange-700",
+      "bg-green-100 text-green-700",
+      "bg-blue-100 text-blue-700",
+    ];
+
+    return {
+      category: "meal",
+      value: mealKey,
+      label: slotName,
+      color: colors[index % colors.length],
+    };
+  });
 
   const handleDateSelect = (date: Date) => {
     // Calculate the week that contains the selected date (start from Monday)
@@ -159,10 +185,47 @@ export const NewMobileMealLayout = ({
               onDelete={() => onDeleteMeal?.(currentDay, mealSlot)}
               isGenerating={!meal && isSlotGenerating}
               isRegenerating={meal && isSlotGenerating}
+              isSelected={selectedMeals.has(slotKey)}
+              onMealSelection={() => onMealSelection?.(currentDay, mealSlot)}
             />
           );
         })}
       </div>
+
+      {/* Selected Meal Tags */}
+      {mealTags.length > 0 && (
+        <div className="px-4 pt-2 border-t border-orange-200">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-wrap gap-2">
+              {mealTags.map((tag, index) => (
+                <div
+                  key={index}
+                  className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium border border-current/20 ${tag.color}`}
+                >
+                  <span>{tag.label}</span>
+                  <button
+                    onClick={() => {
+                      const [day, slot] = tag.value.split("-");
+                      onMealSelection?.(day, slot as MealSlot);
+                    }}
+                    className="h-auto p-0.5 hover:bg-current/20 rounded-full transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+              ))}
+            </div>
+            {onClearSelectedMeals && (
+              <button
+                onClick={onClearSelectedMeals}
+                className="text-xs text-gray-500 hover:text-red-600 transition-colors"
+              >
+                Clear all
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Input Bar */}
       <ChatInput
@@ -171,7 +234,7 @@ export const NewMobileMealLayout = ({
         onSubmit={onSubmit}
         isGenerating={isGenerating}
         placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
-        canSend={inputValue.trim() !== ""}
+        canSend={inputValue.trim() !== "" || mealTags.length > 0}
         className="p-4 pt-0 bg-orange-50 pb-safe meal-plan-input"
       />
 

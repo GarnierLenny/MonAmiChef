@@ -10,6 +10,7 @@ import { ProgressModal } from "@/components/meal-plan/ProgressModal";
 import { RecipeModal } from "@/components/meal-plan/RecipeModal";
 import { SavedRecipesModal } from "@/components/meal-plan/SavedRecipesModal";
 import { GuestMealPlanningCTA } from "@/components/meal-plan/GuestMealPlanningCTA";
+import { ChatInput } from "@/components/ui/chat-input";
 
 // Import constants and utils
 import {
@@ -19,6 +20,7 @@ import {
   type MealSlot,
   type Meal,
 } from "@/components/meal-plan/constants";
+import { X } from "lucide-react";
 import { parseMealSlots } from "@/lib/mealSlotParser";
 
 // Import API and utilities
@@ -41,13 +43,18 @@ interface MealPlanPageProps {
   onSignIn?: () => void;
 }
 
-export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps = {}) {
+export default function MealPlanPage({
+  onSignUp,
+  onSignIn,
+}: MealPlanPageProps = {}) {
   // Input state
   const [inputValue, setInputValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatingSlots, setGeneratingSlots] = useState<Set<string>>(
     new Set(),
   );
+  // Selected meals for targeted input
+  const [selectedMeals, setSelectedMeals] = useState<Set<string>>(new Set());
 
   // Reset scroll position when component mounts
   useEffect(() => {
@@ -60,7 +67,7 @@ export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps =
       document.body.scrollTop = 0;
 
       // Find and reset all scrollable elements
-      const allElements = document.querySelectorAll('*');
+      const allElements = document.querySelectorAll("*");
       allElements.forEach((element) => {
         if (element instanceof HTMLElement && element.scrollTop > 0) {
           element.scrollTop = 0;
@@ -68,7 +75,9 @@ export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps =
       });
 
       // Force reset specific containers
-      const containers = document.querySelectorAll('.mobile-viewport, [class*="overflow"]');
+      const containers = document.querySelectorAll(
+        '.mobile-viewport, [class*="overflow"]',
+      );
       containers.forEach((container) => {
         if (container instanceof HTMLElement) {
           container.scrollTop = 0;
@@ -86,7 +95,9 @@ export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps =
   }, []);
 
   // Meal plan state
-  const [currentWeek, setCurrentWeek] = useState(startOfWeek(new Date(), { weekStartsOn: 1 }));
+  const [currentWeek, setCurrentWeek] = useState(
+    startOfWeek(new Date(), { weekStartsOn: 1 }),
+  );
   const [mealPlan, setMealPlan] = useState<MealPlan>({});
   const [currentDayIndex, setCurrentDayIndex] = useState(0);
 
@@ -114,7 +125,10 @@ export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps =
 
   // Saved recipes modal state
   const [showSavedRecipesModal, setShowSavedRecipesModal] = useState(false);
-  const [savedRecipeTargetSlot, setSavedRecipeTargetSlot] = useState<{day: string, meal: MealSlot} | null>(null);
+  const [savedRecipeTargetSlot, setSavedRecipeTargetSlot] = useState<{
+    day: string;
+    meal: MealSlot;
+  } | null>(null);
 
   // Load meal plans and user goals on component mount
   useEffect(() => {
@@ -398,12 +412,32 @@ export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps =
     setMealPlan(newPlan);
   };
 
+  // Handle meal selection for targeted input
+  const handleMealSelection = (day: string, mealSlot: MealSlot) => {
+    const mealKey = `${day}-${mealSlot}`;
+    const newSelectedMeals = new Set(selectedMeals);
+
+    if (selectedMeals.has(mealKey)) {
+      newSelectedMeals.delete(mealKey);
+    } else {
+      newSelectedMeals.add(mealKey);
+    }
+
+    setSelectedMeals(newSelectedMeals);
+  };
+
+  // Clear selected meals
+  const clearSelectedMeals = () => {
+    setSelectedMeals(new Set());
+  };
+
   // Handle mobile input submission
   const handleMobileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isGenerating || !inputValue.trim()) return;
     await handleMealGeneration(inputValue.trim());
     setInputValue("");
+    setSelectedMeals(new Set()); // Clear selected meals after submission
   };
 
   // Handle meal slot click
@@ -612,7 +646,11 @@ export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps =
       try {
         const weekPlan = await ensureCurrentWeekMealPlan();
         if (weekPlan) {
-          const itemRequest = createMealPlanItemRequest(day, meal, savedRecipe.recipe);
+          const itemRequest = createMealPlanItemRequest(
+            day,
+            meal,
+            savedRecipe.recipe,
+          );
           await mealPlanApi.addMealPlanItem(weekPlan.id, itemRequest);
         }
       } catch (err) {
@@ -648,12 +686,7 @@ export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps =
 
   // Show guest CTA if user is unauthenticated
   if (isUnauthenticated) {
-    return (
-      <GuestMealPlanningCTA
-        onSignUp={onSignUp}
-        onSignIn={onSignIn}
-      />
-    );
+    return <GuestMealPlanningCTA onSignUp={onSignUp} onSignIn={onSignIn} />;
   }
 
   return (
@@ -705,47 +738,76 @@ export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps =
           onGeneratePlan={generateAIMealPlan}
           onPreviousWeek={goToPreviousWeek}
           onNextWeek={goToNextWeek}
+          selectedMeals={selectedMeals}
+          onMealSelection={handleMealSelection}
         />
 
+        {/* Desktop Selected Meal Tags */}
+        {selectedMeals.size > 0 && (
+          <div className="px-6 py-3 border-t border-gray-200 bg-white">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-wrap gap-2">
+                {Array.from(selectedMeals).map((mealKey, index) => {
+                  const [day, slot] = mealKey.split("-");
+                  const slotName = slot.charAt(0).toUpperCase() + slot.slice(1);
+
+                  // Vary colors for different tags
+                  const colors = [
+                    "bg-orange-100 text-orange-700",
+                    "bg-green-100 text-green-700",
+                    "bg-blue-100 text-blue-700",
+                  ];
+
+                  return (
+                    <div
+                      key={mealKey}
+                      className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium border border-current/20 ${colors[index % colors.length]}`}
+                    >
+                      <span>{slotName}</span>
+                      <button
+                        onClick={() => {
+                          const [day, slot] = mealKey.split("-");
+                          handleMealSelection(day, slot as MealSlot);
+                        }}
+                        className="h-auto p-0.5 hover:bg-current/20 rounded-full transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+              <button
+                onClick={clearSelectedMeals}
+                className="text-xs text-gray-500 hover:text-red-600 transition-colors"
+              >
+                Clear all
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* Desktop Input Bar */}
-        <div className="p-6 border-t border-gray-200 bg-white">
-          <form
+        <div className="border-t border-gray-200 bg-white">
+          <ChatInput
+            inputValue={inputValue}
+            onInputChange={setInputValue}
             onSubmit={async (e) => {
               e.preventDefault();
-              if (isGenerating || !inputValue.trim()) return;
+              if (
+                isGenerating ||
+                (!inputValue.trim() && selectedMeals.size === 0)
+              )
+                return;
               await handleMealGeneration(inputValue.trim());
               setInputValue("");
+              setSelectedMeals(new Set()); // Clear selected meals after submission
             }}
-            className="flex items-center gap-4 p-2 pl-5 bg-white flex-1 shadow-lg shadow-orange-500/30 border border-gray-300 focus-within:ring-2 focus-within:ring-orange-500 rounded-full transition-colors"
-          >
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
-              disabled={isGenerating}
-              className="min-w-0 grow basis-0 bg-transparent outline-none focus:ring-0"
-            />
-            <button
-              type="submit"
-              disabled={isGenerating || !inputValue.trim()}
-              className="shrink-0 rounded-full px-4 py-4 bg-orange-500 hover:bg-orange-600 disabled:bg-gray-400 text-white flex items-center justify-center"
-            >
-              {isGenerating ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <svg
-                  className="w-4 h-4"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <path d="m22 2-7 20-4-9-9-4Z" />
-                </svg>
-              )}
-            </button>
-          </form>
+            isGenerating={isGenerating}
+            placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
+            canSend={inputValue.trim() !== "" || selectedMeals.size > 0}
+            className="p-6 bg-white"
+          />
         </div>
       </div>
 
@@ -772,6 +834,9 @@ export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps =
           onSavedMeals={handleSavedMeals}
           generatingSlots={generatingSlots}
           userGoals={userGoals}
+          selectedMeals={selectedMeals}
+          onMealSelection={handleMealSelection}
+          onClearSelectedMeals={clearSelectedMeals}
         />
       </div>
 
@@ -800,4 +865,3 @@ export default function MealPlanPage({ onSignUp, onSignIn }: MealPlanPageProps =
     </div>
   );
 }
-

@@ -17,6 +17,8 @@ interface MealGridProps {
   onGeneratePlan: () => void;
   onPreviousWeek: () => void;
   onNextWeek: () => void;
+  selectedMeals?: Set<string>;
+  onMealSelection?: (day: string, mealSlot: MealSlot) => void;
 }
 
 export const MealGrid = ({
@@ -27,6 +29,8 @@ export const MealGrid = ({
   onGeneratePlan,
   onPreviousWeek,
   onNextWeek,
+  selectedMeals = new Set(),
+  onMealSelection,
 }: MealGridProps) => {
   return (
     <div className="hidden md:flex md:flex-1 flex-col overflow-hidden">
@@ -98,16 +102,21 @@ export const MealGrid = ({
               </div>
 
               {/* Meal slots for each day */}
-              {DAYS_OF_WEEK.map((day, index) => (
-                <MealCard
-                  key={index}
-                  meal={mealPlan[day]?.[meal]}
-                  mealSlot={meal}
-                  onClick={() => onSlotClick(day, meal)}
-                  onRemove={() => onRemoveMeal(day, meal)}
-                  isDesktop
-                />
-              ))}
+              {DAYS_OF_WEEK.map((day, index) => {
+                const slotKey = `${day}-${meal}`;
+                return (
+                  <MealCard
+                    key={index}
+                    meal={mealPlan[day]?.[meal]}
+                    mealSlot={meal}
+                    onClick={() => onSlotClick(day, meal)}
+                    onRemove={() => onRemoveMeal(day, meal)}
+                    isDesktop
+                    isSelected={selectedMeals.has(slotKey)}
+                    onMealSelection={() => onMealSelection?.(day, meal)}
+                  />
+                );
+              })}
             </>
           ))}
         </div>

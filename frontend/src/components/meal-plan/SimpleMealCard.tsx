@@ -6,7 +6,7 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { BookmarkIcon, Sparkles, User, Clock, Zap, Eye, RotateCcw, Trash2, Loader2 } from "lucide-react";
+import { BookmarkIcon, Sparkles, User, Clock, Zap, Eye, RotateCcw, Trash2, Loader2, CheckCircle } from "lucide-react";
 import { getGradeStyles } from "./utils";
 import type { Meal, MealSlot } from "./constants";
 
@@ -20,6 +20,8 @@ interface SimpleMealCardProps {
   onDelete?: () => void;
   isGenerating?: boolean;
   isRegenerating?: boolean;
+  isSelected?: boolean;
+  onMealSelection?: () => void;
 }
 
 export const SimpleMealCard = ({
@@ -32,16 +34,35 @@ export const SimpleMealCard = ({
   onDelete,
   isGenerating = false,
   isRegenerating = false,
+  isSelected = false,
+  onMealSelection,
 }: SimpleMealCardProps) => {
   const isCurrentlyGenerating = isGenerating || isRegenerating;
 
   return (
-    <div className="bg-white rounded-xl border border-gray-200 p-3 space-y-2 relative">
+    <div className={`bg-white rounded-xl border p-3 space-y-2 relative transition-all duration-200 ${
+      isSelected
+        ? 'border-orange-500 bg-orange-50 shadow-md'
+        : 'border-gray-200 hover:border-gray-300'
+    }`}>
       {/* Meal Type Header */}
-      <div className="text-left">
+      <div className="flex items-center justify-between">
         <h3 className="font-semibold text-gray-400 uppercase tracking-wide text-xs">
           {mealSlot}
         </h3>
+        {/* Select Icon */}
+        {onMealSelection && (
+          <button
+            onClick={onMealSelection}
+            className={`p-1 rounded-full transition-all duration-200 ${
+              isSelected
+                ? 'bg-orange-500 text-white hover:bg-orange-600'
+                : 'bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600'
+            }`}
+          >
+            <CheckCircle className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       {/* Meal Content or Empty State */}

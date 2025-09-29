@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, X, User, Clock, Zap } from "lucide-react";
+import { Plus, X, User, Clock, Zap, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getGradeStyles, getMacroBadgeClass } from "./utils";
 import type { Meal } from "./constants";
@@ -12,6 +12,8 @@ interface MealCardProps {
   onClick: () => void;
   onRemove?: () => void;
   isDesktop?: boolean;
+  isSelected?: boolean;
+  onMealSelection?: () => void;
 }
 
 export const MealCard = ({
@@ -20,28 +22,55 @@ export const MealCard = ({
   onClick,
   onRemove,
   isDesktop = false,
+  isSelected = false,
+  onMealSelection,
 }: MealCardProps) => {
   if (isDesktop) {
     return (
       <Card
-        className="h-48 cursor-pointer hover:shadow-md transition-shadow group"
+        className={cn(
+          "h-48 cursor-pointer hover:shadow-md transition-all duration-200 group",
+          isSelected
+            ? "border-orange-500 bg-orange-50 shadow-md"
+            : "border-gray-200 hover:border-gray-300"
+        )}
         onClick={onClick}
       >
         <CardContent className="p-3 h-full flex flex-col">
           {meal ? (
             <div className="flex flex-col h-full">
-              {/* Remove button */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="self-end p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onRemove?.();
-                }}
-              >
-                <X className="h-3 w-3" />
-              </Button>
+              {/* Action buttons */}
+              <div className="flex justify-end gap-1">
+                {onMealSelection && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className={cn(
+                      "p-1 transition-all duration-200",
+                      isSelected
+                        ? "bg-orange-500 text-white hover:bg-orange-600"
+                        : "opacity-0 group-hover:opacity-100 bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                    )}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onMealSelection();
+                    }}
+                  >
+                    <CheckCircle className="h-3 w-3" />
+                  </Button>
+                )}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemove?.();
+                  }}
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </div>
 
               {/* Header with title and grade */}
               <div className="flex items-start justify-between mb-2 -mt-6">
@@ -104,7 +133,12 @@ export const MealCard = ({
   // Mobile version
   return (
     <Card
-      className="flex-1 w-full border-2 border-gray-200 rounded-xl min-h-0 cursor-pointer hover:shadow-md transition-shadow"
+      className={cn(
+        "flex-1 w-full border-2 rounded-xl min-h-0 cursor-pointer hover:shadow-md transition-all duration-200",
+        isSelected
+          ? "border-orange-500 bg-orange-50 shadow-md"
+          : "border-gray-200 hover:border-gray-300"
+      )}
       onClick={onClick}
     >
       <CardContent className="p-3 h-full flex flex-col">
@@ -113,8 +147,26 @@ export const MealCard = ({
             {/* Header with meal type, title and grade */}
             <div className="flex items-start justify-between mb-2">
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-                  {mealSlot}
+                <div className="flex items-center justify-between mb-1">
+                  <div className="text-xs font-medium text-gray-500 uppercase tracking-wide">
+                    {mealSlot}
+                  </div>
+                  {onMealSelection && (
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onMealSelection();
+                      }}
+                      className={cn(
+                        "p-1 rounded-full transition-all duration-200",
+                        isSelected
+                          ? "bg-orange-500 text-white hover:bg-orange-600"
+                          : "bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                      )}
+                    >
+                      <CheckCircle className="w-3 h-3" />
+                    </button>
+                  )}
                 </div>
                 <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 leading-tight">
                   {meal.title}
