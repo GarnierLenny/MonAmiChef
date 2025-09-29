@@ -1,13 +1,6 @@
 import { useState } from "react";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import {
@@ -22,7 +15,7 @@ import {
   Calculator,
   Timer,
   BarChart3,
-  Languages,
+  Settings,
 } from "lucide-react";
 import { User as UserType } from "../types/types";
 
@@ -68,9 +61,6 @@ export function NavigationSidebar({
     onClose();
   };
 
-  const handleLanguageChange = (language: string) => {
-    i18n.changeLanguage(language);
-  };
 
   const isActivePath = (path: string) => location.pathname === path;
 
@@ -184,32 +174,18 @@ export function NavigationSidebar({
                 Cooking Timer
               </Button>
 
-              {/* Language Selector */}
-              <div className="space-y-2">
-                <div className="flex items-center gap-3 px-4 py-2 text-sm font-medium text-gray-600">
-                  <Languages className="h-4 w-4" />
-                  {t('navigation.language')}
-                </div>
-                <div className="px-4">
-                  <Select value={i18n.language} onValueChange={handleLanguageChange}>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder={t('navigation.language')} />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="en">
-                        <span className="flex items-center gap-2">
-                          🇺🇸 {t('languages.en')}
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="fr">
-                        <span className="flex items-center gap-2">
-                          🇫🇷 {t('languages.fr')}
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              <Button
+                variant="ghost"
+                className={`w-full justify-start gap-4 h-12 text-left font-medium ${
+                  isActivePath("/settings")
+                    ? "bg-green-100 text-green-700"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
+                onClick={() => handleNavigation("/settings")}
+              >
+                <Settings className="h-5 w-5" />
+                {t('navigation.settings')}
+              </Button>
 
               {user && (
                 <>

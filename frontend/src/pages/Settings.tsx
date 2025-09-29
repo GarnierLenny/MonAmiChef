@@ -1,0 +1,122 @@
+import { useState } from "react";
+import { useTranslation } from "react-i18next";
+import Navigation from "@/components/Navigation";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Languages, User, Bell } from "lucide-react";
+
+const Settings = () => {
+  const { t, i18n } = useTranslation();
+
+  const handleLanguageChange = (language: string) => {
+    i18n.changeLanguage(language);
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-background via-chef-cream to-background">
+      <Navigation />
+      <main className="container mx-auto px-4 py-16">
+        <div className="max-w-4xl mx-auto space-y-8">
+          {/* Header */}
+          <div className="text-center space-y-4">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-chef-orange via-chef-yellow to-chef-green bg-clip-text text-transparent">
+              {t('navigation.settings')}
+            </h1>
+            <p className="text-lg text-chef-brown/80">
+              Customize your MonAmiChef experience
+            </p>
+          </div>
+
+          {/* Settings Cards */}
+          <div className="grid gap-6">
+            {/* Language Settings */}
+            <Card className="bg-white/80 backdrop-blur-sm border border-chef-orange/20 shadow-lg">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-chef-orange to-chef-yellow rounded-full flex items-center justify-center">
+                    <Languages className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-chef-brown">
+                      {t('navigation.language')}
+                    </CardTitle>
+                    <CardDescription>
+                      Choose your preferred language for the application
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="max-w-xs">
+                  <Select value={i18n.language} onValueChange={handleLanguageChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t('navigation.language')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">
+                        <div className="flex items-center gap-2">
+                          🇺🇸 <span>{t('languages.en')}</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value="fr">
+                        <div className="flex items-center gap-2">
+                          🇫🇷 <span>{t('languages.fr')}</span>
+                        </div>
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Account Settings - Placeholder for future */}
+            <Card className="bg-white/80 backdrop-blur-sm border border-chef-green/20 shadow-lg opacity-60">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-chef-green to-chef-yellow rounded-full flex items-center justify-center">
+                    <User className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-chef-brown">
+                      Account Settings
+                    </CardTitle>
+                    <CardDescription>
+                      Manage your profile and account preferences (Coming Soon)
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+
+            {/* Notifications - Placeholder for future */}
+            <Card className="bg-white/80 backdrop-blur-sm border border-chef-brown/20 shadow-lg opacity-60">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-chef-brown to-chef-orange rounded-full flex items-center justify-center">
+                    <Bell className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-chef-brown">
+                      Notifications
+                    </CardTitle>
+                    <CardDescription>
+                      Configure your notification preferences (Coming Soon)
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+            </Card>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+};
+
+export default Settings;

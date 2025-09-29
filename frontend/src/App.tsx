@@ -27,6 +27,7 @@ import MealPlanPage from "./pages/MealPlanPage";
 import AuthCallback from "./components/AuthCallback";
 import SavedRecipes from "./pages/SavedRecipes";
 import NotFoundPage from "./pages/NotFoundPage";
+import Settings from "./pages/Settings";
 import CanonicalUrl from "./components/CanonicalUrl";
 import RedirectHandler from "./components/RedirectHandler";
 import SEOHead from "./components/SEOHead";
@@ -370,6 +371,19 @@ function App() {
             }
           />
           <Route path="/coming-soon" element={<ComingSoonView />} />
+          <Route
+            path="/settings"
+            element={
+              <>
+                <SEOHead
+                  title="Settings - Mon Ami Chef"
+                  description="Customize your MonAmiChef experience. Change language settings and preferences."
+                  keywords="settings, preferences, language, configuration, customization"
+                />
+                <Settings />
+              </>
+            }
+          />
           <Route path="/success" element={<SuccessPage />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
           <Route
