@@ -99,7 +99,16 @@ export default function MealPlanPage({
     startOfWeek(new Date(), { weekStartsOn: 1 }),
   );
   const [mealPlan, setMealPlan] = useState<MealPlan>({});
-  const [currentDayIndex, setCurrentDayIndex] = useState(0);
+
+  // Calculate today's day index (0 = Monday, 6 = Sunday)
+  const getTodayDayIndex = () => {
+    const today = new Date();
+    const dayOfWeek = today.getDay();
+    // Convert Sunday (0) to 6, and shift Monday-Saturday to 0-5
+    return dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+  };
+
+  const [currentDayIndex, setCurrentDayIndex] = useState(getTodayDayIndex());
 
   // Backend state
   const [backendMealPlans, setBackendMealPlans] = useState<BackendMealPlan[]>(
@@ -138,6 +147,9 @@ export default function MealPlanPage({
 
   // Update current backend plan when week changes
   useEffect(() => {
+    // Don't update if still loading initial data
+    if (isLoading) return;
+
     const weekPlan = findMealPlanForWeek(backendMealPlans, currentWeek);
     setCurrentBackendPlan(weekPlan || null);
 
@@ -145,14 +157,17 @@ export default function MealPlanPage({
       // No plan for this week, clear the meal plan only if user is authenticated
       // For unauthenticated users, keep their local data
       if (!isUnauthenticated) {
+        console.log('[MealPlan] No backend plan found for current week, clearing meal plan');
         setMealPlan({});
       }
     } else {
       // We have a backend plan for this week, populate the frontend meal plan
+      console.log('[MealPlan] Found backend plan for week:', weekPlan.id, 'with items:', weekPlan.items?.length || 0);
       const frontendMealPlan = convertBackendToFrontendMealPlan(weekPlan);
+      console.log('[MealPlan] Converted to frontend plan with days:', Object.keys(frontendMealPlan));
       setMealPlan(frontendMealPlan);
     }
-  }, [backendMealPlans, currentWeek, isUnauthenticated]);
+  }, [backendMealPlans, currentWeek, isUnauthenticated, isLoading]);
 
   // Load meal plans from backend
   const loadMealPlans = async () => {
@@ -168,11 +183,8 @@ export default function MealPlanPage({
         const weekPlan = findMealPlanForWeek(plans, currentWeek);
         if (weekPlan) {
           const frontendMealPlan = convertBackendToFrontendMealPlan(weekPlan);
-          // Merge with existing meal plan data (in case user has local-only data)
-          setMealPlan((prevPlan) => ({
-            ...frontendMealPlan,
-            ...prevPlan, // Keep any local changes that aren't in backend
-          }));
+          // Set the meal plan directly from backend data
+          setMealPlan(frontendMealPlan);
         }
       }
     } catch (err: unknown) {
@@ -758,86 +770,89 @@ export default function MealPlanPage({
           onMealSelection={handleMealSelection}
         />
 
-        {/* Desktop Selected Meal Tags */}
+        {/* Desktop Selected Meal Tags and Input Bar - Only show when meals are selected */}
         {selectedMeals.size > 0 && (
-          <div className="px-6 py-3 border-t border-gray-200 bg-white">
-            <div className="flex items-center justify-between">
-              <div className="flex flex-wrap gap-2">
-                {Array.from(selectedMeals).map((mealKey, index) => {
-                  const [day, slot] = mealKey.split("-");
-                  const slotName = slot.charAt(0).toUpperCase() + slot.slice(1);
+          <>
+            {/* Desktop Selected Meal Tags */}
+            <div className="px-6 py-3 border-t border-gray-200 bg-white">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-wrap gap-2">
+                  {Array.from(selectedMeals).map((mealKey, index) => {
+                    const [day, slot] = mealKey.split("-");
+                    const slotName = slot.charAt(0).toUpperCase() + slot.slice(1);
 
-                  // Vary colors for different tags
-                  const colors = [
-                    "bg-orange-100 text-orange-700",
-                    "bg-green-100 text-green-700",
-                    "bg-blue-100 text-blue-700",
-                  ];
+                    // Vary colors for different tags
+                    const colors = [
+                      "bg-orange-100 text-orange-700",
+                      "bg-green-100 text-green-700",
+                      "bg-blue-100 text-blue-700",
+                    ];
 
-                  return (
-                    <div
-                      key={mealKey}
-                      className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium border border-current/20 ${colors[index % colors.length]}`}
-                    >
-                      <span>{slotName}</span>
-                      <button
-                        onClick={() => {
-                          const [day, slot] = mealKey.split("-");
-                          handleMealSelection(day, slot as MealSlot);
-                        }}
-                        className="h-auto p-0.5 hover:bg-current/20 rounded-full transition-colors"
+                    return (
+                      <div
+                        key={mealKey}
+                        className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium border border-current/20 ${colors[index % colors.length]}`}
                       >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  );
-                })}
+                        <span>{slotName}</span>
+                        <button
+                          onClick={() => {
+                            const [day, slot] = mealKey.split("-");
+                            handleMealSelection(day, slot as MealSlot);
+                          }}
+                          className="h-auto p-0.5 hover:bg-current/20 rounded-full transition-colors"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+                <button
+                  onClick={clearSelectedMeals}
+                  className="text-xs text-gray-500 hover:text-red-600 transition-colors"
+                >
+                  Clear all
+                </button>
               </div>
-              <button
-                onClick={clearSelectedMeals}
-                className="text-xs text-gray-500 hover:text-red-600 transition-colors"
-              >
-                Clear all
-              </button>
             </div>
-          </div>
+
+            {/* Desktop Input Bar */}
+            <div className="border-t border-gray-200 bg-white">
+              <ChatInput
+                inputValue={inputValue}
+                onInputChange={setInputValue}
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  if (
+                    isGenerating ||
+                    (!inputValue.trim() && selectedMeals.size === 0)
+                  )
+                    return;
+
+                  // Append selected meals to the input behind the scenes
+                  let finalInput = inputValue.trim();
+                  if (selectedMeals.size > 0) {
+                    const mealTypes = Array.from(selectedMeals).map(mealKey => {
+                      const [day, slot] = mealKey.split('-');
+                      return slot; // Just the meal type (breakfast, lunch, dinner)
+                    });
+                    const uniqueMealTypes = [...new Set(mealTypes)];
+                    const mealSuffix = ` for ${uniqueMealTypes.join(' and ')}`;
+                    finalInput = finalInput ? `${finalInput}${mealSuffix}` : `something${mealSuffix}`;
+                  }
+
+                  await handleMealGeneration(finalInput);
+                  setInputValue("");
+                  setSelectedMeals(new Set()); // Clear selected meals after submission
+                }}
+                isGenerating={isGenerating}
+                placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
+                canSend={inputValue.trim() !== "" || selectedMeals.size > 0}
+                className="p-6 bg-white"
+              />
+            </div>
+          </>
         )}
-
-        {/* Desktop Input Bar */}
-        <div className="border-t border-gray-200 bg-white">
-          <ChatInput
-            inputValue={inputValue}
-            onInputChange={setInputValue}
-            onSubmit={async (e) => {
-              e.preventDefault();
-              if (
-                isGenerating ||
-                (!inputValue.trim() && selectedMeals.size === 0)
-              )
-                return;
-
-              // Append selected meals to the input behind the scenes
-              let finalInput = inputValue.trim();
-              if (selectedMeals.size > 0) {
-                const mealTypes = Array.from(selectedMeals).map(mealKey => {
-                  const [day, slot] = mealKey.split('-');
-                  return slot; // Just the meal type (breakfast, lunch, dinner)
-                });
-                const uniqueMealTypes = [...new Set(mealTypes)];
-                const mealSuffix = ` for ${uniqueMealTypes.join(' and ')}`;
-                finalInput = finalInput ? `${finalInput}${mealSuffix}` : `something${mealSuffix}`;
-              }
-
-              await handleMealGeneration(finalInput);
-              setInputValue("");
-              setSelectedMeals(new Set()); // Clear selected meals after submission
-            }}
-            isGenerating={isGenerating}
-            placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
-            canSend={inputValue.trim() !== "" || selectedMeals.size > 0}
-            className="p-6 bg-white"
-          />
-        </div>
       </div>
 
       {/* Mobile Layout */}

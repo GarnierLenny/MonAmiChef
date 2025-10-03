@@ -1,7 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Plus, X, User, Clock, Zap, CheckCircle } from "lucide-react";
+import { Plus, X, User, Clock, Zap, Circle, CircleDot } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { getGradeStyles, getMacroBadgeClass } from "./utils";
 import type { Meal } from "./constants";
@@ -42,22 +42,22 @@ export const MealCard = ({
               {/* Action buttons */}
               <div className="flex justify-end gap-1">
                 {onMealSelection && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
+                  <button
                     className={cn(
-                      "p-1 transition-all duration-200",
-                      isSelected
-                        ? "bg-orange-500 text-white hover:bg-orange-600"
-                        : "opacity-0 group-hover:opacity-100 bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+                      "p-1 transition-all duration-200 hover:scale-110",
+                      !isSelected && "opacity-0 group-hover:opacity-100"
                     )}
                     onClick={(e) => {
                       e.stopPropagation();
                       onMealSelection();
                     }}
                   >
-                    <CheckCircle className="h-3 w-3" />
-                  </Button>
+                    {isSelected ? (
+                      <CircleDot className="h-4 w-4 text-orange-500 fill-orange-100" />
+                    ) : (
+                      <Circle className="h-4 w-4 text-gray-400" />
+                    )}
+                  </button>
                 )}
                 <Button
                   variant="ghost"
@@ -157,14 +157,13 @@ export const MealCard = ({
                         e.stopPropagation();
                         onMealSelection();
                       }}
-                      className={cn(
-                        "p-1 rounded-full transition-all duration-200",
-                        isSelected
-                          ? "bg-orange-500 text-white hover:bg-orange-600"
-                          : "bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
-                      )}
+                      className="transition-all duration-200 hover:scale-110"
                     >
-                      <CheckCircle className="w-3 h-3" />
+                      {isSelected ? (
+                        <CircleDot className="w-4 h-4 text-orange-500 fill-orange-100" />
+                      ) : (
+                        <Circle className="w-4 h-4 text-gray-400" />
+                      )}
                     </button>
                   )}
                 </div>

@@ -17,7 +17,9 @@ import {
   RotateCcw,
   Trash2,
   Loader2,
-  CheckCircle,
+  Circle,
+  CircleDot,
+  CheckSquare,
 } from "lucide-react";
 import { getGradeStyles } from "./utils";
 import type { Meal, MealSlot } from "./constants";
@@ -75,17 +77,17 @@ export const SimpleMealCard = ({
         <h3 className="font-semibold text-gray-400 uppercase tracking-wide text-xs">
           {mealSlot}
         </h3>
-        {/* Select Icon */}
-        {onMealSelection && (
+        {/* Select Icon - Only show when meal exists */}
+        {onMealSelection && meal && (
           <button
             onClick={onMealSelection}
-            className={`p-1 rounded-full transition-all duration-200 ${
-              isSelected
-                ? "bg-orange-500 text-white hover:bg-orange-600"
-                : "bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
-            }`}
+            className="transition-all duration-200 hover:scale-110"
           >
-            <CheckCircle className="w-4 h-4" />
+            {isSelected ? (
+              <CircleDot className="w-5 h-5 text-orange-500 fill-orange-100" />
+            ) : (
+              <Circle className="w-5 h-5 text-gray-400" />
+            )}
           </button>
         )}
       </div>
@@ -237,13 +239,11 @@ export const SimpleMealCard = ({
 
             <Button
               className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-orange-500 hover:bg-gray-800"
-              onClick={onGenerate}
+              onClick={onMealSelection}
               disabled={isGenerating}
             >
-              <Sparkles className="w-4 h-4" />
-              <span className="text-sm font-medium">
-                {isGenerating ? "Generating..." : "Generate"}
-              </span>
+              <CheckSquare className="w-4 h-4" />
+              <span className="text-sm font-medium">Select</span>
             </Button>
           </div>
         </>
