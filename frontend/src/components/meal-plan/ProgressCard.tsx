@@ -3,7 +3,7 @@ import { Progress } from "@/components/ui/progress";
 import { CountUp } from "@/components/ui/count-up";
 import { ChevronRight, TrendingUp, Target, Calculator } from "lucide-react";
 import { calculateDayProgress } from "./utils";
-import type { MealPlan } from "./constants";
+import type { MealPlan, MealSlot } from "./constants";
 import type { UserGoals } from "../../lib/api/healthApi";
 
 interface ProgressCardProps {
@@ -12,6 +12,7 @@ interface ProgressCardProps {
   onDetailsClick: () => void;
   isMobile?: boolean;
   userGoals?: UserGoals | null;
+  selectedMeals?: Set<string>;
 }
 
 export const ProgressCard = ({
@@ -20,6 +21,7 @@ export const ProgressCard = ({
   onDetailsClick,
   isMobile = false,
   userGoals,
+  selectedMeals = new Set(),
 }: ProgressCardProps) => {
   const hasGoals =
     userGoals &&
@@ -27,6 +29,28 @@ export const ProgressCard = ({
     userGoals.daily_calories_goal > 0;
   const dayProgress = calculateDayProgress(mealPlan, currentDay, userGoals);
   const hasMeals = Object.keys(mealPlan[currentDay] || {}).length > 0;
+
+  // Calculate selected meals for current day
+  const selectedMealSlots = Array.from(selectedMeals)
+    .filter(key => key.startsWith(currentDay))
+    .map(key => key.split('-')[1] as MealSlot);
+
+  // Get meal summary
+  const getMealSummary = (slot: MealSlot) => {
+    const meal = mealPlan[currentDay]?.[slot];
+    const isSelected = selectedMealSlots.includes(slot);
+
+    if (meal) {
+      return { calories: meal.calories, status: 'added' };
+    } else if (isSelected) {
+      return { calories: 0, status: 'selected' };
+    }
+    return { calories: 0, status: 'not-selected' };
+  };
+
+  const breakfastSummary = getMealSummary('breakfast');
+  const lunchSummary = getMealSummary('lunch');
+  const dinnerSummary = getMealSummary('dinner');
 
   // If no goals are set, show CTA card
   if (!hasGoals) {

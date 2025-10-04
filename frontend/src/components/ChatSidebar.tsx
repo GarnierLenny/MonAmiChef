@@ -61,7 +61,7 @@ export function ChatSidebar({
   onSubmitPreferences,
   hasSelectedPreferences,
 }: ChatSidebarProps) {
-  const [activeTab, setActiveTab] = useState("history");
+  const [activeTab, setActiveTab] = useState("preferences");
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>

@@ -29,9 +29,9 @@ export const MealCard = ({
     return (
       <Card
         className={cn(
-          "h-48 cursor-pointer hover:shadow-md transition-all duration-200 group",
+          "h-48 cursor-pointer hover:shadow-md transition-all duration-300 group",
           isSelected
-            ? "border-orange-500 bg-orange-50 shadow-md"
+            ? "border-orange-500 bg-orange-50 shadow-md scale-[1.02] animate-in fade-in-0 zoom-in-95"
             : "border-gray-200 hover:border-gray-300"
         )}
         onClick={onClick}
@@ -44,7 +44,7 @@ export const MealCard = ({
                 {onMealSelection && (
                   <button
                     className={cn(
-                      "p-1 transition-all duration-200 hover:scale-110",
+                      "p-1 transition-all duration-200 hover:scale-110 active:scale-95",
                       !isSelected && "opacity-0 group-hover:opacity-100"
                     )}
                     onClick={(e) => {
@@ -53,7 +53,7 @@ export const MealCard = ({
                     }}
                   >
                     {isSelected ? (
-                      <CircleDot className="h-4 w-4 text-orange-500 fill-orange-100" />
+                      <CircleDot className="h-4 w-4 text-orange-500 fill-orange-100 animate-in zoom-in-50 duration-300" />
                     ) : (
                       <Circle className="h-4 w-4 text-gray-400" />
                     )}
@@ -86,8 +86,8 @@ export const MealCard = ({
                 </div>
               </div>
 
-              {/* Info Row */}
-              <div className="flex items-center justify-between mb-2 text-xs text-gray-600">
+              {/* Info Row - Dimmed */}
+              <div className="flex items-center justify-between mb-2 text-xs text-gray-400">
                 <div className="flex items-center gap-1">
                   <User className="w-3 h-3" />
                   <span>{meal.servings}</span>
@@ -98,21 +98,21 @@ export const MealCard = ({
                 </div>
               </div>
 
-              {/* Calories */}
+              {/* Calories - More prominent */}
               <div className="flex items-center gap-1 mb-2 text-xs">
                 <Zap className="w-3 h-3 text-orange-500" />
-                <span className="font-medium">{meal.calories} cal</span>
+                <span className="font-bold text-xs text-gray-900">{meal.calories} cal</span>
               </div>
 
-              {/* Macros */}
-              <div className="flex items-center gap-1 flex-wrap mt-auto">
-                <Badge className={cn("text-xs", getMacroBadgeClass("protein"))}>
+              {/* Macros - Equal spacing */}
+              <div className="flex items-center gap-1.5 flex-wrap mt-auto">
+                <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium">
                   P {meal.macros.protein}g
                 </Badge>
-                <Badge className={cn("text-xs", getMacroBadgeClass("carbs"))}>
+                <Badge className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium">
                   C {meal.macros.carbs}g
                 </Badge>
-                <Badge className={cn("text-xs", getMacroBadgeClass("fat"))}>
+                <Badge className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium">
                   F {meal.macros.fat}g
                 </Badge>
               </div>
@@ -134,9 +134,9 @@ export const MealCard = ({
   return (
     <Card
       className={cn(
-        "flex-1 w-full border-2 rounded-xl min-h-0 cursor-pointer hover:shadow-md transition-all duration-200",
+        "flex-1 w-full border-2 rounded-xl min-h-0 cursor-pointer hover:shadow-md transition-all duration-300",
         isSelected
-          ? "border-orange-500 bg-orange-50 shadow-md"
+          ? "border-orange-500 bg-orange-50 shadow-md scale-[1.02] animate-in fade-in-0 zoom-in-95"
           : "border-gray-200 hover:border-gray-300"
       )}
       onClick={onClick}
@@ -157,10 +157,10 @@ export const MealCard = ({
                         e.stopPropagation();
                         onMealSelection();
                       }}
-                      className="transition-all duration-200 hover:scale-110"
+                      className="transition-all duration-200 hover:scale-110 active:scale-95"
                     >
                       {isSelected ? (
-                        <CircleDot className="w-4 h-4 text-orange-500 fill-orange-100" />
+                        <CircleDot className="w-4 h-4 text-orange-500 fill-orange-100 animate-in zoom-in-50 duration-300" />
                       ) : (
                         <Circle className="w-4 h-4 text-gray-400" />
                       )}
@@ -178,8 +178,8 @@ export const MealCard = ({
               </div>
             </div>
 
-            {/* Info Row */}
-            <div className="flex items-center gap-4 mb-2 text-xs text-gray-600">
+            {/* Info Row - Dimmed */}
+            <div className="flex items-center gap-4 mb-2 text-xs text-gray-400">
               <div className="flex items-center gap-1">
                 <User className="w-3 h-3" />
                 <span>Servings: {meal.servings}</span>
@@ -191,22 +191,22 @@ export const MealCard = ({
             </div>
 
             {/* Calories and Macros Row */}
-            <div className="flex items-center justify-between">
-              {/* Calories */}
+            <div className="flex items-center justify-between gap-2">
+              {/* Calories - More prominent */}
               <div className="flex items-center gap-1 text-xs">
                 <Zap className="w-3 h-3 text-orange-500" />
-                <span className="font-medium">{meal.calories} cal</span>
+                <span className="font-bold text-xs text-gray-900">{meal.calories} cal</span>
               </div>
 
-              {/* Macros */}
-              <div className="flex items-center gap-1">
-                <Badge className={cn("text-xs", getMacroBadgeClass("protein"))}>
+              {/* Macros - Equal spacing */}
+              <div className="flex items-center gap-1.5">
+                <Badge className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium">
                   P {meal.macros.protein}g
                 </Badge>
-                <Badge className={cn("text-xs", getMacroBadgeClass("carbs"))}>
+                <Badge className="bg-blue-500 hover:bg-blue-600 text-white text-xs font-medium">
                   C {meal.macros.carbs}g
                 </Badge>
-                <Badge className={cn("text-xs", getMacroBadgeClass("fat"))}>
+                <Badge className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-medium">
                   F {meal.macros.fat}g
                 </Badge>
               </div>

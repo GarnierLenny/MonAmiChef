@@ -163,6 +163,7 @@ export const NewMobileMealLayout = ({
           onDetailsClick={onProgressDetailsClick}
           isMobile
           userGoals={userGoals}
+          selectedMeals={selectedMeals}
         />
       </div>
 

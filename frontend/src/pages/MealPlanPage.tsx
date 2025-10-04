@@ -754,6 +754,7 @@ export default function MealPlanPage({
               setShowProgressDetails(true);
             }}
             userGoals={userGoals}
+            selectedMeals={selectedMeals}
           />
         </div>
 
