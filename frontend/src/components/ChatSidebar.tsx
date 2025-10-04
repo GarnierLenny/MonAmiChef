@@ -61,7 +61,7 @@ export function ChatSidebar({
   onSubmitPreferences,
   hasSelectedPreferences,
 }: ChatSidebarProps) {
-  const [activeTab, setActiveTab] = useState("history");
+  const [activeTab, setActiveTab] = useState("preferences");
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -76,18 +76,18 @@ export function ChatSidebar({
             >
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger
-                  value="history"
-                  className="flex items-center gap-2"
-                >
-                  <History className="h-4 w-4" />
-                  History
-                </TabsTrigger>
-                <TabsTrigger
                   value="preferences"
                   className="flex items-center gap-2"
                 >
                   <CircleDot className="h-4 w-4" />
                   Preferences
+                </TabsTrigger>
+                <TabsTrigger
+                  value="history"
+                  className="flex items-center gap-2"
+                >
+                  <History className="h-4 w-4" />
+                  History
                 </TabsTrigger>
               </TabsList>
             </Tabs>
@@ -131,24 +131,26 @@ export function ChatSidebar({
           </div>
 
           {/* Mobile Preferences Submit Button */}
-          {activeTab === "preferences" && hasSelectedPreferences && onSubmitPreferences && (
-            <div className="absolute bottom-0 left-0 right-0 z-50 md:hidden">
-              <div className="bg-gradient-to-t from-orange-50 via-orange-50/80 to-transparent h-24 absolute inset-0 backdrop-blur-sm"></div>
-              <div className="relative p-4">
-                <div className="absolute inset-0 bg-white/10 backdrop-blur-md rounded-lg mx-4"></div>
-                <Button
-                  onClick={() => {
-                    onSubmitPreferences();
-                    onClose();
-                  }}
-                  className="relative w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium py-3 rounded-lg shadow-lg border border-white/20 flex items-center justify-center gap-2 transition-all duration-200 animate-in slide-in-from-bottom-2 hover:scale-105 active:scale-95"
-                >
-                  <Send className="w-4 h-4" />
-                  Generate Recipe
-                </Button>
+          {activeTab === "preferences" &&
+            hasSelectedPreferences &&
+            onSubmitPreferences && (
+              <div className="absolute bottom-0 left-0 right-0 z-50 md:hidden">
+                <div className="bg-gradient-to-t from-orange-50 via-orange-50/80 to-transparent h-24 absolute inset-0 backdrop-blur-sm"></div>
+                <div className="relative p-4">
+                  <div className="absolute inset-0 bg-white/10 backdrop-blur-md rounded-lg mx-4"></div>
+                  <Button
+                    onClick={() => {
+                      onSubmitPreferences();
+                      onClose();
+                    }}
+                    className="relative w-full bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white font-medium py-3 rounded-lg shadow-lg border border-white/20 flex items-center justify-center gap-2 transition-all duration-200 animate-in slide-in-from-bottom-2 hover:scale-105 active:scale-95"
+                  >
+                    <Send className="w-4 h-4" />
+                    Generate Recipe
+                  </Button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
         </div>
       </SheetContent>
     </Sheet>

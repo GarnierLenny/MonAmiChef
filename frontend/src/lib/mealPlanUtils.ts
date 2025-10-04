@@ -64,15 +64,22 @@ export function convertBackendToFrontendMealPlan(
 ): MealPlan {
   const frontendPlan: MealPlan = {};
 
-  if (backendPlan.items) {
+  if (backendPlan.items && backendPlan.items.length > 0) {
     backendPlan.items.forEach((item) => {
       const dayName = DAY_NUMBER_TO_NAME[item.day];
+
+      // Validate day name exists
+      if (!dayName) {
+        console.warn(`Invalid day number: ${item.day}`);
+        return;
+      }
+
       if (!frontendPlan[dayName]) {
         frontendPlan[dayName] = {};
       }
 
       // If we have a recipe, convert it to meal format
-      if (item.recipe) {
+      if (item.recipe && item.recipeId) {
         const recipe: Recipe = {
           id: item.recipe.id,
           title: item.recipe.title,

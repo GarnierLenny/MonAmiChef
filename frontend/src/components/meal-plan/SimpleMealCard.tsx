@@ -17,7 +17,9 @@ import {
   RotateCcw,
   Trash2,
   Loader2,
-  CheckCircle,
+  Circle,
+  CircleDot,
+  CheckSquare,
 } from "lucide-react";
 import { getGradeStyles } from "./utils";
 import type { Meal, MealSlot } from "./constants";
@@ -64,9 +66,9 @@ export const SimpleMealCard = ({
 
   return (
     <div
-      className={`bg-white rounded-xl border p-3 space-y-2 relative transition-all duration-200 ${
+      className={`bg-white rounded-xl border p-3 space-y-2 relative transition-all duration-300 ${
         isSelected
-          ? "border-orange-500 bg-orange-50 shadow-md"
+          ? "border-orange-500 bg-orange-50 shadow-md scale-[1.02] animate-in fade-in-0 zoom-in-95"
           : "border-gray-200 hover:border-gray-300"
       }`}
     >
@@ -75,17 +77,17 @@ export const SimpleMealCard = ({
         <h3 className="font-semibold text-gray-400 uppercase tracking-wide text-xs">
           {mealSlot}
         </h3>
-        {/* Select Icon */}
-        {onMealSelection && (
+        {/* Select Icon - Only show when meal exists */}
+        {onMealSelection && meal && (
           <button
             onClick={onMealSelection}
-            className={`p-1 rounded-full transition-all duration-200 ${
-              isSelected
-                ? "bg-orange-500 text-white hover:bg-orange-600"
-                : "bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
-            }`}
+            className="transition-all duration-200 hover:scale-110 active:scale-95"
           >
-            <CheckCircle className="w-4 h-4" />
+            {isSelected ? (
+              <CircleDot className="w-5 h-5 text-orange-500 fill-orange-100 animate-in zoom-in-50 duration-300" />
+            ) : (
+              <Circle className="w-5 h-5 text-gray-400" />
+            )}
           </button>
         )}
       </div>
@@ -153,8 +155,8 @@ export const SimpleMealCard = ({
                 </div>
               </div>
 
-              {/* Servings and Time */}
-              <div className="flex items-center gap-3 text-gray-600">
+              {/* Servings and Time - Dimmed */}
+              <div className="flex items-center gap-3 text-gray-400">
                 <div className="flex items-center gap-1">
                   <User className="w-3 h-3" />
                   <span className="text-xs">Servings: {meal.servings}</span>
@@ -166,24 +168,24 @@ export const SimpleMealCard = ({
               </div>
 
               {/* Calories and Macros */}
-              <div className="flex items-center justify-between">
-                {/* Calories */}
-                <div className="flex items-center gap-1">
+              <div className="flex items-center justify-between gap-3">
+                {/* Calories - More prominent */}
+                <div className="flex items-center gap-1.5">
                   <Zap className="w-4 h-4 text-orange-500" />
-                  <span className="font-semibold text-md text-gray-900">
+                  <span className="font-bold text-sm text-gray-900">
                     {meal.calories} cal
                   </span>
                 </div>
 
-                {/* Macros */}
-                <div className="flex items-center gap-1.5">
-                  <Badge className="bg-green-500 hover:bg-green-600 text-white px-2 py-0.5 text-xs">
+                {/* Macros - Equal spacing */}
+                <div className="flex items-center gap-2">
+                  <Badge className="bg-green-500 hover:bg-green-600 text-white px-2.5 py-0.5 text-xs font-medium">
                     P {meal.macros.protein}g
                   </Badge>
-                  <Badge className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-0.5 text-xs">
+                  <Badge className="bg-blue-500 hover:bg-blue-600 text-white px-2.5 py-0.5 text-xs font-medium">
                     C {meal.macros.carbs}g
                   </Badge>
-                  <Badge className="bg-orange-500 hover:bg-orange-600 text-white px-2 py-0.5 text-xs">
+                  <Badge className="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-0.5 text-xs font-medium">
                     F {meal.macros.fat}g
                   </Badge>
                 </div>
@@ -236,14 +238,12 @@ export const SimpleMealCard = ({
             </Button>
 
             <Button
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-orange-500 hover:bg-gray-800"
-              onClick={onGenerate}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-orange-500 hover:bg-gray-800 active:scale-95 transition-transform"
+              onClick={onMealSelection}
               disabled={isGenerating}
             >
-              <Sparkles className="w-4 h-4" />
-              <span className="text-sm font-medium">
-                {isGenerating ? "Generating..." : "Generate"}
-              </span>
+              <CheckSquare className="w-4 h-4" />
+              <span className="text-sm font-medium">Select</span>
             </Button>
           </div>
         </>

@@ -163,6 +163,7 @@ export const NewMobileMealLayout = ({
           onDetailsClick={onProgressDetailsClick}
           isMobile
           userGoals={userGoals}
+          selectedMeals={selectedMeals}
         />
       </div>
 
@@ -192,51 +193,54 @@ export const NewMobileMealLayout = ({
         })}
       </div>
 
-      {/* Selected Meal Tags */}
-      {mealTags.length > 0 && (
-        <div className="px-4 pt-2 border-t border-orange-200">
-          <div className="flex items-center justify-between">
-            <div className="flex flex-wrap gap-2">
-              {mealTags.map((tag, index) => (
-                <div
-                  key={index}
-                  className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium border border-current/20 ${tag.color}`}
-                >
-                  <span>{tag.label}</span>
-                  <button
-                    onClick={() => {
-                      const [day, slot] = tag.value.split("-");
-                      onMealSelection?.(day, slot as MealSlot);
-                    }}
-                    className="h-auto p-0.5 hover:bg-current/20 rounded-full transition-colors"
+      {/* Selected Meal Tags and Input Bar - Only show when meals are selected */}
+      {selectedMeals.size > 0 && (
+        <>
+          {/* Selected Meal Tags */}
+          <div className="px-4 pt-2 border-t border-orange-200">
+            <div className="flex items-center justify-between">
+              <div className="flex flex-wrap gap-2">
+                {mealTags.map((tag, index) => (
+                  <div
+                    key={index}
+                    className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium border border-current/20 ${tag.color}`}
                   >
-                    <X className="w-3 h-3" />
-                  </button>
-                </div>
-              ))}
+                    <span>{tag.label}</span>
+                    <button
+                      onClick={() => {
+                        const [day, slot] = tag.value.split("-");
+                        onMealSelection?.(day, slot as MealSlot);
+                      }}
+                      className="h-auto p-0.5 hover:bg-current/20 rounded-full transition-colors"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+              {onClearSelectedMeals && (
+                <button
+                  onClick={onClearSelectedMeals}
+                  className="text-xs text-gray-500 hover:text-red-600 transition-colors"
+                >
+                  Clear all
+                </button>
+              )}
             </div>
-            {onClearSelectedMeals && (
-              <button
-                onClick={onClearSelectedMeals}
-                className="text-xs text-gray-500 hover:text-red-600 transition-colors"
-              >
-                Clear all
-              </button>
-            )}
           </div>
-        </div>
-      )}
 
-      {/* Input Bar */}
-      <ChatInput
-        inputValue={inputValue}
-        onInputChange={setInputValue}
-        onSubmit={onSubmit}
-        isGenerating={isGenerating}
-        placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
-        canSend={inputValue.trim() !== "" || selectedMeals.size > 0}
-        className="p-4 pt-0 bg-orange-50 pb-safe meal-plan-input"
-      />
+          {/* Input Bar */}
+          <ChatInput
+            inputValue={inputValue}
+            onInputChange={setInputValue}
+            onSubmit={onSubmit}
+            isGenerating={isGenerating}
+            placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
+            canSend={inputValue.trim() !== "" || selectedMeals.size > 0}
+            className="p-4 pt-0 bg-orange-50 pb-safe meal-plan-input"
+          />
+        </>
+      )}
 
       {/* Calendar Modal */}
       <CalendarModal
