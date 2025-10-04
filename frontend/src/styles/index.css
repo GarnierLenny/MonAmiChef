@@ -5,8 +5,11 @@
   --color-border: oklch(0.922 0 0);
   --color-input: oklch(0.922 0 0);
   --color-ring: oklch(0.72 0.15 45);
-  --color-background: oklch(1 0 0);
-  --color-foreground: oklch(0.145 0 0);
+  --color-background: hsl(0, 0%, 98%);
+  --color-background-dark-layer: hsl(0, 0%, 90%);
+  --color-background-light: hsl(0, 0%, 100%);
+  --color-foreground: hsl(0, 0%, 5%);
+  --color-foreground-muted: hsl(0, 0%, 30%);
   --color-primary: oklch(0.72 0.15 45);
   --color-primary-foreground: oklch(0.985 0 0);
   --color-secondary: oklch(0.96 0.01 220);
@@ -24,6 +27,8 @@
   /* Dark mode colors */
   --color-*-dark: initial;
   --color-background-dark: oklch(0.145 0 0);
+  --color-background-dark-layer-dark: oklch(0.205 0 0);
+  --color-background-light-dark: oklch(0.185 0 0);
   --color-foreground-dark: oklch(0.985 0 0);
   --color-card-dark: oklch(0.205 0 0);
   --color-card-foreground-dark: oklch(0.985 0 0);
@@ -131,7 +136,8 @@
   /* Mobile-specific layout fixes */
   @media (max-width: 768px) {
     /* Prevent document scrolling on mobile */
-    html, body {
+    html,
+    body {
       overflow: hidden;
       height: 100dvh;
       position: fixed;
@@ -252,14 +258,18 @@
   [data-state="open"] {
     outline: none !important;
     border: none !important;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+    box-shadow:
+      0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
   }
 
   [role="dialog"]:focus,
   [role="dialog"]:focus-visible {
     outline: none !important;
     ring: none !important;
-    box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
+    box-shadow:
+      0 10px 15px -3px rgb(0 0 0 / 0.1),
+      0 4px 6px -4px rgb(0 0 0 / 0.1) !important;
   }
 
   /* Fix dialog centering */
@@ -277,7 +287,6 @@
     right: auto !important;
     bottom: auto !important;
   }
-
 
   /* Softer button hover states */
   .btn-soft-orange {

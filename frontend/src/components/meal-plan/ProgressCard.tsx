@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Progress } from "./MealPlanProgressBar";
 import { CountUp } from "@/components/ui/count-up";
 import { ChevronRight, TrendingUp, Target, Calculator } from "lucide-react";
 import { calculateDayProgress } from "./utils";
@@ -32,8 +32,8 @@ export const ProgressCard = ({
 
   // Calculate selected meals for current day
   const selectedMealSlots = Array.from(selectedMeals)
-    .filter(key => key.startsWith(currentDay))
-    .map(key => key.split('-')[1] as MealSlot);
+    .filter((key) => key.startsWith(currentDay))
+    .map((key) => key.split("-")[1] as MealSlot);
 
   // Get meal summary
   const getMealSummary = (slot: MealSlot) => {
@@ -41,22 +41,22 @@ export const ProgressCard = ({
     const isSelected = selectedMealSlots.includes(slot);
 
     if (meal) {
-      return { calories: meal.calories, status: 'added' };
+      return { calories: meal.calories, status: "added" };
     } else if (isSelected) {
-      return { calories: 0, status: 'selected' };
+      return { calories: 0, status: "selected" };
     }
-    return { calories: 0, status: 'not-selected' };
+    return { calories: 0, status: "not-selected" };
   };
 
-  const breakfastSummary = getMealSummary('breakfast');
-  const lunchSummary = getMealSummary('lunch');
-  const dinnerSummary = getMealSummary('dinner');
+  const breakfastSummary = getMealSummary("breakfast");
+  const lunchSummary = getMealSummary("lunch");
+  const dinnerSummary = getMealSummary("dinner");
 
   // If no goals are set, show CTA card
   if (!hasGoals) {
     return (
       <Card
-        className={`border border-orange-200 rounded-xl cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-r from-orange-50 to-pink-50 ${
+        className={`border border-orange-200 rounded-xl cursor-pointer hover:shadow-md transition-shadow bg-background inset-shadow-2lg ${
           isMobile ? "border-2" : ""
         }`}
         onClick={() => (window.location.href = "/calories")}
@@ -92,9 +92,7 @@ export const ProgressCard = ({
 
   return (
     <Card
-      className={`border border-gray-200 rounded-xl cursor-pointer hover:shadow-md transition-shadow ${
-        isMobile ? "border-2" : ""
-      }`}
+      className={`rounded-xl border-0 bg-background shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)] inset-shadow-blue-200 cursor-pointer hover:shadow-md`}
       onClick={onDetailsClick}
     >
       <CardContent className="px-4">
@@ -123,8 +121,9 @@ export const ProgressCard = ({
           {/* Center - Progress bar */}
           <div className="flex-1 mx-6">
             <Progress
-              value={Math.min(dayProgress.calories.percentage, 100)}
-              className="h-3 bg-gray-200 progress-calories"
+              //value={Math.min(dayProgress.calories.percentage, 100)}
+              value={24}
+              className="h-3 bg-background-dark-layer shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]  progress-calories"
             />
           </div>
 

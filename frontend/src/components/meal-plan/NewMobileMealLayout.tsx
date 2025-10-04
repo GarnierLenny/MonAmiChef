@@ -112,7 +112,7 @@ export const NewMobileMealLayout = ({
   };
 
   return (
-    <div className="flex flex-col h-full w-screen pb-18 bg-orange-50 overflow-hidden">
+    <div className="flex flex-col h-full w-screen pb-18 bg-background-dark-layer overflow-hidden">
       {/* Day Navigation */}
       <div className="px-4 mt-2">
         <div className="flex items-center justify-between">

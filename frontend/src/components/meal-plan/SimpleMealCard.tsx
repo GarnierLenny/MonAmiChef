@@ -234,7 +234,7 @@ export const SimpleMealCard = ({
               disabled={isGenerating}
             >
               <BookmarkIcon className="w-4 h-4" />
-              <span className="text-sm font-medium">Choose saved</span>
+              <span className="text-sm font-medium">Pick</span>
             </Button>
 
             <Button

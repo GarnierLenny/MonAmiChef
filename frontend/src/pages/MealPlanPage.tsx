@@ -157,14 +157,24 @@ export default function MealPlanPage({
       // No plan for this week, clear the meal plan only if user is authenticated
       // For unauthenticated users, keep their local data
       if (!isUnauthenticated) {
-        console.log('[MealPlan] No backend plan found for current week, clearing meal plan');
+        console.log(
+          "[MealPlan] No backend plan found for current week, clearing meal plan",
+        );
         setMealPlan({});
       }
     } else {
       // We have a backend plan for this week, populate the frontend meal plan
-      console.log('[MealPlan] Found backend plan for week:', weekPlan.id, 'with items:', weekPlan.items?.length || 0);
+      console.log(
+        "[MealPlan] Found backend plan for week:",
+        weekPlan.id,
+        "with items:",
+        weekPlan.items?.length || 0,
+      );
       const frontendMealPlan = convertBackendToFrontendMealPlan(weekPlan);
-      console.log('[MealPlan] Converted to frontend plan with days:', Object.keys(frontendMealPlan));
+      console.log(
+        "[MealPlan] Converted to frontend plan with days:",
+        Object.keys(frontendMealPlan),
+      );
       setMealPlan(frontendMealPlan);
     }
   }, [backendMealPlans, currentWeek, isUnauthenticated, isLoading]);
@@ -448,18 +458,21 @@ export default function MealPlanPage({
   // Handle mobile input submission
   const handleMobileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isGenerating || (!inputValue.trim() && selectedMeals.size === 0)) return;
+    if (isGenerating || (!inputValue.trim() && selectedMeals.size === 0))
+      return;
 
     // Append selected meals to the input behind the scenes
     let finalInput = inputValue.trim();
     if (selectedMeals.size > 0) {
-      const mealTypes = Array.from(selectedMeals).map(mealKey => {
-        const [day, slot] = mealKey.split('-');
+      const mealTypes = Array.from(selectedMeals).map((mealKey) => {
+        const [day, slot] = mealKey.split("-");
         return slot; // Just the meal type (breakfast, lunch, dinner)
       });
       const uniqueMealTypes = [...new Set(mealTypes)];
-      const mealSuffix = ` for ${uniqueMealTypes.join(' and ')}`;
-      finalInput = finalInput ? `${finalInput}${mealSuffix}` : `something${mealSuffix}`;
+      const mealSuffix = ` for ${uniqueMealTypes.join(" and ")}`;
+      finalInput = finalInput
+        ? `${finalInput}${mealSuffix}`
+        : `something${mealSuffix}`;
     }
 
     await handleMealGeneration(finalInput);
@@ -780,7 +793,8 @@ export default function MealPlanPage({
                 <div className="flex flex-wrap gap-2">
                   {Array.from(selectedMeals).map((mealKey, index) => {
                     const [day, slot] = mealKey.split("-");
-                    const slotName = slot.charAt(0).toUpperCase() + slot.slice(1);
+                    const slotName =
+                      slot.charAt(0).toUpperCase() + slot.slice(1);
 
                     // Vary colors for different tags
                     const colors = [
@@ -833,13 +847,17 @@ export default function MealPlanPage({
                   // Append selected meals to the input behind the scenes
                   let finalInput = inputValue.trim();
                   if (selectedMeals.size > 0) {
-                    const mealTypes = Array.from(selectedMeals).map(mealKey => {
-                      const [day, slot] = mealKey.split('-');
-                      return slot; // Just the meal type (breakfast, lunch, dinner)
-                    });
+                    const mealTypes = Array.from(selectedMeals).map(
+                      (mealKey) => {
+                        const [day, slot] = mealKey.split("-");
+                        return slot; // Just the meal type (breakfast, lunch, dinner)
+                      },
+                    );
                     const uniqueMealTypes = [...new Set(mealTypes)];
-                    const mealSuffix = ` for ${uniqueMealTypes.join(' and ')}`;
-                    finalInput = finalInput ? `${finalInput}${mealSuffix}` : `something${mealSuffix}`;
+                    const mealSuffix = ` for ${uniqueMealTypes.join(" and ")}`;
+                    finalInput = finalInput
+                      ? `${finalInput}${mealSuffix}`
+                      : `something${mealSuffix}`;
                   }
 
                   await handleMealGeneration(finalInput);
