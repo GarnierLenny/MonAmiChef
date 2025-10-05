@@ -57,7 +57,6 @@ export const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
         className={cn(
           "flex-shrink-0",
           !className?.includes("meal-plan-input") && "chat-input-container",
-          !className?.includes("bg-") && "bg-orange-50",
           className,
         )}
       >

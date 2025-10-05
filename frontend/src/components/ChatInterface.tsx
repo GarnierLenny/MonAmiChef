@@ -229,10 +229,10 @@ export default function ChatInterface({
   const canSend = inputValue.trim() !== "" || hasSelectedPreferences;
 
   return (
-    <div className="flex-1 flex flex-col h-full overflow-hidden">
+    <div className="flex-1 flex flex-col bg-background-dark-layer h-full overflow-hidden">
       <div className="flex-1 flex flex-col min-h-0">
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <div className="flex-1 overflow-y-auto px-4 pt-6 pb-20 space-y-4">
           {messages.map((message, index) => {
             const messageId = message.id ?? `${index}-${message.role}`;
             const isRecipe =
@@ -246,10 +246,10 @@ export default function ChatInterface({
                 className={`flex text-sm ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-3xl rounded-2xl px-6 py-4 mb-10 relative ${
+                  className={`max-w-3xl rounded-2xl px-4 py-3 relative shadow-sm/20 ${
                     message.role === "user"
                       ? "bg-orange-500 text-white"
-                      : "bg-gray-100 text-gray-900"
+                      : "bg-background-light text-gray-900"
                   }`}
                 >
                   {message.role === "model" && (
