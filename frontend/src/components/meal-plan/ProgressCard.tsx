@@ -121,8 +121,8 @@ export const ProgressCard = ({
           {/* Center - Progress bar */}
           <div className="flex-1 mx-6">
             <Progress
-              //value={Math.min(dayProgress.calories.percentage, 100)}
-              value={24}
+              value={Math.min(dayProgress.calories.percentage, 100)}
+              //value={24}
               className="h-3 bg-background-dark-layer shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]  progress-calories"
             />
           </div>

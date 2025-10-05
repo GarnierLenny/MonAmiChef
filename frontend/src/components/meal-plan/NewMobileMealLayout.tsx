@@ -1,11 +1,25 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Calendar, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  X,
+  Eye,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
 import { format, addDays, startOfWeek, differenceInDays } from "date-fns";
 import { SimpleMealCard } from "./SimpleMealCard";
 import { ProgressCard } from "./ProgressCard";
 import { CalendarModal } from "./CalendarModal";
 import { ChatInput } from "@/components/ui/chat-input";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   DAYS_OF_WEEK,
   MEAL_SLOTS,
@@ -60,6 +74,10 @@ export const NewMobileMealLayout = ({
   onClearSelectedMeals,
 }: NewMobileMealLayoutProps) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [selectedMealSlot, setSelectedMealSlot] = useState<{
+    day: string;
+    slot: MealSlot;
+  } | null>(null);
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const currentDay = DAYS_OF_WEEK[currentDayIndex];
 
@@ -168,7 +186,7 @@ export const NewMobileMealLayout = ({
       </div>
 
       {/* Meal Cards */}
-      <div className="flex-1 px-4 space-y-4 overflow-y-auto">
+      <div className="flex flex-row p-4 items-center gap-[16px] overflow-y-auto no-scrollbar">
         {MEAL_SLOTS.map((mealSlot) => {
           const meal = mealPlan[currentDay]?.[mealSlot];
           const slotKey = `${currentDay}-${mealSlot}`;
@@ -181,9 +199,9 @@ export const NewMobileMealLayout = ({
               meal={meal}
               onGenerate={() => onSlotClick(currentDay, mealSlot)}
               onSaved={() => handleSavedMeals(mealSlot)}
-              onShowRecipe={() => onShowRecipe?.(currentDay, mealSlot)}
-              onRegenerate={() => onRegenerate?.(currentDay, mealSlot)}
-              onDelete={() => onDeleteMeal?.(currentDay, mealSlot)}
+              onCardClick={() =>
+                meal && setSelectedMealSlot({ day: currentDay, slot: mealSlot })
+              }
               isGenerating={!meal && isSlotGenerating}
               isRegenerating={meal && isSlotGenerating}
               isSelected={selectedMeals.has(slotKey)}
@@ -250,6 +268,62 @@ export const NewMobileMealLayout = ({
         currentDate={addDays(weekStart, currentDayIndex)}
         mealPlan={mealPlan}
       />
+
+      {/* Meal Actions Bottom Sheet */}
+      <Sheet
+        open={!!selectedMealSlot}
+        onOpenChange={(open) => !open && setSelectedMealSlot(null)}
+      >
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <SheetHeader>
+            <SheetTitle>
+              {selectedMealSlot &&
+                mealPlan[selectedMealSlot.day]?.[selectedMealSlot.slot]?.title}
+            </SheetTitle>
+          </SheetHeader>
+          <div className="flex flex-col gap-3 mt-4">
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-start gap-3 h-12"
+              onClick={() => {
+                if (selectedMealSlot) {
+                  onShowRecipe?.(selectedMealSlot.day, selectedMealSlot.slot);
+                  setSelectedMealSlot(null);
+                }
+              }}
+            >
+              <Eye className="w-5 h-5" />
+              <span>Show recipe</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-start gap-3 h-12"
+              onClick={() => {
+                if (selectedMealSlot) {
+                  onRegenerate?.(selectedMealSlot.day, selectedMealSlot.slot);
+                  setSelectedMealSlot(null);
+                }
+              }}
+            >
+              <RotateCcw className="w-5 h-5" />
+              <span>Regenerate</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-start gap-3 h-12 text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={() => {
+                if (selectedMealSlot) {
+                  onDeleteMeal?.(selectedMealSlot.day, selectedMealSlot.slot);
+                  setSelectedMealSlot(null);
+                }
+              }}
+            >
+              <Trash2 className="w-5 h-5" />
+              <span>Delete</span>
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };

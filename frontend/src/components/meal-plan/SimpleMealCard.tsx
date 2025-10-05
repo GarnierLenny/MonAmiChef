@@ -2,24 +2,15 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import {
   BookmarkIcon,
-  Sparkles,
+  Loader2,
+  Coffee,
+  Sun,
+  Moon,
+  CheckSquare,
   User,
   Clock,
   Zap,
-  Eye,
-  RotateCcw,
-  Trash2,
-  Loader2,
-  Circle,
-  CircleDot,
-  CheckSquare,
 } from "lucide-react";
 import { getGradeStyles } from "./utils";
 import type { Meal, MealSlot } from "./constants";
@@ -30,9 +21,7 @@ interface SimpleMealCardProps {
   meal?: Meal;
   onGenerate: () => void;
   onSaved: () => void;
-  onShowRecipe?: () => void;
-  onRegenerate?: () => void;
-  onDelete?: () => void;
+  onCardClick?: () => void;
   isGenerating?: boolean;
   isRegenerating?: boolean;
   isSelected?: boolean;
@@ -44,9 +33,7 @@ export const SimpleMealCard = ({
   meal,
   onGenerate,
   onSaved,
-  onShowRecipe,
-  onRegenerate,
-  onDelete,
+  onCardClick,
   isGenerating = false,
   isRegenerating = false,
   isSelected = false,
@@ -64,190 +51,129 @@ export const SimpleMealCard = ({
     }
   }, [isCurrentlyGenerating]);
 
+  // Get icon based on meal slot
+  const getMealIcon = () => {
+    switch (mealSlot) {
+      case "breakfast":
+        return <Coffee color="rgba(0, 0, 0, 0.5)" className="w-4 h-4" />;
+      case "lunch":
+        return <Sun color="rgba(0, 0, 0, 0.5)" className="w-4 h-4" />;
+      case "dinner":
+        return <Moon color="rgba(0, 0, 0, 0.5)" className="w-4 h-4" />;
+      default:
+        return <Coffee className="w-4 h-4" />;
+    }
+  };
+
   return (
     <div
-      className={`bg-white rounded-xl border p-3 space-y-2 relative transition-all duration-300 ${
+      className={`bg-background rounded-xl min-w-[280px] w-[280px] h-[300px] border-0 shadow-xl/5 p-6 flex flex-col space-y-2 relative transition-all duration-300 ${
         isSelected
           ? "border-orange-500 bg-orange-50 shadow-md scale-[1.02] animate-in fade-in-0 zoom-in-95"
           : "border-gray-200 hover:border-gray-300"
       }`}
     >
       {/* Meal Type Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-gray-400 uppercase tracking-wide text-xs">
+      <div className="flex items-center gap-2">
+        {getMealIcon()}
+        <h3 className="text-muted-foreground uppercase tracking-wide text-xs">
           {mealSlot}
         </h3>
-        {/* Select Icon - Only show when meal exists */}
-        {onMealSelection && meal && (
-          <button
-            onClick={onMealSelection}
-            className="transition-all duration-200 hover:scale-110 active:scale-95"
-          >
-            {isSelected ? (
-              <CircleDot className="w-5 h-5 text-orange-500 fill-orange-100 animate-in zoom-in-50 duration-300" />
-            ) : (
-              <Circle className="w-5 h-5 text-gray-400" />
-            )}
-          </button>
-        )}
       </div>
 
       {/* Meal Content or Empty State */}
       {meal ? (
-        <ContextMenu>
-          <ContextMenuTrigger asChild>
-            <div
-              className="space-y-2 cursor-pointer touch-manipulation"
-              onTouchStart={(e) => {
-                // Store touch start position, time, and target for gesture detection
-                const touch = e.touches[0];
-                const startX = touch.clientX;
-                const startY = touch.clientY;
-                const startTime = Date.now();
-                const targetElement = e.currentTarget; // Store the target reference
+        <div
+          className="space-y-2 mt-3 cursor-pointer flex-1 flex flex-col"
+          onClick={onCardClick}
+        >
+          {/* Recipe Title */}
+          <div className="flex items-start mb-3 justify-between">
+            <h4 className="font-semibold text-base leading-tight flex-1">
+              {meal.title}
+            </h4>
+          </div>
 
-                const handleTouchEnd = (endEvent: TouchEvent) => {
-                  const endTime = Date.now();
-                  const duration = endTime - startTime;
+          {/* Servings and Time */}
+          <div className="flex items-center gap-2 text-gray-600">
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <User className="w-3.5 h-3.5" />
+              <span className="text-sm">{meal.servings}</span>
+            </div>
+            <span className="text-muted-foreground">•</span>
+            <div className="flex items-center gap-1 text-muted-foreground">
+              <Clock className="w-3.5 h-3.5" />
+              <span className="text-sm">{meal.cookingTime} min</span>
+            </div>
+            <span className="text-muted-foreground">•</span>
+            <div className="flex items-center gap-1">
+              <Zap className="w-3.5 h-3.5 text-orange-500" />
+              <span className="text-sm text-orange-500">
+                {meal.calories} cal
+              </span>
+            </div>
+          </div>
 
-                  // Only trigger context menu for quick taps (not scrolls)
-                  // - Duration should be less than 300ms (quick tap)
-                  // - Movement should be minimal (less than 10px)
-                  if (duration < 300 && endEvent.changedTouches.length > 0) {
-                    const endTouch = endEvent.changedTouches[0];
-                    const deltaX = Math.abs(endTouch.clientX - startX);
-                    const deltaY = Math.abs(endTouch.clientY - startY);
-
-                    if (deltaX < 10 && deltaY < 10) {
-                      // This was a tap, not a scroll - trigger context menu
-                      endEvent.preventDefault();
-                      endEvent.stopPropagation();
-
-                      const contextMenuEvent = new MouseEvent("contextmenu", {
-                        bubbles: true,
-                        cancelable: true,
-                        clientX: startX,
-                        clientY: startY,
-                      });
-                      targetElement.dispatchEvent(contextMenuEvent);
-                    }
-                  }
-
-                  // Clean up event listener
-                  document.removeEventListener("touchend", handleTouchEnd);
-                };
-
-                // Add touch end listener
-                document.addEventListener("touchend", handleTouchEnd, {
-                  once: true,
-                });
-              }}
-            >
-              {/* Recipe Title and Grade */}
-              <div className="flex items-start justify-between">
-                <h4 className="font-semibold text-gray-900 text-sm leading-tight flex-1">
-                  {meal.title}
-                </h4>
-                <div
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ml-2 flex-shrink-0 ${getGradeStyles(meal.grade)}`}
+          {/* Macros */}
+          <div className="flex justify-between mt-4 mb-4 items-end -ml-2">
+            <div className="flex flex-wrap gap-2 items-center max-w-[180px]">
+              {[
+                { label: "Proteins", value: meal.macros.protein },
+                { label: "Carbs", value: meal.macros.carbs },
+                { label: "Fibers", value: meal.macros.fat },
+              ].map((macro) => (
+                <Badge
+                  key={macro.label}
+                  className="text-[10px] shadow-[inset_0_2px_2px_rgba(0,0,0,0.2)] bg-background-light text-black font-medium px-2.5 py-1.5 h-auto whitespace-nowrap"
                 >
-                  {meal.grade}
-                </div>
-              </div>
-
-              {/* Servings and Time - Dimmed */}
-              <div className="flex items-center gap-3 text-gray-400">
-                <div className="flex items-center gap-1">
-                  <User className="w-3 h-3" />
-                  <span className="text-xs">Servings: {meal.servings}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  <span className="text-xs">{meal.cookingTime} min</span>
-                </div>
-              </div>
-
-              {/* Calories and Macros */}
-              <div className="flex items-center justify-between gap-3">
-                {/* Calories - More prominent */}
-                <div className="flex items-center gap-1.5">
-                  <Zap className="w-4 h-4 text-orange-500" />
-                  <span className="font-bold text-sm text-gray-900">
-                    {meal.calories} cal
+                  <span className="flex items-center">
+                    {macro.label} {macro.value}g
                   </span>
-                </div>
-
-                {/* Macros - Equal spacing */}
-                <div className="flex items-center gap-2">
-                  <Badge className="bg-green-500 hover:bg-green-600 text-white px-2.5 py-0.5 text-xs font-medium">
-                    P {meal.macros.protein}g
-                  </Badge>
-                  <Badge className="bg-blue-500 hover:bg-blue-600 text-white px-2.5 py-0.5 text-xs font-medium">
-                    C {meal.macros.carbs}g
-                  </Badge>
-                  <Badge className="bg-amber-500 hover:bg-amber-600 text-white px-2.5 py-0.5 text-xs font-medium">
-                    F {meal.macros.fat}g
-                  </Badge>
-                </div>
+                </Badge>
+              ))}
+            </div>
+            <div className="flex flex-col h-full items-center justify-center gap-1">
+              <span className="text-[8px] text-muted-foreground uppercase tracking-wide">
+                Score
+              </span>
+              <div
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${getGradeStyles(meal.grade)}`}
+              >
+                {meal.grade}
               </div>
             </div>
-          </ContextMenuTrigger>
-          <ContextMenuContent className="w-48">
-            <ContextMenuItem
-              onClick={onShowRecipe}
-              className="flex items-center gap-2 cursor-pointer"
-            >
-              <Eye className="w-4 h-4" />
-              <span>Show recipe</span>
-            </ContextMenuItem>
-            <ContextMenuItem
-              onClick={onRegenerate}
-              className="flex items-center gap-2 cursor-pointer"
-              disabled={isCurrentlyGenerating}
-            >
-              <RotateCcw className="w-4 h-4" />
-              <span>
-                {isCurrentlyGenerating ? "Generating..." : "Regenerate"}
-              </span>
-            </ContextMenuItem>
-            <ContextMenuItem
-              onClick={onDelete}
-              className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600"
-            >
-              <Trash2 className="w-4 h-4" />
-              <span>Delete</span>
-            </ContextMenuItem>
-          </ContextMenuContent>
-        </ContextMenu>
+          </div>
+        </div>
       ) : (
-        <>
-          <div className="py-2">
-            <p className="text-gray-500 text-sm">No meal selected</p>
-          </div>
-
-          {/* Action Buttons - Only show when no meal */}
-          <div className="flex gap-3">
-            <Button
-              variant="outline"
-              className="flex-1 flex items-center justify-center gap-2 py-2.5"
-              onClick={onSaved}
-              disabled={isGenerating}
-            >
-              <BookmarkIcon className="w-4 h-4" />
-              <span className="text-sm font-medium">Pick</span>
-            </Button>
-
-            <Button
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-orange-500 hover:bg-gray-800 active:scale-95 transition-transform"
-              onClick={onMealSelection}
-              disabled={isGenerating}
-            >
-              <CheckSquare className="w-4 h-4" />
-              <span className="text-sm font-medium">Select</span>
-            </Button>
-          </div>
-        </>
+        <div className="flex-1 grow flex flex-col gap-[4px] items-center justify-center">
+          <p className="text-muted-foreground text-sm">No meal selected</p>
+          <p className="text-muted-foreground text-xs">
+            Choose from saved or generate new
+          </p>
+        </div>
       )}
+
+      {/* Action Buttons - Always show */}
+      <div className="flex gap-[6px] mt-auto w-full">
+        <Button
+          variant="outline"
+          className="flex-1 w-1/2 flex shadow-sm/10 items-center justify-center bg-white border border-gray-300 gap-2 py-2 text-gray-700 hover:bg-gray-50"
+          onClick={onSaved}
+          disabled={isGenerating}
+        >
+          <BookmarkIcon className="w-4 h-4" />
+          <span className="text-sm font-medium">Saved</span>
+        </Button>
+
+        <Button
+          className="flex-1 w-1/2 flex items-center justify-center gap-2 py-2 bg-orange-500 text-white hover:bg-orange-600 active:scale-95 transition-transform"
+          onClick={onMealSelection}
+          disabled={isGenerating}
+        >
+          <CheckSquare className="w-4 h-4" />
+          <span className="text-sm font-medium">Select</span>
+        </Button>
+      </div>
 
       {/* Loading Overlay */}
       {isCurrentlyGenerating && (
