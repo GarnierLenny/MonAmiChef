@@ -92,7 +92,7 @@ export const ProgressCard = ({
 
   return (
     <Card
-      className={`rounded-xl border-0 bg-background shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)] inset-shadow-blue-200 cursor-pointer hover:shadow-md`}
+      className={`rounded-xl border-0 bg-background shadow-[inset_0_2px_6px_rgba(0,0,0,0.3)] inset-shadow-blue-200 cursor-pointer hover:shadow-md`}
       onClick={onDetailsClick}
     >
       <CardContent className="px-4">
@@ -121,9 +121,9 @@ export const ProgressCard = ({
           {/* Center - Progress bar */}
           <div className="flex-1 mx-6">
             <Progress
-              value={Math.min(dayProgress.calories.percentage, 100)}
-              //value={24}
-              className="h-3 bg-background-dark-layer shadow-[inset_0_2px_4px_rgba(0,0,0,0.2)]  progress-calories"
+              //value={Math.min(dayProgress.calories.percentage, 100)}
+              value={24}
+              className="h-3 bg-background-dark-layer shadow-[inset_0_-2px_6px_rgba(0,0,0,0.4)]  progress-calories"
             />
           </div>
 

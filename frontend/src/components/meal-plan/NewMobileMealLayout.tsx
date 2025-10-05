@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import {
   ChevronLeft,
@@ -78,8 +78,23 @@ export const NewMobileMealLayout = ({
     day: string;
     slot: MealSlot;
   } | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
+  const prevSelectedMealsSize = useRef(selectedMeals.size);
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const currentDay = DAYS_OF_WEEK[currentDayIndex];
+
+  // Detect when going from 1 selected meal to 0 to trigger closing animation
+  useEffect(() => {
+    if (prevSelectedMealsSize.current > 0 && selectedMeals.size === 0) {
+      setIsClosing(true);
+      // Reset closing state after animation completes
+      const timer = setTimeout(() => {
+        setIsClosing(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+    prevSelectedMealsSize.current = selectedMeals.size;
+  }, [selectedMeals.size]);
 
   const handlePreviousDay = () => {
     if (currentDayIndex > 0) {
@@ -132,9 +147,9 @@ export const NewMobileMealLayout = ({
   return (
     <div className="flex flex-col h-full w-screen pb-18 bg-background-dark-layer overflow-hidden">
       {/* Day Navigation */}
-      <div className="px-4 mt-2">
+      <div className="px-4 mt-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center border-2 border-orange-300 bg-white rounded-full justify-between flex-1 px-2">
+          <div className="flex items-center shadow-sm/10 bg-background rounded-full justify-between flex-1 px-2">
             <Button
               variant="ghost"
               size="sm"
@@ -166,7 +181,7 @@ export const NewMobileMealLayout = ({
             variant="ghost"
             size="sm"
             onClick={() => setIsCalendarOpen(true)}
-            className="p-1 bg-white px-2 hover:bg-gray-100 border-2 border-orange-300 rounded-full transition-colors ml-2"
+            className="p-2.5 bg-background hover:bg-gray-100 shadow-sm/20 rounded-full transition-colors ml-2"
           >
             <Calendar className="w-5 h-5 text-gray-600" />
           </Button>
@@ -186,7 +201,7 @@ export const NewMobileMealLayout = ({
       </div>
 
       {/* Meal Cards */}
-      <div className="flex flex-row p-4 items-center gap-[16px] overflow-y-auto no-scrollbar">
+      <div className="flex flex-row px-4 mt-2 mb-4 pb-10 items-center gap-[16px] overflow-y-auto no-scrollbar">
         {MEAL_SLOTS.map((mealSlot) => {
           const meal = mealPlan[currentDay]?.[mealSlot];
           const slotKey = `${currentDay}-${mealSlot}`;
@@ -211,11 +226,14 @@ export const NewMobileMealLayout = ({
         })}
       </div>
 
-      {/* Selected Meal Tags and Input Bar - Only show when meals are selected */}
-      {selectedMeals.size > 0 && (
-        <>
+      {/* Spacer to push input to bottom */}
+      <div className="flex-1" />
+
+      {/* Selected Meal Tags and Input Bar - Show when meals are selected */}
+      {(selectedMeals.size > 0 || isClosing) && (
+        <div className={isClosing ? "animate-slide-down" : "animate-slide-up"}>
           {/* Selected Meal Tags */}
-          <div className="px-4 pt-2 border-t border-orange-200">
+          <div className="px-4 pt-2">
             <div className="flex items-center justify-between">
               <div className="flex flex-wrap gap-2">
                 {mealTags.map((tag, index) => (
@@ -253,11 +271,11 @@ export const NewMobileMealLayout = ({
             onInputChange={setInputValue}
             onSubmit={onSubmit}
             isGenerating={isGenerating}
-            placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
+            placeholder="Veggie and high protein"
             canSend={inputValue.trim() !== "" || selectedMeals.size > 0}
-            className="p-4 pt-0 bg-orange-50 pb-safe meal-plan-input"
+            className="p-4 pt-0 bg-background-dark-layer pb-safe meal-plan-input"
           />
-        </>
+        </div>
       )}
 
       {/* Calendar Modal */}

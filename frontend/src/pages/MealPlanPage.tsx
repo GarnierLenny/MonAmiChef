@@ -658,6 +658,11 @@ export default function MealPlanPage({
 
   const handleDeleteMeal = async (day: string, meal: MealSlot) => {
     await removeMeal(day, meal);
+    // Unselect the meal if it was selected
+    const slotKey = `${day}-${meal}`;
+    if (selectedMeals.has(slotKey)) {
+      handleMealSelection(day, meal);
+    }
   };
 
   const handleSavedMeals = (day: string, meal: MealSlot) => {
@@ -865,7 +870,7 @@ export default function MealPlanPage({
                   setSelectedMeals(new Set()); // Clear selected meals after submission
                 }}
                 isGenerating={isGenerating}
-                placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
+                placeholder="Veggie high protein"
                 canSend={inputValue.trim() !== "" || selectedMeals.size > 0}
                 className="p-6 bg-white"
               />

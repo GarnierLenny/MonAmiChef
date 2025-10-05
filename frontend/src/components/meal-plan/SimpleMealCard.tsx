@@ -11,6 +11,7 @@ import {
   User,
   Clock,
   Zap,
+  X,
 } from "lucide-react";
 import { getGradeStyles } from "./utils";
 import type { Meal, MealSlot } from "./constants";
@@ -166,12 +167,25 @@ export const SimpleMealCard = ({
         </Button>
 
         <Button
-          className="flex-1 w-1/2 flex items-center justify-center gap-2 py-2 bg-orange-500 text-white hover:bg-orange-600 active:scale-95 transition-transform"
+          className={`flex-1 w-1/2 flex items-center justify-center gap-2 py-2 active:scale-95 transition-transform ${
+            isSelected
+              ? "bg-gray-500 text-white hover:bg-gray-800"
+              : "bg-orange-500 text-white hover:bg-orange-600"
+          }`}
           onClick={onMealSelection}
           disabled={isGenerating}
         >
-          <CheckSquare className="w-4 h-4" />
-          <span className="text-sm font-medium">Select</span>
+          {isSelected ? (
+            <>
+              <X className="w-4 h-4" />
+              <span className="text-sm font-medium">Unselect</span>
+            </>
+          ) : (
+            <>
+              <CheckSquare className="w-4 h-4" />
+              <span className="text-sm font-medium">Select</span>
+            </>
+          )}
         </Button>
       </div>
 

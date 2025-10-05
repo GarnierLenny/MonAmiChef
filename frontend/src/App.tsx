@@ -203,6 +203,21 @@ function App() {
     return path || "generator";
   };
 
+  const getPageTitle = () => {
+    const path = location.pathname;
+    if (path === "/meal-plan-chat") return "Meal Plan";
+    if (path === "/macros") return "Macros";
+    if (path === "/calories") return "Calories";
+    if (path === "/timer") return "Timer";
+    if (path === "/notifications") return "Notifications";
+    if (path === "/dashboard") return "Dashboard";
+    if (path === "/explore") return "Explore";
+    if (path === "/settings") return "Settings";
+    if (path === "/recipes/saved") return "Saved Recipes";
+    if (path === "/profile") return "Profile";
+    return "Mon Ami Chef";
+  };
+
   const getSubscriptionPlanName = () => {
     return "Free Plan";
   };
@@ -226,7 +241,10 @@ function App() {
       <OrganizationStructuredData />
       <div className="flex flex-col mobile-viewport overflow-hidden bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
       {!isRecipePage && !isChatPage && (
-        <MobileTopBar onMenuClick={() => setIsMobileSidebarOpen(true)} />
+        <MobileTopBar
+          onMenuClick={() => setIsMobileSidebarOpen(true)}
+          title={getPageTitle()}
+        />
       )}
       
       {!isRecipePage && (

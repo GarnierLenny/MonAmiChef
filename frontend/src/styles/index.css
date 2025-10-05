@@ -5,8 +5,8 @@
   --color-border: oklch(0.922 0 0);
   --color-input: oklch(0.922 0 0);
   --color-ring: oklch(0.72 0.15 45);
-  --color-background: hsl(0, 0%, 96%);
-  --color-background-dark-layer: hsl(0, 0%, 90%);
+  --color-background: hsl(0, 0%, 97%);
+  --color-background-dark-layer: hsl(0, 0%, 92%);
   --color-background-light: hsl(0, 0%, 100%);
   --color-foreground: hsl(0, 0%, 5%);
   --color-foreground-muted: hsl(0, 0%, 5%);
@@ -324,5 +324,36 @@
 
   .grade-d {
     background-color: oklch(0.55 0.15 15);
+  }
+
+  /* Slide up animation for input bar */
+  @keyframes slideUp {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes slideDown {
+    from {
+      transform: translateY(0);
+      opacity: 1;
+    }
+    to {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+  }
+
+  .animate-slide-up {
+    animation: slideUp 0.3s ease-out forwards;
+  }
+
+  .animate-slide-down {
+    animation: slideDown 0.3s ease-in forwards;
   }
 }
