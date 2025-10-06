@@ -60,10 +60,10 @@ export const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
           className,
         )}
       >
-        <div className="">
+        <div className={cn(!className?.includes("meal-plan-input") && "px-4 pb-4")}>
           {/* Selected Tags - Only show for non-meal-plan inputs */}
           {tags.length > 0 && !className?.includes("meal-plan-input") && (
-            <div>
+            <div className="mb-3">
               <div className="flex items-center justify-end mb-2">
                 {onClearAllTags && (
                   <Button
