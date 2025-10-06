@@ -119,7 +119,7 @@ export default function SavedRecipes() {
 
   if (isLoadingAuth) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background-dark-layer flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
@@ -131,7 +131,7 @@ export default function SavedRecipes() {
   if (!user) {
     return (
       <>
-        <div className="overflow-hidden bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 flex items-center justify-center px-4">
+        <div className="overflow-hidden bg-background-dark-layer flex items-center justify-center px-4">
           <div className="text-center w-full max-w-2xl mx-auto">
             {/* Friendly illustration */}
             <div className="relative mb-12">
@@ -185,7 +185,7 @@ export default function SavedRecipes() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background-dark-layer flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your saved recipes...</p>
@@ -195,15 +195,8 @@ export default function SavedRecipes() {
   }
 
   return (
-    <div className="overflow-hidden bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
+    <div className="flex overflow-hidden bg-background-dark-layer flex-1">
       <div className="w-screen mx-auto px-6 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Saved Recipes
-          </h1>
-          <p className="text-gray-600">Your collection of favorite recipes</p>
-        </div>
-
         {savedRecipes.length === 0 ? (
           <div className="text-center py-16">
             <div className="relative mb-8">
@@ -229,7 +222,7 @@ export default function SavedRecipes() {
             </a>
           </div>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grow flex-1 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {savedRecipes.map((saved) => (
               <div
                 key={saved.id}

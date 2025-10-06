@@ -24,17 +24,17 @@ const Settings = () => {
 
   // Get browser's preferred language for display
   const getBrowserLanguage = () => {
-    const browserLang = navigator.language || 'en';
-    if (browserLang.startsWith('fr')) return 'fr';
-    if (browserLang.startsWith('en')) return 'en';
-    return 'en';
+    const browserLang = navigator.language || "en";
+    if (browserLang.startsWith("fr")) return "fr";
+    if (browserLang.startsWith("en")) return "en";
+    return "en";
   };
 
   const browserLang = getBrowserLanguage();
   const isUsingBrowserDefault = i18n.language === browserLang;
 
   return (
-    <div className="min-h-screen w-screen overflow-y-hidden bg-orange-50">
+    <div className="min-h-screen w-screen overflow-y-hidden bg-background-dark-layer pt-4">
       <main className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Settings Cards */}
@@ -51,10 +51,11 @@ const Settings = () => {
                       {t("navigation.language")}
                     </CardTitle>
                     <CardDescription>
-                      {t('settings.languageDescription')}
+                      {t("settings.languageDescription")}
                       {isUsingBrowserDefault && (
                         <span className="block text-green-600 text-sm mt-1">
-                          ✓ {t('settings.usingBrowserLanguage')} ({navigator.language})
+                          ✓ {t("settings.usingBrowserLanguage")} (
+                          {navigator.language})
                         </span>
                       )}
                     </CardDescription>
@@ -96,10 +97,10 @@ const Settings = () => {
                   </div>
                   <div>
                     <CardTitle className="text-chef-brown">
-                      {t('settings.accountSettings')}
+                      {t("settings.accountSettings")}
                     </CardTitle>
                     <CardDescription>
-                      {t('settings.accountDescription')}
+                      {t("settings.accountDescription")}
                     </CardDescription>
                   </div>
                 </div>
@@ -110,15 +111,15 @@ const Settings = () => {
             <Card className="bg-white/80 backdrop-blur-sm border border-chef-brown/20 shadow-lg opacity-60">
               <CardHeader>
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-chef-brown to-chef-orange rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-orange-500 rounded-full flex items-center justify-center">
                     <Bell className="h-5 w-5 text-white" />
                   </div>
                   <div>
                     <CardTitle className="text-chef-brown">
-                      {t('settings.notifications')}
+                      {t("settings.notifications")}
                     </CardTitle>
                     <CardDescription>
-                      {t('settings.notificationsDescription')}
+                      {t("settings.notificationsDescription")}
                     </CardDescription>
                   </div>
                 </div>
@@ -132,4 +133,3 @@ const Settings = () => {
 };
 
 export default Settings;
-

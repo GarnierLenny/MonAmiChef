@@ -287,40 +287,17 @@ function App() {
                 </ComponentErrorBoundary>
               }
             />
-            <Route
-              path="/macros"
-              element={
-                <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
-                  <SEOHead
-                    title="Recipe Macros & Nutrition Analysis - Mon Ami Chef"
-                    description="Analyze the nutritional content and macros of your saved recipes. Track protein, carbs, fat, and calories for better meal planning and health goals."
-                    keywords="recipe macros, nutrition analysis, calorie tracking, protein carbs fat, recipe nutrition, meal planning macros"
-                  />
-                  <div className="px-4 pt-4">
-                    <Breadcrumb />
-                  </div>
-                  <NutritionView
-                    currentSubView="macros"
-                    recipe={null}
-                    session={session}
-                    user={user}
-                  />
-                </div>
-              }
-            />
+
             <Route path="/recipe/:id" element={<RecipePage />} />
             <Route
               path="/calories"
               element={
-                <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
+                <div className="mobile-viewport bg-background-dark-layer w-screen overflow-y-auto">
                   <SEOHead
                     title="Calorie Calculator & BMI Tool - Mon Ami Chef"
                     description="Calculate your daily calorie needs, BMI, and macronutrient requirements. Get personalized nutrition recommendations for your health and fitness goals."
                     keywords="calorie calculator, BMI calculator, daily calories, nutrition calculator, macro calculator, weight management"
                   />
-                  <div className="px-4 pt-4">
-                    <Breadcrumb />
-                  </div>
                   <NutritionView
                     currentSubView="calories"
                     recipe={null}
@@ -359,7 +336,7 @@ function App() {
             <Route
               path="/dashboard"
               element={
-                <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
+                <div className="mobile-viewport bg-background-dark-layer w-screen overflow-y-auto">
                   <SEOHead
                     title="Cooking Dashboard - Mon Ami Chef"
                     description="View your cooking stats, saved recipes, and meal planning progress. Track your culinary journey with detailed insights and analytics."
@@ -421,15 +398,12 @@ function App() {
             <Route
               path="/recipes/saved"
               element={
-                <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
+                <div className="mobile-viewport bg-background-dark-layer w-screen overflow-y-auto">
                   <SEOHead
                     title="Saved Recipes Collection - Mon Ami Chef"
                     description="Access your personal collection of saved recipes. View, organize, and manage all your favorite AI-generated recipes in one place."
                     keywords="saved recipes, recipe collection, favorite recipes, my recipes, recipe library, personal recipes"
                   />
-                  <div className="px-4 pt-4">
-                    <Breadcrumb />
-                  </div>
                   <SavedRecipes />
                 </div>
               }
