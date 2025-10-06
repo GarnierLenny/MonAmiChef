@@ -77,7 +77,7 @@ export const SimpleMealCard = ({
       {/* Meal Type Header */}
       <div className="flex items-center gap-2">
         {getMealIcon()}
-        <h3 className="text-muted-foreground uppercase tracking-wide text-xs">
+        <h3 className="text-foreground-muted uppercase tracking-wide text-xs">
           {mealSlot}
         </h3>
       </div>
@@ -85,31 +85,29 @@ export const SimpleMealCard = ({
       {/* Meal Content or Empty State */}
       {meal ? (
         <div
-          className="space-y-2 mt-3 cursor-pointer flex-1 flex flex-col"
+          className="space-y-2 mt-2.5 cursor-pointer flex-1 flex flex-col"
           onClick={onCardClick}
         >
           {/* Recipe Title */}
           <div className="flex items-start mb-3 justify-between">
-            <h4 className="font-semibold text-base leading-tight flex-1">
-              {meal.title}
-            </h4>
+            <h4 className="font-semibold text-sm flex-1">{meal.title}</h4>
           </div>
 
           {/* Servings and Time */}
           <div className="flex items-center gap-2 text-gray-600">
-            <div className="flex items-center gap-1 text-muted-foreground">
+            <div className="flex items-center gap-1 text-foreground-muted">
               <User className="w-3.5 h-3.5" />
-              <span className="text-sm">{meal.servings}</span>
+              <span className="text-xs">{meal.servings}</span>
             </div>
-            <span className="text-muted-foreground">•</span>
-            <div className="flex items-center gap-1 text-muted-foreground">
+            <span className="text-foreground-muted">•</span>
+            <div className="flex items-center gap-1 text-foreground-muted">
               <Clock className="w-3.5 h-3.5" />
-              <span className="text-sm">{meal.cookingTime} min</span>
+              <span className="text-xs">{meal.cookingTime} min</span>
             </div>
-            <span className="text-muted-foreground">•</span>
+            <span className="text-foreground-muted">•</span>
             <div className="flex items-center gap-1">
               <Zap className="w-3.5 h-3.5 text-orange-500" />
-              <span className="text-sm text-orange-500">
+              <span className="text-xs text-orange-500">
                 {meal.calories} cal
               </span>
             </div>
@@ -134,7 +132,7 @@ export const SimpleMealCard = ({
               ))}
             </div>
             <div className="flex flex-col h-full items-center justify-center gap-1">
-              <span className="text-[8px] text-muted-foreground uppercase tracking-wide">
+              <span className="text-[8px] text-foreground-muted uppercase tracking-wide">
                 Score
               </span>
               <div
@@ -147,8 +145,8 @@ export const SimpleMealCard = ({
         </div>
       ) : (
         <div className="flex-1 grow flex flex-col gap-[4px] items-center justify-center">
-          <p className="text-muted-foreground text-sm">No meal selected</p>
-          <p className="text-muted-foreground text-xs">
+          <p className="text-foreground-muted text-sm">No meal selected</p>
+          <p className="text-foreground-muted text-xs">
             Choose from saved or generate new
           </p>
         </div>

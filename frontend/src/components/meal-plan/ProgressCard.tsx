@@ -92,10 +92,10 @@ export const ProgressCard = ({
 
   return (
     <Card
-      className={`rounded-xl border-0 py-[10px] bg-background shadow-[inset_0_2px_6px_rgba(0,0,0,0.3)] inset-shadow-blue-200 cursor-pointer hover:shadow-md`}
+      className={`rounded-xl border-0 py-[4px] bg-background-dark-layer shadow-none inset-shadow-blue-200 cursor-pointer hover:shadow-md`}
       onClick={onDetailsClick}
     >
-      <CardContent className="px-4">
+      <CardContent className="px-2">
         <div className="flex items-center  justify-between">
           {/* Left side - Current calories */}
           <div className="text-left">
@@ -112,7 +112,6 @@ export const ProgressCard = ({
             <Progress
               value={Math.min(dayProgress.calories.percentage, 100)}
               //value={24}
-              className="h-3 bg-background-dark-layer shadow-[inset_0_-2px_6px_rgba(0,0,0,0.4)]  progress-calories"
             />
           </div>
 

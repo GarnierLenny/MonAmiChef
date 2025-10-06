@@ -189,7 +189,7 @@ export const NewMobileMealLayout = ({
       </div>
 
       {/* Progress Card */}
-      <div className="px-4 pt-4 pb-2">
+      <div className="px-4 pt-[18px] pb-2">
         <ProgressCard
           mealPlan={mealPlan}
           currentDay={currentDay}
@@ -231,7 +231,9 @@ export const NewMobileMealLayout = ({
 
       {/* Selected Meal Tags and Input Bar - Show when meals are selected */}
       {(selectedMeals.size > 0 || isClosing) && (
-        <div className={isClosing ? "animate-slide-down" : "animate-slide-up"}>
+        <div
+          className={`${isClosing ? "animate-slide-down absolute bottom-0 left-0 right-0" : "animate-slide-up"}`}
+        >
           {/* Selected Meal Tags */}
           <div className="px-4">
             <div className="flex items-center justify-between">
