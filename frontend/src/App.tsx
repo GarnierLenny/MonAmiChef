@@ -34,6 +34,7 @@ import SEOHead from "./components/SEOHead";
 import Breadcrumb from "./components/Breadcrumb";
 import OrganizationStructuredData from "./components/OrganizationStructuredData";
 import { Toaster } from "@/components/ui/toaster";
+import { useToast } from "@/hooks/use-toast";
 import {
   AppErrorBoundary,
   ComponentErrorBoundary,
@@ -41,6 +42,7 @@ import {
 
 import { supabase } from "./lib/supabase";
 import { User } from "./types/types";
+import { useSubscription, getSubscriptionDisplayName } from "./hooks/useSubscription";
 
 function RequireAuth({
   session,
@@ -55,6 +57,7 @@ function RequireAuth({
 function App() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { toast } = useToast();
   const isRecipePage = location.pathname.startsWith("/recipe/");
   const isChatPage = location.pathname === "/";
   const isMealPlanPage = location.pathname === "/meal-plan-chat";
@@ -65,6 +68,8 @@ function App() {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  const subscription = useSubscription(session);
 
   // 🔁 used to force-remount ChatPage (reset chats)
   const [chatResetKey, setChatResetKey] = useState(0);
@@ -80,6 +85,21 @@ function App() {
   const resetChats = useCallback(() => {
     setChatResetKey((k) => k + 1); // remount ChatPage
   }, []);
+
+  // Handle canceled checkout
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.has("canceled")) {
+      toast({
+        title: "Checkout Canceled",
+        description: "Your payment was canceled. You can try again whenever you're ready!",
+        variant: "default",
+      });
+      // Remove the canceled param
+      params.delete("canceled");
+      navigate({ search: params.toString() }, { replace: true });
+    }
+  }, [location.search, navigate, toast]);
 
   // Scroll to top on route change
   useEffect(() => {
@@ -222,7 +242,7 @@ function App() {
   };
 
   const getSubscriptionPlanName = () => {
-    return "Free Plan";
+    return getSubscriptionDisplayName(subscription.status);
   };
 
   if (isLoadingAuth) {
@@ -389,7 +409,7 @@ function App() {
                     description="Customize your MonAmiChef experience. Change language settings and preferences."
                     keywords="settings, preferences, language, configuration, customization"
                   />
-                  <Settings />
+                  <Settings onPricingClick={() => setIsPricingModalOpen(true)} />
                 </>
               }
             />

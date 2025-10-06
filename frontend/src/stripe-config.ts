@@ -13,11 +13,22 @@ export const products: Product[] = [
   {
     id: "prod_Si53HWH2IT2A4M",
     priceId: "price_1RmetOIjlR3LvH1zBaQ1xU4O",
-    name: "Meal-planner",
+    name: "Premium",
     description:
       "Access to premium meal planning features with AI-powered recipe generation and advanced nutritional analysis.",
     mode: "subscription",
-    price: 5.0,
+    price: 2.99,
+    currency: "EUR",
+    interval: "month",
+  },
+  {
+    id: "prod_family_plan",
+    priceId: "price_family_plan_monthly",
+    name: "Family Plan",
+    description:
+      "Perfect for families! Share recipes, create family meal plans, and manage multiple dietary preferences all in one place.",
+    mode: "subscription",
+    price: 5.99,
     currency: "EUR",
     interval: "month",
   },
