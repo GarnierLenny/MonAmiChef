@@ -58,7 +58,20 @@
     "recipeCompleted": "Recette terminée !",
     "generating": "Génération en cours",
     "generatingRecipe": "recette...",
-    "macros": "Macros"
+    "macros": "Macros",
+    "addMeal": "Ajouter un repas",
+    "add": "Ajouter",
+    "min": "min",
+    "servingsLabel": "Portions:",
+    "cal": "cal",
+    "checked": "cochés",
+    "stepsDone": "étapes terminées",
+    "setYourGoals": "Définir vos objectifs",
+    "trackNutritionProgress": "Suivez vos progrès nutritionnels",
+    "setGoals": "Définir objectifs",
+    "calculate": "Calculer",
+    "failedToLoadRecipe": "Échec du chargement des détails de la recette",
+    "tryAgain": "Réessayer"
   },
   "progress": {
     "consumed": "Consommé",

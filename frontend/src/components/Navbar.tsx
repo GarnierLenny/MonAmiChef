@@ -12,6 +12,8 @@ import {
   LogIn,
   LogOut,
   Heart,
+  History,
+  Settings2,
 } from "lucide-react";
 
 interface NavbarProps {
@@ -22,6 +24,8 @@ interface NavbarProps {
   subscriptionPlan: string;
   onAuthClick: () => void;
   onPricingClick: () => void;
+  onToggleChatHistory?: () => void;
+  onTogglePreferences?: () => void;
 }
 
 export default function Navbar({
@@ -47,23 +51,16 @@ export default function Navbar({
       color: "text-orange-600",
     },
     {
-      id: "recipes",
-      label: "My Recipes",
-      icon: Bookmark,
+      id: "meal-plan-chat",
+      label: "Meal Plan",
+      icon: CalendarDays,
       color: "text-green-600",
-      dropdown: [
-        { id: "recipes/saved", label: "Saved Recipes", icon: Heart },
-      ],
     },
     {
-      id: "nutrition",
-      label: "Nutrition & Analysis",
+      id: "calories",
+      label: "Calorie Calculator",
       icon: Calculator,
       color: "text-green-600",
-      dropdown: [
-        { id: "macros", label: "Macro Tracker", icon: Bookmark },
-        { id: "calories", label: "Calorie Calculator", icon: Zap },
-      ],
     },
     {
       id: "timer",
@@ -72,17 +69,17 @@ export default function Navbar({
       color: "text-orange-600",
     },
     {
-      id: "meal-plan-chat",
-      label: "Meal Planning",
-      icon: CalendarDays,
+      id: "recipes/saved",
+      label: "My Recipes",
+      icon: Bookmark,
       color: "text-green-600",
     },
-    {
+    /*{
       id: "explore",
       label: "Explore",
       icon: Compass,
       color: "text-orange-600",
-    },
+    },*/
   ];
 
   return (
@@ -178,7 +175,7 @@ export default function Navbar({
           </div>
 
           {/* User Profile / Auth */}
-          <div className="flex items-center space-x-3">
+          <div className="ml-8 flex items-center space-x-3">
             {user ? (
               <>
                 {/* Subscription Badge */}

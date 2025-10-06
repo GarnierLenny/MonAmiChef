@@ -232,7 +232,7 @@ export default function ChatInterface({
     <div className="flex-1 flex flex-col bg-background-dark-layer h-full overflow-hidden">
       <div className="flex-1 flex flex-col min-h-0">
         {/* Messages */}
-        <div className="flex-1 overflow-y-auto px-4 pt-6 pb-20 space-y-4">
+        <div className="flex-1 overflow-y-auto px-4 md:px-8 pt-6 pb-20 space-y-4">
           {messages.map((message, index) => {
             const messageId = message.id ?? `${index}-${message.role}`;
             const isRecipe =
@@ -243,10 +243,10 @@ export default function ChatInterface({
             return (
               <div
                 key={messageId}
-                className={`flex text-xs ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                className={`flex text-xs md:text-base w-full ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
-                  className={`max-w-3xl rounded-2xl px-4 py-3 relative shadow-sm/20 ${
+                  className={`max-w-3xl md:max-w-4xl rounded-2xl px-4 py-3 md:px-6 md:py-5 relative shadow-sm/20 ${
                     message.role === "user"
                       ? "bg-orange-500 text-white"
                       : "bg-background-light text-gray-900"
@@ -254,47 +254,47 @@ export default function ChatInterface({
                 >
                   {message.role === "model" && (
                     <div className="flex items-center space-x-2 mb-2">
-                      <Sparkles className="w-4 h-4 text-orange-500" />
-                      <span className="text-xs font-medium text-orange-600">
+                      <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
+                      <span className="text-xs md:text-sm font-medium text-orange-600">
                         AI Chef
                       </span>
                     </div>
                   )}
 
                   {message.role === "user" ? (
-                    <div className="font-sans text-xs">
+                    <div className="font-sans text-xs md:text-base">
                       <ReactMarkdown>{message.text}</ReactMarkdown>
                     </div>
                   ) : (
-                    <div className="font-sans text-xs">
+                    <div className="font-sans text-xs md:text-base">
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm, remarkBreaks]}
                         components={{
                           p: (props) => (
-                            <p className="my-3 text-xs leading-6" {...props} />
+                            <p className="my-3 text-xs md:text-base leading-6 md:leading-7" {...props} />
                           ),
                           ul: (props) => (
                             <ul
-                              className="my-2 text-xs pl-5 list-disc space-y-1"
+                              className="my-2 text-xs md:text-base pl-5 list-disc space-y-1"
                               {...props}
                             />
                           ),
                           ol: (props) => (
                             <ol
-                              className="my-2  text-xs pl-5 list-decimal space-y-1"
+                              className="my-2 text-xs md:text-base pl-5 list-decimal space-y-1"
                               {...props}
                             />
                           ),
                           li: (props) => <li className="my-1" {...props} />,
                           h1: (props) => (
                             <h3
-                              className="mt-3 mb-1 text-xs font-semibold"
+                              className="mt-3 mb-1 text-xs md:text-lg font-semibold"
                               {...props}
                             />
                           ),
                           h2: (props) => (
                             <h4
-                              className="mt-3 mb-1 text-xs font-semibold"
+                              className="mt-3 mb-1 text-xs md:text-base font-semibold"
                               {...props}
                             />
                           ),
@@ -311,17 +311,17 @@ export default function ChatInterface({
                               handleSaveRecipe(message.text, messageId)
                             }
                             disabled={isSaving}
-                            className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
+                            className={`flex items-center space-x-2 px-4 py-2 md:px-5 md:py-2.5 rounded-lg text-sm md:text-base font-medium transition-all duration-200 ${
                               isSaved
                                 ? "bg-green-100 text-green-700 hover:bg-green-200"
                                 : "bg-orange-100 text-orange-700 hover:bg-orange-200 hover:scale-105"
                             } ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
                           >
                             {isSaving ? (
-                              <Loader2 className="w-4 h-4 animate-spin" />
+                              <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
                             ) : (
                               <Heart
-                                className={`w-4 h-4 ${isSaved ? "fill-current" : ""}`}
+                                className={`w-4 h-4 md:w-5 md:h-5 ${isSaved ? "fill-current" : ""}`}
                               />
                             )}
                             <span>
@@ -342,17 +342,17 @@ export default function ChatInterface({
           })}
 
           {isGenerating && (
-            <div className="flex mb-18 justify-start">
-              <div className="max-w-3xl rounded-2xl px-6 py-4 bg-gray-100">
+            <div className="flex mb-18 justify-start w-full">
+              <div className="max-w-3xl md:max-w-4xl rounded-2xl px-6 py-4 md:px-8 md:py-6 bg-gray-100">
                 <div className="flex items-center space-x-2 mb-2">
-                  <Sparkles className="w-4 h-4 text-orange-500" />
-                  <span className="text-sm font-medium text-orange-600">
+                  <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-orange-500" />
+                  <span className="text-sm md:text-base font-medium text-orange-600">
                     AI Chef
                   </span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Loader2 className="w-4 h-4 animate-spin text-orange-500" />
-                  <span className="text-gray-600">
+                  <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin text-orange-500" />
+                  <span className="text-gray-600 text-sm md:text-base">
                     Creating your perfect recipe...
                   </span>
                 </div>
