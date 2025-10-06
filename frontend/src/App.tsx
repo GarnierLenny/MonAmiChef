@@ -28,6 +28,7 @@ import AuthCallback from "./components/AuthCallback";
 import SavedRecipes from "./pages/SavedRecipes";
 import NotFoundPage from "./pages/NotFoundPage";
 import Settings from "./pages/Settings";
+import Palette from "./pages/Palette";
 import CanonicalUrl from "./components/CanonicalUrl";
 import RedirectHandler from "./components/RedirectHandler";
 import SEOHead from "./components/SEOHead";
@@ -415,6 +416,7 @@ function App() {
             />
             <Route path="/success" element={<SuccessPage />} />
             <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route path="/palette" element={<Palette />} />
             <Route
               path="/recipes/saved"
               element={

@@ -10,7 +10,74 @@
   --color-background-light: hsl(0, 0%, 100%);
   --color-foreground: hsl(0, 0%, 5%);
   --color-foreground-muted: hsl(0, 0%, 30%);
-  --color-primary: oklch(0.72 0.15 45);
+
+  /* Primary orange palette - from lightest to darkest */
+  --color-primary-100: hsl(33, 96%, 94%);
+  --color-primary-200: hsl(32, 98%, 88%);
+  --color-primary-300: hsl(31, 100%, 78%);
+  --color-primary-400: hsl(30, 100%, 64%);
+  --color-primary-500: hsl(28, 100%, 52%); /* base orange */
+  --color-primary-600: hsl(26, 98%, 44%);
+  --color-primary-700: hsl(25, 96%, 34%);
+  --color-primary-800: hsl(24, 94%, 24%);
+  --color-primary-900: hsl(22, 92%, 14%);
+
+  /* Orange-neutral palette */
+  --color-neutral-100: hsl(34 10% 94%);
+  --color-neutral-200: hsl(33 12% 88%);
+  --color-neutral-300: hsl(32 14% 78%);
+  --color-neutral-400: hsl(31 16% 64%);
+  --color-neutral-500: hsl(30 18% 52%); /* aligned with other 500s */
+  --color-neutral-600: hsl(29 18% 44%);
+  --color-neutral-700: hsl(28 16% 34%);
+  --color-neutral-800: hsl(27 14% 24%);
+  --color-neutral-900: hsl(26 12% 14%);
+
+  /* SUCCESS — warm green (slightly yellow-leaning) */
+  --color-success-100: hsl(145, 76%, 94%);
+  --color-success-200: hsl(144, 82%, 88%);
+  --color-success-300: hsl(143, 90%, 78%);
+  --color-success-400: hsl(142, 96%, 64%);
+  --color-success-500: hsl(140, 96%, 52%);
+  --color-success-600: hsl(139, 94%, 44%);
+  --color-success-700: hsl(138, 90%, 34%);
+  --color-success-800: hsl(136, 86%, 24%);
+  --color-success-900: hsl(134, 82%, 14%);
+
+  /* DANGER — clean red (slightly warmer in lights, deeper toward 0° in darks) */
+  --color-danger-100: hsl(12, 96%, 94%);
+  --color-danger-200: hsl(10, 96%, 88%);
+  --color-danger-300: hsl(8, 98%, 78%);
+  --color-danger-400: hsl(6, 100%, 64%);
+  --color-danger-500: hsl(4, 100%, 52%);
+  --color-danger-600: hsl(2, 96%, 44%);
+  --color-danger-700: hsl(0, 92%, 34%);
+  --color-danger-800: hsl(358, 88%, 24%);
+  --color-danger-900: hsl(356, 84%, 14%);
+
+  /* WARNING — amber (distinct from your primary orange; slightly more yellow) */
+  --color-warning-50: hsl(50, 96%, 97%);
+  --color-warning-100: hsl(50, 96%, 94%);
+  --color-warning-200: hsl(49, 96%, 88%);
+  --color-warning-300: hsl(48, 98%, 78%);
+  --color-warning-400: hsl(48, 100%, 64%);
+  --color-warning-500: hsl(47, 100%, 52%); /* base warning */
+  --color-warning-600: hsl(46, 96%, 44%);
+  --color-warning-700: hsl(46, 92%, 34%);
+  --color-warning-800: hsl(45, 88%, 24%);
+  --color-warning-900: hsl(45, 84%, 14%);
+
+  /* INFO — cobalt/azure (cool to balance the warm UI) */
+  --color-info-100: hsl(220, 96%, 94%);
+  --color-info-200: hsl(218, 96%, 88%);
+  --color-info-300: hsl(216, 98%, 78%);
+  --color-info-400: hsl(214, 100%, 64%);
+  --color-info-500: hsl(212, 100%, 52%);
+  --color-info-600: hsl(210, 96%, 44%);
+  --color-info-700: hsl(208, 92%, 34%);
+  --color-info-800: hsl(206, 88%, 24%);
+  --color-info-900: hsl(204, 84%, 14%);
+
   --color-primary-foreground: oklch(0.985 0 0);
   --color-secondary: oklch(0.96 0.01 220);
   --color-secondary-foreground: oklch(0.25 0.02 220);
