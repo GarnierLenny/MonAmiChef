@@ -1,20 +1,38 @@
+// Import UI components
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+import { Progress } from "./MealPlanProgressBar";
 import { CountUp } from "@/components/ui/count-up";
+
+// Import icons
 import { ChevronRight, TrendingUp, Target, Calculator } from "lucide-react";
+
+// Import utilities and types
 import { calculateDayProgress } from "./utils";
 import type { MealPlan, MealSlot } from "./constants";
 import type { UserGoals } from "../../lib/api/healthApi";
 
+// Import i18n for translations
+import { useTranslation } from "react-i18next";
+
+/**
+ * Props interface for ProgressCard component
+ */
 interface ProgressCardProps {
-  mealPlan: MealPlan;
-  currentDay: string;
-  onDetailsClick: () => void;
-  isMobile?: boolean;
-  userGoals?: UserGoals | null;
-  selectedMeals?: Set<string>;
+  mealPlan: MealPlan; // Complete meal plan data for the week
+  currentDay: string; // Current day identifier (e.g., "monday")
+  onDetailsClick: () => void; // Handler for clicking to view detailed progress
+  isMobile?: boolean; // Flag for mobile-optimized rendering
+  userGoals?: UserGoals | null; // User's nutritional goals (optional)
+  selectedMeals?: Set<string>; // Set of selected meal slot identifiers
 }
 
+/**
+ * ProgressCard Component
+ *
+ * Displays daily caloric progress with a visual progress bar.
+ * Shows current calories consumed vs. goal, with animated count-up numbers.
+ * If user has no goals set, displays a call-to-action to set goals instead.
+ */
 export const ProgressCard = ({
   mealPlan,
   currentDay,
@@ -23,66 +41,79 @@ export const ProgressCard = ({
   userGoals,
   selectedMeals = new Set(),
 }: ProgressCardProps) => {
+  // Get translation function
+  const { t } = useTranslation();
+
+  // Check if user has valid calorie goals set
   const hasGoals =
     userGoals &&
     userGoals.daily_calories_goal &&
     userGoals.daily_calories_goal > 0;
+
+  // Calculate progress for the current day
   const dayProgress = calculateDayProgress(mealPlan, currentDay, userGoals);
   const hasMeals = Object.keys(mealPlan[currentDay] || {}).length > 0;
 
-  // Calculate selected meals for current day
+  // Filter selected meals for current day only
   const selectedMealSlots = Array.from(selectedMeals)
-    .filter(key => key.startsWith(currentDay))
-    .map(key => key.split('-')[1] as MealSlot);
+    .filter((key) => key.startsWith(currentDay))
+    .map((key) => key.split("-")[1] as MealSlot);
 
-  // Get meal summary
+  /**
+   * Get meal summary for a specific slot
+   * Returns calories and status (added, selected, not-selected)
+   */
   const getMealSummary = (slot: MealSlot) => {
     const meal = mealPlan[currentDay]?.[slot];
     const isSelected = selectedMealSlots.includes(slot);
 
     if (meal) {
-      return { calories: meal.calories, status: 'added' };
+      return { calories: meal.calories, status: "added" };
     } else if (isSelected) {
-      return { calories: 0, status: 'selected' };
+      return { calories: 0, status: "selected" };
     }
-    return { calories: 0, status: 'not-selected' };
+    return { calories: 0, status: "not-selected" };
   };
 
-  const breakfastSummary = getMealSummary('breakfast');
-  const lunchSummary = getMealSummary('lunch');
-  const dinnerSummary = getMealSummary('dinner');
+  // Pre-calculate meal summaries for all meal slots
+  const breakfastSummary = getMealSummary("breakfast");
+  const lunchSummary = getMealSummary("lunch");
+  const dinnerSummary = getMealSummary("dinner");
 
-  // If no goals are set, show CTA card
+  // If no goals are set, show CTA (Call-To-Action) card
   if (!hasGoals) {
     return (
       <Card
-        className={`border border-orange-200 rounded-xl cursor-pointer hover:shadow-md transition-shadow bg-gradient-to-r from-orange-50 to-pink-50 ${
+        className={`border border-orange-200 rounded-xl cursor-pointer hover:shadow-md transition-shadow bg-background inset-shadow-2lg ${
           isMobile ? "border-2" : ""
         }`}
         onClick={() => (window.location.href = "/calories")}
       >
         <CardContent className="px-4">
+          {/* Header with title and target icon */}
           <div className="flex items-center justify-between mb-4">
             <h2
               className={`font-semibold text-gray-900 ${isMobile ? "text-sm" : "text-lg"}`}
             >
-              Set Your Goals
+              {t('mealPlan.setYourGoals')}
             </h2>
             <Target
               className={`text-orange-500 ${isMobile ? "w-5 h-5" : "w-6 h-6"}`}
             />
           </div>
 
+          {/* Description and CTA button */}
           <div className="flex items-center justify-between">
             <p
               className={`text-gray-600 flex-1 ${isMobile ? "text-xs" : "text-sm"}`}
             >
-              Track your nutrition progress
+              {t('mealPlan.trackNutritionProgress')}
             </p>
 
+            {/* Gradient button with calculator icon */}
             <div className="inline-flex items-center gap-1 py-2 px-4 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg text-xs font-medium ml-3">
               <Calculator className="w-3 h-3" />
-              {isMobile ? "Set Goals" : "Calculate"}
+              {isMobile ? t('mealPlan.setGoals') : t('mealPlan.calculate')}
             </div>
           </div>
         </CardContent>
@@ -90,53 +121,46 @@ export const ProgressCard = ({
     );
   }
 
+  // Main progress card - shows calories consumed vs goal
   return (
     <Card
-      className={`border border-gray-200 rounded-xl cursor-pointer hover:shadow-md transition-shadow ${
-        isMobile ? "border-2" : ""
-      }`}
+      className={`rounded-xl border-0 py-[4px] bg-background-dark-layer shadow-none inset-shadow-blue-200 cursor-pointer hover:shadow-md`}
       onClick={onDetailsClick}
     >
-      <CardContent className="px-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2
-            className={`font-semibold text-gray-900 ${isMobile ? "text-sm" : "text-lg"}`}
-          >
-            Today's Progress
-          </h2>
-          <ChevronRight
-            className={`text-gray-400 ${isMobile ? "w-4 h-4" : "w-5 h-5"}`}
-          />
-        </div>
-
+      <CardContent className="px-2">
         <div className="flex items-center justify-between">
-          {/* Left side - Current calories */}
+          {/* Left side - Current calories consumed (green to indicate progress) */}
           <div className="text-left">
             <CountUp
               end={dayProgress.calories.used}
               duration={600}
-              suffix=" cal"
+              suffix={` ${t('mealPlan.cal')}`}
               className="text-sm font-semibold text-green-600"
             />
           </div>
 
-          {/* Center - Progress bar */}
+          {/* Center - Visual progress bar showing percentage of goal reached */}
           <div className="flex-1 mx-6">
             <Progress
               value={Math.min(dayProgress.calories.percentage, 100)}
-              className="h-3 bg-gray-200 progress-calories"
+              // Note: Progress bar capped at 100% even if exceeded
             />
           </div>
 
-          {/* Right side - Goal calories */}
+          {/* Right side - Goal calories (gray to indicate target) */}
           <div className="text-right">
             <CountUp
               end={dayProgress.calories.goal}
               duration={600}
-              suffix=" cal"
+              suffix={` ${t('mealPlan.cal')}`}
               className="text-sm font-medium text-gray-600"
             />
           </div>
+
+          {/* Chevron icon to indicate card is clickable for more details */}
+          <ChevronRight
+            className={`text-gray-400 ml-4 ${isMobile ? "w-4 h-4" : "w-5 h-5"}`}
+          />
         </div>
       </CardContent>
     </Card>

@@ -450,7 +450,7 @@ export default function PreferenceSidebar({
 
   return (
     <div
-      className="bg-gradient-to-b from-orange-50 to-pink-50 border-r border-orange-200 h-full overflow-y-auto p-6"
+      className="bg-gradient-to-b from-orange-50 to-pink-50 border-r border-orange-200 h-full overflow-y-auto p-6 w-80 flex-shrink-0"
       style={{ scrollBehavior: "auto" }}
     >
       <div className="mb-8">

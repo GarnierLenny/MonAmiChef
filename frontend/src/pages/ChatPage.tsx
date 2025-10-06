@@ -25,7 +25,7 @@ const MAX_CHARACTERS = 150;
 const cookies = new Cookies(null, { path: "/" });
 
 const initialAIText = (max: number): string =>
-  `Hi! I'm your AI cooking assistant. Tell me what ingredients you have (max ${max} characters) and I'll create a personalized recipe for you based on your preferences!`;
+  `Hi, I’m your AI Chef! Tell me what ingredients you’ve got, and I’ll cook up a recipe just for you.`;
 
 const buildAiGreeting = (): ChatMessage => ({
   id: "initial",

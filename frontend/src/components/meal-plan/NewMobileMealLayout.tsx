@@ -1,11 +1,25 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Calendar, X } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Calendar,
+  X,
+  Eye,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
 import { format, addDays, startOfWeek, differenceInDays } from "date-fns";
 import { SimpleMealCard } from "./SimpleMealCard";
 import { ProgressCard } from "./ProgressCard";
 import { CalendarModal } from "./CalendarModal";
 import { ChatInput } from "@/components/ui/chat-input";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 import {
   DAYS_OF_WEEK,
   MEAL_SLOTS,
@@ -60,8 +74,27 @@ export const NewMobileMealLayout = ({
   onClearSelectedMeals,
 }: NewMobileMealLayoutProps) => {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const [selectedMealSlot, setSelectedMealSlot] = useState<{
+    day: string;
+    slot: MealSlot;
+  } | null>(null);
+  const [isClosing, setIsClosing] = useState(false);
+  const prevSelectedMealsSize = useRef(selectedMeals.size);
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const currentDay = DAYS_OF_WEEK[currentDayIndex];
+
+  // Detect when going from 1 selected meal to 0 to trigger closing animation
+  useEffect(() => {
+    if (prevSelectedMealsSize.current > 0 && selectedMeals.size === 0) {
+      setIsClosing(true);
+      // Reset closing state after animation completes
+      const timer = setTimeout(() => {
+        setIsClosing(false);
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+    prevSelectedMealsSize.current = selectedMeals.size;
+  }, [selectedMeals.size]);
 
   const handlePreviousDay = () => {
     if (currentDayIndex > 0) {
@@ -112,11 +145,11 @@ export const NewMobileMealLayout = ({
   };
 
   return (
-    <div className="flex flex-col h-full w-screen pb-18 bg-orange-50 overflow-hidden">
+    <div className="flex flex-col h-full w-screen pb-18 bg-background-dark-layer overflow-hidden">
       {/* Day Navigation */}
-      <div className="px-4 mt-2">
+      <div className="px-4 mt-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center border-2 border-orange-300 bg-white rounded-full justify-between flex-1 px-2">
+          <div className="flex items-center shadow-sm/10 bg-background rounded-full justify-between flex-1 px-2">
             <Button
               variant="ghost"
               size="sm"
@@ -124,11 +157,11 @@ export const NewMobileMealLayout = ({
               disabled={currentDayIndex === 0}
               className="p-1 hover:bg-gray-100 rounded-full transition-colors"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-600" />
+              <ChevronLeft className="w-3 h-3 text-gray-600" />
             </Button>
 
             <div className="text-center">
-              <div className="font-medium text-gray-900 text-md">
+              <div className="font-medium text-gray-900 text-sm">
                 {format(addDays(weekStart, currentDayIndex), "EEEE, MMM d")}
               </div>
             </div>
@@ -140,7 +173,7 @@ export const NewMobileMealLayout = ({
               disabled={currentDayIndex === 6}
               className="p-1 hover:bg-gray-100 rounded-full transition-colors"
             >
-              <ChevronRight className="w-5 h-5 text-gray-600" />
+              <ChevronRight className="w-3 h-3 text-gray-600" />
             </Button>
           </div>
 
@@ -148,7 +181,7 @@ export const NewMobileMealLayout = ({
             variant="ghost"
             size="sm"
             onClick={() => setIsCalendarOpen(true)}
-            className="p-1 bg-white px-2 hover:bg-gray-100 border-2 border-orange-300 rounded-full transition-colors ml-2"
+            className="p-2.5 bg-background hover:bg-gray-100 shadow-sm/20 rounded-full transition-colors ml-2"
           >
             <Calendar className="w-5 h-5 text-gray-600" />
           </Button>
@@ -156,7 +189,7 @@ export const NewMobileMealLayout = ({
       </div>
 
       {/* Progress Card */}
-      <div className="p-4">
+      <div className="px-4 pt-[18px] pb-2">
         <ProgressCard
           mealPlan={mealPlan}
           currentDay={currentDay}
@@ -168,7 +201,7 @@ export const NewMobileMealLayout = ({
       </div>
 
       {/* Meal Cards */}
-      <div className="flex-1 px-4 space-y-4 overflow-y-auto">
+      <div className="flex flex-row px-4 pt-4 mb-4 pb-10 items-center gap-[16px] overflow-y-auto no-scrollbar">
         {MEAL_SLOTS.map((mealSlot) => {
           const meal = mealPlan[currentDay]?.[mealSlot];
           const slotKey = `${currentDay}-${mealSlot}`;
@@ -181,9 +214,9 @@ export const NewMobileMealLayout = ({
               meal={meal}
               onGenerate={() => onSlotClick(currentDay, mealSlot)}
               onSaved={() => handleSavedMeals(mealSlot)}
-              onShowRecipe={() => onShowRecipe?.(currentDay, mealSlot)}
-              onRegenerate={() => onRegenerate?.(currentDay, mealSlot)}
-              onDelete={() => onDeleteMeal?.(currentDay, mealSlot)}
+              onCardClick={() =>
+                meal && setSelectedMealSlot({ day: currentDay, slot: mealSlot })
+              }
               isGenerating={!meal && isSlotGenerating}
               isRegenerating={meal && isSlotGenerating}
               isSelected={selectedMeals.has(slotKey)}
@@ -193,54 +226,62 @@ export const NewMobileMealLayout = ({
         })}
       </div>
 
-      {/* Selected Meal Tags and Input Bar - Only show when meals are selected */}
-      {selectedMeals.size > 0 && (
-        <>
-          {/* Selected Meal Tags */}
-          <div className="px-4 pt-2 border-t border-orange-200">
-            <div className="flex items-center justify-between">
-              <div className="flex flex-wrap gap-2">
-                {mealTags.map((tag, index) => (
-                  <div
-                    key={index}
-                    className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium border border-current/20 ${tag.color}`}
-                  >
-                    <span>{tag.label}</span>
-                    <button
-                      onClick={() => {
-                        const [day, slot] = tag.value.split("-");
-                        onMealSelection?.(day, slot as MealSlot);
-                      }}
-                      className="h-auto p-0.5 hover:bg-current/20 rounded-full transition-colors"
-                    >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
-              </div>
-              {onClearSelectedMeals && (
-                <button
-                  onClick={onClearSelectedMeals}
-                  className="text-xs text-gray-500 hover:text-red-600 transition-colors"
-                >
-                  Clear all
-                </button>
-              )}
-            </div>
-          </div>
+      {/* Spacer to push input to bottom */}
+      <div className="flex-1" />
 
-          {/* Input Bar */}
-          <ChatInput
-            inputValue={inputValue}
-            onInputChange={setInputValue}
-            onSubmit={onSubmit}
-            isGenerating={isGenerating}
-            placeholder="Try: 'Something healthy for breakfast' or 'Indian food for dinner'"
-            canSend={inputValue.trim() !== "" || selectedMeals.size > 0}
-            className="p-4 pt-0 bg-orange-50 pb-safe meal-plan-input"
-          />
-        </>
-      )}
+      {/* Fixed container to prevent layout shift */}
+      <div className="relative h-0">
+        {/* Selected Meal Tags and Input Bar - Show when meals are selected */}
+        {(selectedMeals.size > 0 || isClosing) && (
+          <div
+            className={`absolute bottom-0 left-0 right-0 ${isClosing ? "animate-slide-down" : "animate-slide-up"}`}
+          >
+            {/* Selected Meal Tags */}
+            <div className="px-4">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-wrap gap-2">
+                  {mealTags.map((tag, index) => (
+                    <div
+                      key={index}
+                      className={`inline-flex items-center space-x-2 px-3 rounded-full text-sm font-medium border border-current/20 ${tag.color}`}
+                    >
+                      <span>{tag.label}</span>
+                      <button
+                        onClick={() => {
+                          const [day, slot] = tag.value.split("-");
+                          onMealSelection?.(day, slot as MealSlot);
+                        }}
+                        className="h-auto p-0.5 hover:bg-current/20 rounded-full transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                {onClearSelectedMeals && (
+                  <button
+                    onClick={onClearSelectedMeals}
+                    className="text-xs text-gray-500 hover:text-red-600 transition-colors"
+                  >
+                    Clear all
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Input Bar */}
+            <ChatInput
+              inputValue={inputValue}
+              onInputChange={setInputValue}
+              onSubmit={onSubmit}
+              isGenerating={isGenerating}
+              placeholder="Veggie and high protein"
+              canSend={inputValue.trim() !== "" || selectedMeals.size > 0}
+              className="px-4 py-0 mt-[4px] pb-safe meal-plan-input"
+            />
+          </div>
+        )}
+      </div>
 
       {/* Calendar Modal */}
       <CalendarModal
@@ -250,6 +291,62 @@ export const NewMobileMealLayout = ({
         currentDate={addDays(weekStart, currentDayIndex)}
         mealPlan={mealPlan}
       />
+
+      {/* Meal Actions Bottom Sheet */}
+      <Sheet
+        open={!!selectedMealSlot}
+        onOpenChange={(open) => !open && setSelectedMealSlot(null)}
+      >
+        <SheetContent side="bottom" className="rounded-t-2xl">
+          <SheetHeader>
+            <SheetTitle>
+              {selectedMealSlot &&
+                mealPlan[selectedMealSlot.day]?.[selectedMealSlot.slot]?.title}
+            </SheetTitle>
+          </SheetHeader>
+          <div className="flex flex-col gap-3 mt-4">
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-start gap-3 h-12"
+              onClick={() => {
+                if (selectedMealSlot) {
+                  onShowRecipe?.(selectedMealSlot.day, selectedMealSlot.slot);
+                  setSelectedMealSlot(null);
+                }
+              }}
+            >
+              <Eye className="w-5 h-5" />
+              <span>Show recipe</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-start gap-3 h-12"
+              onClick={() => {
+                if (selectedMealSlot) {
+                  onRegenerate?.(selectedMealSlot.day, selectedMealSlot.slot);
+                  setSelectedMealSlot(null);
+                }
+              }}
+            >
+              <RotateCcw className="w-5 h-5" />
+              <span>Regenerate</span>
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full flex items-center justify-start gap-3 h-12 text-red-600 hover:text-red-700 hover:bg-red-50"
+              onClick={() => {
+                if (selectedMealSlot) {
+                  onDeleteMeal?.(selectedMealSlot.day, selectedMealSlot.slot);
+                  setSelectedMealSlot(null);
+                }
+              }}
+            >
+              <Trash2 className="w-5 h-5" />
+              <span>Delete</span>
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 };

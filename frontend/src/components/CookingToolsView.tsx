@@ -122,7 +122,7 @@ export default function CookingToolsView({
   };
 
   const renderCookingTimer = () => (
-    <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
+    <div className="mobile-viewport bg-background-dark-layer w-screen overflow-y-auto">
       <div className="p-4 space-y-4">
         {/* Add New Timer Card */}
         <div className="bg-white rounded-lg p-4 shadow-sm">

@@ -99,10 +99,12 @@ export default function Dashboard({ session }: DashboardProps) {
 
       // Reload dashboard data to show updated values
       await loadDashboardData();
-
     } catch (err) {
       console.error("Error logging entry:", err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to log entry. Please try again.";
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to log entry. Please try again.";
       toast({
         title: "Error",
         description: errorMessage,
@@ -116,7 +118,7 @@ export default function Dashboard({ session }: DashboardProps) {
   // Early return for non-authenticated users
   if (!session) {
     return (
-      <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
+      <div className="mobile-viewport bg-background-dark-layer w-screen overflow-y-auto">
         <div className="flex items-center justify-center min-h-[80vh] p-4">
           <div className="max-w-md text-center">
             {/* Icon */}
@@ -192,7 +194,7 @@ export default function Dashboard({ session }: DashboardProps) {
 
   if (loading) {
     return (
-      <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
+      <div className="mobile-viewport bg-background-dark-layer w-screen overflow-y-auto">
         <div className="p-4 text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your health data...</p>
@@ -203,7 +205,7 @@ export default function Dashboard({ session }: DashboardProps) {
 
   if (error) {
     return (
-      <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
+      <div className="mobile-viewport bg-background-dark-layer w-screen overflow-y-auto">
         <div className="p-4 text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <button
@@ -236,24 +238,27 @@ export default function Dashboard({ session }: DashboardProps) {
 
   // Helper function to get recent entries combining weight and body fat data
   const getRecentEntries = () => {
-    const entriesMap = new Map<string, { date: string; weight?: number; bodyFat?: number }>();
+    const entriesMap = new Map<
+      string,
+      { date: string; weight?: number; bodyFat?: number }
+    >();
 
     // Add weight entries
-    weightProgressData.forEach(entry => {
+    weightProgressData.forEach((entry) => {
       entriesMap.set(entry.date, {
         date: entry.date,
         weight: entry.weight,
-        bodyFat: entriesMap.get(entry.date)?.bodyFat
+        bodyFat: entriesMap.get(entry.date)?.bodyFat,
       });
     });
 
     // Add body fat entries
-    bodyFatProgressData.forEach(entry => {
+    bodyFatProgressData.forEach((entry) => {
       const existing = entriesMap.get(entry.date);
       entriesMap.set(entry.date, {
         date: entry.date,
         weight: existing?.weight,
-        bodyFat: entry.bodyFat
+        bodyFat: entry.bodyFat,
       });
     });
 
@@ -266,7 +271,7 @@ export default function Dashboard({ session }: DashboardProps) {
   // Helper function to format date for display
   const formatEntryDate = (dateString: string, isToday: boolean) => {
     if (isToday) {
-      const today = new Date().toISOString().split('T')[0];
+      const today = new Date().toISOString().split("T")[0];
       if (dateString === today) {
         return "Today";
       }
@@ -277,16 +282,24 @@ export default function Dashboard({ session }: DashboardProps) {
     const yesterday = new Date(now);
     yesterday.setDate(yesterday.getDate() - 1);
 
-    if (dateString === yesterday.toISOString().split('T')[0]) {
+    if (dateString === yesterday.toISOString().split("T")[0]) {
       return "Yesterday";
     }
 
     // Format as "Mon 15" or "Feb 15" depending on how recent
-    const diffDays = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+    const diffDays = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24),
+    );
     if (diffDays < 7) {
-      return date.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric' });
+      return date.toLocaleDateString("en-US", {
+        weekday: "short",
+        day: "numeric",
+      });
     } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      return date.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      });
     }
   };
 
@@ -308,7 +321,7 @@ export default function Dashboard({ session }: DashboardProps) {
   const renderStatsCards = () => (
     <div className="grid grid-cols-2 gap-4">
       {/* Weight Card */}
-      <div className="bg-blue-50 rounded-xl p-4 border border-orange-100">
+      <div className="bg-blue-50 rounded-xl p-4 shadow-sm/10">
         <div className="flex items-center justify-center w-10 h-10 bg-blue-500 rounded-full mb-3">
           <Scale className="w-5 h-5 text-white" />
         </div>
@@ -325,7 +338,7 @@ export default function Dashboard({ session }: DashboardProps) {
       </div>
 
       {/* Body Fat Card */}
-      <div className="bg-green-50 rounded-xl p-4 border border-green-100">
+      <div className="bg-green-50 rounded-xl p-4 shadow-sm/10">
         <div className="flex items-center justify-center w-10 h-10 bg-green-500 rounded-full mb-3">
           <Activity className="w-5 h-5 text-white" />
         </div>
@@ -617,17 +630,25 @@ export default function Dashboard({ session }: DashboardProps) {
           <div className="text-center py-4">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-orange-500 mx-auto"></div>
           </div>
-        ) : dashboardData?.chartData.weightProgress.length === 0 && dashboardData?.chartData.bodyFatProgress.length === 0 ? (
+        ) : dashboardData?.chartData.weightProgress.length === 0 &&
+          dashboardData?.chartData.bodyFatProgress.length === 0 ? (
           <div className="text-center py-8">
             <p className="text-gray-500 text-sm">No entries yet</p>
-            <p className="text-gray-400 text-xs mt-1">Start logging your metrics to see them here</p>
+            <p className="text-gray-400 text-xs mt-1">
+              Start logging your metrics to see them here
+            </p>
           </div>
         ) : (
           <div className="space-y-3">
             {getRecentEntries().map((entry, index) => (
-              <div key={entry.date} className="flex justify-between items-center py-2">
+              <div
+                key={entry.date}
+                className="flex justify-between items-center py-2"
+              >
                 <div>
-                  <div className="font-medium text-gray-900">{formatEntryDate(entry.date, index === 0)}</div>
+                  <div className="font-medium text-gray-900">
+                    {formatEntryDate(entry.date, index === 0)}
+                  </div>
                   <div className="text-sm text-gray-600">
                     {entry.weight && `Weight: ${entry.weight}kg`}
                     {entry.weight && entry.bodyFat && " • "}
@@ -766,7 +787,7 @@ export default function Dashboard({ session }: DashboardProps) {
   };
 
   return (
-    <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
+    <div className="mobile-viewport bg-background-dark-layer w-screen overflow-y-auto">
       <div className="p-4 space-y-4">
         {/* Stats Cards - Always Visible */}
         {renderStatsCards()}

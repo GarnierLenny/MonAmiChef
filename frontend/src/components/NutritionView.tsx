@@ -1495,7 +1495,7 @@ export default function NutritionView({
   );
 
   const renderExportOptions = () => (
-    <div className="max-w-4xl bg-orange-50 mx-auto p-6">
+    <div className="max-w-4xl bg-blue-50 mx-auto p-6">
       <div className="bg-white rounded-2xl shadow-lg p-8">
         <div className="flex items-center space-x-3 mb-8">
           <div className="bg-gradient-to-r from-green-500 to-emerald-600 p-3 rounded-xl">

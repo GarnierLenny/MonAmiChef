@@ -1,3 +1,4 @@
+// Import UI components from shadcn/ui
 import {
   Dialog,
   DialogContent,
@@ -8,24 +9,51 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { ScrollArea } from "@/components/ui/scroll-area";
+
+// Import icons from lucide-react
 import { Clock, Users, Zap, X, ChefHat, Utensils, Loader2 } from "lucide-react";
+
+// Import React hooks
 import { useState, useEffect } from "react";
+
+// Import i18n for translations
 import { useTranslation } from "react-i18next";
+
+// Import types and API
 import type { Meal } from "./constants";
 import type { Recipe } from "@/lib/api/recipeApi";
 import { recipeApi } from "@/lib/api/recipeApi";
 
+/**
+ * Props interface for RecipeModal component
+ */
 interface RecipeModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  meal: Meal | null;
+  isOpen: boolean; // Controls modal visibility
+  onClose: () => void; // Handler for closing the modal
+  meal: Meal | null; // Meal data to display recipe for
 }
 
+/**
+ * RecipeModal Component
+ *
+ * Displays full recipe details in a modal dialog including:
+ * - Recipe title, cooking time, servings, calories
+ * - Nutritional macros (protein, carbs, fat)
+ * - Interactive ingredient checklist
+ * - Step-by-step cooking instructions with checkboxes
+ * - Chef's tips and recommendations
+ * - Markdown rendering support for formatted text
+ */
 export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
+  // Get translation function
   const { t } = useTranslation();
+
+  // Recipe data state
   const [recipe, setRecipe] = useState<Recipe | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Interactive checklist states for tracking cooking progress
   const [checkedIngredients, setCheckedIngredients] = useState<Set<number>>(new Set());
   const [checkedInstructions, setCheckedInstructions] = useState<Set<number>>(new Set());
 
@@ -69,7 +97,10 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
     }
   }, [meal?.id, recipe?.id]);
 
-  // Toggle ingredient checked state
+  /**
+   * Toggle ingredient checked state
+   * Adds or removes ingredient index from checkedIngredients set
+   */
   const toggleIngredientCheck = (index: number) => {
     setCheckedIngredients(prev => {
       const newSet = new Set(prev);
@@ -82,7 +113,10 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
     });
   };
 
-  // Toggle instruction checked state
+  /**
+   * Toggle instruction checked state
+   * Adds or removes instruction index from checkedInstructions set
+   */
   const toggleInstructionCheck = (index: number) => {
     setCheckedInstructions(prev => {
       const newSet = new Set(prev);
@@ -95,7 +129,10 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
     });
   };
 
-  // Simple markdown renderer for bold text
+  /**
+   * Simple markdown renderer for bold text
+   * Converts **text** to <strong>text</strong>
+   */
   const renderMarkdown = (text: string) => {
     const parts = text.split(/(\*\*.*?\*\*)/g);
     return parts.map((part, index) => {
@@ -119,18 +156,19 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
               <DialogTitle className="text-2xl font-bold text-gray-900 mb-2">
                 {meal.title}
               </DialogTitle>
+              {/* Recipe metadata - cooking time, servings, calories */}
               <div className="flex items-center gap-4 text-sm text-gray-600">
                 <div className="flex items-center gap-1">
                   <Clock className="w-4 h-4" />
-                  <span>{meal.cookingTime} min</span>
+                  <span>{meal.cookingTime} {t('mealPlan.min')}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Users className="w-4 h-4" />
-                  <span>{meal.servings} servings</span>
+                  <span>{meal.servings} {t('mealPlan.servings')}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Zap className="w-4 h-4 text-orange-500" />
-                  <span className="font-semibold">{meal.calories} cal</span>
+                  <span className="font-semibold">{meal.calories} {t('mealPlan.cal')}</span>
                 </div>
               </div>
             </div>
@@ -163,10 +201,11 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
               </div>
             </div>
           ) : error ? (
+            // Error state - show error message with retry button
             <div className="flex items-center justify-center h-64">
               <div className="text-center">
                 <p className="text-red-600 mb-2">
-                  Failed to load recipe details
+                  {t('mealPlan.failedToLoadRecipe')}
                 </p>
                 <Button
                   variant="outline"
@@ -177,16 +216,17 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                       recipeApi
                         .getRecipe(meal.id)
                         .then(setRecipe)
-                        .catch(() => setError("Failed to load recipe details"))
+                        .catch(() => setError(t('mealPlan.failedToLoadRecipe')))
                         .finally(() => setIsLoading(false));
                     }
                   }}
                 >
-                  Try Again
+                  {t('mealPlan.tryAgain')}
                 </Button>
               </div>
             </div>
           ) : recipe ? (
+            // Recipe loaded - display full recipe content
             <div className="space-y-8">
               {/* Recipe Image/Emoji */}
               {/* <div className="text-center">
@@ -196,7 +236,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                 </p>
               </div> */}
 
-              {/* Ingredients Section */}
+              {/* Ingredients Section - Interactive checklist */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -205,6 +245,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                       {t('mealPlan.ingredients')}
                     </h3>
                   </div>
+                  {/* Progress indicator - shows completion status */}
                   {recipe.content_json.ingredients && recipe.content_json.ingredients.length > 0 && (
                     <div className={`text-sm transition-colors ${
                       checkedIngredients.size === recipe.content_json.ingredients.length
@@ -213,7 +254,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                     }`}>
                       {checkedIngredients.size === recipe.content_json.ingredients.length
                         ? `✅ ${t('mealPlan.allIngredientsReady')}`
-                        : `${checkedIngredients.size} / ${recipe.content_json.ingredients.length} checked`
+                        : `${checkedIngredients.size} / ${recipe.content_json.ingredients.length} ${t('mealPlan.checked')}`
                       }
                     </div>
                   )}
@@ -255,7 +296,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
 
               <Separator />
 
-              {/* Instructions Section */}
+              {/* Instructions Section - Step-by-step cooking guide */}
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -264,6 +305,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                       {t('mealPlan.instructions')}
                     </h3>
                   </div>
+                  {/* Progress indicator - shows cooking progress */}
                   {recipe.content_json.instructions && recipe.content_json.instructions.length > 0 && (
                     <div className={`text-sm transition-colors ${
                       checkedInstructions.size === recipe.content_json.instructions.length
@@ -272,7 +314,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                     }`}>
                       {checkedInstructions.size === recipe.content_json.instructions.length
                         ? `🎉 ${t('mealPlan.recipeCompleted')}`
-                        : `${checkedInstructions.size} / ${recipe.content_json.instructions.length} steps done`
+                        : `${checkedInstructions.size} / ${recipe.content_json.instructions.length} ${t('mealPlan.stepsDone')}`
                       }
                     </div>
                   )}
@@ -286,12 +328,14 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                           key={index}
                           className="flex gap-4 cursor-pointer hover:bg-gray-50 rounded-lg p-3 transition-colors"
                         >
+                          {/* Checkbox for tracking step completion */}
                           <input
                             type="checkbox"
                             checked={isChecked}
                             onChange={() => toggleInstructionCheck(index)}
                             className="w-4 h-4 text-green-600 bg-gray-100 border-gray-300 rounded focus:ring-green-500 focus:ring-2 flex-shrink-0 mt-1"
                           />
+                          {/* Step number badge - changes color when completed */}
                           <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm transition-all ${
                             isChecked
                               ? 'bg-green-500 text-white'
@@ -299,6 +343,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                           }`}>
                             {isChecked ? '✓' : index + 1}
                           </div>
+                          {/* Instruction text with markdown support */}
                           <div className="flex-1 pt-1">
                             <p className={`leading-relaxed transition-all duration-200 ${
                               isChecked
@@ -312,6 +357,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                       );
                     })
                   ) : (
+                    // Empty state for instructions
                     <div className="text-center py-8">
                       <p className="text-gray-500">{t('recipe.noInstructions')}</p>
                     </div>
@@ -319,7 +365,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                 </div>
               </div>
 
-              {/* Tips Section */}
+              {/* Tips Section - Chef's recommendations and pro tips */}
               {recipe.content_json.tips &&
                 recipe.content_json.tips.length > 0 && (
                   <div className="bg-blue-50 rounded-lg p-6">
@@ -335,6 +381,7 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
                 )}
             </div>
           ) : (
+            // No recipe data available state
             <div className="flex items-center justify-center h-64">
               <p className="text-gray-600">{t('recipe.noData')}</p>
             </div>
@@ -342,11 +389,11 @@ export const RecipeModal = ({ isOpen, onClose, meal }: RecipeModalProps) => {
           </div>
         </ScrollArea>
 
-        {/* Footer */}
+        {/* Footer - Commented out for cleaner UI */}
         {/* <div className="p-6 pt-4 border-t">
           <div className="flex justify-end">
             <Button onClick={onClose} className="px-8">
-              Close
+              {t('common.close')}
             </Button>
           </div>
         </div> */}

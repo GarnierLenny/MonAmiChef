@@ -162,7 +162,7 @@ export default function AuthModal({
           </h2>
           <button
             onClick={onClose}
-            className="text-muted-foreground hover:text-foreground transition-colors rounded-full p-1 hover:bg-muted"
+            className="text-foreground-muted hover:text-foreground transition-colors rounded-full p-1 hover:bg-muted"
           >
             <X className="w-5 h-5" />
           </button>
@@ -192,12 +192,12 @@ export default function AuthModal({
                 Full Name
               </label>
               <div className="relative">
-                <UserIcon className="w-5 h-5 text-muted-foreground absolute left-4 top-1/2 -translate-y-1/2" />
+                <UserIcon className="w-5 h-5 text-foreground-muted absolute left-4 top-1/2 -translate-y-1/2" />
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder-muted-foreground"
+                  className="w-full pl-12 pr-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder-foreground-muted"
                   placeholder="Enter your full name"
                   required
                 />
@@ -210,12 +210,12 @@ export default function AuthModal({
               Email Address
             </label>
             <div className="relative">
-              <Mail className="w-5 h-5 text-muted-foreground absolute left-4 top-1/2 -translate-y-1/2" />
+              <Mail className="w-5 h-5 text-foreground-muted absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder-muted-foreground"
+                className="w-full pl-12 pr-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder-foreground-muted"
                 placeholder="Enter your email"
                 required
               />
@@ -227,12 +227,12 @@ export default function AuthModal({
               Password
             </label>
             <div className="relative">
-              <Lock className="w-5 h-5 text-muted-foreground absolute left-4 top-1/2 -translate-y-1/2" />
+              <Lock className="w-5 h-5 text-foreground-muted absolute left-4 top-1/2 -translate-y-1/2" />
               <input
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder-muted-foreground"
+                className="w-full pl-12 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder-foreground-muted"
                 placeholder="Enter your password"
                 required
                 minLength={6}
@@ -240,7 +240,7 @@ export default function AuthModal({
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground transition-colors"
               >
                 {showPassword ? (
                   <EyeOff className="w-5 h-5" />
@@ -270,7 +270,7 @@ export default function AuthModal({
               <span className="w-full border-t border-border" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">
+              <span className="bg-card px-2 text-foreground-muted">
                 Or continue with
               </span>
             </div>
@@ -287,7 +287,7 @@ export default function AuthModal({
         </button>
 
         <div className="mt-8 text-center">
-          <p className="text-muted-foreground">
+          <p className="text-foreground-muted">
             {isLogin ? "Don't have an account?" : "Already have an account?"}
             <button
               onClick={() => {

@@ -192,18 +192,6 @@ export const CalendarModal = ({
             </div>
           </div>
 
-          {/* Progress Summary */}
-          {monthSummary.totalDays > 0 && (
-            <div className="mt-3 text-sm text-gray-600 bg-gray-50 rounded-lg p-3">
-              <div className="text-center">
-                <span className="font-medium text-gray-900">This month: </span>
-                {monthSummary.onTargetDays}/{monthSummary.totalDays} days on
-                target
-                <span className="mx-2">•</span>
-                Avg kcal: {avgCalories.toLocaleString()}
-              </div>
-            </div>
-          )}
         </DialogHeader>
 
         <div className="py-4">
@@ -228,29 +216,22 @@ export const CalendarModal = ({
               const isToday = isSameDay(day, new Date());
 
               return (
-                <button
-                  key={day.toString()}
-                  onClick={() => handleDateClick(day)}
-                  className={cn(
-                    "relative h-12 w-12 mx-autoi z-10 rounded-full transition-all duration-200 hover:scale-105",
-                    isCurrentMonth ? "text-gray-900" : "text-gray-300",
-                    isSelected && "text-orange-500",
-                    isToday && "text-green-500",
-                    getProgressColor(
-                      progress.percentage,
-                      progress.hasData && isCurrentMonth,
-                    ),
-                  )}
-                >
-                  {/* Progress ring */}
-                  {isCurrentMonth &&
-                    getProgressRing(progress.percentage, progress.hasData)}
-
-                  {/* Day number */}
-                  <span className="text-sm font-medium">
-                    {format(day, "d")}
-                  </span>
-                </button>
+                <div key={day.toString()} className="flex justify-center">
+                  <button
+                    onClick={() => handleDateClick(day)}
+                    className={cn(
+                      "relative h-12 w-12 z-10 rounded-full transition-all duration-200 hover:scale-105",
+                      isCurrentMonth ? "text-gray-900" : "text-gray-300",
+                      isSelected && "text-orange-500",
+                      isToday && "text-green-500",
+                    )}
+                  >
+                    {/* Day number */}
+                    <span className="text-sm font-medium">
+                      {format(day, "d")}
+                    </span>
+                  </button>
+                </div>
               );
             })}
           </div>

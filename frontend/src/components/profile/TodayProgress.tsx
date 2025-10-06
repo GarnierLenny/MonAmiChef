@@ -9,7 +9,12 @@ interface TodayProgressProps {
   onViewMealPlan: () => void;
 }
 
-export const TodayProgress = ({ goals, dashboardData, isLoading, onViewMealPlan }: TodayProgressProps) => {
+export const TodayProgress = ({
+  goals,
+  dashboardData,
+  isLoading,
+  onViewMealPlan,
+}: TodayProgressProps) => {
   if (isLoading) {
     return (
       <div className="bg-white rounded-2xl p-6 shadow-sm">
@@ -43,8 +48,12 @@ export const TodayProgress = ({ goals, dashboardData, isLoading, onViewMealPlan 
             <TrendingUp className="w-6 h-6 text-blue-600" />
           </div>
           <div>
-            <h3 className="text-lg font-bold text-gray-900">Today's Progress</h3>
-            <p className="text-gray-600 text-sm">Your nutrition intake vs goals</p>
+            <h3 className="text-lg font-bold text-gray-900">
+              Tosday's Progress
+            </h3>
+            <p className="text-gray-600 text-sm">
+              Your nutrition intake vs goals
+            </p>
           </div>
         </div>
         <button
@@ -65,7 +74,7 @@ export const TodayProgress = ({ goals, dashboardData, isLoading, onViewMealPlan 
               No calorie goals set yet
             </p>
             <button
-              onClick={() => window.location.href = "/calories"}
+              onClick={() => (window.location.href = "/calories")}
               className="text-xs font-medium text-orange-600 hover:text-orange-700 underline"
             >
               Calculate your daily goals →
@@ -81,11 +90,15 @@ export const TodayProgress = ({ goals, dashboardData, isLoading, onViewMealPlan 
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-gray-700">Calories</span>
             <span className="text-sm text-gray-600">
-              {formatNumber(todayMacros.calories.current)} / {formatNumber(todayMacros.calories.goal)}
+              {formatNumber(todayMacros.calories.current)} /{" "}
+              {formatNumber(todayMacros.calories.goal)}
             </span>
           </div>
           <Progress
-            value={calculatePercentage(todayMacros.calories.current, todayMacros.calories.goal)}
+            value={calculatePercentage(
+              todayMacros.calories.current,
+              todayMacros.calories.goal,
+            )}
             className="h-2 bg-gray-200"
           />
         </div>
@@ -100,7 +113,10 @@ export const TodayProgress = ({ goals, dashboardData, isLoading, onViewMealPlan 
                 {formatNumber(todayMacros.protein.current)}g
               </div>
               <Progress
-                value={calculatePercentage(todayMacros.protein.current, todayMacros.protein.goal)}
+                value={calculatePercentage(
+                  todayMacros.protein.current,
+                  todayMacros.protein.goal,
+                )}
                 className="h-2 bg-gray-200"
               />
               <div className="text-xs text-gray-500">
@@ -117,7 +133,10 @@ export const TodayProgress = ({ goals, dashboardData, isLoading, onViewMealPlan 
                 {formatNumber(todayMacros.carbs.current)}g
               </div>
               <Progress
-                value={calculatePercentage(todayMacros.carbs.current, todayMacros.carbs.goal)}
+                value={calculatePercentage(
+                  todayMacros.carbs.current,
+                  todayMacros.carbs.goal,
+                )}
                 className="h-2 bg-gray-200"
               />
               <div className="text-xs text-gray-500">
@@ -134,7 +153,10 @@ export const TodayProgress = ({ goals, dashboardData, isLoading, onViewMealPlan 
                 {formatNumber(todayMacros.fat.current)}g
               </div>
               <Progress
-                value={calculatePercentage(todayMacros.fat.current, todayMacros.fat.goal)}
+                value={calculatePercentage(
+                  todayMacros.fat.current,
+                  todayMacros.fat.goal,
+                )}
                 className="h-2 bg-gray-200"
               />
               <div className="text-xs text-gray-500">
@@ -152,7 +174,7 @@ export const TodayProgress = ({ goals, dashboardData, isLoading, onViewMealPlan 
             <p>No meals logged for today.</p>
             {todayMacros.calories.goal === 0 ? (
               <button
-                onClick={() => window.location.href = "/calories"}
+                onClick={() => (window.location.href = "/calories")}
                 className="text-orange-600 hover:text-orange-700 font-medium"
               >
                 Set your goals first →
@@ -171,3 +193,4 @@ export const TodayProgress = ({ goals, dashboardData, isLoading, onViewMealPlan 
     </div>
   );
 };
+
