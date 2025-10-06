@@ -71,7 +71,7 @@ export const SimpleMealCard = ({
       className={`bg-background rounded-xl min-w-[280px] w-[280px] h-[300px] border-0 shadow-xl/5 p-6 flex flex-col space-y-2 relative transition-all duration-300 ${
         isSelected
           ? "border-orange-500 bg-orange-50 shadow-md animate-in fade-in-0 zoom-in-95"
-          : "border-gray-200 hover:border-gray-300"
+          : "border-gray-200 shadow-xs hover:border-gray-300"
       }`}
     >
       {/* Meal Type Header */}
