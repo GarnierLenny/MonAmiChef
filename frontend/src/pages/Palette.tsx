@@ -5,6 +5,7 @@ export default function Palette() {
     {
       name: "Primary Orange",
       items: [
+        { shade: 50, className: "bg-primary-50" },
         { shade: 100, className: "bg-primary-100" },
         { shade: 200, className: "bg-primary-200" },
         { shade: 300, className: "bg-primary-300" },
@@ -19,6 +20,7 @@ export default function Palette() {
     {
       name: "Neutral (Orange-tinted)",
       items: [
+        { shade: 50, className: "bg-neutral-50" },
         { shade: 100, className: "bg-neutral-100" },
         { shade: 200, className: "bg-neutral-200" },
         { shade: 300, className: "bg-neutral-300" },
@@ -33,6 +35,7 @@ export default function Palette() {
     {
       name: "Success (Warm Green)",
       items: [
+        { shade: 50, className: "bg-success-50" },
         { shade: 100, className: "bg-success-100" },
         { shade: 200, className: "bg-success-200" },
         { shade: 300, className: "bg-success-300" },
@@ -47,6 +50,7 @@ export default function Palette() {
     {
       name: "Danger (Red)",
       items: [
+        { shade: 50, className: "bg-danger-50" },
         { shade: 100, className: "bg-danger-100" },
         { shade: 200, className: "bg-danger-200" },
         { shade: 300, className: "bg-danger-300" },
@@ -61,6 +65,7 @@ export default function Palette() {
     {
       name: "Warning (Amber)",
       items: [
+        { shade: 50, className: "bg-warning-50" },
         { shade: 100, className: "bg-warning-100" },
         { shade: 200, className: "bg-warning-200" },
         { shade: 300, className: "bg-warning-300" },
@@ -75,6 +80,7 @@ export default function Palette() {
     {
       name: "Info (Cobalt)",
       items: [
+        { shade: 50, className: "bg-info-50" },
         { shade: 100, className: "bg-info-100" },
         { shade: 200, className: "bg-info-200" },
         { shade: 300, className: "bg-info-300" },
@@ -110,14 +116,14 @@ export default function Palette() {
         ))}
       </div>
 
-      <div className="w-64 sticky ml-12 top-8 self-start">
+      <div className="w-64 sticky ml-24 top-8 self-start">
         <h2 className="text-xl font-bold mb-4">Overview</h2>
         <div className="flex space-y-0.5">
           {palettes.map((palette) => (
             <div key={palette.name}>
               <div className="flex flex-col gap-0.5">
                 {palette.items.map(({ shade, className }) => (
-                  <div key={shade} className={`w-12 h-12 ${className}`} />
+                  <div key={shade} className={`w-18 h-18 ${className}`} />
                 ))}
               </div>
             </div>

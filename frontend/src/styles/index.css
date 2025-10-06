@@ -12,6 +12,7 @@
   --color-foreground-muted: hsl(0, 0%, 30%);
 
   /* Primary orange palette - from lightest to darkest */
+  --color-primary-50: hsl(33 96% 97%);
   --color-primary-100: hsl(33, 96%, 94%);
   --color-primary-200: hsl(32, 98%, 88%);
   --color-primary-300: hsl(31, 100%, 78%);
@@ -23,6 +24,7 @@
   --color-primary-900: hsl(22, 92%, 14%);
 
   /* Orange-neutral palette */
+  --color-neutral-50: hsl(34 10% 97%); /* warm off-white to match pacing */
   --color-neutral-100: hsl(34 10% 94%);
   --color-neutral-200: hsl(33 12% 88%);
   --color-neutral-300: hsl(32 14% 78%);
@@ -34,6 +36,7 @@
   --color-neutral-900: hsl(26 12% 14%);
 
   /* SUCCESS — warm green (slightly yellow-leaning) */
+  --color-success-50: hsl(145 72% 97%);
   --color-success-100: hsl(145, 76%, 94%);
   --color-success-200: hsl(144, 82%, 88%);
   --color-success-300: hsl(143, 90%, 78%);
@@ -45,6 +48,7 @@
   --color-success-900: hsl(134, 82%, 14%);
 
   /* DANGER — clean red (slightly warmer in lights, deeper toward 0° in darks) */
+  --color-danger-50: hsl(12 96% 97%);
   --color-danger-100: hsl(12, 96%, 94%);
   --color-danger-200: hsl(10, 96%, 88%);
   --color-danger-300: hsl(8, 98%, 78%);
@@ -56,6 +60,7 @@
   --color-danger-900: hsl(356, 84%, 14%);
 
   /* WARNING — amber (distinct from your primary orange; slightly more yellow) */
+  --color-warning-50: hsl(50 96% 97%);
   --color-warning-50: hsl(50, 96%, 97%);
   --color-warning-100: hsl(50, 96%, 94%);
   --color-warning-200: hsl(49, 96%, 88%);
@@ -68,6 +73,7 @@
   --color-warning-900: hsl(45, 84%, 14%);
 
   /* INFO — cobalt/azure (cool to balance the warm UI) */
+  --color-info-50: hsl(220 96% 97%);
   --color-info-100: hsl(220, 96%, 94%);
   --color-info-200: hsl(218, 96%, 88%);
   --color-info-300: hsl(216, 98%, 78%);
