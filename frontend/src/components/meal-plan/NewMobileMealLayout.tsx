@@ -229,56 +229,59 @@ export const NewMobileMealLayout = ({
       {/* Spacer to push input to bottom */}
       <div className="flex-1" />
 
-      {/* Selected Meal Tags and Input Bar - Show when meals are selected */}
-      {(selectedMeals.size > 0 || isClosing) && (
-        <div
-          className={`${isClosing ? "animate-slide-down absolute bottom-0 left-0 right-0" : "animate-slide-up"}`}
-        >
-          {/* Selected Meal Tags */}
-          <div className="px-4">
-            <div className="flex items-center justify-between">
-              <div className="flex flex-wrap gap-2">
-                {mealTags.map((tag, index) => (
-                  <div
-                    key={index}
-                    className={`inline-flex items-center space-x-2 px-3 rounded-full text-sm font-medium border border-current/20 ${tag.color}`}
-                  >
-                    <span>{tag.label}</span>
-                    <button
-                      onClick={() => {
-                        const [day, slot] = tag.value.split("-");
-                        onMealSelection?.(day, slot as MealSlot);
-                      }}
-                      className="h-auto p-0.5 hover:bg-current/20 rounded-full transition-colors"
+      {/* Fixed container to prevent layout shift */}
+      <div className="relative h-0">
+        {/* Selected Meal Tags and Input Bar - Show when meals are selected */}
+        {(selectedMeals.size > 0 || isClosing) && (
+          <div
+            className={`absolute bottom-0 left-0 right-0 ${isClosing ? "animate-slide-down" : "animate-slide-up"}`}
+          >
+            {/* Selected Meal Tags */}
+            <div className="px-4">
+              <div className="flex items-center justify-between">
+                <div className="flex flex-wrap gap-2">
+                  {mealTags.map((tag, index) => (
+                    <div
+                      key={index}
+                      className={`inline-flex items-center space-x-2 px-3 rounded-full text-sm font-medium border border-current/20 ${tag.color}`}
                     >
-                      <X className="w-3 h-3" />
-                    </button>
-                  </div>
-                ))}
+                      <span>{tag.label}</span>
+                      <button
+                        onClick={() => {
+                          const [day, slot] = tag.value.split("-");
+                          onMealSelection?.(day, slot as MealSlot);
+                        }}
+                        className="h-auto p-0.5 hover:bg-current/20 rounded-full transition-colors"
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                {onClearSelectedMeals && (
+                  <button
+                    onClick={onClearSelectedMeals}
+                    className="text-xs text-gray-500 hover:text-red-600 transition-colors"
+                  >
+                    Clear all
+                  </button>
+                )}
               </div>
-              {onClearSelectedMeals && (
-                <button
-                  onClick={onClearSelectedMeals}
-                  className="text-xs text-gray-500 hover:text-red-600 transition-colors"
-                >
-                  Clear all
-                </button>
-              )}
             </div>
-          </div>
 
-          {/* Input Bar */}
-          <ChatInput
-            inputValue={inputValue}
-            onInputChange={setInputValue}
-            onSubmit={onSubmit}
-            isGenerating={isGenerating}
-            placeholder="Veggie and high protein"
-            canSend={inputValue.trim() !== "" || selectedMeals.size > 0}
-            className="px-4 py-0 mt-[4px] pb-safe meal-plan-input"
-          />
-        </div>
-      )}
+            {/* Input Bar */}
+            <ChatInput
+              inputValue={inputValue}
+              onInputChange={setInputValue}
+              onSubmit={onSubmit}
+              isGenerating={isGenerating}
+              placeholder="Veggie and high protein"
+              canSend={inputValue.trim() !== "" || selectedMeals.size > 0}
+              className="px-4 py-0 mt-[4px] pb-safe meal-plan-input"
+            />
+          </div>
+        )}
+      </div>
 
       {/* Calendar Modal */}
       <CalendarModal
