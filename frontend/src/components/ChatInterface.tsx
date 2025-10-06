@@ -243,7 +243,7 @@ export default function ChatInterface({
             return (
               <div
                 key={messageId}
-                className={`flex text-sm ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                className={`flex text-xs ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`max-w-3xl rounded-2xl px-4 py-3 relative shadow-sm/20 ${
@@ -255,46 +255,46 @@ export default function ChatInterface({
                   {message.role === "model" && (
                     <div className="flex items-center space-x-2 mb-2">
                       <Sparkles className="w-4 h-4 text-orange-500" />
-                      <span className="text-sm font-medium text-orange-600">
+                      <span className="text-xs font-medium text-orange-600">
                         AI Chef
                       </span>
                     </div>
                   )}
 
                   {message.role === "user" ? (
-                    <div className="font-sans">
+                    <div className="font-sans text-xs">
                       <ReactMarkdown>{message.text}</ReactMarkdown>
                     </div>
                   ) : (
-                    <div className="font-sans">
+                    <div className="font-sans text-xs">
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm, remarkBreaks]}
                         components={{
                           p: (props) => (
-                            <p className="my-3 leading-6" {...props} />
+                            <p className="my-3 text-xs leading-6" {...props} />
                           ),
                           ul: (props) => (
                             <ul
-                              className="my-2 pl-5 list-disc space-y-1"
+                              className="my-2 text-xs pl-5 list-disc space-y-1"
                               {...props}
                             />
                           ),
                           ol: (props) => (
                             <ol
-                              className="my-2 pl-5 list-decimal space-y-1"
+                              className="my-2  text-xs pl-5 list-decimal space-y-1"
                               {...props}
                             />
                           ),
                           li: (props) => <li className="my-1" {...props} />,
                           h1: (props) => (
                             <h3
-                              className="mt-3 mb-1 text-base font-semibold"
+                              className="mt-3 mb-1 text-xs font-semibold"
                               {...props}
                             />
                           ),
                           h2: (props) => (
                             <h4
-                              className="mt-3 mb-1 text-sm font-semibold"
+                              className="mt-3 mb-1 text-xs font-semibold"
                               {...props}
                             />
                           ),

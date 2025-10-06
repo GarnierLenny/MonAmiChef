@@ -60,10 +60,10 @@ export const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
           className,
         )}
       >
-        <div className="p-3 pb-safe">
+        <div className="">
           {/* Selected Tags - Only show for non-meal-plan inputs */}
           {tags.length > 0 && !className?.includes("meal-plan-input") && (
-            <div className="mb-4">
+            <div>
               <div className="flex items-center justify-end mb-2">
                 {onClearAllTags && (
                   <Button
@@ -105,7 +105,7 @@ export const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
           <form
             onSubmit={handleSubmit}
             className={cn(
-              "flex items-center gap-4 mb-2 p-0.5 pl-5 bg-white flex-1 shadow-lg shadow-orange-500/20 border rounded-full transition-colors",
+              "flex items-center gap-4 p-0.5 pl-5 bg-white flex-1 shadow-lg shadow-orange-500/20 border rounded-full transition-colors",
               isOverLimit
                 ? "border-red-300 bg-red-50 focus-within:ring-2 focus-within:ring-red-500"
                 : "border-gray-300 focus-within:ring-2 focus-within:ring-orange-500",

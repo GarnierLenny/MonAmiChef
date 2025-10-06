@@ -16,7 +16,7 @@ export function MobileTopBar({
   title = "Mon Ami Chef",
 }: MobileTopBarProps) {
   return (
-    <header className="md:hidden sticky top-0 z-50 py-1 px-2 bg-background pt-safe">
+    <header className="md:hidden sticky top-0 z-50 px-2 bg-background pt-safe">
       {/* Island container */}
       <div className="mx-auto max-w-sm">
         <div className="flex items-center justify-between rounded-2xl py-1">
@@ -33,7 +33,7 @@ export function MobileTopBar({
 
           {/* Brand with logo */}
           <div className="flex items-center gap-2">
-            <span className="text-foreground font-medium text-base tracking-wide">
+            <span className="text-foreground font-medium text-sm tracking-wide">
               {title}
             </span>
           </div>

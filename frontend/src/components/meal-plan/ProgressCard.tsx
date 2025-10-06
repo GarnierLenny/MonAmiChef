@@ -92,22 +92,11 @@ export const ProgressCard = ({
 
   return (
     <Card
-      className={`rounded-xl border-0 bg-background shadow-[inset_0_2px_6px_rgba(0,0,0,0.3)] inset-shadow-blue-200 cursor-pointer hover:shadow-md`}
+      className={`rounded-xl border-0 py-[10px] bg-background shadow-[inset_0_2px_6px_rgba(0,0,0,0.3)] inset-shadow-blue-200 cursor-pointer hover:shadow-md`}
       onClick={onDetailsClick}
     >
       <CardContent className="px-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2
-            className={`font-semibold text-gray-900 ${isMobile ? "text-sm" : "text-lg"}`}
-          >
-            Today's Progress
-          </h2>
-          <ChevronRight
-            className={`text-gray-400 ${isMobile ? "w-4 h-4" : "w-5 h-5"}`}
-          />
-        </div>
-
-        <div className="flex items-center justify-between">
+        <div className="flex items-center  justify-between">
           {/* Left side - Current calories */}
           <div className="text-left">
             <CountUp
@@ -121,8 +110,8 @@ export const ProgressCard = ({
           {/* Center - Progress bar */}
           <div className="flex-1 mx-6">
             <Progress
-              //value={Math.min(dayProgress.calories.percentage, 100)}
-              value={24}
+              value={Math.min(dayProgress.calories.percentage, 100)}
+              //value={24}
               className="h-3 bg-background-dark-layer shadow-[inset_0_-2px_6px_rgba(0,0,0,0.4)]  progress-calories"
             />
           </div>
@@ -136,6 +125,10 @@ export const ProgressCard = ({
               className="text-sm font-medium text-gray-600"
             />
           </div>
+
+          <ChevronRight
+            className={`text-gray-400 ml-4 ${isMobile ? "w-4 h-4" : "w-5 h-5"}`}
+          />
         </div>
       </CardContent>
     </Card>

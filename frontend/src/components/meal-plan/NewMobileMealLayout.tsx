@@ -157,11 +157,11 @@ export const NewMobileMealLayout = ({
               disabled={currentDayIndex === 0}
               className="p-1 hover:bg-gray-100 rounded-full transition-colors"
             >
-              <ChevronLeft className="w-5 h-5 text-gray-600" />
+              <ChevronLeft className="w-3 h-3 text-gray-600" />
             </Button>
 
             <div className="text-center">
-              <div className="font-medium text-gray-900 text-md">
+              <div className="font-medium text-gray-900 text-sm">
                 {format(addDays(weekStart, currentDayIndex), "EEEE, MMM d")}
               </div>
             </div>
@@ -173,7 +173,7 @@ export const NewMobileMealLayout = ({
               disabled={currentDayIndex === 6}
               className="p-1 hover:bg-gray-100 rounded-full transition-colors"
             >
-              <ChevronRight className="w-5 h-5 text-gray-600" />
+              <ChevronRight className="w-3 h-3 text-gray-600" />
             </Button>
           </div>
 
@@ -189,7 +189,7 @@ export const NewMobileMealLayout = ({
       </div>
 
       {/* Progress Card */}
-      <div className="p-4">
+      <div className="px-4 pt-4 pb-2">
         <ProgressCard
           mealPlan={mealPlan}
           currentDay={currentDay}
@@ -201,7 +201,7 @@ export const NewMobileMealLayout = ({
       </div>
 
       {/* Meal Cards */}
-      <div className="flex flex-row px-4 mt-2 mb-4 pb-10 items-center gap-[16px] overflow-y-auto no-scrollbar">
+      <div className="flex flex-row px-4 pt-4 mb-4 pb-10 items-center gap-[16px] overflow-y-auto no-scrollbar">
         {MEAL_SLOTS.map((mealSlot) => {
           const meal = mealPlan[currentDay]?.[mealSlot];
           const slotKey = `${currentDay}-${mealSlot}`;
@@ -233,13 +233,13 @@ export const NewMobileMealLayout = ({
       {(selectedMeals.size > 0 || isClosing) && (
         <div className={isClosing ? "animate-slide-down" : "animate-slide-up"}>
           {/* Selected Meal Tags */}
-          <div className="px-4 pt-2">
+          <div className="px-4">
             <div className="flex items-center justify-between">
               <div className="flex flex-wrap gap-2">
                 {mealTags.map((tag, index) => (
                   <div
                     key={index}
-                    className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium border border-current/20 ${tag.color}`}
+                    className={`inline-flex items-center space-x-2 px-3 rounded-full text-sm font-medium border border-current/20 ${tag.color}`}
                   >
                     <span>{tag.label}</span>
                     <button
@@ -273,7 +273,7 @@ export const NewMobileMealLayout = ({
             isGenerating={isGenerating}
             placeholder="Veggie and high protein"
             canSend={inputValue.trim() !== "" || selectedMeals.size > 0}
-            className="p-4 pt-0 bg-background-dark-layer pb-safe meal-plan-input"
+            className="px-4 py-0 mt-[4px] pb-safe meal-plan-input"
           />
         </div>
       )}
