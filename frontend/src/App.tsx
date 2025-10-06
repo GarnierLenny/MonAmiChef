@@ -34,7 +34,10 @@ import SEOHead from "./components/SEOHead";
 import Breadcrumb from "./components/Breadcrumb";
 import OrganizationStructuredData from "./components/OrganizationStructuredData";
 import { Toaster } from "@/components/ui/toaster";
-import { AppErrorBoundary, ComponentErrorBoundary } from "./components/ErrorBoundary";
+import {
+  AppErrorBoundary,
+  ComponentErrorBoundary,
+} from "./components/ErrorBoundary";
 
 import { supabase } from "./lib/supabase";
 import { User } from "./types/types";
@@ -90,16 +93,16 @@ function App() {
       document.body.scrollTop = 0;
 
       // Reset all potentially scrollable elements
-      const allElements = document.querySelectorAll('*');
+      const allElements = document.querySelectorAll("*");
       allElements.forEach((element) => {
         if (element instanceof HTMLElement) {
           const style = window.getComputedStyle(element);
           const isScrollable =
-            style.overflow === 'auto' ||
-            style.overflow === 'scroll' ||
-            style.overflowY === 'auto' ||
-            style.overflowY === 'scroll' ||
-            element.classList.contains('mobile-viewport') ||
+            style.overflow === "auto" ||
+            style.overflow === "scroll" ||
+            style.overflowY === "auto" ||
+            style.overflowY === "scroll" ||
+            element.classList.contains("mobile-viewport") ||
             element.scrollTop > 0;
 
           if (isScrollable) {
@@ -110,15 +113,15 @@ function App() {
 
       // Additional targeted resets for common patterns
       const targets = [
-        '.mobile-viewport',
+        ".mobile-viewport",
         '[class*="overflow-y-auto"]',
         '[class*="overflow-auto"]',
-        '#root',
-        'body',
-        'html'
+        "#root",
+        "body",
+        "html",
       ];
 
-      targets.forEach(selector => {
+      targets.forEach((selector) => {
         const elements = document.querySelectorAll(selector);
         elements.forEach((element) => {
           if (element instanceof HTMLElement) {
@@ -240,227 +243,238 @@ function App() {
       <RedirectHandler />
       <OrganizationStructuredData />
       <div className="flex flex-col mobile-viewport overflow-hidden bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
-      {!isRecipePage && !isChatPage && (
-        <MobileTopBar
-          onMenuClick={() => setIsMobileSidebarOpen(true)}
-          title={getPageTitle()}
-        />
-      )}
-      
-      {!isRecipePage && (
-        <div className="hidden md:block sticky top-0 z-50">
-          <Navbar
-            handleSignOut={handleSignOut}
-            currentView={getCurrentView()}
-            onViewChange={handleViewChange}
-            user={user}
-            subscriptionPlan={getSubscriptionPlanName()}
-            onAuthClick={() => setIsAuthModalOpen(true)}
-            onPricingClick={() => setIsPricingModalOpen(true)}
+        {!isRecipePage && !isChatPage && (
+          <MobileTopBar
+            onMenuClick={() => setIsMobileSidebarOpen(true)}
+            title={getPageTitle()}
           />
+        )}
+
+        {!isRecipePage && (
+          <div className="hidden md:block sticky top-0 z-50">
+            <Navbar
+              handleSignOut={handleSignOut}
+              currentView={getCurrentView()}
+              onViewChange={handleViewChange}
+              user={user}
+              subscriptionPlan={getSubscriptionPlanName()}
+              onAuthClick={() => setIsAuthModalOpen(true)}
+              onPricingClick={() => setIsPricingModalOpen(true)}
+            />
+          </div>
+        )}
+
+        <div
+          className={`flex ${isRecipePage ? "mobile-viewport" : "flex-1"} ${isChatPage || isMealPlanPage ? "overflow-hidden" : "overflow-y-auto"}`}
+        >
+          <Routes>
+            {/* Public routes */}
+            <Route
+              path="/"
+              element={
+                <ComponentErrorBoundary componentName="ChatPage">
+                  <SEOHead
+                    title="Mon Ami Chef - AI Recipe Generator & Cooking Assistant"
+                    description="Get personalized AI-generated recipes based on your ingredients, dietary preferences, and cooking style. Chat with your AI cooking assistant for instant meal ideas and cooking tips."
+                    keywords="AI recipe generator, cooking assistant, personalized recipes, meal ideas, ingredient-based recipes, AI cooking chat"
+                  />
+                  <ChatPage
+                    key={chatResetKey}
+                    user={user}
+                    onAuthClick={() => setIsAuthModalOpen(true)}
+                    onSignOut={handleSignOut}
+                  />
+                </ComponentErrorBoundary>
+              }
+            />
+            <Route
+              path="/macros"
+              element={
+                <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
+                  <SEOHead
+                    title="Recipe Macros & Nutrition Analysis - Mon Ami Chef"
+                    description="Analyze the nutritional content and macros of your saved recipes. Track protein, carbs, fat, and calories for better meal planning and health goals."
+                    keywords="recipe macros, nutrition analysis, calorie tracking, protein carbs fat, recipe nutrition, meal planning macros"
+                  />
+                  <div className="px-4 pt-4">
+                    <Breadcrumb />
+                  </div>
+                  <NutritionView
+                    currentSubView="macros"
+                    recipe={null}
+                    session={session}
+                    user={user}
+                  />
+                </div>
+              }
+            />
+            <Route path="/recipe/:id" element={<RecipePage />} />
+            <Route
+              path="/calories"
+              element={
+                <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
+                  <SEOHead
+                    title="Calorie Calculator & BMI Tool - Mon Ami Chef"
+                    description="Calculate your daily calorie needs, BMI, and macronutrient requirements. Get personalized nutrition recommendations for your health and fitness goals."
+                    keywords="calorie calculator, BMI calculator, daily calories, nutrition calculator, macro calculator, weight management"
+                  />
+                  <div className="px-4 pt-4">
+                    <Breadcrumb />
+                  </div>
+                  <NutritionView
+                    currentSubView="calories"
+                    recipe={null}
+                    session={session}
+                    user={user}
+                  />
+                </div>
+              }
+            />
+            <Route
+              path="/timer"
+              element={
+                <>
+                  <SEOHead
+                    title="Cooking Timer & Kitchen Tools - Mon Ami Chef"
+                    description="Set multiple cooking timers for your recipes. Never overcook or burn your food again with our smart kitchen timer tools."
+                    keywords="cooking timer, kitchen timer, recipe timer, cooking tools, kitchen assistant, food timer"
+                  />
+                  <CookingToolsView currentSubView="timer" />
+                </>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <>
+                  <SEOHead
+                    title="Cooking Notifications & Alerts - Mon Ami Chef"
+                    description="Set up smart cooking notifications and alerts. Get reminders for cooking steps, timer alerts, and meal planning notifications."
+                    keywords="cooking notifications, cooking alerts, timer notifications, cooking reminders, kitchen notifications"
+                  />
+                  <CookingToolsView currentSubView="notifications" />
+                </>
+              }
+            />
+            <Route
+              path="/dashboard"
+              element={
+                <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
+                  <SEOHead
+                    title="Cooking Dashboard - Mon Ami Chef"
+                    description="View your cooking stats, saved recipes, and meal planning progress. Track your culinary journey with detailed insights and analytics."
+                    keywords="cooking dashboard, recipe stats, meal planning dashboard, cooking progress, recipe analytics"
+                  />
+                  <Dashboard
+                    currentSubView="overview"
+                    user={user}
+                    session={session}
+                  />
+                </div>
+              }
+            />
+            <Route
+              path="/meal-plan-chat"
+              element={
+                <ComponentErrorBoundary componentName="MealPlanPage">
+                  <SEOHead
+                    title="AI Meal Planning Chat - Mon Ami Chef"
+                    description="Chat with our AI to create personalized weekly meal plans. Get instant meal suggestions, grocery lists, and dietary customizations."
+                    keywords="AI meal planning, weekly meal planner, meal plan generator, grocery list generator, diet meal planning, automatic meal planning"
+                  />
+                  <MealPlanPage
+                    onSignUp={() => setIsAuthModalOpen(true)}
+                    onSignIn={() => setIsAuthModalOpen(true)}
+                  />
+                </ComponentErrorBoundary>
+              }
+            />
+            <Route
+              path="/explore"
+              element={
+                <>
+                  <SEOHead
+                    title="Explore Recipes & Discover New Meals - Mon Ami Chef"
+                    description="Discover new recipe ideas and explore different cuisines. Browse trending recipes and find inspiration for your next meal."
+                    keywords="explore recipes, discover meals, recipe ideas, cooking inspiration, recipe discovery, meal inspiration"
+                  />
+                  <ExploreView />
+                </>
+              }
+            />
+            <Route path="/coming-soon" element={<ComingSoonView />} />
+            <Route
+              path="/settings"
+              element={
+                <>
+                  <SEOHead
+                    title="Settings - Mon Ami Chef"
+                    description="Customize your MonAmiChef experience. Change language settings and preferences."
+                    keywords="settings, preferences, language, configuration, customization"
+                  />
+                  <Settings />
+                </>
+              }
+            />
+            <Route path="/success" element={<SuccessPage />} />
+            <Route path="/auth/callback" element={<AuthCallback />} />
+            <Route
+              path="/recipes/saved"
+              element={
+                <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
+                  <SEOHead
+                    title="Saved Recipes Collection - Mon Ami Chef"
+                    description="Access your personal collection of saved recipes. View, organize, and manage all your favorite AI-generated recipes in one place."
+                    keywords="saved recipes, recipe collection, favorite recipes, my recipes, recipe library, personal recipes"
+                  />
+                  <div className="px-4 pt-4">
+                    <Breadcrumb />
+                  </div>
+                  <SavedRecipes />
+                </div>
+              }
+            />
+
+            {/* Private */}
+            <Route
+              path="/profile"
+              element={
+                <RequireAuth session={session}>
+                  <UserProfile user={user} onSignOut={handleSignOut} />
+                </RequireAuth>
+              }
+            />
+
+            <Route path="*" element={<NotFoundPage />} />
+          </Routes>
         </div>
-      )}
 
-      <div
-        className={`flex ${isRecipePage ? "mobile-viewport" : "flex-1"} ${isChatPage || isMealPlanPage ? "overflow-hidden" : "overflow-y-auto"}`}
-      >
-        <Routes>
-          {/* Public routes */}
-          <Route
-            path="/"
-            element={
-              <ComponentErrorBoundary componentName="ChatPage">
-                <SEOHead
-                  title="Mon Ami Chef - AI Recipe Generator & Cooking Assistant"
-                  description="Get personalized AI-generated recipes based on your ingredients, dietary preferences, and cooking style. Chat with your AI cooking assistant for instant meal ideas and cooking tips."
-                  keywords="AI recipe generator, cooking assistant, personalized recipes, meal ideas, ingredient-based recipes, AI cooking chat"
-                />
-                <ChatPage
-                  key={chatResetKey}
-                  user={user}
-                  onAuthClick={() => setIsAuthModalOpen(true)}
-                  onSignOut={handleSignOut}
-                />
-              </ComponentErrorBoundary>
-            }
-          />
-          <Route
-            path="/macros"
-            element={
-              <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
-                <SEOHead
-                  title="Recipe Macros & Nutrition Analysis - Mon Ami Chef"
-                  description="Analyze the nutritional content and macros of your saved recipes. Track protein, carbs, fat, and calories for better meal planning and health goals."
-                  keywords="recipe macros, nutrition analysis, calorie tracking, protein carbs fat, recipe nutrition, meal planning macros"
-                />
-                <div className="px-4 pt-4">
-                  <Breadcrumb />
-                </div>
-                <NutritionView currentSubView="macros" recipe={null} session={session} user={user} />
-              </div>
-            }
-          />
-          <Route path="/recipe/:id" element={<RecipePage />} />
-          <Route
-            path="/calories"
-            element={
-              <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
-                <SEOHead
-                  title="Calorie Calculator & BMI Tool - Mon Ami Chef"
-                  description="Calculate your daily calorie needs, BMI, and macronutrient requirements. Get personalized nutrition recommendations for your health and fitness goals."
-                  keywords="calorie calculator, BMI calculator, daily calories, nutrition calculator, macro calculator, weight management"
-                />
-                <div className="px-4 pt-4">
-                  <Breadcrumb />
-                </div>
-                <NutritionView currentSubView="calories" recipe={null} session={session} user={user} />
-              </div>
-            }
-          />
-          <Route
-            path="/timer"
-            element={
-              <>
-                <SEOHead
-                  title="Cooking Timer & Kitchen Tools - Mon Ami Chef"
-                  description="Set multiple cooking timers for your recipes. Never overcook or burn your food again with our smart kitchen timer tools."
-                  keywords="cooking timer, kitchen timer, recipe timer, cooking tools, kitchen assistant, food timer"
-                />
-                <CookingToolsView currentSubView="timer" />
-              </>
-            }
-          />
-          <Route
-            path="/notifications"
-            element={
-              <>
-                <SEOHead
-                  title="Cooking Notifications & Alerts - Mon Ami Chef"
-                  description="Set up smart cooking notifications and alerts. Get reminders for cooking steps, timer alerts, and meal planning notifications."
-                  keywords="cooking notifications, cooking alerts, timer notifications, cooking reminders, kitchen notifications"
-                />
-                <CookingToolsView currentSubView="notifications" />
-              </>
-            }
-          />
-          <Route
-            path="/dashboard"
-            element={
-              <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
-                <SEOHead
-                  title="Cooking Dashboard - Mon Ami Chef"
-                  description="View your cooking stats, saved recipes, and meal planning progress. Track your culinary journey with detailed insights and analytics."
-                  keywords="cooking dashboard, recipe stats, meal planning dashboard, cooking progress, recipe analytics"
-                />
-                <div className="px-4 pt-4">
-                  <Breadcrumb />
-                </div>
-                <Dashboard currentSubView="overview" user={user} session={session} />
-              </div>
-            }
-          />
-          <Route
-            path="/meal-plan-chat"
-            element={
-              <ComponentErrorBoundary componentName="MealPlanPage">
-                <SEOHead
-                  title="AI Meal Planning Chat - Mon Ami Chef"
-                  description="Chat with our AI to create personalized weekly meal plans. Get instant meal suggestions, grocery lists, and dietary customizations."
-                  keywords="AI meal planning, weekly meal planner, meal plan generator, grocery list generator, diet meal planning, automatic meal planning"
-                />
-                <MealPlanPage
-                  onSignUp={() => setIsAuthModalOpen(true)}
-                  onSignIn={() => setIsAuthModalOpen(true)}
-                />
-              </ComponentErrorBoundary>
-            }
-          />
-          <Route
-            path="/explore"
-            element={
-              <>
-                <SEOHead
-                  title="Explore Recipes & Discover New Meals - Mon Ami Chef"
-                  description="Discover new recipe ideas and explore different cuisines. Browse trending recipes and find inspiration for your next meal."
-                  keywords="explore recipes, discover meals, recipe ideas, cooking inspiration, recipe discovery, meal inspiration"
-                />
-                <ExploreView />
-              </>
-            }
-          />
-          <Route path="/coming-soon" element={<ComingSoonView />} />
-          <Route
-            path="/settings"
-            element={
-              <>
-                <SEOHead
-                  title="Settings - Mon Ami Chef"
-                  description="Customize your MonAmiChef experience. Change language settings and preferences."
-                  keywords="settings, preferences, language, configuration, customization"
-                />
-                <Settings />
-              </>
-            }
-          />
-          <Route path="/success" element={<SuccessPage />} />
-          <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route
-            path="/recipes/saved"
-            element={
-              <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
-                <SEOHead
-                  title="Saved Recipes Collection - Mon Ami Chef"
-                  description="Access your personal collection of saved recipes. View, organize, and manage all your favorite AI-generated recipes in one place."
-                  keywords="saved recipes, recipe collection, favorite recipes, my recipes, recipe library, personal recipes"
-                />
-                <div className="px-4 pt-4">
-                  <Breadcrumb />
-                </div>
-                <SavedRecipes />
-              </div>
-            }
-          />
+        <NavigationSidebar
+          isOpen={isMobileSidebarOpen}
+          onClose={() => setIsMobileSidebarOpen(false)}
+          user={user}
+          onAuthClick={() => {
+            setIsMobileSidebarOpen(false);
+            setIsAuthModalOpen(true);
+          }}
+          onSignOut={handleSignOut}
+        />
 
-          {/* Private */}
-          <Route
-            path="/profile"
-            element={
-              <RequireAuth session={session}>
-                <UserProfile user={user} onSignOut={handleSignOut} />
-              </RequireAuth>
-            }
-          />
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          onAuthenticate={handleAuthenticate}
+        />
 
-          <Route path="*" element={<NotFoundPage />} />
-        </Routes>
-      </div>
-
-      <NavigationSidebar
-        isOpen={isMobileSidebarOpen}
-        onClose={() => setIsMobileSidebarOpen(false)}
-        user={user}
-        onAuthClick={() => {
-          setIsMobileSidebarOpen(false);
-          setIsAuthModalOpen(true);
-        }}
-        onSignOut={handleSignOut}
-      />
-
-      <AuthModal
-        isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        onAuthenticate={handleAuthenticate}
-      />
-
-      <PricingModal
-        isOpen={isPricingModalOpen}
-        onClose={() => setIsPricingModalOpen(false)}
-        isAuthenticated={!!session}
-        onAuthRequired={() => {
-          setIsPricingModalOpen(false);
-          setIsAuthModalOpen(true);
-        }}
-      />
+        <PricingModal
+          isOpen={isPricingModalOpen}
+          onClose={() => setIsPricingModalOpen(false)}
+          isAuthenticated={!!session}
+          onAuthRequired={() => {
+            setIsPricingModalOpen(false);
+            setIsAuthModalOpen(true);
+          }}
+        />
         <Toaster />
       </div>
     </AppErrorBoundary>

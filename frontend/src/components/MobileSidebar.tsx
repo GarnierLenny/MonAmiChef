@@ -70,7 +70,7 @@ export function MobileSidebar({
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
         side="left"
-        className="w-80 p-0 flex flex-col h-full bg-gradient-to-b from-chef-cream to-background data-[state=open]:animate-slide-in-right"
+        className="w-64 p-0 flex flex-col h-full bg-gradient-to-b from-chef-cream to-background data-[state=open]:animate-slide-in-right"
         style={{
           animation: "slide-in-right 0.3s ease-out",
         }}
