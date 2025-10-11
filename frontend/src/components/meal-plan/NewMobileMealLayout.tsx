@@ -8,7 +8,9 @@ import {
   Eye,
   RotateCcw,
   Trash2,
+  ShoppingCart,
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { format, addDays, startOfWeek, differenceInDays } from "date-fns";
 import { SimpleMealCard } from "./SimpleMealCard";
 import { ProgressCard } from "./ProgressCard";
@@ -49,6 +51,7 @@ interface NewMobileMealLayoutProps {
   selectedMeals?: Set<string>;
   onMealSelection?: (day: string, mealSlot: MealSlot) => void;
   onClearSelectedMeals?: () => void;
+  onGroceryListClick?: () => void;
 }
 
 export const NewMobileMealLayout = ({
@@ -72,14 +75,19 @@ export const NewMobileMealLayout = ({
   selectedMeals = new Set(),
   onMealSelection,
   onClearSelectedMeals,
+  onGroceryListClick,
 }: NewMobileMealLayoutProps) => {
+  const { toast } = useToast();
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [selectedMealSlot, setSelectedMealSlot] = useState<{
     day: string;
     slot: MealSlot;
   } | null>(null);
   const [isClosing, setIsClosing] = useState(false);
+  const [shouldShake, setShouldShake] = useState(false);
+  const [hideBadge, setHideBadge] = useState(false);
   const prevSelectedMealsSize = useRef(selectedMeals.size);
+  const lastSeenMealsCount = useRef(selectedMeals.size);
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const currentDay = DAYS_OF_WEEK[currentDayIndex];
 
@@ -87,6 +95,7 @@ export const NewMobileMealLayout = ({
   useEffect(() => {
     if (prevSelectedMealsSize.current > 0 && selectedMeals.size === 0) {
       setIsClosing(true);
+      setHideBadge(false); // Reset badge visibility when all meals deselected
       // Reset closing state after animation completes
       const timer = setTimeout(() => {
         setIsClosing(false);
@@ -94,6 +103,31 @@ export const NewMobileMealLayout = ({
       return () => clearTimeout(timer);
     }
     prevSelectedMealsSize.current = selectedMeals.size;
+  }, [selectedMeals.size]);
+
+  // Trigger shake animation when shopping cart becomes clickable
+  useEffect(() => {
+    const prevSize = prevSelectedMealsSize.current;
+    const currentSize = selectedMeals.size;
+
+    // Going from 0 to any number > 0 (first meal selected)
+    if (prevSize === 0 && currentSize > 0) {
+      setShouldShake(true);
+      setHideBadge(false); // Show badge when first meal selected
+
+      // Reset shake state after animation completes
+      const timer = setTimeout(() => {
+        setShouldShake(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedMeals.size]);
+
+  // Show badge when new meals are added after last seen count
+  useEffect(() => {
+    if (selectedMeals.size > lastSeenMealsCount.current && selectedMeals.size > 0) {
+      setHideBadge(false);
+    }
   }, [selectedMeals.size]);
 
   const handlePreviousDay = () => {
@@ -144,6 +178,21 @@ export const NewMobileMealLayout = ({
     setCurrentDayIndex(selectedDayIndex);
   };
 
+  const handleGroceryListClick = () => {
+    if (selectedMeals.size === 0) {
+      toast({
+        title: "No meals selected",
+        description: "Select meal(s) to see the grocery list",
+        variant: "default",
+        className: "bg-info-100 border-info-500 text-info-900",
+      });
+    } else {
+      setHideBadge(true); // Hide badge when opening grocery list
+      lastSeenMealsCount.current = selectedMeals.size; // Track current count
+      onGroceryListClick?.();
+    }
+  };
+
   return (
     <div className="flex flex-col h-full w-screen pb-18 bg-background-dark-layer overflow-hidden">
       {/* Day Navigation */}
@@ -184,6 +233,21 @@ export const NewMobileMealLayout = ({
             className="p-2.5 bg-background hover:bg-gray-100 shadow-sm/20 rounded-full transition-colors ml-2"
           >
             <Calendar className="w-5 h-5 text-gray-600" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleGroceryListClick}
+            className={`p-2.5 shadow-sm/20 rounded-full transition-all duration-500 ml-2 bg-background hover:bg-gray-100 relative ${shouldShake ? "animate-shake" : ""}`}
+          >
+            <ShoppingCart
+              className={`w-5 h-5 transition-colors duration-500 ${
+                selectedMeals.size === 0 ? "text-neutral-400" : "text-black"
+              }`}
+            />
+            {selectedMeals.size > 0 && !hideBadge && (
+              <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-danger-500 rounded-full border-2 border-background animate-pop-in" />
+            )}
           </Button>
         </div>
       </div>
