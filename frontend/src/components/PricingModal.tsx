@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, Check, Loader2, Crown, Sparkles } from "lucide-react";
+import { X, Check, Loader2, Crown, Sparkles, Users } from "lucide-react";
 import { products, type Product } from "../stripe-config";
 import { supabase } from "../lib/supabase";
 
@@ -52,7 +52,7 @@ export default function PricingModal({
             price_id: product.priceId,
             mode: product.mode,
             success_url: `${window.location.origin}/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `${window.location.origin}/pricing`,
+            cancel_url: `${window.location.origin}/?canceled=true`,
           }),
         },
       );
@@ -83,9 +83,9 @@ export default function PricingModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90dvh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-200 p-6 rounded-t-2xl">
+        <div className="sticky top-0 bg-white z-1 border-b border-gray-200 p-6 rounded-t-2xl">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-3xl font-bold text-gray-900">
@@ -147,11 +147,11 @@ export default function PricingModal({
             {products.map((product) => (
               <div
                 key={product.id}
-                className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-xl p-6 border-2 border-orange-300 relative"
+                className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-xl p-6 border border-orange-200 relative hover:border-orange-300 transition-colors"
               >
-                <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
-                  <div className="bg-gradient-to-r from-orange-500 to-pink-500 text-white px-4 py-1 rounded-full text-sm font-medium flex items-center space-x-1">
-                    <Crown className="w-4 h-4" />
+                <div className="absolute -top-2.5 left-1/2 transform -translate-x-1/2">
+                  <div className="bg-gradient-to-r from-orange-400 to-pink-400 text-white px-3 py-0.5 rounded-full text-xs font-medium flex items-center space-x-1">
+                    <Crown className="w-3.5 h-3.5" />
                     <span>Premium</span>
                   </div>
                 </div>
@@ -171,50 +171,115 @@ export default function PricingModal({
                 </p>
 
                 <ul className="space-y-3 mb-6">
-                  <li className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-orange-500" />
-                    <span className="text-gray-700">
-                      Unlimited recipe generation
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-orange-500" />
-                    <span className="text-gray-700">
-                      Advanced AI recipe suggestions
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-orange-500" />
-                    <span className="text-gray-700">
-                      Detailed nutritional analysis
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-orange-500" />
-                    <span className="text-gray-700">Weekly meal planning</span>
-                  </li>
-                  <li className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-orange-500" />
-                    <span className="text-gray-700">Smart grocery lists</span>
-                  </li>
-                  <li className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-orange-500" />
-                    <span className="text-gray-700">
-                      Recipe collections & favorites
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-3">
-                    <Check className="w-5 h-5 text-orange-500" />
-                    <span className="text-gray-700">
-                      Priority customer support
-                    </span>
-                  </li>
-                  <li className="flex items-center space-x-3">
-                    <Sparkles className="w-5 h-5 text-orange-500" />
-                    <span className="text-gray-700 font-medium">
-                      Early access to new features
-                    </span>
-                  </li>
+                  {product.name === "Family Plan" ? (
+                    <>
+                      <li className="flex items-center space-x-3">
+                        <Users className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700 font-medium">
+                          Up to 6 family members
+                        </span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <Check className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700">
+                          Unlimited recipe generation
+                        </span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <Check className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700">
+                          Family meal planning & scheduling
+                        </span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <Check className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700">
+                          Multiple dietary preferences
+                        </span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <Check className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700">
+                          Shared recipe collections
+                        </span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <Check className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700">
+                          Family grocery lists & budgeting
+                        </span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <Check className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700">
+                          Kid-friendly recipe suggestions
+                        </span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <Check className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700">
+                          Priority support for families
+                        </span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <Sparkles className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700 font-medium">
+                          Early access to family features
+                        </span>
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      <li className="flex items-center space-x-3">
+                        <Check className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700">
+                          Unlimited recipe generation
+                        </span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <Check className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700">
+                          Advanced AI recipe suggestions
+                        </span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <Check className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700">
+                          Detailed nutritional analysis
+                        </span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <Check className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700">
+                          Weekly meal planning
+                        </span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <Check className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700">
+                          Smart grocery lists
+                        </span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <Check className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700">
+                          Recipe collections & favorites
+                        </span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <Check className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700">
+                          Priority customer support
+                        </span>
+                      </li>
+                      <li className="flex items-center space-x-3">
+                        <Sparkles className="w-5 h-5 text-orange-500" />
+                        <span className="text-gray-700 font-medium">
+                          Early access to new features
+                        </span>
+                      </li>
+                    </>
+                  )}
                 </ul>
 
                 <button

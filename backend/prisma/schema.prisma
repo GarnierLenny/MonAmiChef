@@ -198,3 +198,86 @@ model UserGoals {
 
   @@schema("public")
 }
+
+// Stripe Integration Models
+
+/// Enum for Stripe subscription status
+enum StripeSubscriptionStatus {
+  not_started
+  incomplete
+  incomplete_expired
+  trialing
+  active
+  past_due
+  canceled
+  unpaid
+  paused
+
+  @@map("stripe_subscription_status")
+  @@schema("public")
+}
+
+/// Enum for Stripe order status
+enum StripeOrderStatus {
+  pending
+  completed
+  canceled
+
+  @@map("stripe_order_status")
+  @@schema("public")
+}
+
+/// Links Supabase users to Stripe customers
+/// This model contains row level security and requires additional setup for migrations.
+model StripeCustomer {
+  id          BigInt    @id @default(autoincrement())
+  user_id     String    @unique @db.Uuid
+  customer_id String    @unique
+  created_at  DateTime  @default(now()) @db.Timestamptz()
+  updated_at  DateTime  @default(now()) @db.Timestamptz()
+  deleted_at  DateTime? @db.Timestamptz()
+
+  @@map("stripe_customers")
+  @@schema("public")
+}
+
+/// Manages Stripe subscription data
+/// This model contains row level security and requires additional setup for migrations.
+model StripeSubscription {
+  id                    BigInt                    @id @default(autoincrement())
+  customer_id           String                    @unique
+  subscription_id       String?
+  price_id              String?
+  current_period_start  BigInt?
+  current_period_end    BigInt?
+  cancel_at_period_end  Boolean                   @default(false)
+  payment_method_brand  String?
+  payment_method_last4  String?
+  status                StripeSubscriptionStatus
+  created_at            DateTime                  @default(now()) @db.Timestamptz()
+  updated_at            DateTime                  @default(now()) @db.Timestamptz()
+  deleted_at            DateTime?                 @db.Timestamptz()
+
+  @@map("stripe_subscriptions")
+  @@schema("public")
+}
+
+/// Stores Stripe order/purchase information
+/// This model contains row level security and requires additional setup for migrations.
+model StripeOrder {
+  id                  BigInt            @id @default(autoincrement())
+  checkout_session_id String
+  payment_intent_id   String
+  customer_id         String
+  amount_subtotal     BigInt
+  amount_total        BigInt
+  currency            String
+  payment_status      String
+  status              StripeOrderStatus @default(pending)
+  created_at          DateTime          @default(now()) @db.Timestamptz()
+  updated_at          DateTime          @default(now()) @db.Timestamptz()
+  deleted_at          DateTime?         @db.Timestamptz()
+
+  @@map("stripe_orders")
+  @@schema("public")
+}

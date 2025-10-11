@@ -178,13 +178,16 @@ export default function Navbar({
           <div className="ml-8 flex items-center space-x-3">
             {user ? (
               <>
-                {/* Subscription Badge */}
-                <div className="hidden sm:flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-lg">
+                {/* Subscription Badge - Clickable */}
+                <button
+                  onClick={onPricingClick}
+                  className="hidden sm:flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-lg hover:bg-white/30 transition-colors cursor-pointer"
+                >
                   <Crown className="w-4 h-4 text-yellow-300" />
                   <span className="text-sm font-medium text-white">
                     {subscriptionPlan}
                   </span>
-                </div>
+                </button>
 
                 {/* User Menu */}
                 <div className="relative">
