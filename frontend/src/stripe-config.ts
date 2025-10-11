@@ -11,7 +11,7 @@ export interface Product {
 
 export const products: Product[] = [
   {
-    id: "prod_Si53HWH2IT2A4M",
+    id: "premium-plan",
     priceId: "price_1RmetOIjlR3LvH1zBaQ1xU4O",
     name: "Premium",
     description:
@@ -22,8 +22,8 @@ export const products: Product[] = [
     interval: "month",
   },
   {
-    id: "prod_family_plan",
-    priceId: "price_family_plan_monthly",
+    id: "family-plan",
+    priceId: "price_1SH1tBIjlR3LvH1zzK0sXnHQ",
     name: "Family Plan",
     description:
       "Perfect for families! Share recipes, create family meal plans, and manage multiple dietary preferences all in one place.",

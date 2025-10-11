@@ -152,7 +152,13 @@ const Settings = ({ onPricingClick }: SettingsProps) => {
                           </button>
                         ) : (
                           <button
-                            onClick={() => window.open("https://billing.stripe.com/p/login/test_your_portal_link", "_blank")}
+                            onClick={() => {
+                              // TODO: Replace with your actual Stripe Customer Portal URL
+                              // Get it from: https://dashboard.stripe.com/settings/billing/portal
+                              const portalUrl = import.meta.env.VITE_STRIPE_CUSTOMER_PORTAL_URL ||
+                                               "https://billing.stripe.com/p/login/test_your_portal_link";
+                              window.open(portalUrl, "_blank");
+                            }}
                             className="px-6 py-2.5 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-all duration-200 flex items-center justify-center gap-2"
                           >
                             Manage Subscription
