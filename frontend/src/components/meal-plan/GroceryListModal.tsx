@@ -8,6 +8,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { ShoppingCart, Loader2 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 import type { MealPlan, MealSlot } from "./constants";
 import type { Recipe } from "@/lib/api/recipeApi";
 import { recipeApi } from "@/lib/api/recipeApi";
@@ -34,6 +35,7 @@ export const GroceryListModal = ({
   selectedMeals,
   mealPlan,
 }: GroceryListModalProps) => {
+  const { t } = useTranslation();
   const [mealsWithRecipes, setMealsWithRecipes] = useState<MealWithRecipe[]>(
     [],
   );
@@ -128,11 +130,13 @@ export const GroceryListModal = ({
             </div>
             <div>
               <DialogTitle className="text-2xl font-bold text-gray-900">
-                Grocery List
+                {t("mealPlan.groceryList")}
               </DialogTitle>
               <p className="text-sm text-neutral-600 mt-1">
-                {selectedMeals.size} meal{selectedMeals.size !== 1 ? "s" : ""}{" "}
-                selected
+                {selectedMeals.size}{" "}
+                {selectedMeals.size !== 1
+                  ? t("mealPlan.mealsSelected")
+                  : t("mealPlan.mealSelected")}
               </p>
             </div>
           </div>
@@ -149,7 +153,7 @@ export const GroceryListModal = ({
                 <div className="flex items-center gap-3">
                   <Loader2 className="w-6 h-6 animate-spin text-info-500" />
                   <span className="text-neutral-600">
-                    Loading grocery list...
+                    {t("mealPlan.loadingGroceryList")}
                   </span>
                 </div>
               </div>
@@ -163,7 +167,7 @@ export const GroceryListModal = ({
               <div className="flex items-center justify-center h-64">
                 <div className="text-center">
                   <ShoppingCart className="w-12 h-12 text-neutral-400 mx-auto mb-3" />
-                  <p className="text-neutral-600">No meals selected</p>
+                  <p className="text-neutral-600">{t("mealPlan.noMealsSelected")}</p>
                 </div>
               </div>
             ) : (
@@ -220,7 +224,7 @@ export const GroceryListModal = ({
                       </div>
                     ) : (
                       <div className="text-center py-4 text-neutral-500 text-sm">
-                        No ingredients available
+                        {t("mealPlan.noIngredientsAvailable")}
                       </div>
                     )}
 

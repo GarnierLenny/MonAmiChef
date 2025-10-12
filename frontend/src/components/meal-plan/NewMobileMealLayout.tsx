@@ -12,6 +12,7 @@ import {
   CheckCheck,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { format, addDays, startOfWeek, differenceInDays } from "date-fns";
 import { SimpleMealCard } from "./SimpleMealCard";
 import { ProgressCard } from "./ProgressCard";
@@ -81,6 +82,7 @@ export const NewMobileMealLayout = ({
   onSelectAllMeals,
 }: NewMobileMealLayoutProps) => {
   const { toast } = useToast();
+  const { t } = useTranslation();
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [selectedMealSlot, setSelectedMealSlot] = useState<{
     day: string;
@@ -196,8 +198,8 @@ export const NewMobileMealLayout = ({
   const handleGroceryListClick = () => {
     if (!hasSelectedMealsWithData()) {
       toast({
-        title: "No meals selected",
-        description: "Select meal(s) to see the grocery list",
+        title: t("mealPlan.noMealsSelected"),
+        description: t("mealPlan.selectMealsForGroceryList"),
         variant: "default",
         className: "bg-info-100 border-info-500 text-info-900",
       });
@@ -320,7 +322,7 @@ export const NewMobileMealLayout = ({
       </div>
 
       <div className="flex mx-4.5 mt-1 justify-between">
-        <p className="text-sm text-neutral-700">YOUR MEALS</p>
+        <p className="text-sm text-neutral-700">{t("mealPlan.yourMeals")}</p>
         <button
           onClick={handleSelectAll}
           className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
@@ -328,12 +330,16 @@ export const NewMobileMealLayout = ({
           {areAllCurrentDayMealsSelected() ? (
             <>
               <X className="h-4 w-4 text-danger-500" />
-              <p className="text-sm text-danger-500">Deselect All</p>
+              <p className="text-sm text-danger-500">
+                {t("mealPlan.deselectAll")}
+              </p>
             </>
           ) : (
             <>
               <CheckCheck className="h-4 w-4 text-neutral-700" />
-              <p className="text-sm text-neutral-700">Select All</p>
+              <p className="text-sm text-neutral-700">
+                {t("mealPlan.selectAll")}
+              </p>
             </>
           )}
         </button>
