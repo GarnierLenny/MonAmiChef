@@ -71,7 +71,17 @@
     "setGoals": "Définir objectifs",
     "calculate": "Calculer",
     "failedToLoadRecipe": "Échec du chargement des détails de la recette",
-    "tryAgain": "Réessayer"
+    "tryAgain": "Réessayer",
+    "groceryList": "Liste de courses",
+    "noMealsSelected": "Aucun repas sélectionné",
+    "selectMealsForGroceryList": "Sélectionnez des repas pour voir la liste de courses",
+    "loadingGroceryList": "Chargement de la liste de courses...",
+    "noIngredientsAvailable": "Aucun ingrédient disponible",
+    "mealSelected": "repas sélectionné",
+    "mealsSelected": "repas sélectionnés",
+    "yourMeals": "VOS REPAS",
+    "selectAll": "Tout sélectionner",
+    "deselectAll": "Tout désélectionner"
   },
   "progress": {
     "consumed": "Consommé",

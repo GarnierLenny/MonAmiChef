@@ -10,6 +10,7 @@ import { ProgressModal } from "@/components/meal-plan/ProgressModal";
 import { RecipeModal } from "@/components/meal-plan/RecipeModal";
 import { SavedRecipesModal } from "@/components/meal-plan/SavedRecipesModal";
 import { GuestMealPlanningCTA } from "@/components/meal-plan/GuestMealPlanningCTA";
+import { GroceryListModal } from "@/components/meal-plan/GroceryListModal";
 import { ChatInput } from "@/components/ui/chat-input";
 
 // Import constants and utils
@@ -139,11 +140,19 @@ export default function MealPlanPage({
     meal: MealSlot;
   } | null>(null);
 
+  // Grocery list modal state
+  const [showGroceryListModal, setShowGroceryListModal] = useState(false);
+
   // Load meal plans and user goals on component mount
   useEffect(() => {
     loadMealPlans();
     loadUserGoals();
   }, []);
+
+  // Reset selected meals when day changes
+  useEffect(() => {
+    setSelectedMeals(new Set());
+  }, [currentDayIndex]);
 
   // Update current backend plan when week changes
   useEffect(() => {
@@ -453,6 +462,24 @@ export default function MealPlanPage({
   // Clear selected meals
   const clearSelectedMeals = () => {
     setSelectedMeals(new Set());
+  };
+
+  // Handle bulk meal selection (select all / deselect all)
+  const handleSelectAllMeals = (mealKeys: string[]) => {
+    const newSelectedMeals = new Set(selectedMeals);
+
+    // Check if all provided meals are already selected
+    const allSelected = mealKeys.every((key) => selectedMeals.has(key));
+
+    if (allSelected) {
+      // Deselect all provided meals
+      mealKeys.forEach((key) => newSelectedMeals.delete(key));
+    } else {
+      // Select all provided meals
+      mealKeys.forEach((key) => newSelectedMeals.add(key));
+    }
+
+    setSelectedMeals(newSelectedMeals);
   };
 
   // Handle mobile input submission
@@ -905,6 +932,8 @@ export default function MealPlanPage({
           selectedMeals={selectedMeals}
           onMealSelection={handleMealSelection}
           onClearSelectedMeals={clearSelectedMeals}
+          onGroceryListClick={() => setShowGroceryListModal(true)}
+          onSelectAllMeals={handleSelectAllMeals}
         />
       </div>
 
@@ -929,6 +958,14 @@ export default function MealPlanPage({
         onClose={() => setShowSavedRecipesModal(false)}
         onSelectRecipe={handleSelectSavedRecipe}
         isAuthenticated={!isUnauthenticated}
+      />
+
+      {/* Grocery List Modal */}
+      <GroceryListModal
+        isOpen={showGroceryListModal}
+        onClose={() => setShowGroceryListModal(false)}
+        selectedMeals={selectedMeals}
+        mealPlan={mealPlan}
       />
     </div>
   );

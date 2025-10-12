@@ -428,4 +428,61 @@
   .animate-slide-down {
     animation: slideDown 0.3s ease-in forwards;
   }
+
+  /* Shake animation for shopping cart button */
+  @keyframes shake {
+    0%,
+    100% {
+      transform: translateX(0);
+    }
+    10%,
+    30%,
+    50%,
+    70% {
+      transform: translateX(-0.75px);
+    }
+    20%,
+    40%,
+    60% {
+      transform: translateX(0.75px);
+    }
+  }
+
+  .animate-shake {
+    animation: shake 1s ease-in-out;
+  }
+
+  /* Pop animation for notification badge */
+  @keyframes popIn {
+    0% {
+      transform: scale(0);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.2);
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes popOut {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0);
+      opacity: 0;
+    }
+  }
+
+  .animate-pop-in {
+    animation: popIn 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  }
+
+  .animate-pop-out {
+    animation: popOut 0.2s ease-in forwards;
+  }
 }

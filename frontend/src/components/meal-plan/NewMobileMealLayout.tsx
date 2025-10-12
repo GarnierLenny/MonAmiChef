@@ -8,7 +8,11 @@ import {
   Eye,
   RotateCcw,
   Trash2,
+  ShoppingCart,
+  CheckCheck,
 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
 import { format, addDays, startOfWeek, differenceInDays } from "date-fns";
 import { SimpleMealCard } from "./SimpleMealCard";
 import { ProgressCard } from "./ProgressCard";
@@ -49,6 +53,8 @@ interface NewMobileMealLayoutProps {
   selectedMeals?: Set<string>;
   onMealSelection?: (day: string, mealSlot: MealSlot) => void;
   onClearSelectedMeals?: () => void;
+  onGroceryListClick?: () => void;
+  onSelectAllMeals?: (mealKeys: string[]) => void;
 }
 
 export const NewMobileMealLayout = ({
@@ -72,14 +78,21 @@ export const NewMobileMealLayout = ({
   selectedMeals = new Set(),
   onMealSelection,
   onClearSelectedMeals,
+  onGroceryListClick,
+  onSelectAllMeals,
 }: NewMobileMealLayoutProps) => {
+  const { toast } = useToast();
+  const { t } = useTranslation();
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [selectedMealSlot, setSelectedMealSlot] = useState<{
     day: string;
     slot: MealSlot;
   } | null>(null);
   const [isClosing, setIsClosing] = useState(false);
+  const [shouldShake, setShouldShake] = useState(false);
+  const [hideBadge, setHideBadge] = useState(false);
   const prevSelectedMealsSize = useRef(selectedMeals.size);
+  const lastSeenMealsCount = useRef(selectedMeals.size);
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const currentDay = DAYS_OF_WEEK[currentDayIndex];
 
@@ -87,6 +100,7 @@ export const NewMobileMealLayout = ({
   useEffect(() => {
     if (prevSelectedMealsSize.current > 0 && selectedMeals.size === 0) {
       setIsClosing(true);
+      setHideBadge(false); // Reset badge visibility when all meals deselected
       // Reset closing state after animation completes
       const timer = setTimeout(() => {
         setIsClosing(false);
@@ -94,6 +108,35 @@ export const NewMobileMealLayout = ({
       return () => clearTimeout(timer);
     }
     prevSelectedMealsSize.current = selectedMeals.size;
+  }, [selectedMeals.size]);
+
+  // Trigger shake animation when shopping cart becomes clickable
+  useEffect(() => {
+    const prevSize = prevSelectedMealsSize.current;
+    const currentSize = selectedMeals.size;
+    const hasMealsWithData = hasSelectedMealsWithData();
+
+    // Going from no meals with data to having meals with data (first real meal selected)
+    if (prevSize === 0 && currentSize > 0 && hasMealsWithData) {
+      setShouldShake(true);
+      setHideBadge(false); // Show badge when first meal selected
+
+      // Reset shake state after animation completes
+      const timer = setTimeout(() => {
+        setShouldShake(false);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [selectedMeals.size, mealPlan]);
+
+  // Show badge when new meals are added after last seen count
+  useEffect(() => {
+    if (
+      selectedMeals.size > lastSeenMealsCount.current &&
+      selectedMeals.size > 0
+    ) {
+      setHideBadge(false);
+    }
   }, [selectedMeals.size]);
 
   const handlePreviousDay = () => {
@@ -144,6 +187,69 @@ export const NewMobileMealLayout = ({
     setCurrentDayIndex(selectedDayIndex);
   };
 
+  // Check if any selected meals actually have meal data
+  const hasSelectedMealsWithData = () => {
+    return Array.from(selectedMeals).some((mealKey) => {
+      const [day, slot] = mealKey.split("-");
+      return mealPlan[day]?.[slot as MealSlot];
+    });
+  };
+
+  const handleGroceryListClick = () => {
+    if (!hasSelectedMealsWithData()) {
+      toast({
+        title: t("mealPlan.noMealsSelected"),
+        description: t("mealPlan.selectMealsForGroceryList"),
+        variant: "default",
+        className: "bg-info-100 border-info-500 text-info-900",
+      });
+    } else {
+      setHideBadge(true); // Hide badge when opening grocery list
+      lastSeenMealsCount.current = selectedMeals.size; // Track current count
+      onGroceryListClick?.();
+    }
+  };
+
+  // Get all meal slots for the current day (including empty ones)
+  const getCurrentDayMealSlots = () => {
+    return MEAL_SLOTS.map((slot) => `${currentDay}-${slot}`);
+  };
+
+  const areAllCurrentDayMealsSelected = () => {
+    const allSlots = getCurrentDayMealSlots();
+    return allSlots.every((mealKey) => selectedMeals.has(mealKey));
+  };
+
+  // Handle Select All button click
+  const handleSelectAll = () => {
+    const allSlots = getCurrentDayMealSlots();
+    const allSelected = areAllCurrentDayMealsSelected();
+
+    if (onSelectAllMeals) {
+      // Use bulk selection callback if available
+      if (allSelected) {
+        // Pass empty array to deselect all (or all current day slots to toggle them off)
+        onSelectAllMeals(allSlots);
+      } else {
+        // Pass all slots to select them
+        onSelectAllMeals(allSlots);
+      }
+    } else {
+      // Fallback to individual selection
+      if (allSelected) {
+        allSlots.forEach((mealKey) => {
+          const [day, slot] = mealKey.split("-");
+          onMealSelection?.(day, slot as MealSlot);
+        });
+      } else {
+        allSlots.forEach((mealKey) => {
+          const [day, slot] = mealKey.split("-");
+          onMealSelection?.(day, slot as MealSlot);
+        });
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col h-full w-screen pb-18 bg-background-dark-layer overflow-hidden">
       {/* Day Navigation */}
@@ -185,11 +291,26 @@ export const NewMobileMealLayout = ({
           >
             <Calendar className="w-5 h-5 text-gray-600" />
           </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleGroceryListClick}
+            className={`p-2.5 shadow-sm/20 rounded-full transition-all duration-500 ml-2 bg-background hover:bg-gray-100 relative ${shouldShake ? "animate-shake" : ""}`}
+          >
+            <ShoppingCart
+              className={`w-5 h-5 transition-colors duration-500 ${
+                hasSelectedMealsWithData() ? "text-black" : "text-neutral-400"
+              }`}
+            />
+            {hasSelectedMealsWithData() && !hideBadge && (
+              <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-danger-500 rounded-full border-2 border-background animate-pop-in" />
+            )}
+          </Button>
         </div>
       </div>
 
       {/* Progress Card */}
-      <div className="px-4 pt-[18px] pb-2">
+      <div className="px-4 pt-[18px] pb-2 mb-2">
         <ProgressCard
           mealPlan={mealPlan}
           currentDay={currentDay}
@@ -198,6 +319,30 @@ export const NewMobileMealLayout = ({
           userGoals={userGoals}
           selectedMeals={selectedMeals}
         />
+      </div>
+
+      <div className="flex mx-4.5 mt-1 justify-between">
+        <p className="text-sm text-neutral-700">{t("mealPlan.yourMeals")}</p>
+        <button
+          onClick={handleSelectAll}
+          className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
+        >
+          {areAllCurrentDayMealsSelected() ? (
+            <>
+              <X className="h-4 w-4 text-danger-500" />
+              <p className="text-sm text-danger-500">
+                {t("mealPlan.deselectAll")}
+              </p>
+            </>
+          ) : (
+            <>
+              <CheckCheck className="h-4 w-4 text-neutral-700" />
+              <p className="text-sm text-neutral-700">
+                {t("mealPlan.selectAll")}
+              </p>
+            </>
+          )}
+        </button>
       </div>
 
       {/* Meal Cards */}
