@@ -53,7 +53,6 @@ interface NewMobileMealLayoutProps {
   onMealSelection?: (day: string, mealSlot: MealSlot) => void;
   onClearSelectedMeals?: () => void;
   onGroceryListClick?: () => void;
-  onSelectAllMeals?: (mealKeys: string[]) => void;
 }
 
 export const NewMobileMealLayout = ({
@@ -78,7 +77,6 @@ export const NewMobileMealLayout = ({
   onMealSelection,
   onClearSelectedMeals,
   onGroceryListClick,
-  onSelectAllMeals,
 }: NewMobileMealLayoutProps) => {
   const { toast } = useToast();
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -199,46 +197,6 @@ export const NewMobileMealLayout = ({
     }
   };
 
-  // Get all meal slots for the current day (including empty ones)
-  const getCurrentDayMealSlots = () => {
-    return MEAL_SLOTS.map((slot) => `${currentDay}-${slot}`);
-  };
-
-  const areAllCurrentDayMealsSelected = () => {
-    const allSlots = getCurrentDayMealSlots();
-    return allSlots.every((mealKey) => selectedMeals.has(mealKey));
-  };
-
-  // Handle Select All button click
-  const handleSelectAll = () => {
-    const allSlots = getCurrentDayMealSlots();
-    const allSelected = areAllCurrentDayMealsSelected();
-
-    if (onSelectAllMeals) {
-      // Use bulk selection callback if available
-      if (allSelected) {
-        // Pass empty array to deselect all (or all current day slots to toggle them off)
-        onSelectAllMeals(allSlots);
-      } else {
-        // Pass all slots to select them
-        onSelectAllMeals(allSlots);
-      }
-    } else {
-      // Fallback to individual selection
-      if (allSelected) {
-        allSlots.forEach((mealKey) => {
-          const [day, slot] = mealKey.split("-");
-          onMealSelection?.(day, slot as MealSlot);
-        });
-      } else {
-        allSlots.forEach((mealKey) => {
-          const [day, slot] = mealKey.split("-");
-          onMealSelection?.(day, slot as MealSlot);
-        });
-      }
-    }
-  };
-
   return (
     <div className="flex flex-col h-full w-screen pb-18 bg-background-dark-layer overflow-hidden">
       {/* Day Navigation */}
@@ -299,7 +257,7 @@ export const NewMobileMealLayout = ({
       </div>
 
       {/* Progress Card */}
-      <div className="px-4 pt-[18px] pb-2 mb-2">
+      <div className="px-4 pt-[18px] pb-2">
         <ProgressCard
           mealPlan={mealPlan}
           currentDay={currentDay}
@@ -310,24 +268,12 @@ export const NewMobileMealLayout = ({
         />
       </div>
 
-      <div className="flex mx-4.5 mt-1 justify-between">
-        <p className="text-sm text-neutral-700">YOUR MEALS</p>
-        <button
-          onClick={handleSelectAll}
-          className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
-        >
-          {areAllCurrentDayMealsSelected() ? (
-            <>
-              <X className="h-4 w-4 text-danger-500" />
-              <p className="text-sm text-danger-500">Deselect All</p>
-            </>
-          ) : (
-            <>
-              <CheckCheck className="h-4 w-4 text-neutral-700" />
-              <p className="text-sm text-neutral-700">Select All</p>
-            </>
-          )}
-        </button>
+      <div className="flex mx-4 mt-1 justify-between">
+        <p>YOUR MEALS</p>
+        <div className="flex">
+          <CheckCheck />
+          <p>Select All</p>
+        </div>
       </div>
 
       {/* Meal Cards */}

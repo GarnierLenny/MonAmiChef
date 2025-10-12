@@ -464,6 +464,24 @@ export default function MealPlanPage({
     setSelectedMeals(new Set());
   };
 
+  // Handle bulk meal selection (select all / deselect all)
+  const handleSelectAllMeals = (mealKeys: string[]) => {
+    const newSelectedMeals = new Set(selectedMeals);
+
+    // Check if all provided meals are already selected
+    const allSelected = mealKeys.every((key) => selectedMeals.has(key));
+
+    if (allSelected) {
+      // Deselect all provided meals
+      mealKeys.forEach((key) => newSelectedMeals.delete(key));
+    } else {
+      // Select all provided meals
+      mealKeys.forEach((key) => newSelectedMeals.add(key));
+    }
+
+    setSelectedMeals(newSelectedMeals);
+  };
+
   // Handle mobile input submission
   const handleMobileSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -915,6 +933,7 @@ export default function MealPlanPage({
           onMealSelection={handleMealSelection}
           onClearSelectedMeals={clearSelectedMeals}
           onGroceryListClick={() => setShowGroceryListModal(true)}
+          onSelectAllMeals={handleSelectAllMeals}
         />
       </div>
 
