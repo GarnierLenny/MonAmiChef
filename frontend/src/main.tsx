@@ -1,6 +1,7 @@
 import { createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
+import DesktopComingSoon from "./components/DesktopComingSoon.tsx";
 import "./styles/index.css";
 import "./lib/i18n";
 import { PostHogProvider } from "posthog-js/react";
@@ -53,7 +54,9 @@ createRoot(document.getElementById("root")!).render(
     options={options}
   >
     <BrowserRouter>
-      <App />
+      <DesktopComingSoon>
+        <App />
+      </DesktopComingSoon>
     </BrowserRouter>
   </PostHogProvider>,
   //</StrictMode>,
