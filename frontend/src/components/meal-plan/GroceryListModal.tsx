@@ -121,7 +121,7 @@ export const GroceryListModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="h-[90dvh] max-w-2xl w-[calc(100vw-2rem)] p-0 gap-0 mx-auto">
         {/* Header */}
-        <DialogHeader className="p-6">
+        <DialogHeader className="p-6 bg-info-50">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-info-100 rounded-full">
               <ShoppingCart className="w-6 h-6 text-info-500" />

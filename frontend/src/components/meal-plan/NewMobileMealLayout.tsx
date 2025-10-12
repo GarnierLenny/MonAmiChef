@@ -112,9 +112,10 @@ export const NewMobileMealLayout = ({
   useEffect(() => {
     const prevSize = prevSelectedMealsSize.current;
     const currentSize = selectedMeals.size;
+    const hasMealsWithData = hasSelectedMealsWithData();
 
-    // Going from 0 to any number > 0 (first meal selected)
-    if (prevSize === 0 && currentSize > 0) {
+    // Going from no meals with data to having meals with data (first real meal selected)
+    if (prevSize === 0 && currentSize > 0 && hasMealsWithData) {
       setShouldShake(true);
       setHideBadge(false); // Show badge when first meal selected
 
@@ -124,7 +125,7 @@ export const NewMobileMealLayout = ({
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [selectedMeals.size]);
+  }, [selectedMeals.size, mealPlan]);
 
   // Show badge when new meals are added after last seen count
   useEffect(() => {
@@ -184,8 +185,16 @@ export const NewMobileMealLayout = ({
     setCurrentDayIndex(selectedDayIndex);
   };
 
+  // Check if any selected meals actually have meal data
+  const hasSelectedMealsWithData = () => {
+    return Array.from(selectedMeals).some((mealKey) => {
+      const [day, slot] = mealKey.split("-");
+      return mealPlan[day]?.[slot as MealSlot];
+    });
+  };
+
   const handleGroceryListClick = () => {
-    if (selectedMeals.size === 0) {
+    if (!hasSelectedMealsWithData()) {
       toast({
         title: "No meals selected",
         description: "Select meal(s) to see the grocery list",
@@ -288,10 +297,10 @@ export const NewMobileMealLayout = ({
           >
             <ShoppingCart
               className={`w-5 h-5 transition-colors duration-500 ${
-                selectedMeals.size === 0 ? "text-neutral-400" : "text-black"
+                hasSelectedMealsWithData() ? "text-black" : "text-neutral-400"
               }`}
             />
-            {selectedMeals.size > 0 && !hideBadge && (
+            {hasSelectedMealsWithData() && !hideBadge && (
               <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-danger-500 rounded-full border-2 border-background animate-pop-in" />
             )}
           </Button>
