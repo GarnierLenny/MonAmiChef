@@ -149,7 +149,7 @@ export const GroceryListModal = ({
           <div className="p-6 pt-2">
             {isLoading ? (
               // Loading state
-              <div className="flex items-center justify-center h-64">
+              <div className="flex w-screen items-center justify-center h-64">
                 <div className="flex items-center gap-3">
                   <Loader2 className="w-6 h-6 animate-spin text-info-500" />
                   <span className="text-neutral-600">
@@ -167,7 +167,9 @@ export const GroceryListModal = ({
               <div className="flex items-center justify-center h-64">
                 <div className="text-center">
                   <ShoppingCart className="w-12 h-12 text-neutral-400 mx-auto mb-3" />
-                  <p className="text-neutral-600">{t("mealPlan.noMealsSelected")}</p>
+                  <p className="text-neutral-600">
+                    {t("mealPlan.noMealsSelected")}
+                  </p>
                 </div>
               </div>
             ) : (

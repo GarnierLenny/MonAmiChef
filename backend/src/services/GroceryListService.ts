@@ -346,21 +346,40 @@ export class GroceryListService {
    * Parse ingredient string to extract name and quantity
    */
   private parseIngredient(ingredient: string): ParsedIngredient {
-    // Simple parsing - can be enhanced later
-    const match = ingredient.match(/^([\d./\s]+)?(.+)$/);
+    // Remove cooking instructions (anything after comma or in parentheses)
+    let cleanedIngredient = ingredient.split(',')[0].trim(); // Remove everything after comma
+    cleanedIngredient = cleanedIngredient.split('(')[0].trim(); // Remove everything after opening parenthesis
+
+    // Extract quantity and name
+    const match = cleanedIngredient.match(/^([\d./\s¼½¾⅓⅔⅛⅜⅝⅞]+(?:\s*(?:cup|cups|tablespoon|tablespoons|tbsp|teaspoon|teaspoons|tsp|pound|pounds|lb|lbs|ounce|ounces|oz|gram|grams|g|kilogram|kilograms|kg|ml|milliliter|milliliters|liter|liters|l|piece|pieces|slice|slices|clove|cloves|can|cans|package|packages|pkg))?)?(.+)$/i);
+
     if (match) {
       const quantity = match[1]?.trim() || '';
-      const name = match[2]?.trim() || ingredient;
+      let name = match[2]?.trim() || cleanedIngredient;
+
+      // Capitalize first letter
+      name = name.charAt(0).toUpperCase() + name.slice(1);
+
       return {
         original: ingredient,
-        name: name.charAt(0).toUpperCase() + name.slice(1),
+        name,
         quantity: quantity || '1',
+      };
+    }
+
+    // Fallback: if no match, try simple split
+    const simpleParts = cleanedIngredient.split(/\s+/);
+    if (simpleParts.length > 1 && /^[\d./¼½¾⅓⅔⅛⅜⅝⅞]+$/.test(simpleParts[0])) {
+      return {
+        original: ingredient,
+        name: simpleParts.slice(1).join(' ').charAt(0).toUpperCase() + simpleParts.slice(1).join(' ').slice(1),
+        quantity: simpleParts[0],
       };
     }
 
     return {
       original: ingredient,
-      name: ingredient,
+      name: cleanedIngredient.charAt(0).toUpperCase() + cleanedIngredient.slice(1),
       quantity: '1',
     };
   }

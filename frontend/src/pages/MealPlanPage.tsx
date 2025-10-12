@@ -1,6 +1,10 @@
 // src/pages/MealPlanPage.tsx
 import { useState, useCallback, useEffect } from "react";
 import { startOfWeek, addWeeks, subWeeks } from "date-fns";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
+import { useTranslation } from "react-i18next";
+import { ToastAction } from "@/components/ui/toast";
 
 // Import components
 import { MealGrid } from "@/components/meal-plan/MealGrid";
@@ -28,6 +32,7 @@ import { parseMealSlots } from "@/lib/mealSlotParser";
 import { mealPlanApi, type BackendMealPlan } from "@/lib/api/mealPlanApi";
 import { recipeApi } from "@/lib/api/recipeApi";
 import { healthApi, type UserGoals } from "@/lib/api/healthApi";
+import { groceryListApi } from "@/lib/api/groceryListApi";
 import type { SavedRecipe } from "@/types/recipe";
 import {
   createMealPlanRequest,
@@ -48,6 +53,10 @@ export default function MealPlanPage({
   onSignUp,
   onSignIn,
 }: MealPlanPageProps = {}) {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const { t } = useTranslation();
+
   // Input state
   const [inputValue, setInputValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -143,10 +152,16 @@ export default function MealPlanPage({
   // Grocery list modal state
   const [showGroceryListModal, setShowGroceryListModal] = useState(false);
 
+  // Grocery list state - track which meal plan item IDs are already in the grocery list
+  const [groceryListMealIds, setGroceryListMealIds] = useState<Set<string>>(
+    new Set(),
+  );
+
   // Load meal plans and user goals on component mount
   useEffect(() => {
     loadMealPlans();
     loadUserGoals();
+    loadGroceryList();
   }, []);
 
   // Reset selected meals when day changes
@@ -234,6 +249,23 @@ export default function MealPlanPage({
       setUserGoals(null);
     } finally {
       setIsLoadingGoals(false);
+    }
+  };
+
+  // Load grocery list to track which meals are already added
+  const loadGroceryList = async () => {
+    if (isUnauthenticated) return;
+
+    try {
+      const groceryList = await groceryListApi.getGroceryList();
+      // Extract meal plan item IDs from the grocery list
+      const mealIds = new Set(
+        groceryList.meals.map((meal) => meal.mealPlanItemId),
+      );
+      setGroceryListMealIds(mealIds);
+    } catch (err: unknown) {
+      console.warn("Failed to load grocery list:", err);
+      // Don't show error - just means grocery list is empty or unavailable
     }
   };
 
@@ -735,6 +767,65 @@ export default function MealPlanPage({
     setSavedRecipeTargetSlot(null);
   };
 
+  // Handle adding selected meals to grocery list
+  const handleAddToGroceryList = async () => {
+    if (selectedMeals.size === 0 || !currentBackendPlan) return;
+
+    try {
+      // Convert selected meal keys to meal plan item IDs
+      const mealPlanItemIds: string[] = [];
+
+      selectedMeals.forEach((mealKey) => {
+        const [day, mealSlot] = mealKey.split("-");
+        const item = findMealPlanItem(
+          currentBackendPlan,
+          day,
+          mealSlot as MealSlot,
+        );
+        if (item) {
+          mealPlanItemIds.push(item.id);
+        }
+      });
+
+      if (mealPlanItemIds.length === 0) {
+        console.warn("No meal plan items found for selected meals");
+        return;
+      }
+
+      // Add meals to grocery list
+      await groceryListApi.addMeals(mealPlanItemIds);
+
+      // Update grocery list meal IDs state
+      await loadGroceryList();
+
+      // Show success toast with action button
+      const mealCount = mealPlanItemIds.length;
+      toast({
+        title: t("groceryList.mealsAddedSuccess"),
+        description: t("groceryList.mealsAddedSuccessDescription", {
+          count: mealCount,
+        }),
+        variant: "success" as any,
+        action: (
+          <ToastAction
+            altText={t("groceryList.seeGroceryList")}
+            onClick={() => navigate("/grocery-list")}
+          >
+            {t("groceryList.seeGroceryList")}
+          </ToastAction>
+        ),
+      });
+
+      // Clear selected meals
+      setSelectedMeals(new Set());
+    } catch (err: unknown) {
+      console.error("Failed to add meals to grocery list:", err);
+      setError(
+        (err as Error).message || "Failed to add meals to grocery list",
+      );
+    }
+  };
+
   // Week navigation
   const goToPreviousWeek = () => setCurrentWeek((prev) => subWeeks(prev, 1));
   const goToNextWeek = () => setCurrentWeek((prev) => addWeeks(prev, 1));
@@ -932,7 +1023,8 @@ export default function MealPlanPage({
           selectedMeals={selectedMeals}
           onMealSelection={handleMealSelection}
           onClearSelectedMeals={clearSelectedMeals}
-          onGroceryListClick={() => setShowGroceryListModal(true)}
+          onAddToGroceryList={handleAddToGroceryList}
+          groceryListMealIds={groceryListMealIds}
           onSelectAllMeals={handleSelectAllMeals}
         />
       </div>

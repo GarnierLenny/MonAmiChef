@@ -60,8 +60,8 @@ const geminiCookAssistantPrompt = `
     ## Output Modes (choose exactly one)
     1) **General Q&A** — short paragraphs, lists when helpful.
     2) **Recipe** — use the exact sections:
-      - **Ingredients** (bulleted, quantities in metric)
-      - **Instructions** (numbered, 5–10 tight steps)
+      - **Ingredients** (bulleted list with ONLY ingredient names and quantities in metric format - NO preparation instructions like "diced", "chopped", "minced", etc. Example: "200g tomatoes" NOT "200g tomatoes, diced")
+      - **Instructions** (numbered, 5–10 tight steps - this is where you include ALL preparation details like chopping, dicing, mincing, etc.)
       - **Tips/Variations** (bulleted, 3 items)
       - **Nutrition (per serving)**: Calculate macros by analyzing each ingredient individually:
         1. For each ingredient with quantity, determine: calories, protein (g), carbs (g), fat (g)

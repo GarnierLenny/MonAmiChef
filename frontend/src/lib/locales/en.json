@@ -15,12 +15,14 @@
     "filter": "Filter",
     "clear": "Clear",
     "submit": "Submit",
-    "confirm": "Confirm"
+    "confirm": "Confirm",
+    "retry": "Retry"
   },
   "navigation": {
     "home": "Home",
     "dashboard": "Dashboard",
     "mealPlan": "Meal Plan",
+    "groceryList": "Grocery List",
     "recipes": "Recipes",
     "chat": "Chat",
     "profile": "Profile",
@@ -166,5 +168,38 @@
     "accountDescription": "Manage your profile and account preferences (Coming Soon)",
     "notifications": "Notifications",
     "notificationsDescription": "Configure your notification preferences (Coming Soon)"
+  },
+  "groceryList": {
+    "title": "Grocery List",
+    "meal": "meal",
+    "meals": "meals",
+    "loading": "Loading grocery list...",
+    "emptyState": "Your grocery list is empty",
+    "emptyStateCta": "Add meals from your meal plan to generate your grocery list",
+    "goToMealPlan": "Go to Meal Plan",
+    "mealsSection": "From Your Meal Plan",
+    "ingredientsSection": "Ingredients",
+    "customItemsSection": "Additional Items",
+    "addItem": "Add",
+    "addItemPlaceholder": "Add item (e.g., Paper towels)",
+    "quantityPlaceholder": "Qty (optional)",
+    "clearAll": "Clear All",
+    "confirmClearAll": "Are you sure you want to clear your entire grocery list?",
+    "confirmRemoveMeal": "Remove meal from grocery list?",
+    "confirmRemoveMealDescription": "Are you sure you want to remove \"{{mealName}}\" from your grocery list? Its ingredients will no longer appear in your list.",
+    "mealsAddedSuccess": "Meals added to grocery list!",
+    "mealsAddedSuccessDescription_one": "{{count}} meal has been added to your grocery list",
+    "mealsAddedSuccessDescription_other": "{{count}} meals have been added to your grocery list",
+    "seeGroceryList": "See Grocery List",
+    "showAllCategories": "Show all categories",
+    "addToCategoryPlaceholder": "Add item...",
+    "categories": {
+      "produce": "Produce",
+      "protein": "Proteins",
+      "dairy": "Dairy",
+      "grains": "Grains",
+      "spices": "Spices & Seasonings",
+      "other": "Other"
+    }
   }
 }

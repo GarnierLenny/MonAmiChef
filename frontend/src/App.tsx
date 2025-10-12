@@ -24,6 +24,7 @@ import RecipePage from "./components/RecipePage";
 import UserProfile from "./components/UserProfile";
 import ChatPage from "./pages/ChatPage";
 import MealPlanPage from "./pages/MealPlanPage";
+import GroceryListPage from "./pages/GroceryListPage";
 import AuthCallback from "./components/AuthCallback";
 import SavedRecipes from "./pages/SavedRecipes";
 import NotFoundPage from "./pages/NotFoundPage";
@@ -43,7 +44,10 @@ import {
 
 import { supabase } from "./lib/supabase";
 import { User } from "./types/types";
-import { useSubscription, getSubscriptionDisplayName } from "./hooks/useSubscription";
+import {
+  useSubscription,
+  getSubscriptionDisplayName,
+} from "./hooks/useSubscription";
 
 function RequireAuth({
   session,
@@ -93,7 +97,8 @@ function App() {
     if (params.has("canceled")) {
       toast({
         title: "Checkout Canceled",
-        description: "Your payment was canceled. You can try again whenever you're ready!",
+        description:
+          "Your payment was canceled. You can try again whenever you're ready!",
         variant: "default",
       });
       // Remove the canceled param
@@ -230,6 +235,7 @@ function App() {
   const getPageTitle = () => {
     const path = location.pathname;
     if (path === "/meal-plan-chat") return "Meal Plan";
+    if (path === "/grocery-list") return "Grocery List";
     if (path === "/macros") return "Macros";
     if (path === "/calories") return "Calories";
     if (path === "/timer") return "Timer";
@@ -388,6 +394,19 @@ function App() {
               }
             />
             <Route
+              path="/grocery-list"
+              element={
+                <ComponentErrorBoundary componentName="GroceryListPage">
+                  <SEOHead
+                    title="Grocery List - Mon Ami Chef"
+                    description="Your smart grocery list from your meal plan. Add custom items and check off ingredients while shopping."
+                    keywords="grocery list, shopping list, meal plan groceries, ingredient list, smart shopping"
+                  />
+                  <GroceryListPage />
+                </ComponentErrorBoundary>
+              }
+            />
+            <Route
               path="/explore"
               element={
                 <>
@@ -410,7 +429,9 @@ function App() {
                     description="Customize your MonAmiChef experience. Change language settings and preferences."
                     keywords="settings, preferences, language, configuration, customization"
                   />
-                  <Settings onPricingClick={() => setIsPricingModalOpen(true)} />
+                  <Settings
+                    onPricingClick={() => setIsPricingModalOpen(true)}
+                  />
                 </>
               }
             />
