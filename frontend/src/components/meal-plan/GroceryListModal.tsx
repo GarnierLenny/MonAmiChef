@@ -79,10 +79,7 @@ export const GroceryListModal = ({
           .getRecipe(mealItem.recipeId)
           .then((recipe) => ({ ...mealItem, recipe }))
           .catch((err) => {
-            console.error(
-              `Failed to fetch recipe for ${mealItem.title}:`,
-              err,
-            );
+            console.error(`Failed to fetch recipe for ${mealItem.title}:`, err);
             return mealItem; // Return without recipe on error
           }),
       );
@@ -124,7 +121,7 @@ export const GroceryListModal = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="h-[90dvh] max-w-2xl w-[calc(100vw-2rem)] p-0 gap-0 mx-auto">
         {/* Header */}
-        <DialogHeader className="p-6 pb-4">
+        <DialogHeader className="p-6">
           <div className="flex items-center gap-3">
             <div className="p-2 bg-info-100 rounded-full">
               <ShoppingCart className="w-6 h-6 text-info-500" />
@@ -145,7 +142,7 @@ export const GroceryListModal = ({
 
         {/* Content */}
         <ScrollArea className="flex-1">
-          <div className="p-6">
+          <div className="p-6 pt-2">
             {isLoading ? (
               // Loading state
               <div className="flex items-center justify-center h-64">

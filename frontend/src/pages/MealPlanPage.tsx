@@ -149,6 +149,11 @@ export default function MealPlanPage({
     loadUserGoals();
   }, []);
 
+  // Reset selected meals when day changes
+  useEffect(() => {
+    setSelectedMeals(new Set());
+  }, [currentDayIndex]);
+
   // Update current backend plan when week changes
   useEffect(() => {
     // Don't update if still loading initial data
