@@ -14,7 +14,6 @@ import { ProgressModal } from "@/components/meal-plan/ProgressModal";
 import { RecipeModal } from "@/components/meal-plan/RecipeModal";
 import { SavedRecipesModal } from "@/components/meal-plan/SavedRecipesModal";
 import { GuestMealPlanningCTA } from "@/components/meal-plan/GuestMealPlanningCTA";
-import { GroceryListModal } from "@/components/meal-plan/GroceryListModal";
 import { ChatInput } from "@/components/ui/chat-input";
 
 // Import constants and utils
@@ -148,9 +147,6 @@ export default function MealPlanPage({
     day: string;
     meal: MealSlot;
   } | null>(null);
-
-  // Grocery list modal state
-  const [showGroceryListModal, setShowGroceryListModal] = useState(false);
 
   // Grocery list state - track which meal plan item IDs are already in the grocery list
   const [groceryListMealIds, setGroceryListMealIds] = useState<Set<string>>(
@@ -1050,14 +1046,6 @@ export default function MealPlanPage({
         onClose={() => setShowSavedRecipesModal(false)}
         onSelectRecipe={handleSelectSavedRecipe}
         isAuthenticated={!isUnauthenticated}
-      />
-
-      {/* Grocery List Modal */}
-      <GroceryListModal
-        isOpen={showGroceryListModal}
-        onClose={() => setShowGroceryListModal(false)}
-        selectedMeals={selectedMeals}
-        mealPlan={mealPlan}
       />
     </div>
   );
