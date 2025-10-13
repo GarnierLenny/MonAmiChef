@@ -151,6 +151,48 @@ model Recipe {
   @@schema("public")
 }
 
+/// Grocery list models - Shopping cart pattern (one active list per user)
+model GroceryList {
+  id          String              @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String              @unique @map("user_id") @db.Uuid
+  meals       GroceryMeal[]
+  customItems CustomGroceryItem[]
+  createdAt   DateTime            @default(now()) @map("created_at")
+  updatedAt   DateTime            @updatedAt @map("updated_at")
+
+  @@schema("public")
+}
+
+model GroceryMeal {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  listId         String   @map("list_id") @db.Uuid
+  mealPlanItemId String   @map("meal_plan_item_id") @db.Uuid
+  day            Int      // 0..6 (Sun..Sat), matches MealPlanItem.day
+  mealSlot       MealSlot @map("meal_slot")
+  addedAt        DateTime @default(now()) @map("added_at")
+
+  list GroceryList @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, mealPlanItemId], map: "grocery_meal_list_item_unique")
+  @@index([listId])
+  @@schema("public")
+}
+
+model CustomGroceryItem {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  listId    String   @map("list_id") @db.Uuid
+  name      String
+  quantity  String?
+  category  String?
+  checked   Boolean  @default(false)
+  createdAt DateTime @default(now()) @map("created_at")
+
+  list GroceryList @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  @@index([listId])
+  @@schema("public")
+}
+
 /// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model SavedRecipe {
   id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid

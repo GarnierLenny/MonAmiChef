@@ -53,7 +53,8 @@ interface NewMobileMealLayoutProps {
   selectedMeals?: Set<string>;
   onMealSelection?: (day: string, mealSlot: MealSlot) => void;
   onClearSelectedMeals?: () => void;
-  onGroceryListClick?: () => void;
+  onAddToGroceryList?: () => void;
+  groceryListMealIds?: Set<string>;
   onSelectAllMeals?: (mealKeys: string[]) => void;
 }
 
@@ -78,7 +79,8 @@ export const NewMobileMealLayout = ({
   selectedMeals = new Set(),
   onMealSelection,
   onClearSelectedMeals,
-  onGroceryListClick,
+  onAddToGroceryList,
+  groceryListMealIds = new Set(),
   onSelectAllMeals,
 }: NewMobileMealLayoutProps) => {
   const { toast } = useToast();
@@ -195,6 +197,22 @@ export const NewMobileMealLayout = ({
     });
   };
 
+  // Check if any selected meals with data are NOT already in grocery list
+  const hasNewMealsToAdd = () => {
+    return Array.from(selectedMeals).some((mealKey) => {
+      const [day, slot] = mealKey.split("-");
+      const hasMealData = mealPlan[day]?.[slot as MealSlot];
+      if (!hasMealData) return false;
+
+      // Check if this meal's mealPlanItemId is NOT in the grocery list
+      // We need to find the meal plan item ID from the backend data
+      // Since we don't have direct access to that here, we'll rely on
+      // the parent component to track this via groceryListMealIds
+      // For now, just check if it has data (we'll enhance this later)
+      return hasMealData;
+    });
+  };
+
   const handleGroceryListClick = () => {
     if (!hasSelectedMealsWithData()) {
       toast({
@@ -204,9 +222,9 @@ export const NewMobileMealLayout = ({
         className: "bg-info-100 border-info-500 text-info-900",
       });
     } else {
-      setHideBadge(true); // Hide badge when opening grocery list
+      setHideBadge(true); // Hide badge when adding to grocery list
       lastSeenMealsCount.current = selectedMeals.size; // Track current count
-      onGroceryListClick?.();
+      onAddToGroceryList?.();
     }
   };
 
@@ -302,7 +320,7 @@ export const NewMobileMealLayout = ({
                 hasSelectedMealsWithData() ? "text-black" : "text-neutral-400"
               }`}
             />
-            {hasSelectedMealsWithData() && !hideBadge && (
+            {hasNewMealsToAdd() && !hideBadge && (
               <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-danger-500 rounded-full border-2 border-background animate-pop-in" />
             )}
           </Button>

@@ -15,12 +15,14 @@
     "filter": "Filtrer",
     "clear": "Effacer",
     "submit": "Soumettre",
-    "confirm": "Confirmer"
+    "confirm": "Confirmer",
+    "retry": "Réessayer"
   },
   "navigation": {
     "home": "Accueil",
     "dashboard": "Tableau de bord",
     "mealPlan": "Plan de repas",
+    "groceryList": "Liste de courses",
     "recipes": "Recettes",
     "chat": "Chat",
     "profile": "Profil",
@@ -166,5 +168,38 @@
     "accountDescription": "Gérez votre profil et vos préférences de compte (Bientôt disponible)",
     "notifications": "Notifications",
     "notificationsDescription": "Configurez vos préférences de notification (Bientôt disponible)"
+  },
+  "groceryList": {
+    "title": "Liste de courses",
+    "meal": "repas",
+    "meals": "repas",
+    "loading": "Chargement de la liste de courses...",
+    "emptyState": "Votre liste de courses est vide",
+    "emptyStateCta": "Ajoutez des repas de votre plan de repas pour générer votre liste de courses",
+    "goToMealPlan": "Aller au plan de repas",
+    "mealsSection": "De votre plan de repas",
+    "ingredientsSection": "Ingrédients",
+    "customItemsSection": "Articles supplémentaires",
+    "addItem": "Ajouter",
+    "addItemPlaceholder": "Ajouter un article (ex: Essuie-tout)",
+    "quantityPlaceholder": "Qté (facultatif)",
+    "clearAll": "Tout effacer",
+    "confirmClearAll": "Êtes-vous sûr de vouloir effacer toute votre liste de courses ?",
+    "confirmRemoveMeal": "Retirer le repas de la liste ?",
+    "confirmRemoveMealDescription": "Êtes-vous sûr de vouloir retirer \"{{mealName}}\" de votre liste de courses ? Ses ingrédients n'apparaîtront plus dans votre liste.",
+    "mealsAddedSuccess": "Repas ajoutés à la liste !",
+    "mealsAddedSuccessDescription_one": "{{count}} repas a été ajouté à votre liste de courses",
+    "mealsAddedSuccessDescription_other": "{{count}} repas ont été ajoutés à votre liste de courses",
+    "seeGroceryList": "Voir la liste de courses",
+    "showAllCategories": "Afficher toutes les catégories",
+    "addToCategoryPlaceholder": "Ajouter un article...",
+    "categories": {
+      "produce": "Fruits et Légumes",
+      "protein": "Protéines",
+      "dairy": "Produits Laitiers",
+      "grains": "Céréales",
+      "spices": "Épices et Assaisonnements",
+      "other": "Autre"
+    }
   }
 }

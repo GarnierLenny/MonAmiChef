@@ -16,6 +16,7 @@ import {
   Timer,
   BarChart3,
   Settings,
+  ShoppingCart,
 } from "lucide-react";
 import { User as UserType } from "../types/types";
 
@@ -146,6 +147,19 @@ export function NavigationSidebar({
               >
                 <CalendarDays className="h-5 w-5" />
                 {t('navigation.mealPlan')}
+              </Button>
+
+              <Button
+                variant="ghost"
+                className={`w-full justify-start gap-4 h-12 text-left font-medium ${
+                  isActivePath("/grocery-list")
+                    ? "bg-green-100 text-green-700"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
+                onClick={() => handleNavigation("/grocery-list")}
+              >
+                <ShoppingCart className="h-5 w-5" />
+                {t('navigation.groceryList')}
               </Button>
 
               <Button
