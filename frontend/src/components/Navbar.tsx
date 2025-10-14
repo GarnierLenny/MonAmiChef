@@ -83,17 +83,17 @@ export default function Navbar({
   ];
 
   return (
-    <nav className="bg-gradient-to-r overflow-visible from-orange-500 via-orange-600 to-pink-500 shadow-lg relative z-50 py-2">
+    <nav className="bg-white overflow-visible shadow-lg relative z-50 py-2">
       <div className="overflow-visible max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           {/* Logo */}
           <div className="flex items-center space-x-3">
-            <div className="bg-white/25 backdrop-blur-sm p-2 rounded-xl border border-white/20">
+            <div className="bg-orange-500 p-2 rounded-xl">
               <ChefHat className="w-8 h-8 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-white">Mon ami chef</h1>
-              <p className="text-xs text-orange-100">
+              <h1 className="text-xl font-bold text-gray-900">Mon ami chef</h1>
+              <p className="text-xs text-gray-600">
                 AI-Powered Recipe Generator
               </p>
             </div>
@@ -119,8 +119,8 @@ export default function Navbar({
                     }}
                     className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
                       isActive
-                        ? "bg-white/20 backdrop-blur-sm text-white shadow-lg"
-                        : "text-orange-100 hover:text-white hover:bg-white/10"
+                        ? "bg-orange-100 text-orange-700 shadow-md"
+                        : "text-gray-700 hover:text-orange-700 hover:bg-orange-50"
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -181,10 +181,10 @@ export default function Navbar({
                 {/* Subscription Badge - Clickable */}
                 <button
                   onClick={onPricingClick}
-                  className="hidden sm:flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-3 py-1 rounded-lg hover:bg-white/30 transition-colors cursor-pointer"
+                  className="hidden sm:flex items-center space-x-2 bg-orange-100 px-3 py-1 rounded-lg hover:bg-orange-200 transition-colors cursor-pointer"
                 >
-                  <Crown className="w-4 h-4 text-yellow-300" />
-                  <span className="text-sm font-medium text-white">
+                  <Crown className="w-4 h-4 text-yellow-600" />
+                  <span className="text-sm font-medium text-orange-700">
                     {subscriptionPlan}
                   </span>
                 </button>
@@ -193,7 +193,7 @@ export default function Navbar({
                 <div className="relative">
                   <button
                     onClick={() => toggleDropdown("user")}
-                    className="flex items-center space-x-2 bg-white/20 backdrop-blur-sm p-2 rounded-xl text-white hover:bg-white/30 transition-colors"
+                    className="flex items-center space-x-2 bg-gray-100 p-2 rounded-xl text-gray-700 hover:bg-gray-200 transition-colors"
                   >
                     <User className="w-5 h-5" />
                     <span className="hidden sm:inline font-medium">
@@ -252,7 +252,7 @@ export default function Navbar({
             ) : (
               <button
                 onClick={onAuthClick}
-                className="flex items-center space-x-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-xl text-white hover:bg-white/30 transition-colors"
+                className="flex items-center space-x-2 bg-orange-500 px-4 py-2 rounded-xl text-white hover:bg-orange-600 transition-colors"
               >
                 <LogIn className="w-5 h-5" />
                 <span className="font-medium">Login</span>

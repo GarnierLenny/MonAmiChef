@@ -370,59 +370,38 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
     <>
       {isMobile ? (
         <div className="flex flex-col mobile-viewport min-h-0 relative overflow-hidden">
-          <MobileTopBar
-            onMenuClick={() => setIsMobileSidebarOpen(true)}
-            rightIcon={<Settings2 className="h-5 w-5" />}
-            onRightIconClick={() => setIsChatSidebarOpen(true)}
-          />
+            <MobileTopBar
+              onMenuClick={() => setIsMobileSidebarOpen(true)}
+              rightIcon={<Settings2 className="h-5 w-5" />}
+              onRightIconClick={() => setIsChatSidebarOpen(true)}
+            />
 
-          <NavigationSidebar
-            isOpen={isMobileSidebarOpen}
-            onClose={() => setIsMobileSidebarOpen(false)}
-            user={user}
-            onAuthClick={onAuthClick || (() => {})}
-            onSignOut={onSignOut || (async () => {})}
-          />
+            <NavigationSidebar
+              isOpen={isMobileSidebarOpen}
+              onClose={() => setIsMobileSidebarOpen(false)}
+              user={user}
+              onAuthClick={onAuthClick || (() => {})}
+              onSignOut={onSignOut || (async () => {})}
+              chats={chats}
+              onNewChat={handleNewChat}
+              handleDropdownAction={handleDropdownAction}
+              activeDropdown={activeDropdown}
+              setActiveDropdown={setActiveDropdown}
+              renamingId={renamingId}
+              setRenamingId={setRenamingId}
+              renameValue={renameValue}
+              setRenameValue={setRenameValue}
+              cancelRename={cancelRename}
+              saveRename={saveRename}
+              confirmDeleteId={confirmDeleteId}
+              confirmDelete={confirmDelete}
+              cancelDelete={cancelDelete}
+            />
 
-          <ChatSidebar
-            isOpen={isChatSidebarOpen}
-            onClose={() => setIsChatSidebarOpen(false)}
-            chats={chats}
-            onNewChat={handleNewChat}
-            handleDropdownAction={handleDropdownAction}
-            activeDropdown={activeDropdown}
-            setActiveDropdown={setActiveDropdown}
-            renamingId={renamingId}
-            renameValue={renameValue}
-            setRenameValue={setRenameValue}
-            cancelRename={cancelRename}
-            saveRename={saveRename}
-            confirmDeleteId={confirmDeleteId}
-            confirmDelete={confirmDelete}
-            cancelDelete={cancelDelete}
-            preferences={preferences}
-            onPreferenceChange={(category, value, action) =>
-              handlePreferenceChange(
-                category as ArrayKeys | NumberKeys,
-                value,
-                action as "add" | "remove" | "set" | "clear",
-              )
-            }
-            clearAllPreferences={clearAllPreferences}
-            onSubmitPreferences={handleSubmitPreferencesOnly}
-            hasSelectedPreferences={hasSelectedPreferences}
-          />
-
-          <div className="flex-1 flex flex-col overflow-hidden mobile-content min-h-0">
-            {isLoadingChat && (
-              <div className="pointer-events-none absolute inset-0 flex items-start justify-center pt-4">
-                <div className="rounded-full h-6 w-6 border-2 border-gray-300 border-t-transparent animate-spin" />
-              </div>
-            )}
-            <ChatInterface
+            <ChatSidebar
+              isOpen={isChatSidebarOpen}
+              onClose={() => setIsChatSidebarOpen(false)}
               preferences={preferences}
-              inputValue={inputValue}
-              onInputChange={setInputValue}
               onPreferenceChange={(category, value, action) =>
                 handlePreferenceChange(
                   category as ArrayKeys | NumberKeys,
@@ -430,20 +409,42 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
                   action as "add" | "remove" | "set" | "clear",
                 )
               }
-              messages={messages}
-              remainingCharacters={remainingCharacters}
-              isOverLimit={isOverLimit}
-              maxCharacters={MAX_CHARACTERS}
-              hasSelectedPreferences={hasSelectedPreferences}
-              handleSubmit={handleSubmit}
-              isGenerating={isGenerating}
               clearAllPreferences={clearAllPreferences}
-              inputRef={inputRef}
-              user={user}
-              onAuthClick={onAuthClick}
+              onSubmitPreferences={handleSubmitPreferencesOnly}
+              hasSelectedPreferences={hasSelectedPreferences}
             />
+
+            <div className="flex-1 flex flex-col overflow-hidden mobile-content min-h-0">
+              {isLoadingChat && (
+                <div className="pointer-events-none absolute inset-0 flex items-start justify-center pt-4">
+                  <div className="rounded-full h-6 w-6 border-2 border-gray-300 border-t-transparent animate-spin" />
+                </div>
+              )}
+              <ChatInterface
+                preferences={preferences}
+                inputValue={inputValue}
+                onInputChange={setInputValue}
+                onPreferenceChange={(category, value, action) =>
+                  handlePreferenceChange(
+                    category as ArrayKeys | NumberKeys,
+                    value,
+                    action as "add" | "remove" | "set" | "clear",
+                  )
+                }
+                messages={messages}
+                remainingCharacters={remainingCharacters}
+                isOverLimit={isOverLimit}
+                maxCharacters={MAX_CHARACTERS}
+                hasSelectedPreferences={hasSelectedPreferences}
+                handleSubmit={handleSubmit}
+                isGenerating={isGenerating}
+                clearAllPreferences={clearAllPreferences}
+                inputRef={inputRef}
+                user={user}
+                onAuthClick={onAuthClick}
+              />
+            </div>
           </div>
-        </div>
       ) : (
         <div className="flex flex-1 min-h-0">
           <div className="hidden md:block">

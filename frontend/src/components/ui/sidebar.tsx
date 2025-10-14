@@ -8,8 +8,9 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetOverlay } from "@/components/ui/sheet";
 import { Skeleton } from "@/components/ui/skeleton";
+import * as SheetPrimitive from "@radix-ui/react-dialog";
 import {
   Tooltip,
   TooltipContent,
@@ -201,19 +202,29 @@ const Sidebar = React.forwardRef<
     if (isMobile) {
       return (
         <Sheet open={openMobile} onOpenChange={setOpenMobile} {...props}>
-          <SheetContent
-            data-sidebar="sidebar"
-            data-mobile="true"
-            className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
-            style={
-              {
-                "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
-              } as React.CSSProperties
-            }
-            side={side}
-          >
-            <div className="flex h-full w-full flex-col">{children}</div>
-          </SheetContent>
+          <SheetPrimitive.Portal>
+            <SheetOverlay className="bg-black/20" />
+            <SheetPrimitive.Content
+              ref={ref}
+              data-sidebar="sidebar"
+              data-mobile="true"
+              className={cn(
+                "fixed z-50 gap-4 bg-white p-0 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500",
+                side === "left"
+                  ? "inset-y-0 left-0 h-full w-[--sidebar-width] border-r data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left"
+                  : "inset-y-0 right-0 h-full w-[--sidebar-width] border-l data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right",
+                className
+              )}
+              style={
+                {
+                  "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+                } as React.CSSProperties
+              }
+              {...props}
+            >
+              <div className="flex h-full w-full flex-col bg-white">{children}</div>
+            </SheetPrimitive.Content>
+          </SheetPrimitive.Portal>
         </Sheet>
       );
     }

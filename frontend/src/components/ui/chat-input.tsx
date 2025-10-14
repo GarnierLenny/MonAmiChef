@@ -70,7 +70,7 @@ export const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
                     variant="ghost"
                     size="sm"
                     onClick={onClearAllTags}
-                    className="h-auto p-0 text-xs text-gray-500 hover:text-red-600 transition-colors"
+                    className="h-8 px-2 text-xs text-gray-500 hover:text-red-600 transition-colors"
                   >
                     Clear all
                   </Button>
@@ -91,7 +91,7 @@ export const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
                         variant="ghost"
                         size="sm"
                         onClick={() => onRemoveTag(tag.category, tag.value)}
-                        className="h-auto p-0.5 hover:bg-current/20 rounded-full transition-colors"
+                        className="h-5 w-5 p-0 hover:bg-current/20 rounded-full transition-colors"
                       >
                         <X className="w-3 h-3" />
                       </Button>

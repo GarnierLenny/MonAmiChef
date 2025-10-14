@@ -243,7 +243,7 @@ export default function ChatInterface({
             return (
               <div
                 key={messageId}
-                className={`flex text-xs md:text-base w-full ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                className={`flex text-md md:text-base w-full ${message.role === "user" ? "justify-end" : "justify-start"}`}
               >
                 <div
                   className={`max-w-3xl md:max-w-4xl rounded-2xl px-4 py-3 md:px-6 md:py-5 relative shadow-sm/20 ${
@@ -262,39 +262,42 @@ export default function ChatInterface({
                   )}
 
                   {message.role === "user" ? (
-                    <div className="font-sans text-xs md:text-base">
+                    <div className="font-sans text-base">
                       <ReactMarkdown>{message.text}</ReactMarkdown>
                     </div>
                   ) : (
-                    <div className="font-sans text-xs md:text-base">
+                    <div className="font-sans text-base">
                       <ReactMarkdown
                         remarkPlugins={[remarkGfm, remarkBreaks]}
                         components={{
                           p: (props) => (
-                            <p className="my-3 text-xs md:text-base leading-6 md:leading-7" {...props} />
+                            <p
+                              className="my-3 text-base leading-6 md:leading-7"
+                              {...props}
+                            />
                           ),
                           ul: (props) => (
                             <ul
-                              className="my-2 text-xs md:text-base pl-5 list-disc space-y-1"
+                              className="my-2 text-base pl-5 list-disc space-y-1"
                               {...props}
                             />
                           ),
                           ol: (props) => (
                             <ol
-                              className="my-2 text-xs md:text-base pl-5 list-decimal space-y-1"
+                              className="my-2 text-base pl-5 list-decimal space-y-1"
                               {...props}
                             />
                           ),
                           li: (props) => <li className="my-1" {...props} />,
                           h1: (props) => (
                             <h3
-                              className="mt-3 mb-1 text-xs md:text-lg font-semibold"
+                              className="mt-3 mb-1 text-base md:text-lg font-semibold"
                               {...props}
                             />
                           ),
                           h2: (props) => (
                             <h4
-                              className="mt-3 mb-1 text-xs md:text-base font-semibold"
+                              className="mt-3 mb-1 text-base font-semibold"
                               {...props}
                             />
                           ),
@@ -310,12 +313,12 @@ export default function ChatInterface({
                             onClick={() =>
                               handleSaveRecipe(message.text, messageId)
                             }
-                            disabled={isSaving}
+                            disabled={isSaving || isSaved}
                             className={`flex items-center space-x-2 px-4 py-2 md:px-5 md:py-2.5 rounded-lg text-sm md:text-base font-medium transition-all duration-200 ${
                               isSaved
-                                ? "bg-green-100 text-green-700 hover:bg-green-200"
-                                : "bg-orange-100 text-orange-700 hover:bg-orange-200 hover:scale-105"
-                            } ${isSaving ? "opacity-50 cursor-not-allowed" : ""}`}
+                                ? "bg-green-100 text-green-700 cursor-default"
+                                : "bg-orange-100 text-orange-700 hover:bg-orange-200 hover:scale-105 active:scale-95 cursor-pointer"
+                            } ${isSaving ? "opacity-50 cursor-wait" : ""}`}
                           >
                             {isSaving ? (
                               <Loader2 className="w-4 h-4 md:w-5 md:h-5 animate-spin" />
