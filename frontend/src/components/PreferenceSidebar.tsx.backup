@@ -448,21 +448,49 @@ export default function PreferenceSidebar({
     return !selected && wouldExceedLimit(category, value);
   };
 
+  // Helper to get button classes for preference tags
+  const getTagClasses = (selected: boolean, disabled: boolean) => {
+    return `flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+      selected
+        ? "bg-orange-500 text-white shadow-md scale-105"
+        : disabled
+          ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
+          : "bg-white text-gray-700 hover:bg-orange-50 hover:scale-105 shadow-sm"
+    }`;
+  };
+
+  // Helper for section headers
+  const SectionHeader = ({ icon: Icon, title, current, max }: { icon: any, title: string, current: number, max?: number }) => (
+    <h3 className="px-2 mb-3 text-xs font-bold text-orange-600 uppercase tracking-wider flex items-center gap-2">
+      <Icon className="w-3.5 h-3.5" />
+      {title}
+      <span className="ml-auto text-gray-500 normal-case font-normal">
+        {max ? `${current}/${max}` : `${current}`}
+      </span>
+    </h3>
+  );
+
   return (
     <div
-      className="bg-orange-50 h-full overflow-y-auto overflow-x-hidden p-6 w-full flex-shrink-0"
+      className="bg-orange-50 h-full overflow-y-auto p-6 w-full flex-shrink-0"
       style={{ scrollBehavior: "auto" }}
     >
+
       {/* Meal Type */}
       <div className="mb-6">
-        <h3 className="px-2 mb-3 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-          <UtensilsCrossed className="w-3.5 h-3.5 text-black" />
-          <span className="text-black">Meal Type</span>
-          <span className={`ml-auto normal-case font-normal text-xs ${isSectionAtLimit("mealType") ? "text-orange-600 font-semibold" : "text-gray-500"}`}>
+        <h3 className="px-2 mb-3 text-xs font-bold text-orange-600 uppercase tracking-wider flex items-center gap-2">
+          <UtensilsCrossed className="w-3.5 h-3.5" />
+          Meal Type
+          <span className="ml-auto text-gray-500 normal-case font-normal">
             {preferences.mealType.length}/{sectionLimits.mealType}
           </span>
         </h3>
-        <div className="flex flex-wrap gap-2.5">
+        {isSectionAtLimit("mealType") && (
+          <p className="text-xs text-orange-600 mb-2 px-2">
+            Maximum selections reached
+          </p>
+        )}
+        <div className="flex flex-wrap gap-2">
           {mealTypeOptions.map((option) => {
             const Icon = option.icon;
             const selected = isSelected("mealType", option.id);
@@ -472,13 +500,7 @@ export default function PreferenceSidebar({
                 key={option.id}
                 onClick={() => handleChipClick("mealType", option.id)}
                 disabled={disabled}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
-                  selected
-                    ? "bg-orange-500 text-white shadow-md scale-105"
-                    : disabled
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
-                      : "bg-white text-gray-700 hover:bg-orange-50 hover:scale-105 shadow-sm"
-                }`}
+                className={getTagClasses(selected, disabled)}
               >
                 <Icon className={`w-3.5 h-3.5 ${selected ? "text-white" : option.color}`} />
                 <span>{option.label}</span>
@@ -490,14 +512,22 @@ export default function PreferenceSidebar({
 
       {/* Meal Occasion */}
       <div className="mb-6">
-        <h3 className="px-2 mb-3 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-          <Calendar className="w-3.5 h-3.5 text-black" />
-          <span className="text-black">Meal Occasion</span>
-          <span className={`ml-auto normal-case font-normal text-xs ${isSectionAtLimit("mealOccasion") ? "text-orange-600 font-semibold" : "text-gray-500"}`}>
-            {preferences.mealOccasion.length}/{sectionLimits.mealOccasion}
+        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <Calendar className="w-4 h-4 mr-2" />
+            Meal Occasion
+          </div>
+          <span className="text-xs text-gray-500">
+            {preferences.mealOccasion.length}/{sectionLimits.mealOccasion}{" "}
+            selected
           </span>
         </h3>
-        <div className="flex flex-wrap gap-2.5">
+        {isSectionAtLimit("mealOccasion") && (
+          <p className="text-xs text-orange-600 mb-2">
+            Maximum selections reached. Remove one to add another.
+          </p>
+        )}
+        <div className="flex flex-wrap gap-2">
           {mealOccasionOptions.map((option) => {
             const Icon = option.icon;
             const selected = isSelected("mealOccasion", option.id);
@@ -507,15 +537,15 @@ export default function PreferenceSidebar({
                 key={option.id}
                 onClick={() => handleChipClick("mealOccasion", option.id)}
                 disabled={disabled}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
+                className={getTagClasses(selected, disabled)}
                   selected
-                    ? "bg-orange-500 text-white shadow-md scale-105"
+                    ? "bg-emerald-100 text-emerald-700 border-2 border-emerald-300 shadow-sm"
                     : disabled
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
-                      : "bg-white text-gray-700 hover:bg-orange-50 hover:scale-105 shadow-sm"
+                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
+                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${selected ? "text-white" : option.color}`} />
+                <Icon className={`w-4 h-4 ${option.color}`} />
                 <span>{option.label}</span>
               </button>
             );
@@ -525,11 +555,16 @@ export default function PreferenceSidebar({
 
       {/* Cooking Equipment */}
       <div className="mb-6">
-        <h3 className="px-2 mb-3 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-          <ChefHat className="w-3.5 h-3.5 text-black" />
-          <span className="text-black">Cooking Equipment</span>
+        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <ChefHat className="w-4 h-4 mr-2" />
+            Cooking Equipment
+          </div>
+          <span className="text-xs text-gray-500">
+            {preferences.cookingEquipment.length} selected
+          </span>
         </h3>
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex flex-wrap gap-2">
           {cookingEquipmentOptions.map((option) => {
             const Icon = option.icon;
             const selected = isSelected("cookingEquipment", option.id);
@@ -539,15 +574,15 @@ export default function PreferenceSidebar({
                 key={option.id}
                 onClick={() => handleChipClick("cookingEquipment", option.id)}
                 disabled={disabled}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
+                className={getTagClasses(selected, disabled)}
                   selected
-                    ? "bg-orange-500 text-white shadow-md scale-105"
+                    ? "bg-green-100 text-green-700 border-2 border-green-300 shadow-sm"
                     : disabled
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
-                      : "bg-white text-gray-700 hover:bg-orange-50 hover:scale-105 shadow-sm"
+                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
+                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${selected ? "text-white" : option.color}`} />
+                <Icon className={`w-4 h-4 ${option.color}`} />
                 <span>{option.label}</span>
               </button>
             );
@@ -557,14 +592,22 @@ export default function PreferenceSidebar({
 
       {/* Cooking Time */}
       <div className="mb-6">
-        <h3 className="px-2 mb-3 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-          <Clock className="w-3.5 h-3.5 text-black" />
-          <span className="text-black">Cooking Time</span>
-          <span className={`ml-auto normal-case font-normal text-xs ${isSectionAtLimit("cookingTime") ? "text-orange-600 font-semibold" : "text-gray-500"}`}>
-            {preferences.cookingTime.length}/{sectionLimits.cookingTime}
+        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <Clock className="w-4 h-4 mr-2" />
+            Cooking Time
+          </div>
+          <span className="text-xs text-gray-500">
+            {preferences.cookingTime.length}/{sectionLimits.cookingTime}{" "}
+            selected
           </span>
         </h3>
-        <div className="flex flex-wrap gap-2.5">
+        {isSectionAtLimit("cookingTime") && (
+          <p className="text-xs text-orange-600 mb-2">
+            Maximum selections reached. Remove one to add another.
+          </p>
+        )}
+        <div className="flex flex-wrap gap-2">
           {cookingTimeOptions.map((option) => {
             const Icon = option.icon;
             const selected = isSelected("cookingTime", option.id);
@@ -574,15 +617,15 @@ export default function PreferenceSidebar({
                 key={option.id}
                 onClick={() => handleChipClick("cookingTime", option.id)}
                 disabled={disabled}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
+                className={getTagClasses(selected, disabled)}
                   selected
-                    ? "bg-orange-500 text-white shadow-md scale-105"
+                    ? "bg-emerald-100 text-emerald-700 border-2 border-emerald-300 shadow-sm"
                     : disabled
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
-                      : "bg-white text-gray-700 hover:bg-orange-50 hover:scale-105 shadow-sm"
+                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
+                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${selected ? "text-white" : option.color}`} />
+                <Icon className={`w-4 h-4 ${option.color}`} />
                 <span>{option.label}</span>
               </button>
             );
@@ -592,14 +635,21 @@ export default function PreferenceSidebar({
 
       {/* Skill Level */}
       <div className="mb-6">
-        <h3 className="px-2 mb-3 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-          <Star className="w-3.5 h-3.5 text-black" />
-          <span className="text-black">Skill Level</span>
-          <span className={`ml-auto normal-case font-normal text-xs ${isSectionAtLimit("skillLevel") ? "text-orange-600 font-semibold" : "text-gray-500"}`}>
-            {preferences.skillLevel.length}/{sectionLimits.skillLevel}
+        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <Star className="w-4 h-4 mr-2" />
+            Skill Level
+          </div>
+          <span className="text-xs text-gray-500">
+            {preferences.skillLevel.length}/{sectionLimits.skillLevel} selected
           </span>
         </h3>
-        <div className="flex flex-wrap gap-2.5">
+        {isSectionAtLimit("skillLevel") && (
+          <p className="text-xs text-orange-600 mb-2">
+            Maximum selections reached. Remove one to add another.
+          </p>
+        )}
+        <div className="flex flex-wrap gap-2">
           {skillLevelOptions.map((option) => {
             const Icon = option.icon;
             const selected = isSelected("skillLevel", option.id);
@@ -609,15 +659,15 @@ export default function PreferenceSidebar({
                 key={option.id}
                 onClick={() => handleChipClick("skillLevel", option.id)}
                 disabled={disabled}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
+                className={getTagClasses(selected, disabled)}
                   selected
-                    ? "bg-orange-500 text-white shadow-md scale-105"
+                    ? "bg-green-100 text-green-700 border-2 border-green-300 shadow-sm"
                     : disabled
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
-                      : "bg-white text-gray-700 hover:bg-orange-50 hover:scale-105 shadow-sm"
+                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
+                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${selected ? "text-white" : option.color}`} />
+                <Icon className={`w-4 h-4 ${option.color}`} />
                 <span>{option.label}</span>
               </button>
             );
@@ -627,14 +677,21 @@ export default function PreferenceSidebar({
 
       {/* Spice Level */}
       <div className="mb-6">
-        <h3 className="px-2 mb-3 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-          <Flame className="w-3.5 h-3.5 text-black" />
-          <span className="text-black">Spice Level</span>
-          <span className={`ml-auto normal-case font-normal text-xs ${isSectionAtLimit("spiceLevel") ? "text-orange-600 font-semibold" : "text-gray-500"}`}>
-            {preferences.spiceLevel.length}/{sectionLimits.spiceLevel}
+        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <Flame className="w-4 h-4 mr-2" />
+            Spice Level
+          </div>
+          <span className="text-xs text-gray-500">
+            {preferences.spiceLevel.length}/{sectionLimits.spiceLevel} selected
           </span>
         </h3>
-        <div className="flex flex-wrap gap-2.5">
+        {isSectionAtLimit("spiceLevel") && (
+          <p className="text-xs text-orange-600 mb-2">
+            Maximum selections reached. Remove one to add another.
+          </p>
+        )}
+        <div className="flex flex-wrap gap-2">
           {spiceLevelOptions.map((option) => {
             const Icon = option.icon;
             const selected = isSelected("spiceLevel", option.id);
@@ -644,15 +701,15 @@ export default function PreferenceSidebar({
                 key={option.id}
                 onClick={() => handleChipClick("spiceLevel", option.id)}
                 disabled={disabled}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
+                className={getTagClasses(selected, disabled)}
                   selected
-                    ? "bg-orange-500 text-white shadow-md scale-105"
+                    ? "bg-red-100 text-red-700 border-2 border-red-300 shadow-sm"
                     : disabled
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
-                      : "bg-white text-gray-700 hover:bg-orange-50 hover:scale-105 shadow-sm"
+                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
+                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${selected ? "text-white" : option.color}`} />
+                <Icon className={`w-4 h-4 ${option.color}`} />
                 <span>{option.label}</span>
               </button>
             );
@@ -662,14 +719,21 @@ export default function PreferenceSidebar({
 
       {/* Meat Preferences */}
       <div className="mb-6">
-        <h3 className="px-2 mb-3 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-          <Beef className="w-3.5 h-3.5 text-black" />
-          <span className="text-black">Meat & Protein</span>
-          <span className={`ml-auto normal-case font-normal text-xs ${isSectionAtLimit("meat") ? "text-orange-600 font-semibold" : "text-gray-500"}`}>
-            {preferences.meat.length}/{sectionLimits.meat}
+        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <Beef className="w-4 h-4 mr-2" />
+            Meat & Protein
+          </div>
+          <span className="text-xs text-gray-500">
+            {preferences.meat.length}/{sectionLimits.meat} selected
           </span>
         </h3>
-        <div className="flex flex-wrap gap-2.5">
+        {isSectionAtLimit("meat") && (
+          <p className="text-xs text-orange-600 mb-2">
+            Maximum selections reached. Remove one to add another.
+          </p>
+        )}
+        <div className="flex flex-wrap gap-2">
           {meatOptions.map((option) => {
             const Icon = option.icon;
             const selected = isSelected("meat", option.id);
@@ -679,15 +743,15 @@ export default function PreferenceSidebar({
                 key={option.id}
                 onClick={() => handleChipClick("meat", option.id)}
                 disabled={disabled}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
+                className={getTagClasses(selected, disabled)}
                   selected
-                    ? "bg-orange-500 text-white shadow-md scale-105"
+                    ? "bg-red-100 text-red-700 border-2 border-red-300 shadow-sm"
                     : disabled
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
-                      : "bg-white text-gray-700 hover:bg-orange-50 hover:scale-105 shadow-sm"
+                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
+                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${selected ? "text-white" : option.color}`} />
+                <Icon className={`w-4 h-4 ${option.color}`} />
                 <span>{option.label}</span>
               </button>
             );
@@ -697,11 +761,16 @@ export default function PreferenceSidebar({
 
       {/* Vegetables */}
       <div className="mb-6">
-        <h3 className="px-2 mb-3 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-          <Carrot className="w-3.5 h-3.5 text-black" />
-          <span className="text-black">Vegetables</span>
+        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <Carrot className="w-4 h-4 mr-2" />
+            Vegetables
+          </div>
+          <span className="text-xs text-gray-500">
+            {preferences.vegetables.length} selected
+          </span>
         </h3>
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex flex-wrap gap-2">
           {vegetableOptions.map((option) => {
             const Icon = option.icon;
             const selected = isSelected("vegetables", option.id);
@@ -711,15 +780,15 @@ export default function PreferenceSidebar({
                 key={option.id}
                 onClick={() => handleChipClick("vegetables", option.id)}
                 disabled={disabled}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
+                className={getTagClasses(selected, disabled)}
                   selected
-                    ? "bg-orange-500 text-white shadow-md scale-105"
+                    ? "bg-green-100 text-green-700 border-2 border-green-300 shadow-sm"
                     : disabled
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
-                      : "bg-white text-gray-700 hover:bg-orange-50 hover:scale-105 shadow-sm"
+                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
+                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${selected ? "text-white" : option.color}`} />
+                <Icon className={`w-4 h-4 ${option.color}`} />
                 <span>{option.label}</span>
               </button>
             );
@@ -729,14 +798,21 @@ export default function PreferenceSidebar({
 
       {/* Nutritional Focus */}
       <div className="mb-6">
-        <h3 className="px-2 mb-3 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-          <Apple className="w-3.5 h-3.5 text-black" />
-          <span className="text-black">Nutritional Focus</span>
-          <span className={`ml-auto normal-case font-normal text-xs ${isSectionAtLimit("nutrition") ? "text-orange-600 font-semibold" : "text-gray-500"}`}>
-            {preferences.nutrition.length}/{sectionLimits.nutrition}
+        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <Apple className="w-4 h-4 mr-2" />
+            Nutritional Focus
+          </div>
+          <span className="text-xs text-gray-500">
+            {preferences.nutrition.length}/{sectionLimits.nutrition} selected
           </span>
         </h3>
-        <div className="flex flex-wrap gap-2.5">
+        {isSectionAtLimit("nutrition") && (
+          <p className="text-xs text-orange-600 mb-2">
+            Maximum selections reached. Remove one to add another.
+          </p>
+        )}
+        <div className="flex flex-wrap gap-2">
           {nutritionOptions.map((option) => {
             const Icon = option.icon;
             const selected = isSelected("nutrition", option.id);
@@ -746,15 +822,15 @@ export default function PreferenceSidebar({
                 key={option.id}
                 onClick={() => handleChipClick("nutrition", option.id)}
                 disabled={disabled}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
+                className={getTagClasses(selected, disabled)}
                   selected
-                    ? "bg-orange-500 text-white shadow-md scale-105"
+                    ? "bg-emerald-100 text-emerald-700 border-2 border-emerald-300 shadow-sm"
                     : disabled
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
-                      : "bg-white text-gray-700 hover:bg-orange-50 hover:scale-105 shadow-sm"
+                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
+                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
                 }`}
               >
-                <Icon className={`w-3.5 h-3.5 ${selected ? "text-white" : option.color}`} />
+                <Icon className={`w-4 h-4 ${option.color}`} />
                 <span>{option.label}</span>
               </button>
             );
@@ -764,14 +840,21 @@ export default function PreferenceSidebar({
 
       {/* Cuisine Preference */}
       <div className="mb-6">
-        <h3 className="px-2 mb-3 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-          <Globe className="w-3.5 h-3.5 text-black" />
-          <span className="text-black">Cuisine Style</span>
-          <span className={`ml-auto normal-case font-normal text-xs ${isSectionAtLimit("cuisine") ? "text-orange-600 font-semibold" : "text-gray-500"}`}>
-            {preferences.cuisine.length}/{sectionLimits.cuisine}
+        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <Globe className="w-4 h-4 mr-2" />
+            Cuisine Style
+          </div>
+          <span className="text-xs text-gray-500">
+            {preferences.cuisine.length}/{sectionLimits.cuisine} selected
           </span>
         </h3>
-        <div className="flex flex-wrap gap-2.5">
+        {isSectionAtLimit("cuisine") && (
+          <p className="text-xs text-orange-600 mb-2">
+            Maximum selections reached. Remove one to add another.
+          </p>
+        )}
+        <div className="flex flex-wrap gap-2">
           {cuisineOptions.map((option) => {
             const selected = isSelected("cuisine", option.id);
             const disabled = isTagDisabled("cuisine", option.id);
@@ -780,15 +863,15 @@ export default function PreferenceSidebar({
                 key={option.id}
                 onClick={() => handleChipClick("cuisine", option.id)}
                 disabled={disabled}
-                className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all duration-300 ${
+                className={getTagClasses(selected, disabled)}
                   selected
-                    ? "bg-orange-500 text-white shadow-md scale-105"
+                    ? "bg-green-100 text-green-700 border-2 border-green-300 shadow-sm"
                     : disabled
-                      ? "bg-gray-100 text-gray-400 cursor-not-allowed opacity-50"
-                      : "bg-white text-gray-700 hover:bg-orange-50 hover:scale-105 shadow-sm"
+                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
+                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
                 }`}
               >
-                <span className="text-base">{option.flag}</span>
+                <span className="text-lg">{option.flag}</span>
                 <span>{option.label}</span>
               </button>
             );
@@ -798,54 +881,25 @@ export default function PreferenceSidebar({
 
       {/* Number of People to Feed */}
       <div className="mb-6">
-        <h3 className="px-2 mb-3 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-          <Users className="w-3.5 h-3.5 text-black" />
-          <span className="text-black">People to Feed</span>
-          <span className={`ml-auto normal-case font-normal text-xs ${preferences.servings !== null ? "text-orange-600 font-semibold" : "text-gray-500"}`}>
-            {preferences.servings !== null ? "1/1" : "0/1"}
+        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
+          <div className="flex items-center">
+            <Users className="w-4 h-4 mr-2" />
+            People to Feed
+          </div>
+          <span className="text-xs text-gray-500">
+            {preferences.servings !== null ? "1/1" : "0/1"} selected
           </span>
         </h3>
-        <div className="flex flex-wrap gap-2.5">
+        <div className="flex flex-wrap gap-2">
           {servingOptions.map((number) => {
             const selected = isSelected("servings", number);
             return (
               <button
                 key={number}
                 onClick={() => handleChipClick("servings", number)}
-                className={`flex items-center justify-center w-10 h-9 rounded-lg text-xs font-medium transition-all duration-300 ${
-                  selected
-                    ? "bg-orange-500 text-white shadow-md scale-105"
-                    : "bg-white text-gray-700 hover:bg-orange-50 hover:scale-105 shadow-sm"
-                }`}
-              >
-                {number}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Number of Cooks */}
-      {/*}<div className="mb-8">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <ChefHat className="w-4 h-4 mr-2" />
-            People Cooking
-          </div>
-          <span className="text-xs text-gray-500">
-            {preferences.cooks !== null ? "1/1" : "0/1"} selected
-          </span>
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {cookOptions.map((number) => {
-            const selected = isSelected("cooks", number);
-            return (
-              <button
-                key={number}
-                onClick={() => handleChipClick("cooks", number)}
                 className={`flex items-center justify-center w-12 h-10 rounded-full text-sm font-medium transition-all duration-200 ${
                   selected
-                    ? "bg-pink-100 text-pink-700 border-2 border-pink-300 shadow-sm"
+                    ? "bg-green-100 text-green-700 border-2 border-green-300 shadow-sm"
                     : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
                 }`}
               >
@@ -854,8 +908,7 @@ export default function PreferenceSidebar({
             );
           })}
         </div>
-      </div>*/}
-
+      </div>
       {/* Clear All Button */}
       <div className="py-2 mb-22 border-t border-black">
         <button

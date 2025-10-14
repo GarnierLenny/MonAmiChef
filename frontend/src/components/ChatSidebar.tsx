@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Send } from "lucide-react";
+import { Send, PanelLeft, ChefHat } from "lucide-react";
 import { Preferences } from "@/types/types";
 import PreferencesSidebar from "./PreferenceSidebar";
 
@@ -30,11 +30,24 @@ export function ChatSidebar({
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
-      <SheetContent side="right" className="w-80 p-0 bg-orange-50 flex flex-col h-full">
-        {/* Header */}
-        <div className="bg-orange-50 p-4 pt-10 border-b border-orange-100">
-          <h2 className="text-lg font-semibold text-gray-800">Preferences</h2>
-          <p className="text-sm text-gray-600 mt-1">Customize your recipe</p>
+      <SheetContent side="right" className="w-72 p-0 bg-orange-50 border-l border-orange-200/50 flex flex-col h-full">
+        {/* Orange to Pink Gradient Header */}
+        <div className="flex items-center justify-between px-4 py-4 bg-gradient-to-r from-orange-600 via-orange-500 to-pink-500 shadow-md relative overflow-hidden">
+          {/* Animated background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
+
+          <div className="flex items-center gap-3 relative z-10">
+            <div className="p-1.5 bg-white/20 backdrop-blur-sm rounded-lg">
+              <ChefHat className="h-6 w-6 text-white drop-shadow-lg" />
+            </div>
+            <span className="font-bold text-white text-lg drop-shadow-md">Preferences</span>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-white/20 text-white transition-all duration-200 hover:scale-110 relative z-10"
+          >
+            <PanelLeft className="h-5 w-5 drop-shadow" />
+          </button>
         </div>
 
         {/* Content */}
@@ -56,7 +69,7 @@ export function ChatSidebar({
                     onSubmitPreferences();
                     onClose();
                   }}
-                  className="relative w-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-medium py-3 rounded-lg shadow-lg border border-white/20 flex items-center justify-center gap-2 transition-all duration-200 animate-in slide-in-from-bottom-2 hover:scale-105 active:scale-95"
+                  className="relative w-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 rounded-lg shadow-lg border border-white/20 flex items-center justify-center gap-2 transition-all duration-200 hover:scale-105 active:scale-95"
                 >
                   <Send className="w-4 h-4" />
                   Generate Recipe
