@@ -621,6 +621,20 @@
     animation: pulseSubtle 2.5s ease-in-out infinite;
   }
 
+  /* Wave animation for typing letters */
+  @keyframes waveLetter {
+    0%, 60%, 100% {
+      transform: translateY(0);
+    }
+    30% {
+      transform: translateY(-4px);
+    }
+  }
+
+  .animate-wave-letter {
+    animation: waveLetter 1.5s ease-in-out infinite;
+  }
+
   /* Smooth scroll behavior */
   .scroll-smooth {
     scroll-behavior: smooth;

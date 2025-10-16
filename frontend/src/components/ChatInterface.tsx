@@ -246,7 +246,7 @@ export default function ChatInterface({
   const hasMessages = messages.length > 0;
 
   return (
-    <div className="flex-1 flex flex-col bg-chat-background h-full overflow-hidden">
+    <div className="flex-1 flex flex-col bg-orange-50 h-full overflow-hidden w-screen">
       <div className="flex-1 flex flex-col min-h-0">
         {/* Show placeholder when no messages, otherwise show messages */}
         {!hasMessages ? (
@@ -256,180 +256,177 @@ export default function ChatInterface({
         ) : (
           <div
             ref={messagesContainerRef}
-            className="flex-1 overflow-y-auto px-4 md:px-8 pt-6 pb-20 space-y-4 relative scroll-smooth"
+            className="flex-1 overflow-y-auto px-4 md:px-8 pt-0 pb-32 space-y-4 relative scroll-smooth"
           >
             {/* Subtle top gradient fade */}
-            <div className="sticky top-0 left-0 right-0 h-8 bg-gradient-to-b from-chat-background to-transparent pointer-events-none z-10" />
+            <div className="sticky top-0 left-0 right-0 h-2 bg-gradient-to-b from-orange-50 to-transparent pointer-events-none z-10" />
 
             {messages.map((message, index) => {
-            const messageId = message.id ?? `${index}-${message.role}`;
-            const isRecipe =
-              message.role === "model" && parseRecipeFromText(message.text);
-            const isSaved = savedRecipes.has(messageId);
-            const isSaving = savingRecipes.has(messageId);
-            const isLastMessage = index === messages.length - 1;
+              const messageId = message.id ?? `${index}-${message.role}`;
+              const isRecipe =
+                message.role === "model" && parseRecipeFromText(message.text);
+              const isSaved = savedRecipes.has(messageId);
+              const isSaving = savingRecipes.has(messageId);
+              const isLastMessage = index === messages.length - 1;
 
-            return (
-              <div
-                key={messageId}
-                className={`flex text-md md:text-base w-full animate-message-slide-in ${
-                  message.role === "user" ? "justify-end" : "justify-start"
-                }`}
-                style={{
-                  animationDelay: isLastMessage ? "0ms" : "0ms",
-                  animationFillMode: "both",
-                }}
-              >
+              return (
                 <div
-                  className={`max-w-3xl md:max-w-4xl rounded-2xl px-4 py-3 md:px-6 md:py-5 relative transition-all duration-200 hover:shadow-md ${
-                    message.role === "user"
-                      ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-orange-500/20 shadow-md hover:shadow-orange-500/30"
-                      : "bg-white text-gray-900 shadow-sm hover:shadow-md border border-gray-100/80"
+                  key={messageId}
+                  className={`flex text-md md:text-base w-full animate-message-slide-in ${
+                    message.role === "user" ? "justify-end" : "justify-start"
                   }`}
+                  style={{
+                    animationDelay: isLastMessage ? "0ms" : "0ms",
+                    animationFillMode: "both",
+                  }}
                 >
-                  {message.role === "model" && (
-                    <div className="flex items-center space-x-2 mb-3">
-                      <div className="relative">
-                        <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-orange-500 animate-pulse-subtle" />
-                      </div>
-                      <span className="text-xs md:text-sm font-semibold text-orange-600 tracking-wide">
-                        AI Chef
-                      </span>
-                    </div>
-                  )}
-
-                  {message.role === "user" ? (
-                    <div className="font-sans text-base leading-relaxed">
-                      <ReactMarkdown>{message.text}</ReactMarkdown>
-                    </div>
-                  ) : (
-                    <div className="font-sans text-base">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm, remarkBreaks]}
-                        components={{
-                          p: (props) => (
-                            <p
-                              className="my-3 text-base leading-7 md:leading-8 text-gray-700"
-                              {...props}
-                            />
-                          ),
-                          ul: (props) => (
-                            <ul
-                              className="my-3 text-base pl-5 list-disc space-y-1.5 text-gray-700"
-                              {...props}
-                            />
-                          ),
-                          ol: (props) => (
-                            <ol
-                              className="my-3 text-base pl-5 list-decimal space-y-1.5 text-gray-700"
-                              {...props}
-                            />
-                          ),
-                          li: (props) => <li className="my-1" {...props} />,
-                          h1: (props) => (
-                            <h3
-                              className="mt-4 mb-2 text-lg md:text-xl font-bold text-gray-900"
-                              {...props}
-                            />
-                          ),
-                          h2: (props) => (
-                            <h4
-                              className="mt-4 mb-2 text-base md:text-lg font-semibold text-gray-900"
-                              {...props}
-                            />
-                          ),
-                          h3: (props) => (
-                            <h5
-                              className="mt-3 mb-1.5 text-base font-semibold text-gray-800"
-                              {...props}
-                            />
-                          ),
-                          strong: (props) => (
-                            <strong className="font-semibold text-gray-900" {...props} />
-                          ),
-                          em: (props) => (
-                            <em className="italic text-gray-700" {...props} />
-                          ),
-                        }}
-                      >
-                        {message.text}
-                      </ReactMarkdown>
-
-                      {/* Save Recipe Button with enhanced styling */}
-                      {isRecipe && (
-                        <div className="mt-4 pt-4 border-t border-gray-200/80">
-                          <button
-                            onClick={() =>
-                              handleSaveRecipe(message.text, messageId)
-                            }
-                            disabled={isSaving || isSaved}
-                            className={`group flex items-center justify-center space-x-2.5 px-5 py-2.5 md:px-6 md:py-3 rounded-xl text-sm md:text-base font-semibold transition-all duration-300 ${
-                              isSaved
-                                ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 cursor-default shadow-sm"
-                                : "bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 hover:from-orange-100 hover:to-orange-200 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm"
-                            } ${isSaving ? "opacity-70 cursor-wait" : ""}`}
-                          >
-                            {isSaving ? (
-                              <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                <span>Saving Recipe...</span>
-                              </>
-                            ) : (
-                              <>
-                                <Heart
-                                  className={`w-5 h-5 transition-all duration-300 ${
-                                    isSaved
-                                      ? "fill-green-600 text-green-600 scale-110"
-                                      : "group-hover:scale-110 group-hover:fill-orange-300"
-                                  }`}
-                                />
-                                <span>
-                                  {isSaved ? "Recipe Saved" : "Save Recipe"}
-                                </span>
-                              </>
-                            )}
-                          </button>
+                  <div
+                    className={`max-w-3xl md:max-w-4xl rounded-2xl px-4 py-3 md:px-6 md:py-5 relative transition-all duration-200 hover:shadow-md ${
+                      message.role === "user"
+                        ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-orange-500/20 shadow-md hover:shadow-orange-500/30"
+                        : "bg-white text-gray-900 shadow-sm hover:shadow-md border border-gray-100/80"
+                    }`}
+                  >
+                    {message.role === "model" && (
+                      <div className="flex items-center space-x-2 mb-3">
+                        <div className="relative">
+                          <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-orange-500 animate-pulse-subtle" />
                         </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
+                        <span className="text-xs md:text-sm font-semibold text-orange-600 tracking-wide">
+                          AI Chef
+                        </span>
+                      </div>
+                    )}
 
-          {/* Enhanced typing indicator */}
-          {isGenerating && (
-            <div className="flex mb-18 justify-start w-full animate-message-slide-in">
-              <div className="max-w-3xl md:max-w-4xl rounded-2xl px-6 py-4 md:px-8 md:py-6 bg-white shadow-md border border-orange-100/50">
-                <div className="flex items-center space-x-2 mb-3">
-                  <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-orange-500 animate-pulse-subtle" />
-                  <span className="text-sm md:text-base font-semibold text-orange-600">
-                    AI Chef
-                  </span>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <div className="flex space-x-1.5">
-                    <div
-                      className="w-2 h-2 bg-orange-400 rounded-full animate-typing-dot"
-                      style={{ animationDelay: "0ms" }}
-                    />
-                    <div
-                      className="w-2 h-2 bg-orange-400 rounded-full animate-typing-dot"
-                      style={{ animationDelay: "200ms" }}
-                    />
-                    <div
-                      className="w-2 h-2 bg-orange-400 rounded-full animate-typing-dot"
-                      style={{ animationDelay: "400ms" }}
-                    />
+                    {message.role === "user" ? (
+                      <div className="font-sans text-base leading-relaxed">
+                        <ReactMarkdown>{message.text}</ReactMarkdown>
+                      </div>
+                    ) : (
+                      <div className="font-sans text-base">
+                        <ReactMarkdown
+                          remarkPlugins={[remarkGfm, remarkBreaks]}
+                          components={{
+                            p: (props) => (
+                              <p
+                                className="my-3 text-base leading-7 md:leading-8 text-gray-700"
+                                {...props}
+                              />
+                            ),
+                            ul: (props) => (
+                              <ul
+                                className="my-3 text-base pl-5 list-disc space-y-1.5 text-gray-700"
+                                {...props}
+                              />
+                            ),
+                            ol: (props) => (
+                              <ol
+                                className="my-3 text-base pl-5 list-decimal space-y-1.5 text-gray-700"
+                                {...props}
+                              />
+                            ),
+                            li: (props) => <li className="my-1" {...props} />,
+                            h1: (props) => (
+                              <h3
+                                className="mt-4 mb-2 text-lg md:text-xl font-bold text-gray-900"
+                                {...props}
+                              />
+                            ),
+                            h2: (props) => (
+                              <h4
+                                className="mt-4 mb-2 text-base md:text-lg font-semibold text-gray-900"
+                                {...props}
+                              />
+                            ),
+                            h3: (props) => (
+                              <h5
+                                className="mt-3 mb-1.5 text-base font-semibold text-gray-800"
+                                {...props}
+                              />
+                            ),
+                            strong: (props) => (
+                              <strong
+                                className="font-semibold text-gray-900"
+                                {...props}
+                              />
+                            ),
+                            em: (props) => (
+                              <em className="italic text-gray-700" {...props} />
+                            ),
+                          }}
+                        >
+                          {message.text}
+                        </ReactMarkdown>
+
+                        {/* Save Recipe Button with enhanced styling */}
+                        {isRecipe && (
+                          <div className="mt-4 pt-4 border-t border-gray-200/80">
+                            <button
+                              onClick={() =>
+                                handleSaveRecipe(message.text, messageId)
+                              }
+                              disabled={isSaving || isSaved}
+                              className={`group flex items-center justify-center space-x-2.5 px-5 py-2.5 md:px-6 md:py-3 rounded-xl text-sm md:text-base font-semibold transition-all duration-300 ${
+                                isSaved
+                                  ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 cursor-default shadow-sm"
+                                  : "bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 hover:from-orange-100 hover:to-orange-200 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm"
+                              } ${isSaving ? "opacity-70 cursor-wait" : ""}`}
+                            >
+                              {isSaving ? (
+                                <>
+                                  <Loader2 className="w-5 h-5 animate-spin" />
+                                  <span>Saving Recipe...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Heart
+                                    className={`w-5 h-5 transition-all duration-300 ${
+                                      isSaved
+                                        ? "fill-green-600 text-green-600 scale-110"
+                                        : "group-hover:scale-110 group-hover:fill-orange-300"
+                                    }`}
+                                  />
+                                  <span>
+                                    {isSaved ? "Recipe Saved" : "Save Recipe"}
+                                  </span>
+                                </>
+                              )}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  <span className="text-gray-600 text-sm md:text-base animate-pulse-subtle">
-                    Creating your perfect recipe...
-                  </span>
+                </div>
+              );
+            })}
+
+            {/* Enhanced typing indicator */}
+            {isGenerating && (
+              <div className="flex mb-18 justify-start w-full animate-message-slide-in">
+                <div className="max-w-3xl md:max-w-4xl rounded-2xl px-6 py-4 md:px-8 md:py-6 bg-white shadow-md border border-orange-100/50">
+                  <div className="flex items-center space-x-2 mb-3">
+                    <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-orange-500 animate-pulse-subtle" />
+                    <span className="text-sm md:text-base font-semibold text-orange-600">
+                      AI Chef
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="text-sm md:text-base font-medium">
+                      {"Creating your perfect recipe".split("").map((char, index) => (
+                        <span
+                          key={index}
+                          className="inline-block bg-gradient-to-r from-orange-600 via-orange-500 to-orange-600 bg-clip-text text-transparent animate-wave-letter"
+                          style={{ animationDelay: `${index * 50}ms` }}
+                        >
+                          {char === " " ? "\u00A0" : char}
+                        </span>
+                      ))}
+                    </span>
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
+            )}
             <div ref={messagesEndRef} />
           </div>
         )}
