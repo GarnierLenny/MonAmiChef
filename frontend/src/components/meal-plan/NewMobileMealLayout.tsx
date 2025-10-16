@@ -269,11 +269,11 @@ export const NewMobileMealLayout = ({
   };
 
   return (
-    <div className="flex flex-col h-full w-screen pb-18 bg-background-dark-layer overflow-hidden">
+    <div className="flex flex-col h-full w-screen pb-18 bg-orange-50 overflow-hidden">
       {/* Day Navigation */}
       <div className="px-4 mt-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center shadow-sm/10 bg-background rounded-full justify-between flex-1 px-2">
+          <div className="flex items-center shadow-sm bg-white rounded-full justify-between flex-1 px-2 border border-orange-100/50">
             <Button
               variant="ghost"
               size="sm"
@@ -305,7 +305,7 @@ export const NewMobileMealLayout = ({
             variant="ghost"
             size="sm"
             onClick={() => setIsCalendarOpen(true)}
-            className="p-2.5 bg-background hover:bg-gray-100 shadow-sm/20 rounded-full transition-colors ml-2"
+            className="p-2.5 bg-white hover:bg-orange-50 shadow-sm rounded-full transition-colors ml-2 border border-orange-100/50"
           >
             <Calendar className="w-5 h-5 text-gray-600" />
           </Button>
@@ -313,15 +313,15 @@ export const NewMobileMealLayout = ({
             variant="ghost"
             size="sm"
             onClick={handleGroceryListClick}
-            className={`p-2.5 shadow-sm/20 rounded-full transition-all duration-500 ml-2 bg-background hover:bg-gray-100 relative ${shouldShake ? "animate-shake" : ""}`}
+            className={`p-2.5 shadow-sm rounded-full transition-all duration-500 ml-2 bg-white hover:bg-orange-50 border border-orange-100/50 relative ${shouldShake ? "animate-shake" : ""}`}
           >
             <ShoppingCart
               className={`w-5 h-5 transition-colors duration-500 ${
-                hasSelectedMealsWithData() ? "text-black" : "text-neutral-400"
+                hasSelectedMealsWithData() ? "text-orange-600" : "text-neutral-400"
               }`}
             />
             {hasNewMealsToAdd() && !hideBadge && (
-              <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-danger-500 rounded-full border-2 border-background animate-pop-in" />
+              <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full border-2 border-white shadow-md animate-pop-in" />
             )}
           </Button>
         </div>

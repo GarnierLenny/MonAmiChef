@@ -1,33 +1,33 @@
 import { Button } from "@/components/ui/button";
-import { Calendar, Sparkles } from "lucide-react";
+import { ShoppingCart, Check } from "lucide-react";
 
-interface GuestMealPlanningCTAProps {
+interface GuestGroceryListCTAProps {
   onSignUp?: () => void;
   onSignIn?: () => void;
 }
 
-export function GuestMealPlanningCTA({ onSignUp, onSignIn }: GuestMealPlanningCTAProps) {
+export function GuestGroceryListCTA({ onSignUp, onSignIn }: GuestGroceryListCTAProps) {
   return (
     <div className="flex mobile-viewport w-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 items-center justify-center p-4">
       <div className="max-w-md w-full p-6 sm:p-8 text-center">
         {/* Icon */}
         <div className="relative inline-block mb-4">
           <div className="w-16 h-16 bg-gradient-to-br from-orange-500 to-orange-600 rounded-2xl flex items-center justify-center shadow-lg">
-            <Calendar className="w-8 h-8 text-white" />
+            <ShoppingCart className="w-8 h-8 text-white" />
           </div>
-          <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
-            <Sparkles className="w-3 h-3 text-white" />
+          <div className="absolute -top-1 -right-1 w-6 h-6 bg-gradient-to-br from-green-400 to-green-500 rounded-full flex items-center justify-center shadow-md">
+            <Check className="w-4 h-4 text-white" />
           </div>
         </div>
 
         {/* Heading */}
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-          Smart Meal Planning
+          Smart Grocery Lists
         </h1>
 
         {/* Description */}
         <p className="text-sm sm:text-base text-gray-600 mb-6">
-          Plan your week with AI-powered recipes. Sign in to save plans and sync across devices.
+          Turn meal plans into organized shopping lists. Sign in to track ingredients and sync across devices.
         </p>
 
         {/* CTA Buttons */}
