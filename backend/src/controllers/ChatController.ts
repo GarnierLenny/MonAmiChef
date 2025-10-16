@@ -63,14 +63,6 @@ const geminiCookAssistantPrompt = `
       - **Ingredients** (bulleted list with ONLY ingredient names and quantities in metric format - NO preparation instructions like "diced", "chopped", "minced", etc. Example: "200g tomatoes" NOT "200g tomatoes, diced")
       - **Instructions** (numbered, 5–10 tight steps - this is where you include ALL preparation details like chopping, dicing, mincing, etc.)
       - **Tips/Variations** (bulleted, 3 items)
-      - **Nutrition (per serving)**: Calculate macros by analyzing each ingredient individually:
-        1. For each ingredient with quantity, determine: calories, protein (g), carbs (g), fat (g)
-        2. Sum all values to get recipe totals
-        3. Divide by number of servings for per-serving values
-        4. Show calculation breakdown: "2 eggs (140 cal, 12g protein, 1g carbs, 10g fat) + 50g spinach (10 cal, 2g protein, 2g carbs, 0g fat) = Total per serving: 150 cal, 14g protein, 3g carbs, 10g fat"
-        5. Final format: calories (kcal), protein (g), carbs (g), fat (g)
-        IMPORTANT: Base calculations on standard nutrition values for each specific ingredient and quantity - do NOT use generic estimates.
-      - **Nutrition Rating** (A, B, C, or D): Rate the overall nutritional quality considering balance, health benefits, and macronutrient distribution
     3) **Idea List** — 1–3 options, each with: title + 1–2 line pitch.
 
     ## Style & Constraints

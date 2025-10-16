@@ -56,59 +56,20 @@ export const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
         ref={ref}
         className={cn(
           "flex-shrink-0",
-          !className?.includes("meal-plan-input") && "chat-input-container",
-          className,
+          !className?.includes("meal-plan-input") && !className?.includes("no-container") && "chat-input-container bg-orange-50",
+          className?.includes("no-container") && "",
         )}
       >
         <div className={cn(!className?.includes("meal-plan-input") && "px-4 pb-4")}>
-          {/* Selected Tags - Only show for non-meal-plan inputs */}
-          {tags.length > 0 && !className?.includes("meal-plan-input") && (
-            <div className="mb-3">
-              <div className="flex items-center justify-end mb-2">
-                {onClearAllTags && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onClearAllTags}
-                    className="h-auto p-0 text-xs text-gray-500 hover:text-red-600 transition-colors"
-                  >
-                    Clear all
-                  </Button>
-                )}
-              </div>
-              <div className="flex flex-wrap gap-2 max-h-24 overflow-y-auto">
-                {tags.map((tag, index) => (
-                  <div
-                    key={index}
-                    className={cn(
-                      "inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium border border-current/20",
-                      tag.color,
-                    )}
-                  >
-                    <span>{tag.label}</span>
-                    {onRemoveTag && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onRemoveTag(tag.category, tag.value)}
-                        className="h-auto p-0.5 hover:bg-current/20 rounded-full transition-colors"
-                      >
-                        <X className="w-3 h-3" />
-                      </Button>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
+          {/* Enhanced Input Form */}
           <form
             onSubmit={handleSubmit}
             className={cn(
-              "flex items-center gap-4 p-0.5 pl-5 bg-white flex-1 shadow-lg shadow-orange-500/20 border rounded-full transition-colors",
+              "flex items-center gap-4 p-0.5 pl-5 bg-white flex-1 border rounded-full",
+              "transition-shadow duration-200",
               isOverLimit
-                ? "border-red-300 bg-red-50 focus-within:ring-2 focus-within:ring-red-500"
-                : "border-gray-300 focus-within:ring-2 focus-within:ring-orange-500",
+                ? "border-red-300 bg-red-50 shadow-lg shadow-red-200/50 focus-within:shadow-xl focus-within:shadow-red-300/50 focus-within:ring-2 focus-within:ring-red-400"
+                : "border-orange-200/50 shadow-lg shadow-orange-500/15 hover:shadow-xl hover:shadow-orange-500/20 focus-within:shadow-xl focus-within:shadow-orange-500/25 focus-within:ring-2 focus-within:ring-orange-400",
             )}
           >
             <input
@@ -119,19 +80,27 @@ export const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
               placeholder={placeholder}
               maxLength={maxCharacters}
               disabled={isGenerating}
-              className="min-w-0 grow basis-0 bg-transparent outline-none focus:ring-0"
+              className="min-w-0 grow basis-0 bg-transparent outline-none focus:ring-0 placeholder:text-gray-400 text-gray-900"
             />
             <Button
               type="submit"
               disabled={!canSend || isGenerating || isOverLimit}
               className={cn(
-                "shrink-0 rounded-full px-4 py-4 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-0",
+                "shrink-0 rounded-full px-4 py-4 text-white disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center gap-0",
+                "hover:scale-105 active:scale-95",
                 isOverLimit
                   ? "bg-gray-400"
-                  : "bg-orange-500 hover:bg-orange-600",
+                  : "bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 shadow-md shadow-orange-500/30",
               )}
             >
-              <Send />
+              <Send
+                className={cn(
+                  "transition-transform duration-200",
+                  canSend &&
+                    !isGenerating &&
+                    "group-hover:translate-x-0.5 group-hover:-translate-y-0.5",
+                )}
+              />
             </Button>
           </form>
         </div>

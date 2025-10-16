@@ -39,6 +39,7 @@ import {
   Shell,
   Cherry,
   Leaf,
+  PanelLeft,
 } from "lucide-react";
 
 interface PreferenceSidebarProps {
@@ -62,12 +63,14 @@ interface PreferenceSidebarProps {
     action: "add" | "remove" | "set",
   ) => void;
   clearAllPreferences: () => void;
+  onClose?: () => void;
 }
 
 export default function PreferenceSidebar({
   preferences,
   onPreferenceChange,
   clearAllPreferences,
+  onClose,
 }: PreferenceSidebarProps) {
   const [searchParams] = useSearchParams();
   const chatId = searchParams.get("c");
@@ -448,501 +451,303 @@ export default function PreferenceSidebar({
     return !selected && wouldExceedLimit(category, value);
   };
 
+  // Helper to render a preference section with card wrapper
+  const renderSection = (
+    title: string,
+    icon: React.ElementType,
+    category: string,
+    options: Array<
+      | { id: string; label: string; icon?: React.ElementType; color?: string; flag?: string }
+      | number
+    >,
+    hasLimit: boolean = true,
+  ) => {
+    const Icon = icon;
+    const currentCount =
+      category === "servings" || category === "cooks"
+        ? preferences[category as keyof typeof preferences] !== null
+          ? 1
+          : 0
+        : (preferences[category as keyof typeof preferences] as string[]).length;
+    const limit =
+      sectionLimits[category as keyof typeof sectionLimits] === Infinity
+        ? null
+        : sectionLimits[category as keyof typeof sectionLimits];
+    const isAtLimit = isSectionAtLimit(category);
+    const hasSelections = currentCount > 0;
+
+    return (
+      <div className="mb-4 group animate-in fade-in-50 duration-500">
+        <div
+          className={`relative rounded-2xl p-4 transition-all duration-300 ${
+            hasSelections
+              ? "bg-gradient-to-br from-white to-orange-50/50 shadow-lg shadow-orange-100/50 border-2 border-orange-200/50"
+              : "bg-white/60 backdrop-blur-sm shadow-md hover:shadow-lg border-2 border-white/80"
+          }`}
+        >
+          {/* Decorative gradient overlay for selected sections */}
+          {hasSelections && (
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-orange-500/5 to-transparent pointer-events-none" />
+          )}
+
+          {/* Section Header */}
+          <div className="relative mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div
+                className={`p-2 rounded-lg transition-all duration-300 ${
+                  hasSelections
+                    ? "bg-orange-500/10 ring-2 ring-orange-500/20"
+                    : "bg-gray-100/80"
+                }`}
+              >
+                <Icon
+                  className={`w-4 h-4 transition-colors duration-300 ${
+                    hasSelections ? "text-orange-600" : "text-gray-600"
+                  }`}
+                />
+              </div>
+              <h3 className="text-sm font-bold text-gray-800 tracking-wide">
+                {title}
+              </h3>
+            </div>
+
+            {/* Limit Counter */}
+            {hasLimit && limit !== null && (
+              <div
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold transition-all duration-300 ${
+                  isAtLimit
+                    ? "bg-orange-500 text-white shadow-md shadow-orange-200"
+                    : hasSelections
+                      ? "bg-orange-100 text-orange-700"
+                      : "bg-gray-100 text-gray-500"
+                }`}
+              >
+                <span className="tabular-nums">{currentCount}</span>
+                <span className="opacity-60">/</span>
+                <span className="tabular-nums">{limit}</span>
+                {isAtLimit && (
+                  <span className="ml-0.5 animate-pulse">✓</span>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Options Grid */}
+          <div className="relative flex flex-wrap gap-2">
+            {options.map((option, index) => {
+              const isNumberOption = typeof option === "number";
+              const optionId = isNumberOption ? option : option.id;
+              const optionLabel = isNumberOption ? option : option.label;
+              const OptionIcon = isNumberOption ? null : option.icon;
+              const optionColor = isNumberOption ? null : option.color;
+              const optionFlag = isNumberOption ? null : option.flag;
+
+              const selected = isSelected(category, optionId);
+              const disabled = isTagDisabled(category, optionId);
+
+              return (
+                <button
+                  key={optionId}
+                  onClick={() => handleChipClick(category, optionId)}
+                  disabled={disabled}
+                  style={{
+                    animationDelay: `${index * 30}ms`,
+                  }}
+                  className={`group/chip relative flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-medium transition-all duration-300 animate-in fade-in-0 slide-in-from-bottom-2 ${
+                    selected
+                      ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-lg shadow-orange-300/50 scale-105 hover:scale-110 ring-2 ring-orange-400/50"
+                      : disabled
+                        ? "bg-gray-100/50 text-gray-400 cursor-not-allowed opacity-40"
+                        : "bg-white text-gray-700 hover:bg-orange-50 hover:scale-105 hover:shadow-md shadow-sm border border-gray-200/50 hover:border-orange-300/50"
+                  }`}
+                >
+                  {/* Icon or Flag */}
+                  {OptionIcon ? (
+                    <OptionIcon
+                      className={`w-3.5 h-3.5 transition-transform duration-300 ${
+                        selected
+                          ? "text-white scale-110"
+                          : `${optionColor || "text-gray-500"} group-hover/chip:scale-110`
+                      }`}
+                    />
+                  ) : optionFlag ? (
+                    <span className="text-base leading-none">{optionFlag}</span>
+                  ) : null}
+
+                  {/* Label */}
+                  <span className="whitespace-nowrap">{optionLabel}</span>
+
+                  {/* Hover glow effect */}
+                  {!disabled && !selected && (
+                    <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-orange-400/0 to-orange-600/0 group-hover/chip:from-orange-400/10 group-hover/chip:to-orange-600/10 transition-all duration-300 pointer-events-none" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Empty state hint */}
+          {!hasSelections && (
+            <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="text-[10px] text-gray-400 font-medium px-2 py-1 rounded-full bg-gray-100/80">
+                No selections
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div
-      className="bg-gradient-to-b from-orange-50 to-pink-50 border-r border-orange-200 h-full overflow-y-auto p-6 w-80 flex-shrink-0"
-      style={{ scrollBehavior: "auto" }}
+      className="bg-gradient-to-br from-orange-50 via-orange-50/80 to-amber-50/50 h-full overflow-y-auto overflow-x-hidden p-6 w-full flex-shrink-0"
+      style={{ scrollBehavior: "smooth" }}
     >
-      <div className="mb-8">
-        <h2 className="text-xl font-bold text-gray-900 mb-2">
-          Cooking Preferences
-        </h2>
-        <p className="text-sm text-orange-700 mb-2">
-          Customize your recipe generation
-        </p>
+      {/* Decorative background pattern */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.03]">
+        <div className="absolute inset-0" style={{
+          backgroundImage: `radial-gradient(circle at 2px 2px, currentColor 1px, transparent 0)`,
+          backgroundSize: '32px 32px',
+          color: '#f97316'
+        }} />
       </div>
 
-      {/* Meal Type */}
-      <div className="mb-8">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <UtensilsCrossed className="w-4 h-4 mr-2" />
-            Meal Type
+      <div className="relative">
+        {/* Header matching NavigationSidebar */}
+        <div className="flex items-center justify-between px-4 py-4 bg-gradient-to-r from-orange-600 via-orange-500 to-pink-500 shadow-md relative overflow-hidden -mx-6 -mt-6 mb-6">
+          {/* Animated background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
+
+          <div className="flex items-center gap-3 relative z-10">
+            <div className="p-1.5 bg-white/20 backdrop-blur-sm rounded-lg">
+              <UtensilsCrossed className="h-6 w-6 text-white drop-shadow-lg" />
+            </div>
+            <span className="font-bold text-white text-lg drop-shadow-md">Preferences</span>
           </div>
-          <span className="text-xs text-gray-500">
-            {preferences.mealType.length}/{sectionLimits.mealType} selected
-          </span>
-        </h3>
-        {isSectionAtLimit("mealType") && (
-          <p className="text-xs text-orange-600 mb-2">
-            Maximum selections reached. Remove one to add another.
-          </p>
+
+          {onClose && (
+            <button
+              onClick={onClose}
+              className="p-2 rounded-lg hover:bg-white/20 text-white transition-all duration-200 hover:scale-110 relative z-10"
+            >
+              <PanelLeft className="h-5 w-5 drop-shadow" />
+            </button>
+          )}
+        </div>
+        {/* Meal Type */}
+        {renderSection(
+          "Meal Type",
+          UtensilsCrossed,
+          "mealType",
+          mealTypeOptions,
         )}
-        <div className="flex flex-wrap gap-2">
-          {mealTypeOptions.map((option) => {
-            const Icon = option.icon;
-            const selected = isSelected("mealType", option.id);
-            const disabled = isTagDisabled("mealType", option.id);
-            return (
-              <button
-                key={option.id}
-                onClick={() => handleChipClick("mealType", option.id)}
-                disabled={disabled}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selected
-                    ? "bg-green-100 text-green-700 border-2 border-green-300 shadow-sm"
-                    : disabled
-                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
-                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${option.color}`} />
-                <span>{option.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* Meal Occasion */}
-      <div className="mb-8">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <Calendar className="w-4 h-4 mr-2" />
-            Meal Occasion
-          </div>
-          <span className="text-xs text-gray-500">
-            {preferences.mealOccasion.length}/{sectionLimits.mealOccasion}{" "}
-            selected
-          </span>
-        </h3>
-        {isSectionAtLimit("mealOccasion") && (
-          <p className="text-xs text-orange-600 mb-2">
-            Maximum selections reached. Remove one to add another.
-          </p>
+        {/* Meal Occasion */}
+        {renderSection(
+          "Meal Occasion",
+          Calendar,
+          "mealOccasion",
+          mealOccasionOptions,
         )}
-        <div className="flex flex-wrap gap-2">
-          {mealOccasionOptions.map((option) => {
-            const Icon = option.icon;
-            const selected = isSelected("mealOccasion", option.id);
-            const disabled = isTagDisabled("mealOccasion", option.id);
-            return (
-              <button
-                key={option.id}
-                onClick={() => handleChipClick("mealOccasion", option.id)}
-                disabled={disabled}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selected
-                    ? "bg-emerald-100 text-emerald-700 border-2 border-emerald-300 shadow-sm"
-                    : disabled
-                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
-                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${option.color}`} />
-                <span>{option.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* Cooking Equipment */}
-      <div className="mb-8">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <ChefHat className="w-4 h-4 mr-2" />
-            Cooking Equipment
-          </div>
-          <span className="text-xs text-gray-500">
-            {preferences.cookingEquipment.length} selected
-          </span>
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {cookingEquipmentOptions.map((option) => {
-            const Icon = option.icon;
-            const selected = isSelected("cookingEquipment", option.id);
-            const disabled = isTagDisabled("cookingEquipment", option.id);
-            return (
-              <button
-                key={option.id}
-                onClick={() => handleChipClick("cookingEquipment", option.id)}
-                disabled={disabled}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selected
-                    ? "bg-green-100 text-green-700 border-2 border-green-300 shadow-sm"
-                    : disabled
-                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
-                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${option.color}`} />
-                <span>{option.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Cooking Time */}
-      <div className="mb-8">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <Clock className="w-4 h-4 mr-2" />
-            Cooking Time
-          </div>
-          <span className="text-xs text-gray-500">
-            {preferences.cookingTime.length}/{sectionLimits.cookingTime}{" "}
-            selected
-          </span>
-        </h3>
-        {isSectionAtLimit("cookingTime") && (
-          <p className="text-xs text-orange-600 mb-2">
-            Maximum selections reached. Remove one to add another.
-          </p>
+        {/* Cooking Equipment */}
+        {renderSection(
+          "Cooking Equipment",
+          ChefHat,
+          "cookingEquipment",
+          cookingEquipmentOptions,
+          false,
         )}
-        <div className="flex flex-wrap gap-2">
-          {cookingTimeOptions.map((option) => {
-            const Icon = option.icon;
-            const selected = isSelected("cookingTime", option.id);
-            const disabled = isTagDisabled("cookingTime", option.id);
-            return (
-              <button
-                key={option.id}
-                onClick={() => handleChipClick("cookingTime", option.id)}
-                disabled={disabled}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selected
-                    ? "bg-emerald-100 text-emerald-700 border-2 border-emerald-300 shadow-sm"
-                    : disabled
-                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
-                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${option.color}`} />
-                <span>{option.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* Skill Level */}
-      <div className="mb-8">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <Star className="w-4 h-4 mr-2" />
-            Skill Level
-          </div>
-          <span className="text-xs text-gray-500">
-            {preferences.skillLevel.length}/{sectionLimits.skillLevel} selected
-          </span>
-        </h3>
-        {isSectionAtLimit("skillLevel") && (
-          <p className="text-xs text-orange-600 mb-2">
-            Maximum selections reached. Remove one to add another.
-          </p>
+        {/* Cooking Time */}
+        {renderSection(
+          "Cooking Time",
+          Clock,
+          "cookingTime",
+          cookingTimeOptions,
         )}
-        <div className="flex flex-wrap gap-2">
-          {skillLevelOptions.map((option) => {
-            const Icon = option.icon;
-            const selected = isSelected("skillLevel", option.id);
-            const disabled = isTagDisabled("skillLevel", option.id);
-            return (
-              <button
-                key={option.id}
-                onClick={() => handleChipClick("skillLevel", option.id)}
-                disabled={disabled}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selected
-                    ? "bg-green-100 text-green-700 border-2 border-green-300 shadow-sm"
-                    : disabled
-                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
-                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${option.color}`} />
-                <span>{option.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* Spice Level */}
-      <div className="mb-8">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <Flame className="w-4 h-4 mr-2" />
-            Spice Level
-          </div>
-          <span className="text-xs text-gray-500">
-            {preferences.spiceLevel.length}/{sectionLimits.spiceLevel} selected
-          </span>
-        </h3>
-        {isSectionAtLimit("spiceLevel") && (
-          <p className="text-xs text-orange-600 mb-2">
-            Maximum selections reached. Remove one to add another.
-          </p>
+        {/* Skill Level */}
+        {renderSection("Skill Level", Star, "skillLevel", skillLevelOptions)}
+
+        {/* Spice Level */}
+        {renderSection("Spice Level", Flame, "spiceLevel", spiceLevelOptions)}
+
+        {/* Meat Preferences */}
+        {renderSection("Meat & Protein", Beef, "meat", meatOptions)}
+
+        {/* Vegetables */}
+        {renderSection(
+          "Vegetables",
+          Carrot,
+          "vegetables",
+          vegetableOptions,
+          false,
         )}
-        <div className="flex flex-wrap gap-2">
-          {spiceLevelOptions.map((option) => {
-            const Icon = option.icon;
-            const selected = isSelected("spiceLevel", option.id);
-            const disabled = isTagDisabled("spiceLevel", option.id);
-            return (
-              <button
-                key={option.id}
-                onClick={() => handleChipClick("spiceLevel", option.id)}
-                disabled={disabled}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selected
-                    ? "bg-red-100 text-red-700 border-2 border-red-300 shadow-sm"
-                    : disabled
-                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
-                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${option.color}`} />
-                <span>{option.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* Meat Preferences */}
-      <div className="mb-8">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <Beef className="w-4 h-4 mr-2" />
-            Meat & Protein
-          </div>
-          <span className="text-xs text-gray-500">
-            {preferences.meat.length}/{sectionLimits.meat} selected
-          </span>
-        </h3>
-        {isSectionAtLimit("meat") && (
-          <p className="text-xs text-orange-600 mb-2">
-            Maximum selections reached. Remove one to add another.
-          </p>
+        {/* Nutritional Focus */}
+        {renderSection(
+          "Nutritional Focus",
+          Apple,
+          "nutrition",
+          nutritionOptions,
         )}
-        <div className="flex flex-wrap gap-2">
-          {meatOptions.map((option) => {
-            const Icon = option.icon;
-            const selected = isSelected("meat", option.id);
-            const disabled = isTagDisabled("meat", option.id);
-            return (
-              <button
-                key={option.id}
-                onClick={() => handleChipClick("meat", option.id)}
-                disabled={disabled}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selected
-                    ? "bg-red-100 text-red-700 border-2 border-red-300 shadow-sm"
-                    : disabled
-                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
-                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${option.color}`} />
-                <span>{option.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* Vegetables */}
-      <div className="mb-8">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <Carrot className="w-4 h-4 mr-2" />
-            Vegetables
-          </div>
-          <span className="text-xs text-gray-500">
-            {preferences.vegetables.length} selected
-          </span>
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {vegetableOptions.map((option) => {
-            const Icon = option.icon;
-            const selected = isSelected("vegetables", option.id);
-            const disabled = isTagDisabled("vegetables", option.id);
-            return (
-              <button
-                key={option.id}
-                onClick={() => handleChipClick("vegetables", option.id)}
-                disabled={disabled}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selected
-                    ? "bg-green-100 text-green-700 border-2 border-green-300 shadow-sm"
-                    : disabled
-                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
-                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${option.color}`} />
-                <span>{option.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
+        {/* Cuisine Preference */}
+        {renderSection("Cuisine Style", Globe, "cuisine", cuisineOptions)}
 
-      {/* Nutritional Focus */}
-      <div className="mb-8">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <Apple className="w-4 h-4 mr-2" />
-            Nutritional Focus
-          </div>
-          <span className="text-xs text-gray-500">
-            {preferences.nutrition.length}/{sectionLimits.nutrition} selected
-          </span>
-        </h3>
-        {isSectionAtLimit("nutrition") && (
-          <p className="text-xs text-orange-600 mb-2">
-            Maximum selections reached. Remove one to add another.
-          </p>
+        {/* Number of People to Feed */}
+        {renderSection(
+          "People to Feed",
+          Users,
+          "servings",
+          servingOptions,
         )}
-        <div className="flex flex-wrap gap-2">
-          {nutritionOptions.map((option) => {
-            const Icon = option.icon;
-            const selected = isSelected("nutrition", option.id);
-            const disabled = isTagDisabled("nutrition", option.id);
-            return (
-              <button
-                key={option.id}
-                onClick={() => handleChipClick("nutrition", option.id)}
-                disabled={disabled}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selected
-                    ? "bg-emerald-100 text-emerald-700 border-2 border-emerald-300 shadow-sm"
-                    : disabled
-                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
-                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-                }`}
-              >
-                <Icon className={`w-4 h-4 ${option.color}`} />
-                <span>{option.label}</span>
-              </button>
-            );
-          })}
-        </div>
-      </div>
 
-      {/* Cuisine Preference */}
-      <div className="mb-8">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <Globe className="w-4 h-4 mr-2" />
-            Cuisine Style
+        {/* Number of Cooks */}
+        {/*}{renderSection(
+          "People Cooking",
+          ChefHat,
+          "cooks",
+          cookOptions,
+        )}*/}
+
+        {/* Clear All Button */}
+        <div className="mt-6 mb-24">
+          <div className="relative rounded-2xl p-1 bg-gradient-to-br from-gray-200/50 to-gray-100/50 shadow-md">
+            <button
+              onClick={clearAllPreferences}
+              className="group relative w-full py-3.5 px-4 rounded-xl text-sm font-semibold text-gray-700 bg-white hover:bg-gradient-to-br hover:from-red-50 hover:to-orange-50 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] shadow-sm hover:shadow-md overflow-hidden"
+            >
+              {/* Animated background gradient on hover */}
+              <div className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-orange-500/0 to-red-500/0 group-hover:from-red-500/5 group-hover:via-orange-500/10 group-hover:to-red-500/5 transition-all duration-500" />
+
+              {/* Icon and text */}
+              <div className="relative flex items-center justify-center gap-2">
+                <svg
+                  className="w-4 h-4 text-gray-500 group-hover:text-orange-600 transition-colors duration-300 group-hover:rotate-180 group-hover:scale-110"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+                <span className="group-hover:text-orange-700 transition-colors duration-300">
+                  Clear All Preferences
+                </span>
+              </div>
+
+              {/* Hover shine effect */}
+              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            </button>
           </div>
-          <span className="text-xs text-gray-500">
-            {preferences.cuisine.length}/{sectionLimits.cuisine} selected
-          </span>
-        </h3>
-        {isSectionAtLimit("cuisine") && (
-          <p className="text-xs text-orange-600 mb-2">
-            Maximum selections reached. Remove one to add another.
-          </p>
-        )}
-        <div className="flex flex-wrap gap-2">
-          {cuisineOptions.map((option) => {
-            const selected = isSelected("cuisine", option.id);
-            const disabled = isTagDisabled("cuisine", option.id);
-            return (
-              <button
-                key={option.id}
-                onClick={() => handleChipClick("cuisine", option.id)}
-                disabled={disabled}
-                className={`flex items-center space-x-2 px-3 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selected
-                    ? "bg-green-100 text-green-700 border-2 border-green-300 shadow-sm"
-                    : disabled
-                      ? "bg-gray-50 text-gray-400 border-2 border-transparent cursor-not-allowed opacity-50"
-                      : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-                }`}
-              >
-                <span className="text-lg">{option.flag}</span>
-                <span>{option.label}</span>
-              </button>
-            );
-          })}
         </div>
-      </div>
-
-      {/* Number of People to Feed */}
-      <div className="mb-8">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <Users className="w-4 h-4 mr-2" />
-            People to Feed
-          </div>
-          <span className="text-xs text-gray-500">
-            {preferences.servings !== null ? "1/1" : "0/1"} selected
-          </span>
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {servingOptions.map((number) => {
-            const selected = isSelected("servings", number);
-            return (
-              <button
-                key={number}
-                onClick={() => handleChipClick("servings", number)}
-                className={`flex items-center justify-center w-12 h-10 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selected
-                    ? "bg-green-100 text-green-700 border-2 border-green-300 shadow-sm"
-                    : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-                }`}
-              >
-                {number}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Number of Cooks */}
-      {/*}<div className="mb-8">
-        <h3 className="text-sm font-semibold text-gray-700 mb-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <ChefHat className="w-4 h-4 mr-2" />
-            People Cooking
-          </div>
-          <span className="text-xs text-gray-500">
-            {preferences.cooks !== null ? "1/1" : "0/1"} selected
-          </span>
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {cookOptions.map((number) => {
-            const selected = isSelected("cooks", number);
-            return (
-              <button
-                key={number}
-                onClick={() => handleChipClick("cooks", number)}
-                className={`flex items-center justify-center w-12 h-10 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selected
-                    ? "bg-pink-100 text-pink-700 border-2 border-pink-300 shadow-sm"
-                    : "bg-gray-100 text-gray-700 border-2 border-transparent hover:bg-gray-200"
-                }`}
-              >
-                {number}
-              </button>
-            );
-          })}
-        </div>
-      </div>*/}
-
-      {/* Clear All Button */}
-      <div className="py-2 mb-22 border-t border-black">
-        <button
-          onClick={clearAllPreferences}
-          className="w-full py-2 text-sm text-black transition-colors"
-        >
-          Clear All Preferences
-        </button>
       </div>
     </div>
   );

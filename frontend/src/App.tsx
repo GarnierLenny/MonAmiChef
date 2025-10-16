@@ -475,6 +475,20 @@ function App() {
             setIsAuthModalOpen(true);
           }}
           onSignOut={handleSignOut}
+          chats={[]}
+          onNewChat={() => navigate("/")}
+          handleDropdownAction={() => {}}
+          activeDropdown={null}
+          setActiveDropdown={() => {}}
+          renamingId={null}
+          setRenamingId={() => {}}
+          renameValue=""
+          setRenameValue={() => {}}
+          cancelRename={() => {}}
+          saveRename={() => {}}
+          confirmDeleteId={null}
+          confirmDelete={() => {}}
+          cancelDelete={() => {}}
         />
 
         <AuthModal
