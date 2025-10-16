@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "react-i18next";
 import { ToastAction } from "@/components/ui/toast";
+import type { Session } from "@supabase/supabase-js";
 
 // Import components
 import { MealGrid } from "@/components/meal-plan/MealGrid";
@@ -46,11 +47,13 @@ import {
 interface MealPlanPageProps {
   onSignUp?: () => void;
   onSignIn?: () => void;
+  session?: Session | null;
 }
 
 export default function MealPlanPage({
   onSignUp,
   onSignIn,
+  session,
 }: MealPlanPageProps = {}) {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -155,10 +158,17 @@ export default function MealPlanPage({
 
   // Load meal plans and user goals on component mount
   useEffect(() => {
+    // Check if user is authenticated before loading data
+    if (!session) {
+      setIsUnauthenticated(true);
+      setIsLoading(false);
+      return;
+    }
+
     loadMealPlans();
     loadUserGoals();
     loadGroceryList();
-  }, []);
+  }, [session]);
 
   // Reset selected meals when day changes
   useEffect(() => {
@@ -848,7 +858,7 @@ export default function MealPlanPage({
     );
   }
 
-  // Show guest CTA if user is unauthenticated
+  // Show auth gate for guests
   if (isUnauthenticated) {
     return <GuestMealPlanningCTA onSignUp={onSignUp} onSignIn={onSignIn} />;
   }
@@ -870,12 +880,22 @@ export default function MealPlanPage({
         </div>
       )}
 
-      {/* Unauthenticated Message */}
-      {isUnauthenticated && (
-        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg">
-          <p className="text-sm">
-            Sign in to save your meal plans to the cloud
-          </p>
+      {/* Guest CTA Banner */}
+      {isUnauthenticated && onSignUp && onSignIn && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 bg-gradient-to-r from-orange-500 to-orange-600 text-white px-6 py-3 rounded-xl shadow-lg border border-orange-400/20 backdrop-blur-sm max-w-md">
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <p className="text-sm font-medium">
+                Sign in to save your meal plans and sync across devices
+              </p>
+            </div>
+            <button
+              onClick={onSignIn}
+              className="px-4 py-2 bg-white text-orange-600 rounded-lg text-sm font-semibold hover:bg-orange-50 transition-colors whitespace-nowrap"
+            >
+              Sign In
+            </button>
+          </div>
         </div>
       )}
       {/* Desktop Meal Plan Grid */}

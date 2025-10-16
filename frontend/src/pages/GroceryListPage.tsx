@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
+import type { Session } from "@supabase/supabase-js";
 import {
   ShoppingCart,
   Loader2,
@@ -34,9 +35,10 @@ import { GuestGroceryListCTA } from "@/components/grocery-list/GuestGroceryListC
 interface GroceryListPageProps {
   onSignUp?: () => void;
   onSignIn?: () => void;
+  session?: Session | null;
 }
 
-export default function GroceryListPage({ onSignUp, onSignIn }: GroceryListPageProps = {}) {
+export default function GroceryListPage({ onSignUp, onSignIn, session }: GroceryListPageProps = {}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -104,8 +106,15 @@ export default function GroceryListPage({ onSignUp, onSignIn }: GroceryListPageP
 
   // Load grocery list on mount and set initial expanded categories
   useEffect(() => {
+    // Check if user is authenticated before loading data
+    if (!session) {
+      setIsUnauthenticated(true);
+      setIsLoading(false);
+      return;
+    }
+
     loadGroceryList();
-  }, []);
+  }, [session]);
 
   // Set initial expanded categories only on first load
   useEffect(() => {

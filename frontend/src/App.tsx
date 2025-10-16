@@ -410,6 +410,7 @@ function App() {
                   <MealPlanPage
                     onSignUp={() => setIsAuthModalOpen(true)}
                     onSignIn={() => setIsAuthModalOpen(true)}
+                    session={session}
                   />
                 </ComponentErrorBoundary>
               }
@@ -426,6 +427,7 @@ function App() {
                   <GroceryListPage
                     onSignUp={() => setIsAuthModalOpen(true)}
                     onSignIn={() => setIsAuthModalOpen(true)}
+                    session={session}
                   />
                 </ComponentErrorBoundary>
               }
