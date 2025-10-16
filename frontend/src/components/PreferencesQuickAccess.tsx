@@ -121,9 +121,15 @@ export default function PreferencesQuickAccess({
               >
                 <Icon className={`w-3.5 h-3.5 transition-colors duration-700 ease-out ${isSelected ? "text-white" : ""}`} />
                 <span className="transition-all duration-700 ease-out">{pref.label}</span>
-                {isSelected && onRemoveTag && (
-                  <X className="w-3 h-3 ml-0.5 animate-in fade-in zoom-in duration-300" />
-                )}
+                <div
+                  className={`overflow-hidden transition-all duration-700 ease-out ${
+                    isSelected && onRemoveTag ? "w-4 ml-0.5 opacity-100" : "w-0 opacity-0"
+                  }`}
+                >
+                  <X className={`w-3 h-3 transition-all duration-700 ease-out ${
+                    isSelected && onRemoveTag ? "scale-100 opacity-100" : "scale-50 opacity-0"
+                  }`} />
+                </div>
               </button>
             );
           })}
@@ -139,9 +145,11 @@ export default function PreferencesQuickAccess({
               }}
             >
               <span className="transition-all duration-700 ease-out">{tag.label}</span>
-              {onRemoveTag && (
-                <X className="w-3 h-3 ml-0.5 transition-transform duration-300 hover:scale-125" />
-              )}
+              <div className="w-4 ml-0.5 opacity-100 overflow-hidden transition-all duration-700 ease-out">
+                {onRemoveTag && (
+                  <X className="w-3 h-3 scale-100 opacity-100 transition-all duration-700 ease-out hover:scale-125" />
+                )}
+              </div>
             </button>
           ))}
 
