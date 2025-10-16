@@ -9,6 +9,10 @@ import {
   ChevronRight,
   AlertTriangle,
   Check,
+  Plus,
+  Package,
+  Sparkles,
+  ArrowRight,
 } from "lucide-react";
 import { groceryListApi, type GroceryList } from "@/lib/api/groceryListApi";
 import { Button } from "@/components/ui/button";
@@ -61,8 +65,8 @@ export default function GroceryListPage() {
   // Show all categories toggle
   const [showAllCategories, setShowAllCategories] = useState(false);
 
-  // Meals section expanded state (collapsed by default)
-  const [mealsExpanded, setMealsExpanded] = useState(false);
+  // Meals section expanded state (expanded by default now)
+  const [mealsExpanded, setMealsExpanded] = useState(true);
 
   // Category-specific add item inputs
   const [categoryItemInputs, setCategoryItemInputs] = useState<
@@ -73,6 +77,11 @@ export default function GroceryListPage() {
   const [categoryLoading, setCategoryLoading] = useState<
     Record<string, boolean>
   >({});
+
+  // Active input category (to show expanded input form)
+  const [activeInputCategory, setActiveInputCategory] = useState<string | null>(
+    null,
+  );
 
   // Save checked ingredients to localStorage whenever they change
   useEffect(() => {
@@ -148,6 +157,12 @@ export default function GroceryListPage() {
       await groceryListApi.removeMeal(mealToDelete.id);
       await loadGroceryList();
       setMealToDelete(null);
+      toast({
+        title: t("groceryList.mealRemoved"),
+        description: t("groceryList.mealRemovedDescription", {
+          mealName: mealToDelete.title,
+        }),
+      });
     } catch (err: any) {
       console.error("Failed to remove meal:", err);
       setError(err.message || "Failed to remove meal");
@@ -186,9 +201,12 @@ export default function GroceryListPage() {
 
       // Show success toast
       toast({
-        title: "Ingredient successfully added",
+        title: t("groceryList.ingredientAdded"),
         description: `${input.name} has been added to your grocery list.`,
       });
+
+      // Close the input form after successful add
+      setActiveInputCategory(null);
     } catch (err: any) {
       console.error("Failed to add category item:", err);
       setError(err.message || "Failed to add item");
@@ -249,6 +267,11 @@ export default function GroceryListPage() {
 
       // Delete from backend
       await groceryListApi.deleteCustomItem(itemId);
+
+      toast({
+        title: t("groceryList.itemDeleted"),
+        description: t("groceryList.itemDeletedDescription"),
+      });
     } catch (err: any) {
       console.error("Failed to delete custom item:", err);
       setError(err.message || "Failed to delete custom item");
@@ -266,6 +289,10 @@ export default function GroceryListPage() {
       setCheckedIngredients(new Set());
       // Also clear from localStorage
       localStorage.removeItem("groceryList-checkedIngredients");
+      toast({
+        title: t("groceryList.listCleared"),
+        description: t("groceryList.listClearedDescription"),
+      });
     } catch (err: any) {
       console.error("Failed to clear grocery list:", err);
       setError(err.message || "Failed to clear grocery list");
@@ -316,6 +343,24 @@ export default function GroceryListPage() {
       other: "📦",
     };
 
+    const categoryColors: Record<string, string> = {
+      produce: "from-green-500 to-emerald-600",
+      protein: "from-red-500 to-rose-600",
+      dairy: "from-blue-400 to-blue-600",
+      grains: "from-amber-500 to-orange-600",
+      spices: "from-purple-500 to-purple-600",
+      other: "from-gray-500 to-gray-600",
+    };
+
+    const categoryBgColors: Record<string, string> = {
+      produce: "bg-green-50",
+      protein: "bg-red-50",
+      dairy: "bg-blue-50",
+      grains: "bg-amber-50",
+      spices: "bg-purple-50",
+      other: "bg-gray-50",
+    };
+
     // Create a map of existing categories
     const existingCategories = new Map(
       (groceryList?.aggregatedIngredients || []).map((cat) => [
@@ -331,40 +376,66 @@ export default function GroceryListPage() {
         (cat) => cat.category === "other",
       );
 
+      const result = categoriesWithItems.map((cat) => ({
+        ...cat,
+        gradientColor: categoryColors[cat.category] || categoryColors.other,
+        bgColor: categoryBgColors[cat.category] || categoryBgColors.other,
+      }));
+
       if (!hasOther) {
         // Add empty "other" category if it doesn't exist
-        return [
-          ...categoriesWithItems,
-          {
-            category: "other",
-            emoji: "📦",
-            items: [],
-          },
-        ];
+        result.push({
+          category: "other",
+          emoji: "📦",
+          items: [],
+          gradientColor: categoryColors.other,
+          bgColor: categoryBgColors.other,
+        });
       }
 
-      return categoriesWithItems;
+      return result;
     }
 
     // Return all categories, with empty ones if they don't exist
     return allCategoryNames.map((categoryName) => {
-      if (existingCategories.has(categoryName)) {
-        return existingCategories.get(categoryName)!;
-      }
+      const existing = existingCategories.get(categoryName);
       return {
         category: categoryName,
         emoji: categoryEmojis[categoryName] || "📦",
-        items: [],
+        items: existing?.items || [],
+        gradientColor: categoryColors[categoryName] || categoryColors.other,
+        bgColor: categoryBgColors[categoryName] || categoryBgColors.other,
       };
     });
+  };
+
+  // Calculate completion stats
+  const getCompletionStats = () => {
+    if (!groceryList) return { total: 0, checked: 0, percentage: 0 };
+
+    const totalItems =
+      groceryList.aggregatedIngredients.reduce(
+        (sum, cat) => sum + cat.items.length,
+        0,
+      ) + groceryList.customItems.length;
+
+    const checkedCount =
+      checkedIngredients.size +
+      groceryList.customItems.filter((item) => item.checked).length;
+
+    return {
+      total: totalItems,
+      checked: checkedCount,
+      percentage: totalItems > 0 ? Math.round((checkedCount / totalItems) * 100) : 0,
+    };
   };
 
   // Loading state
   if (isLoading) {
     return (
-      <div className="flex h-screen w-screen items-center justify-center bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
+      <div className="flex h-screen w-screen items-center justify-center bg-orange-50">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-info-500 mx-auto mb-4" />
+          <Loader2 className="w-8 h-8 animate-spin text-orange-500 mx-auto mb-4" />
           <p className="text-neutral-600">{t("groceryList.loading")}</p>
         </div>
       </div>
@@ -374,10 +445,15 @@ export default function GroceryListPage() {
   // Error state
   if (error) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
+      <div className="flex h-screen items-center justify-center bg-orange-50">
         <div className="text-center max-w-md mx-auto p-6">
-          <p className="text-danger-600 mb-4">{error}</p>
-          <Button onClick={loadGroceryList}>{t("common.retry")}</Button>
+          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <AlertTriangle className="w-8 h-8 text-red-600" />
+          </div>
+          <p className="text-danger-600 mb-4 font-medium">{error}</p>
+          <Button onClick={loadGroceryList} className="bg-orange-500 hover:bg-orange-600">
+            {t("common.retry")}
+          </Button>
         </div>
       </div>
     );
@@ -387,76 +463,150 @@ export default function GroceryListPage() {
     !groceryList ||
     (groceryList.meals.length === 0 && groceryList.customItems.length === 0);
 
+  const stats = getCompletionStats();
+
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-orange-50 via-orange-50 to-amber-50">
       <div className="flex-1 overflow-y-auto no-scrollbar">
-        <div className="max-w-4xl mx-auto p-4 sm:p-6 w-full">
+        <div className="w-full p-6 sm:p-8 lg:p-12 max-w-7xl mx-auto">
           {isEmpty ? (
-            // Empty state
-            <div className="flex flex-col h-screen items-center justify-center pb-26 text-center">
-              <ShoppingCart className="w-16 h-16 text-neutral-400 mb-4" />
-              <h2 className="text-xl font-semibold text-neutral-700 mb-2">
+            // Empty state - Enhanced with better visuals
+            <div className="flex flex-col h-screen items-center justify-center pb-26 text-center px-4">
+              <div className="relative mb-8">
+                <div className="w-32 h-32 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
+                  <ShoppingCart className="w-16 h-16 text-white" />
+                </div>
+                <div className="absolute -top-2 -right-2">
+                  <Sparkles className="w-10 h-10 text-amber-400 fill-current" />
+                </div>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-bold text-neutral-800 mb-3">
                 {t("groceryList.emptyState")}
               </h2>
-              <p className="text-neutral-500 mb-6">
+              <p className="text-neutral-600 mb-8 max-w-md text-sm sm:text-base leading-relaxed">
                 {t("groceryList.emptyStateCta")}
               </p>
-              <Button onClick={() => navigate("/meal-plan")}>
+              <Button
+                onClick={() => navigate("/meal-plan")}
+                size="lg"
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+              >
                 {t("groceryList.goToMealPlan")}
+                <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </div>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-8 lg:space-y-10">
+              {/* Header with Progress */}
+              <div className="bg-white rounded-2xl p-6 sm:p-8 lg:p-10 shadow-md border border-orange-100">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 mb-6">
+                  <div>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-2 flex items-center gap-3">
+                      <ShoppingCart className="w-7 h-7 text-orange-500" />
+                      {t("groceryList.title")}
+                    </h1>
+                    <p className="text-neutral-500 text-sm sm:text-base">
+                      {stats.total} items in your list
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={handleClearAll}
+                    className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                    disabled={stats.total === 0}
+                  >
+                    <Trash2 className="w-4 h-4 mr-2" />
+                    {t("groceryList.clearAll")}
+                  </Button>
+                </div>
+
+                {/* Progress Bar */}
+                {stats.total > 0 && (
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-sm sm:text-base">
+                      <span className="text-neutral-600 font-medium">
+                        Shopping Progress
+                      </span>
+                      <span className="text-orange-600 font-bold">
+                        {stats.checked} / {stats.total}
+                      </span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3.5 overflow-hidden">
+                      <div
+                        className="bg-gradient-to-r from-orange-500 to-amber-500 h-3.5 rounded-full transition-all duration-500 ease-out"
+                        style={{ width: `${stats.percentage}%` }}
+                      />
+                    </div>
+                    {stats.percentage === 100 && (
+                      <p className="text-green-600 text-sm sm:text-base font-medium flex items-center gap-2 mt-4">
+                        <Check className="w-5 h-5" />
+                        All items collected!
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+
               {/* Meals Section */}
               {groceryList && groceryList.meals.length > 0 && (
                 <section>
-                  <div className="rounded-lg overflow-hidden">
+                  <div className="bg-white rounded-2xl overflow-hidden shadow-md border border-orange-100">
                     <button
                       onClick={() => setMealsExpanded(!mealsExpanded)}
-                      className="w-full pr-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                      className="w-full px-6 sm:px-8 py-5 sm:py-6 flex items-center justify-between hover:bg-orange-50/50 transition-colors group"
                     >
-                      <div className="flex items-center gap-2">
-                        {mealsExpanded ? (
-                          <ChevronDown className="w-5 h-5 text-neutral-500" />
-                        ) : (
-                          <ChevronRight className="w-5 h-5 text-neutral-500" />
-                        )}
-                        <h2 className="text-md font-semibold text-neutral-900">
-                          {t("groceryList.mealsSection")}
-                        </h2>
-                        <span className="text-sm text-neutral-500">
-                          ({groceryList.meals.length})
-                        </span>
+                      <div className="flex items-center gap-4">
+                        <div className="p-2 bg-orange-100 rounded-lg group-hover:bg-orange-200 transition-colors">
+                          {mealsExpanded ? (
+                            <ChevronDown className="w-5 h-5 text-orange-600" />
+                          ) : (
+                            <ChevronRight className="w-5 h-5 text-orange-600" />
+                          )}
+                        </div>
+                        <div className="text-left">
+                          <h2 className="text-lg sm:text-xl font-bold text-neutral-900 mb-1">
+                            {t("groceryList.mealsSection")}
+                          </h2>
+                          <p className="text-sm sm:text-base text-neutral-500">
+                            {groceryList.meals.length} meal{groceryList.meals.length !== 1 ? "s" : ""} added
+                          </p>
+                        </div>
+                      </div>
+                      <div className="px-4 py-1.5 bg-orange-100 text-orange-700 rounded-full text-sm font-semibold">
+                        {groceryList.meals.length}
                       </div>
                     </button>
 
                     {mealsExpanded && (
-                      <div className="p-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="p-6 sm:p-8 lg:p-10 bg-gradient-to-br from-orange-50/30 to-amber-50/30">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 lg:gap-6">
                           {groceryList.meals.map((meal) => (
                             <div
                               key={meal.id}
-                              className="bg-neutral-50 rounded-lg p-4 border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
+                              className="bg-white rounded-xl p-5 sm:p-6 border border-gray-200 shadow-sm hover:shadow-lg hover:border-orange-200 transition-all duration-200 group"
                             >
-                              <div className="flex justify-between items-start">
+                              <div className="flex justify-between items-start gap-4">
                                 <div className="flex-1">
-                                  <h3 className="font-medium text-neutral-900 mb-1">
+                                  <h3 className="font-semibold text-base sm:text-lg text-neutral-900 mb-3 group-hover:text-orange-600 transition-colors">
                                     {meal.recipe.title}
                                   </h3>
-                                  <p className="text-sm text-neutral-500">
-                                    {
-                                      [
-                                        "Sunday",
-                                        "Monday",
-                                        "Tuesday",
-                                        "Wednesday",
-                                        "Thursday",
-                                        "Friday",
-                                        "Saturday",
-                                      ][meal.day]
-                                    }{" "}
-                                    • {meal.mealSlot}
-                                  </p>
+                                  <div className="flex items-center gap-2.5 text-sm text-neutral-500">
+                                    <span className="inline-flex items-center px-2 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-medium">
+                                      {
+                                        [
+                                          "Sunday",
+                                          "Monday",
+                                          "Tuesday",
+                                          "Wednesday",
+                                          "Thursday",
+                                          "Friday",
+                                          "Saturday",
+                                        ][meal.day]
+                                      }
+                                    </span>
+                                    <span className="text-gray-400">•</span>
+                                    <span className="capitalize">{meal.mealSlot}</span>
+                                  </div>
                                 </div>
                                 <Button
                                   variant="ghost"
@@ -467,7 +617,7 @@ export default function GroceryListPage() {
                                       title: meal.recipe.title,
                                     })
                                   }
-                                  className="text-danger-600 hover:bg-danger-50"
+                                  className="text-red-500 hover:text-red-700 hover:bg-red-50"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
@@ -481,68 +631,112 @@ export default function GroceryListPage() {
                 </section>
               )}
 
-              {/* Ingredients Section (always show, includes "other" category for additional items) */}
+              {/* Ingredients Section */}
               {groceryList && (
                 <section>
-                  <div className="flex flex-1 items-center mb-4 justify-between">
-                    <h2 className="text-lg font-semibold text-neutral-900">
+                  <div className="flex items-center justify-between mb-6 lg:mb-8">
+                    <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 flex items-center gap-3">
+                      <Package className="w-6 h-6 sm:w-7 sm:h-7 text-orange-500" />
                       {t("groceryList.ingredientsSection")}
                     </h2>
-                    <label className="flex items-center gap-2 cursor-pointer">
+                    <label className="flex items-center gap-2.5 cursor-pointer group">
                       <Checkbox
                         checked={showAllCategories}
                         onCheckedChange={(checked) =>
                           setShowAllCategories(checked === true)
                         }
                       />
-                      <span className="text-sm text-neutral-600">
+                      <span className="text-sm sm:text-base text-neutral-600 group-hover:text-neutral-900 transition-colors">
                         {t("groceryList.showAllCategories")}
                       </span>
                     </label>
                   </div>
-                  <div className="space-y-3">
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 lg:gap-6">
                     {getAllCategories().map((category) => {
                       const isExpanded = expandedCategories.has(
                         category.category,
                       );
+                      const itemCount =
+                        category.items.length +
+                        (groceryList?.customItems.filter((item) =>
+                          category.category === "other"
+                            ? !item.category ||
+                              item.category === "" ||
+                              item.category === "other"
+                            : item.category === category.category,
+                        ).length || 0);
+
                       return (
                         <div
                           key={category.category}
-                          className="bg-white rounded-lg border border-gray-200 overflow-hidden"
+                          className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden shadow-sm hover:shadow-lg hover:border-orange-200 transition-all duration-200"
                         >
                           <button
                             onClick={() => toggleCategory(category.category)}
-                            className="w-full px-4 py-3 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                            className={`w-full px-6 py-5 flex items-center justify-between transition-all duration-200 ${
+                              isExpanded
+                                ? `bg-gradient-to-r ${category.gradientColor} text-white`
+                                : `${category.bgColor} hover:bg-opacity-80`
+                            }`}
                           >
-                            <div className="flex items-center gap-2">
-                              {isExpanded ? (
-                                <ChevronDown className="w-5 h-5 text-neutral-500" />
-                              ) : (
-                                <ChevronRight className="w-5 h-5 text-neutral-500" />
-                              )}
-                              <span className="text-2xl">{category.emoji}</span>
-                              <span className="font-medium text-neutral-900 capitalize">
-                                {t(
-                                  `groceryList.categories.${category.category}`,
+                            <div className="flex items-center gap-4">
+                              <div
+                                className={`p-2 rounded-lg transition-colors ${
+                                  isExpanded
+                                    ? "bg-white/20"
+                                    : "bg-white shadow-sm"
+                                }`}
+                              >
+                                {isExpanded ? (
+                                  <ChevronDown
+                                    className={`w-5 h-5 ${
+                                      isExpanded ? "text-white" : "text-gray-600"
+                                    }`}
+                                  />
+                                ) : (
+                                  <ChevronRight
+                                    className={`w-5 h-5 ${
+                                      isExpanded ? "text-white" : "text-gray-600"
+                                    }`}
+                                  />
                                 )}
-                              </span>
-                              <span className="text-sm text-neutral-500">
-                                (
-                                {category.items.length +
-                                  (groceryList?.customItems.filter((item) =>
-                                    category.category === "other"
-                                      ? !item.category ||
-                                        item.category === "" ||
-                                        item.category === "other"
-                                      : item.category === category.category,
-                                  ).length || 0)}
-                                )
-                              </span>
+                              </div>
+                              <span className="text-3xl sm:text-4xl">{category.emoji}</span>
+                              <div className="text-left">
+                                <span
+                                  className={`font-bold capitalize text-base sm:text-lg ${
+                                    isExpanded ? "text-white" : "text-neutral-900"
+                                  }`}
+                                >
+                                  {t(
+                                    `groceryList.categories.${category.category}`,
+                                  )}
+                                </span>
+                                <div
+                                  className={`text-sm ${
+                                    isExpanded
+                                      ? "text-white/80"
+                                      : "text-neutral-500"
+                                  }`}
+                                >
+                                  {itemCount} item{itemCount !== 1 ? "s" : ""}
+                                </div>
+                              </div>
+                            </div>
+                            <div
+                              className={`px-3.5 py-1.5 rounded-full text-sm font-bold ${
+                                isExpanded
+                                  ? "bg-white/20 text-white"
+                                  : "bg-white shadow-sm text-neutral-700"
+                              }`}
+                            >
+                              {itemCount}
                             </div>
                           </button>
 
                           {isExpanded && (
-                            <div className="px-4 pb-4 pt-2 space-y-2">
+                            <div className="p-6 sm:p-7 lg:p-8 space-y-4 bg-gradient-to-br from-white to-gray-50/50">
                               {/* Recipe ingredients from meals */}
                               {category.items.map((ingredient, idx) => {
                                 const ingredientKey = `${category.category}-${idx}`;
@@ -551,7 +745,11 @@ export default function GroceryListPage() {
                                 return (
                                   <label
                                     key={ingredientKey}
-                                    className="flex items-start gap-3 p-2 rounded-lg hover:bg-neutral-50 cursor-pointer transition-colors"
+                                    className={`flex items-start gap-3.5 p-4 rounded-xl cursor-pointer transition-all duration-200 ${
+                                      isChecked
+                                        ? "bg-green-50 border-2 border-green-200"
+                                        : "bg-white border-2 border-gray-200 hover:border-orange-200 hover:bg-orange-50/30"
+                                    }`}
                                   >
                                     <Checkbox
                                       checked={isChecked}
@@ -560,20 +758,23 @@ export default function GroceryListPage() {
                                       }
                                       className="mt-0.5"
                                     />
-                                    <span
-                                      className={`text-sm transition-all break-words ${
-                                        isChecked
-                                          ? "text-success-600 line-through"
-                                          : "text-neutral-700"
-                                      }`}
-                                    >
-                                      {ingredient.quantity} {ingredient.name}
+                                    <div className="flex-1">
+                                      <span
+                                        className={`text-sm sm:text-base font-medium transition-all break-words ${
+                                          isChecked
+                                            ? "text-green-700 line-through"
+                                            : "text-neutral-800"
+                                        }`}
+                                      >
+                                        {ingredient.quantity} {ingredient.name}
+                                      </span>
                                       {ingredient.recipes.length > 1 && (
-                                        <span className="text-xs text-neutral-400 ml-2">
-                                          ({ingredient.recipes.length} recipes)
+                                        <span className="block text-xs sm:text-sm text-neutral-400 mt-1.5">
+                                          Used in {ingredient.recipes.length}{" "}
+                                          recipes
                                         </span>
                                       )}
-                                    </span>
+                                    </div>
                                   </label>
                                 );
                               })}
@@ -590,7 +791,11 @@ export default function GroceryListPage() {
                                 .map((item) => (
                                   <div
                                     key={item.id}
-                                    className="flex items-start gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors"
+                                    className={`flex items-start gap-3.5 p-4 rounded-xl transition-all duration-200 ${
+                                      item.checked
+                                        ? "bg-green-50 border-2 border-green-200"
+                                        : "bg-white border-2 border-gray-200 hover:border-orange-200"
+                                    }`}
                                   >
                                     <Checkbox
                                       checked={item.checked}
@@ -603,10 +808,10 @@ export default function GroceryListPage() {
                                       className="mt-0.5"
                                     />
                                     <span
-                                      className={`flex-1 text-sm transition-all ${
+                                      className={`flex-1 text-sm sm:text-base font-medium transition-all ${
                                         item.checked
-                                          ? "text-success-600 line-through"
-                                          : "text-neutral-700"
+                                          ? "text-green-700 line-through"
+                                          : "text-neutral-800"
                                       }`}
                                     >
                                       {item.quantity && `${item.quantity} `}
@@ -618,56 +823,30 @@ export default function GroceryListPage() {
                                       onClick={() =>
                                         handleDeleteCustomItem(item.id)
                                       }
-                                      className="text-danger-600 hover:bg-danger-50 h-auto p-1"
+                                      className="text-red-500 hover:bg-red-50 hover:text-red-700 h-auto p-2 rounded-lg"
                                     >
-                                      <Trash2 className="w-3 h-3" />
+                                      <Trash2 className="w-4 h-4" />
                                     </Button>
                                   </div>
                                 ))}
 
-                              {/* Add item to category form */}
-                              <div className="pt-2 mt-2 border-t border-gray-100">
-                                <div className="flex flex-col gap-2">
-                                  <Input
-                                    type="text"
-                                    placeholder={t(
-                                      "groceryList.addToCategoryPlaceholder",
-                                    )}
-                                    value={
-                                      categoryItemInputs[category.category]
-                                        ?.name || ""
-                                    }
-                                    onChange={(e) =>
-                                      updateCategoryItemInput(
-                                        category.category,
-                                        "name",
-                                        e.target.value,
-                                      )
-                                    }
-                                    onKeyDown={(e) => {
-                                      if (e.key === "Enter") {
-                                        e.preventDefault();
-                                        handleAddCategoryItem(
-                                          category.category,
-                                        );
-                                      }
-                                    }}
-                                    className="w-full h-8 text-sm"
-                                  />
-                                  <div className="flex gap-2 items-center">
+                              {/* Add item to category - Collapsed by default */}
+                              <div className="pt-5 mt-5 border-t border-gray-200">
+                                {activeInputCategory === category.category ? (
+                                  <div className="space-y-4 bg-white p-5 rounded-xl border-2 border-orange-200 shadow-sm">
                                     <Input
                                       type="text"
                                       placeholder={t(
-                                        "groceryList.quantityPlaceholder",
+                                        "groceryList.addToCategoryPlaceholder",
                                       )}
                                       value={
                                         categoryItemInputs[category.category]
-                                          ?.quantity || ""
+                                          ?.name || ""
                                       }
                                       onChange={(e) =>
                                         updateCategoryItemInput(
                                           category.category,
-                                          "quantity",
+                                          "name",
                                           e.target.value,
                                         )
                                       }
@@ -677,38 +856,85 @@ export default function GroceryListPage() {
                                           handleAddCategoryItem(
                                             category.category,
                                           );
+                                        } else if (e.key === "Escape") {
+                                          setActiveInputCategory(null);
                                         }
                                       }}
-                                      className="flex-1 h-8 text-sm"
+                                      className="w-full h-11 text-sm sm:text-base border-gray-300 focus:border-orange-500"
+                                      autoFocus
                                     />
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleAddCategoryItem(category.category)
-                                      }
-                                      disabled={
-                                        !categoryItemInputs[
-                                          category.category
-                                        ]?.name?.trim() ||
-                                        categoryLoading[category.category]
-                                      }
-                                      className={`p-2 flex-shrink-0 rounded-md transition-colors ${
-                                        categoryItemInputs[
-                                          category.category
-                                        ]?.name?.trim() &&
-                                        !categoryLoading[category.category]
-                                          ? "bg-primary-500 text-white hover:bg-primary-600 cursor-pointer"
-                                          : "bg-gray-300 text-gray-500 cursor-not-allowed"
-                                      }`}
-                                    >
-                                      {categoryLoading[category.category] ? (
-                                        <Loader2 className="w-4 h-4 animate-spin" />
-                                      ) : (
-                                        <Check className="w-4 h-4" />
-                                      )}
-                                    </button>
+                                    <div className="flex gap-3 items-center">
+                                      <Input
+                                        type="text"
+                                        placeholder={t(
+                                          "groceryList.quantityPlaceholder",
+                                        )}
+                                        value={
+                                          categoryItemInputs[category.category]
+                                            ?.quantity || ""
+                                        }
+                                        onChange={(e) =>
+                                          updateCategoryItemInput(
+                                            category.category,
+                                            "quantity",
+                                            e.target.value,
+                                          )
+                                        }
+                                        onKeyDown={(e) => {
+                                          if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            handleAddCategoryItem(
+                                              category.category,
+                                            );
+                                          } else if (e.key === "Escape") {
+                                            setActiveInputCategory(null);
+                                          }
+                                        }}
+                                        className="flex-1 h-11 text-sm sm:text-base border-gray-300 focus:border-orange-500"
+                                      />
+                                      <Button
+                                        type="button"
+                                        onClick={() =>
+                                          handleAddCategoryItem(category.category)
+                                        }
+                                        disabled={
+                                          !categoryItemInputs[
+                                            category.category
+                                          ]?.name?.trim() ||
+                                          categoryLoading[category.category]
+                                        }
+                                        className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-5 h-11 disabled:opacity-50"
+                                      >
+                                        {categoryLoading[category.category] ? (
+                                          <Loader2 className="w-5 h-5 animate-spin" />
+                                        ) : (
+                                          <Check className="w-5 h-5" />
+                                        )}
+                                      </Button>
+                                      <Button
+                                        type="button"
+                                        variant="ghost"
+                                        onClick={() =>
+                                          setActiveInputCategory(null)
+                                        }
+                                        className="px-4 h-11"
+                                      >
+                                        Cancel
+                                      </Button>
+                                    </div>
                                   </div>
-                                </div>
+                                ) : (
+                                  <Button
+                                    variant="outline"
+                                    onClick={() =>
+                                      setActiveInputCategory(category.category)
+                                    }
+                                    className="w-full h-12 border-dashed border-2 border-orange-300 text-orange-600 hover:bg-orange-50 hover:border-orange-400 transition-all duration-200"
+                                  >
+                                    <Plus className="w-5 h-5 mr-2" />
+                                    Add item to {t(`groceryList.categories.${category.category}`)}
+                                  </Button>
+                                )}
                               </div>
                             </div>
                           )}
@@ -728,27 +954,29 @@ export default function GroceryListPage() {
         open={!!mealToDelete}
         onOpenChange={(open) => !open && setMealToDelete(null)}
       >
-        <AlertDialogContent className="bg-white">
+        <AlertDialogContent className="bg-white rounded-2xl p-6 sm:p-8">
           <AlertDialogHeader>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-12 h-12 rounded-full bg-danger-100 flex items-center justify-center flex-shrink-0">
-                <AlertTriangle className="w-6 h-6 text-danger-600" />
+            <div className="flex items-center gap-4 mb-3">
+              <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+                <AlertTriangle className="w-7 h-7 text-red-600" />
               </div>
-              <AlertDialogTitle className="text-left">
+              <AlertDialogTitle className="text-left text-lg sm:text-xl">
                 {t("groceryList.confirmRemoveMeal")}
               </AlertDialogTitle>
             </div>
-            <AlertDialogDescription className="text-left">
+            <AlertDialogDescription className="text-left text-sm sm:text-base leading-relaxed pl-[4.5rem]">
               {t("groceryList.confirmRemoveMealDescription", {
                 mealName: mealToDelete?.title || "",
               })}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
+          <AlertDialogFooter className="gap-3 mt-6">
+            <AlertDialogCancel className="hover:bg-gray-100 h-11">
+              {t("common.cancel")}
+            </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmRemoveMeal}
-              className="bg-danger-600 hover:bg-danger-700 text-white"
+              className="bg-red-600 hover:bg-red-700 text-white h-11"
             >
               {t("common.delete")}
             </AlertDialogAction>

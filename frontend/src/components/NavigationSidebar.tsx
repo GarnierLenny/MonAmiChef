@@ -1,5 +1,10 @@
 import { useState } from "react";
-import { useNavigate, useLocation, useSearchParams, Link } from "react-router-dom";
+import {
+  useNavigate,
+  useLocation,
+  useSearchParams,
+  Link,
+} from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -112,18 +117,34 @@ export function NavigationSidebar({
   const isActivePath = (path: string) => location.pathname === path;
 
   const mainNavItems: NavItem[] = [
-    { path: "/dashboard", icon: BarChart3, label: t("navigation.dashboard") },
-    { path: "/meal-plan-chat", icon: CalendarDays, label: t("navigation.mealPlan") },
-    { path: "/grocery-list", icon: ShoppingCart, label: t("navigation.groceryList") },
+    {
+      path: "/meal-plan-chat",
+      icon: CalendarDays,
+      label: t("navigation.mealPlan"),
+    },
+    {
+      path: "/grocery-list",
+      icon: ShoppingCart,
+      label: t("navigation.groceryList"),
+    },
   ];
 
   const toolsNavItems: NavItem[] = [
     { path: "/timer", icon: Timer, label: t("navigation.cookingTimer") },
-    { path: "/calories", icon: Calculator, label: t("navigation.calorieCalculator") },
+    {
+      path: "/calories",
+      icon: Calculator,
+      label: t("navigation.calorieCalculator"),
+    },
   ];
 
   const userNavItems: NavItem[] = [
-    { path: "/recipes/saved", icon: Heart, label: t("navigation.recipes"), requiresAuth: true },
+    {
+      path: "/recipes/saved",
+      icon: Heart,
+      label: t("navigation.recipes"),
+      requiresAuth: true,
+    },
   ];
 
   const renderNavButton = (item: NavItem) => {
@@ -201,13 +222,16 @@ export function NavigationSidebar({
                 className="h-6 w-auto drop-shadow-lg"
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
-                  const nextEl = e.currentTarget.nextElementSibling as HTMLElement;
+                  const nextEl = e.currentTarget
+                    .nextElementSibling as HTMLElement;
                   if (nextEl) nextEl.style.display = "block";
                 }}
               />
               <ChefHat className="h-6 w-6 text-white hidden drop-shadow-lg" />
             </div>
-            <span className="font-bold text-white text-lg drop-shadow-md">Mon Ami Chef</span>
+            <span className="font-bold text-white text-lg drop-shadow-md">
+              Mon Ami Chef
+            </span>
           </div>
           <button
             onClick={onClose}
@@ -218,7 +242,7 @@ export function NavigationSidebar({
         </div>
 
         {/* Navigation Content */}
-        <div className="flex-1 py-6 overflow-y-auto">
+        <div className="flex-1 pt-4 pb-6 overflow-y-auto">
           <nav className="space-y-2 px-3">
             {/* New Chat Button */}
             <div className="mb-4">
@@ -261,13 +285,13 @@ export function NavigationSidebar({
               </h3>
 
               {/* Chat List */}
-              <div className="space-y-1 max-h-64 overflow-y-auto">
+              <div className="space-y-1">
                 {chats.length === 0 ? (
                   <div className="text-center py-6 px-3">
                     <p className="text-sm text-gray-500">No chat history yet</p>
                   </div>
                 ) : (
-                  chats.slice(0, 10).map((chat) => {
+                  chats.map((chat) => {
                     const params = new URLSearchParams(searchParams);
                     params.set("c", chat.id);
                     const isActive = currentChatId === chat.id;
@@ -275,7 +299,10 @@ export function NavigationSidebar({
                     return (
                       <div key={chat.id} className="group relative">
                         <Link
-                          to={{ pathname: location.pathname, search: `?${params.toString()}` }}
+                          to={{
+                            pathname: "/",
+                            search: `?${params.toString()}`,
+                          }}
                           onClick={onClose}
                           className={`flex items-center justify-between px-3 py-2.5 rounded-xl transition-all duration-300 ${
                             isActive
@@ -297,7 +324,9 @@ export function NavigationSidebar({
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              setActiveDropdown(activeDropdown === chat.id ? null : chat.id);
+                              setActiveDropdown(
+                                activeDropdown === chat.id ? null : chat.id,
+                              );
                             }}
                             className="opacity-0 group-hover:opacity-100 p-1.5 rounded hover:bg-gray-200 transition-opacity"
                           >
@@ -401,7 +430,8 @@ export function NavigationSidebar({
                   Delete chat?
                 </h3>
                 <p className="text-sm text-gray-600">
-                  This action will permanently remove the conversation. This cannot be undone.
+                  This action will permanently remove the conversation. This
+                  cannot be undone.
                 </p>
                 <div className="mt-4 flex justify-end gap-2">
                   <button
@@ -442,7 +472,8 @@ export function NavigationSidebar({
               >
                 <div className="flex items-center gap-3">
                   <div className="h-10 w-10 rounded-full bg-orange-500 flex items-center justify-center text-white font-bold text-sm shadow-lg shadow-orange-500/30 ring-2 ring-white">
-                    {user.name?.[0]?.toUpperCase() || user.email[0].toUpperCase()}
+                    {user.name?.[0]?.toUpperCase() ||
+                      user.email[0].toUpperCase()}
                   </div>
                   <div className="text-left">
                     <p className="text-sm font-medium text-gray-900 truncate max-w-[180px]">
@@ -453,7 +484,9 @@ export function NavigationSidebar({
                     </p>
                   </div>
                 </div>
-                <ChevronDown className={`h-4 w-4 text-gray-500 transition-transform ${isProfileDropdownOpen ? "rotate-180" : ""}`} />
+                <ChevronDown
+                  className={`h-4 w-4 text-gray-500 transition-transform ${isProfileDropdownOpen ? "rotate-180" : ""}`}
+                />
               </button>
 
               {/* Profile Dropdown */}
@@ -467,6 +500,17 @@ export function NavigationSidebar({
                       transition={{ duration: 0.15 }}
                       className="absolute bottom-full left-0 right-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
                     >
+                      <button
+                        onClick={() => {
+                          handleNavigation("/profile");
+                          setIsProfileDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors text-sm"
+                      >
+                        <User className="h-4 w-4" />
+                        {t("navigation.profile")}
+                      </button>
+                      <div className="border-t border-gray-200" />
                       <button
                         onClick={() => {
                           handleNavigation("/settings");
@@ -483,8 +527,12 @@ export function NavigationSidebar({
                         disabled={isSigningOut}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-red-600 hover:bg-red-50 transition-colors text-sm"
                       >
-                        <LogOut className={`h-4 w-4 ${isSigningOut ? "animate-spin" : ""}`} />
-                        {isSigningOut ? t("auth.signingOut") : t("navigation.logout")}
+                        <LogOut
+                          className={`h-4 w-4 ${isSigningOut ? "animate-spin" : ""}`}
+                        />
+                        {isSigningOut
+                          ? t("auth.signingOut")
+                          : t("navigation.logout")}
                       </button>
                     </motion.div>
                     <div

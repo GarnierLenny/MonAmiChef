@@ -1,36 +1,58 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
-  Timer,
+  Timer as TimerIcon,
   Bell,
   Play,
   Pause,
   RotateCcw,
   Plus,
-  Minus,
+  Trash2,
   Calendar,
+  Clock,
+  X,
+  Check,
+  Sparkles,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+
+interface TimerState {
+  id: string;
+  name: string;
+  duration: number;
+  remaining: number;
+  isRunning: boolean;
+  createdAt: number;
+}
 
 interface CookingToolsViewProps {
   currentSubView: string;
 }
 
+const PRESET_TIMERS = [
+  { label: "1 min", seconds: 60 },
+  { label: "3 min", seconds: 180 },
+  { label: "5 min", seconds: 300 },
+  { label: "10 min", seconds: 600 },
+  { label: "15 min", seconds: 900 },
+  { label: "20 min", seconds: 1200 },
+  { label: "30 min", seconds: 1800 },
+  { label: "45 min", seconds: 2700 },
+];
+
 export default function CookingToolsView({
   currentSubView,
 }: CookingToolsViewProps) {
-  const [timers, setTimers] = useState<
-    Array<{
-      id: string;
-      name: string;
-      duration: number;
-      remaining: number;
-      isRunning: boolean;
-    }>
-  >([]);
-
+  const [timers, setTimers] = useState<TimerState[]>([]);
+  const [isAddingTimer, setIsAddingTimer] = useState(false);
   const [newTimerName, setNewTimerName] = useState("");
-  const [newTimerDuration, setNewTimerDuration] = useState(10);
-  const [newTimerSeconds, setNewTimerSeconds] = useState(0);
+  const [newTimerMinutes, setNewTimerMinutes] = useState<number>(10);
+  const [newTimerSeconds, setNewTimerSeconds] = useState<number>(0);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const timerRefsMap = useRef<Map<string, HTMLDivElement>>(new Map());
+  const lastAddedTimerIdRef = useRef<string | null>(null);
 
+  // Timer countdown effect
   useEffect(() => {
     const interval = setInterval(() => {
       setTimers((prev) =>
@@ -38,8 +60,15 @@ export default function CookingToolsView({
           if (timer.isRunning && timer.remaining > 0) {
             const newRemaining = timer.remaining - 1;
             if (newRemaining === 0) {
-              // Timer finished - play notification sound
               playNotificationSound();
+              // Show browser notification if permitted
+              if ("Notification" in window && Notification.permission === "granted") {
+                new Notification("Timer Complete!", {
+                  body: `${timer.name} has finished!`,
+                  icon: "/favicon.ico",
+                  badge: "/favicon.ico",
+                });
+              }
               return { ...timer, remaining: 0, isRunning: false };
             }
             return { ...timer, remaining: newRemaining };
@@ -52,18 +81,49 @@ export default function CookingToolsView({
     return () => clearInterval(interval);
   }, []);
 
+  // Request notification permission on mount
+  useEffect(() => {
+    if ("Notification" in window && Notification.permission === "default") {
+      Notification.requestPermission();
+    }
+  }, []);
+
+  // Auto-scroll to newly added timer
+  useEffect(() => {
+    if (lastAddedTimerIdRef.current) {
+      const timerId = lastAddedTimerIdRef.current;
+
+      // Use requestAnimationFrame to ensure DOM is updated
+      requestAnimationFrame(() => {
+        const timerElement = timerRefsMap.current.get(timerId);
+        if (timerElement) {
+          timerElement.scrollIntoView({
+            behavior: "smooth",
+            block: "center",
+            inline: "nearest",
+          });
+        }
+      });
+
+      // Clear the ref after scrolling
+      lastAddedTimerIdRef.current = null;
+    }
+  }, [timers]);
+
   const playNotificationSound = () => {
     try {
-      // Create a simple beep sound using Web Audio API
-      const audioContext = new (window.AudioContext ||
-        window.webkitAudioContext)();
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      }
+
+      const audioContext = audioContextRef.current;
       const oscillator = audioContext.createOscillator();
       const gainNode = audioContext.createGain();
 
       oscillator.connect(gainNode);
       gainNode.connect(audioContext.destination);
 
-      oscillator.frequency.value = 800; // 800Hz tone
+      oscillator.frequency.value = 800;
       oscillator.type = "sine";
 
       gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
@@ -74,27 +134,61 @@ export default function CookingToolsView({
 
       oscillator.start(audioContext.currentTime);
       oscillator.stop(audioContext.currentTime + 1);
+
+      // Play second beep
+      setTimeout(() => {
+        const osc2 = audioContext.createOscillator();
+        const gain2 = audioContext.createGain();
+        osc2.connect(gain2);
+        gain2.connect(audioContext.destination);
+        osc2.frequency.value = 1000;
+        osc2.type = "sine";
+        gain2.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gain2.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1);
+        osc2.start(audioContext.currentTime);
+        osc2.stop(audioContext.currentTime + 1);
+      }, 200);
     } catch (error) {
       console.log("Audio notification not available:", error);
     }
   };
 
-  const addTimer = () => {
-    const totalSeconds = newTimerDuration * 60 + newTimerSeconds;
-    if (totalSeconds === 0) return; // Don't create timer with 0 duration
+  const addTimer = (seconds?: number) => {
+    const totalSeconds = seconds || newTimerMinutes * 60 + newTimerSeconds;
+    if (totalSeconds === 0) return;
 
     const timerName = newTimerName.trim() || `Timer ${timers.length + 1}`;
-    const newTimer = {
-      id: Date.now().toString(),
+    const newTimerId = Date.now().toString();
+    const newTimer: TimerState = {
+      id: newTimerId,
       name: timerName,
       duration: totalSeconds,
       remaining: totalSeconds,
       isRunning: false,
+      createdAt: Date.now(),
     };
+
     setTimers((prev) => [...prev, newTimer]);
+    lastAddedTimerIdRef.current = newTimerId;
     setNewTimerName("");
-    setNewTimerDuration(10);
+    setNewTimerMinutes(10);
     setNewTimerSeconds(0);
+    setIsAddingTimer(false);
+  };
+
+  const addPresetTimer = (seconds: number, label: string) => {
+    const newTimerId = Date.now().toString();
+    const newTimer: TimerState = {
+      id: newTimerId,
+      name: label,
+      duration: seconds,
+      remaining: seconds,
+      isRunning: false,
+      createdAt: Date.now(),
+    };
+
+    setTimers((prev) => [...prev, newTimer]);
+    lastAddedTimerIdRef.current = newTimerId;
   };
 
   const toggleTimer = (id: string) => {
@@ -115,181 +209,399 @@ export default function CookingToolsView({
     );
   };
 
+  const deleteTimer = (id: string) => {
+    setTimers((prev) => prev.filter((timer) => timer.id !== id));
+  };
+
   const formatTime = (seconds: number) => {
-    const mins = Math.floor(seconds / 60);
+    const hrs = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
+
+    if (hrs > 0) {
+      return `${hrs}:${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+    }
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const getProgress = (timer: TimerState) => {
+    return ((timer.duration - timer.remaining) / timer.duration) * 100;
+  };
+
   const renderCookingTimer = () => (
-    <div className="mobile-viewport bg-background-dark-layer w-screen overflow-y-auto">
-      <div className="p-4 space-y-4">
-        {/* Add New Timer Card */}
-        <div className="bg-white rounded-lg p-4 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Add New Timer
-          </h3>
-
-          <div className="space-y-4">
-            <input
-              type="text"
-              value={newTimerName}
-              onChange={(e) => setNewTimerName(e.target.value)}
-              placeholder="Timer name (e.g., Pasta, Chicken...)"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-            />
-
-            <div className="space-y-3">
-              {/* Minutes */}
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setNewTimerDuration(Math.max(0, newTimerDuration - 1))
-                  }
-                  className="p-2 bg-orange-500 flex-1 flex justify-center rounded-sm hover:bg-gray-50 transition-colors"
-                >
-                  <Minus className="w-4 h-4 text-white" />
-                </button>
-                <input
-                  type="number"
-                  value={newTimerDuration}
-                  onChange={(e) =>
-                    setNewTimerDuration(
-                      Math.max(0, Math.min(180, Number(e.target.value))),
-                    )
-                  }
-                  min="0"
-                  max="180"
-                  className="w-20 px-3 py-2 flex-4 flex justify-center rounded-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent text-center"
-                />
-                <button
-                  type="button"
-                  onClick={() =>
-                    setNewTimerDuration(Math.min(180, newTimerDuration + 1))
-                  }
-                  className="flex p-2 flex-1 font-medium justify-center bg-orange-500 rounded-sm hover:bg-gray-50 transition-colors"
-                >
-                  <Plus className="w-4 h-4 text-white" />
-                </button>
-                <span className="text-gray-600 font-medium">minutes</span>
-              </div>
-
-              {/* Seconds */}
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() =>
-                    setNewTimerSeconds(Math.max(0, newTimerSeconds - 1))
-                  }
-                  className="p-2 bg-orange-500 font-medium flex-1 flex justify-center rounded-sm hover:bg-gray-50 transition-colors"
-                >
-                  <Minus className="w-4 h-4 text-white" />
-                </button>
-                <input
-                  type="number"
-                  value={newTimerSeconds}
-                  onChange={(e) =>
-                    setNewTimerSeconds(
-                      Math.max(0, Math.min(59, Number(e.target.value))),
-                    )
-                  }
-                  min="0"
-                  max="59"
-                  className="w-20 px-3 py-2 flex-4 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-center"
-                />
-                <button
-                  type="button"
-                  onClick={() =>
-                    setNewTimerSeconds(Math.min(59, newTimerSeconds + 1))
-                  }
-                  className="p-2 bg-orange-500  flex flex-1 justify-center rounded-sm hover:bg-gray-50 transition-colors"
-                >
-                  <Plus className="w-4 h-4 text-white" />
-                </button>
-                <span className="text-gray-600 font-medium">seconds</span>
-              </div>
-            </div>
-
-            <button
-              onClick={addTimer}
-              className="w-full py-3 bg-gradient-to-r from-orange-500 to-pink-500 text-white rounded-lg font-medium hover:from-orange-600 hover:to-pink-600 transition-colors flex items-center justify-center gap-2"
-            >
-              <Plus className="w-5 h-5" />
-              Add Timer
-            </button>
-          </div>
-        </div>
-
-        {/* Active Timers */}
-        {timers.length > 0 && (
-          <div className="space-y-3">
-            {timers.map((timer) => (
-              <div key={timer.id} className="bg-white rounded-lg p-4 shadow-sm">
-                <div className="flex items-center justify-between mb-3">
-                  <h4 className="text-lg font-medium text-gray-900">
-                    {timer.name}
-                  </h4>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => toggleTimer(timer.id)}
-                      className={`p-2 rounded-lg transition-colors ${
-                        timer.isRunning
-                          ? "bg-red-100 text-red-600 hover:bg-red-200"
-                          : "bg-green-100 text-green-600 hover:bg-green-200"
-                      }`}
-                    >
-                      {timer.isRunning ? (
-                        <Pause className="w-5 h-5" />
-                      ) : (
-                        <Play className="w-5 h-5" />
-                      )}
-                    </button>
-                    <button
-                      onClick={() => resetTimer(timer.id)}
-                      className="p-2 bg-gray-100 text-gray-600 rounded-lg hover:bg-gray-200 transition-colors"
-                    >
-                      <RotateCcw className="w-5 h-5" />
-                    </button>
-                  </div>
+    <div className="flex flex-col h-screen bg-gradient-to-br from-orange-50 via-orange-50 to-amber-50">
+      <div className="flex-1 overflow-y-auto no-scrollbar">
+        <div className="w-full p-6 sm:p-8 lg:p-12 max-w-7xl mx-auto">
+          {timers.length === 0 && !isAddingTimer ? (
+            // Empty state - Beautiful and inviting
+            <div className="flex flex-col h-screen items-center justify-center pb-32 text-center px-4">
+              <div className="relative mb-8">
+                <div className="w-32 h-32 bg-gradient-to-br from-orange-400 to-orange-600 rounded-full flex items-center justify-center shadow-lg">
+                  <TimerIcon className="w-16 h-16 text-white" />
                 </div>
-                <div className="text-center">
-                  <div className="text-4xl font-bold mb-2">
-                    <span
-                      className={
-                        timer.remaining === 0
-                          ? "text-red-600"
-                          : "text-green-600"
-                      }
-                    >
-                      {formatTime(timer.remaining)}
-                    </span>
-                  </div>
-                  {timer.remaining === 0 && (
-                    <div className="text-red-600 font-medium">
-                      Timer Finished!
-                    </div>
-                  )}
+                <div className="absolute -top-2 -right-2">
+                  <Sparkles className="w-10 h-10 text-amber-400 fill-current animate-bounce" />
                 </div>
               </div>
-            ))}
-          </div>
-        )}
-
-        {/* No Timers State */}
-        {timers.length === 0 && (
-          <div className="bg-white rounded-lg p-8 shadow-sm">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Timer className="w-8 h-8 text-gray-400" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-neutral-800 mb-3">
                 No Active Timers
-              </h3>
-              <p className="text-gray-600">Add a timer above to get started</p>
+              </h2>
+              <p className="text-neutral-600 mb-8 max-w-md text-sm sm:text-base leading-relaxed">
+                Create a timer to keep track of your cooking. Never burn or overcook your food again!
+              </p>
+
+              {/* Quick Preset Buttons */}
+              <div className="mb-6">
+                <p className="text-sm font-medium text-neutral-700 mb-4">Quick Start:</p>
+                <div className="flex flex-wrap gap-3 justify-center max-w-md">
+                  {PRESET_TIMERS.slice(0, 4).map((preset) => (
+                    <Button
+                      key={preset.seconds}
+                      onClick={() => addPresetTimer(preset.seconds, preset.label)}
+                      className="bg-white hover:bg-orange-50 text-orange-600 border-2 border-orange-200 hover:border-orange-400 shadow-sm hover:shadow-md transition-all duration-200"
+                    >
+                      <Clock className="w-4 h-4 mr-2" />
+                      {preset.label}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+
+              <Button
+                onClick={() => setIsAddingTimer(true)}
+                size="lg"
+                className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
+              >
+                <Plus className="w-5 h-5 mr-2" />
+                Create Custom Timer
+              </Button>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="space-y-8 lg:space-y-10">
+              {/* Header with Timer Count */}
+              <div className="bg-white rounded-2xl p-6 sm:p-8 lg:p-10 shadow-md border border-orange-100">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+                  <div>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-2 flex items-center gap-3">
+                      <TimerIcon className="w-7 h-7 text-orange-500" />
+                      Cooking Timers
+                    </h1>
+                    <p className="text-neutral-500 text-sm sm:text-base">
+                      {timers.length} active timer{timers.length !== 1 ? "s" : ""}
+                      {timers.filter((t) => t.isRunning).length > 0 &&
+                        ` · ${timers.filter((t) => t.isRunning).length} running`}
+                    </p>
+                  </div>
+                  <Button
+                    onClick={() => setIsAddingTimer(!isAddingTimer)}
+                    className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white shadow-sm"
+                  >
+                    <Plus className="w-5 h-5 mr-2" />
+                    Add Timer
+                  </Button>
+                </div>
+              </div>
+
+              {/* Quick Preset Timers Section */}
+              {!isAddingTimer && (
+                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-md border border-orange-100">
+                  <h3 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-orange-500" />
+                    Quick Timers
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {PRESET_TIMERS.map((preset) => (
+                      <Button
+                        key={preset.seconds}
+                        onClick={() => addPresetTimer(preset.seconds, preset.label)}
+                        variant="outline"
+                        className="h-16 border-2 border-orange-200 hover:border-orange-400 hover:bg-orange-50 text-orange-600 font-semibold transition-all duration-200"
+                      >
+                        <div className="text-center">
+                          <Clock className="w-5 h-5 mx-auto mb-1" />
+                          <span>{preset.label}</span>
+                        </div>
+                      </Button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Add Timer Form */}
+              {isAddingTimer && (
+                <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-md border-2 border-orange-300 animate-in slide-in-from-top duration-300">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-bold text-neutral-900 flex items-center gap-2">
+                      <Plus className="w-6 h-6 text-orange-500" />
+                      Create Custom Timer
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setIsAddingTimer(false)}
+                      className="text-neutral-500 hover:text-neutral-700"
+                    >
+                      <X className="w-5 h-5" />
+                    </Button>
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* Timer Name */}
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 mb-2">
+                        Timer Name
+                      </label>
+                      <Input
+                        type="text"
+                        value={newTimerName}
+                        onChange={(e) => setNewTimerName(e.target.value)}
+                        placeholder="e.g., Pasta, Roast Chicken, Rice..."
+                        className="w-full h-12 text-base border-gray-300 focus:border-orange-500 focus:ring-orange-500"
+                      />
+                    </div>
+
+                    {/* Time Input */}
+                    <div>
+                      <label className="block text-sm font-medium text-neutral-700 mb-3">
+                        Duration
+                      </label>
+                      <div className="grid grid-cols-2 gap-4">
+                        {/* Minutes */}
+                        <div>
+                          <label className="block text-xs text-neutral-500 mb-2">Minutes</label>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              type="button"
+                              onClick={() => setNewTimerMinutes(Math.max(0, newTimerMinutes - 1))}
+                              variant="outline"
+                              className="h-12 w-12 p-0 border-2 border-orange-200 hover:border-orange-400 hover:bg-orange-50"
+                            >
+                              <span className="text-xl font-bold text-orange-600">−</span>
+                            </Button>
+                            <Input
+                              type="number"
+                              value={newTimerMinutes}
+                              onChange={(e) =>
+                                setNewTimerMinutes(
+                                  Math.max(0, Math.min(180, Number(e.target.value) || 0)),
+                                )
+                              }
+                              min="0"
+                              max="180"
+                              className="flex-1 h-12 text-center text-2xl font-bold border-2 border-gray-300 focus:border-orange-500"
+                            />
+                            <Button
+                              type="button"
+                              onClick={() => setNewTimerMinutes(Math.min(180, newTimerMinutes + 1))}
+                              variant="outline"
+                              className="h-12 w-12 p-0 border-2 border-orange-200 hover:border-orange-400 hover:bg-orange-50"
+                            >
+                              <span className="text-xl font-bold text-orange-600">+</span>
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* Seconds */}
+                        <div>
+                          <label className="block text-xs text-neutral-500 mb-2">Seconds</label>
+                          <div className="flex items-center gap-2">
+                            <Button
+                              type="button"
+                              onClick={() => setNewTimerSeconds(Math.max(0, newTimerSeconds - 1))}
+                              variant="outline"
+                              className="h-12 w-12 p-0 border-2 border-orange-200 hover:border-orange-400 hover:bg-orange-50"
+                            >
+                              <span className="text-xl font-bold text-orange-600">−</span>
+                            </Button>
+                            <Input
+                              type="number"
+                              value={newTimerSeconds}
+                              onChange={(e) =>
+                                setNewTimerSeconds(
+                                  Math.max(0, Math.min(59, Number(e.target.value) || 0)),
+                                )
+                              }
+                              min="0"
+                              max="59"
+                              className="flex-1 h-12 text-center text-2xl font-bold border-2 border-gray-300 focus:border-orange-500"
+                            />
+                            <Button
+                              type="button"
+                              onClick={() => setNewTimerSeconds(Math.min(59, newTimerSeconds + 1))}
+                              variant="outline"
+                              className="h-12 w-12 p-0 border-2 border-orange-200 hover:border-orange-400 hover:bg-orange-50"
+                            >
+                              <span className="text-xl font-bold text-orange-600">+</span>
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex gap-3 pt-4">
+                      <Button
+                        onClick={() => addTimer()}
+                        disabled={newTimerMinutes === 0 && newTimerSeconds === 0}
+                        className="flex-1 h-14 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
+                      >
+                        <Check className="w-5 h-5 mr-2" />
+                        Create Timer
+                      </Button>
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsAddingTimer(false)}
+                        className="h-14 px-6 border-2 border-gray-300 hover:bg-gray-50"
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Active Timers Grid */}
+              {timers.length > 0 && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {timers.map((timer) => {
+                    const progress = getProgress(timer);
+                    const isFinished = timer.remaining === 0;
+                    const isWarning = !isFinished && timer.remaining <= 60 && timer.isRunning;
+
+                    return (
+                      <div
+                        key={timer.id}
+                        ref={(el) => {
+                          if (el) {
+                            timerRefsMap.current.set(timer.id, el);
+                          } else {
+                            timerRefsMap.current.delete(timer.id);
+                          }
+                        }}
+                        className={`bg-white rounded-2xl border-2 overflow-hidden shadow-md transition-all duration-300 ${
+                          isFinished
+                            ? "border-red-400 shadow-lg shadow-red-100 animate-pulse"
+                            : isWarning
+                              ? "border-amber-400 shadow-lg shadow-amber-100"
+                              : "border-gray-200 hover:border-orange-200 hover:shadow-lg"
+                        }`}
+                      >
+                        {/* Header */}
+                        <div
+                          className="px-6 py-4 bg-gradient-to-r from-orange-500 to-amber-600 flex items-center justify-between"
+                        >
+                          <div className="flex items-center gap-3">
+                            <TimerIcon className="w-5 h-5 text-white" />
+                            <h3 className="text-lg font-bold text-white">{timer.name}</h3>
+                          </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => deleteTimer(timer.id)}
+                            className="text-white hover:bg-white/20 h-8 w-8 p-0"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+
+                        {/* Timer Display */}
+                        <div className="p-8 sm:p-10">
+                          {/* Circular Progress */}
+                          <div className="relative w-48 h-48 mx-auto mb-6">
+                            {/* Background Circle */}
+                            <svg className="w-full h-full transform -rotate-90">
+                              <circle
+                                cx="96"
+                                cy="96"
+                                r="88"
+                                stroke="currentColor"
+                                strokeWidth="12"
+                                fill="none"
+                                className="text-gray-200"
+                              />
+                              {/* Progress Circle */}
+                              <circle
+                                cx="96"
+                                cy="96"
+                                r="88"
+                                stroke="currentColor"
+                                strokeWidth="12"
+                                fill="none"
+                                strokeDasharray={`${2 * Math.PI * 88}`}
+                                strokeDashoffset={`${2 * Math.PI * 88 * (1 - progress / 100)}`}
+                                className={`transition-all duration-1000 ${
+                                  isFinished
+                                    ? "text-red-500"
+                                    : isWarning
+                                      ? "text-amber-500"
+                                      : "text-orange-500"
+                                }`}
+                                strokeLinecap="round"
+                              />
+                            </svg>
+
+                            {/* Time Display in Center */}
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                              <div
+                                className={`text-4xl sm:text-5xl font-bold transition-colors ${
+                                  isFinished
+                                    ? "text-red-600"
+                                    : isWarning
+                                      ? "text-amber-600"
+                                      : "text-neutral-800"
+                                }`}
+                              >
+                                {formatTime(timer.remaining)}
+                              </div>
+                              {isFinished && (
+                                <div className="text-red-600 font-bold text-sm mt-2 animate-pulse">
+                                  FINISHED!
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Control Buttons */}
+                          <div className="flex gap-3 justify-center">
+                            <Button
+                              onClick={() => toggleTimer(timer.id)}
+                              disabled={isFinished}
+                              className={`h-14 px-8 text-white font-semibold shadow-lg transition-all duration-200 ${
+                                timer.isRunning
+                                  ? "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
+                                  : "bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700"
+                              }`}
+                            >
+                              {timer.isRunning ? (
+                                <>
+                                  <Pause className="w-5 h-5 mr-2" />
+                                  Pause
+                                </>
+                              ) : (
+                                <>
+                                  <Play className="w-5 h-5 mr-2" />
+                                  Start
+                                </>
+                              )}
+                            </Button>
+                            <Button
+                              onClick={() => resetTimer(timer.id)}
+                              variant="outline"
+                              className="h-14 px-8 border-2 border-gray-300 hover:border-orange-400 hover:bg-orange-50 text-neutral-700 font-semibold"
+                            >
+                              <RotateCcw className="w-5 h-5 mr-2" />
+                              Reset
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -319,7 +631,7 @@ export default function CookingToolsView({
               <div className="space-y-6">
                 <div className="bg-white p-4 rounded-lg">
                   <h4 className="font-semibold text-gray-900 mb-3 flex items-center">
-                    <Timer className="w-5 h-5 mr-2 text-orange-500" />
+                    <TimerIcon className="w-5 h-5 mr-2 text-orange-500" />
                     Timer Alerts
                   </h4>
                   <div className="space-y-3">
@@ -438,7 +750,7 @@ export default function CookingToolsView({
               <div className="space-y-4">
                 <div className="flex items-start space-x-3 p-4 bg-white rounded-lg border border-gray-200">
                   <div className="bg-red-100 p-2 rounded-full">
-                    <Timer className="w-4 h-4 text-red-600" />
+                    <TimerIcon className="w-4 h-4 text-red-600" />
                   </div>
                   <div className="flex-1">
                     <p className="text-gray-900 font-medium">

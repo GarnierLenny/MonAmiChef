@@ -28,10 +28,14 @@ interface ChatPageProps {
   user?: { id: string; email: string; name: string } | null;
   onAuthClick?: () => void;
   onSignOut?: () => Promise<void>;
+  chats?: ChatItem[];
+  setChats?: (chats: ChatItem[]) => void;
 }
 
-function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
-  const [chats, setChats] = useState<ChatItem[]>([]);
+function ChatPage({ user, onAuthClick, onSignOut, chats: propsChats = [], setChats: propsSetChats }: ChatPageProps = {}) {
+  const [localChats, setLocalChats] = useState<ChatItem[]>([]);
+  const chats = propsChats.length > 0 ? propsChats : localChats;
+  const setChats = propsSetChats || setLocalChats;
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
@@ -139,23 +143,25 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
     setRenamingId(null);
   }, [renamingId, renameValue]);
 
-  // Load history chats
+  // Load history chats (only if using local chats, not from props)
   useEffect(() => {
-    (async () => {
-      const result = await apiFetch("/chat/conversations", {
-        auth: "optional",
-      });
-      const tmpChats: ChatItem[] = [];
-      result.forEach((chat: any) => {
-        tmpChats.push({
-          title: chat.title,
-          id: chat.id,
-          timestamp: chat.created_at,
+    if (propsChats.length === 0) {
+      (async () => {
+        const result = await apiFetch("/chat/conversations", {
+          auth: "optional",
         });
-      });
-      setChats(tmpChats);
-    })();
-  }, [chatId, isSidebarOpen, saveRename]);
+        const tmpChats: ChatItem[] = [];
+        result.forEach((chat: any) => {
+          tmpChats.push({
+            title: chat.title,
+            id: chat.id,
+            timestamp: chat.created_at,
+          });
+        });
+        setLocalChats(tmpChats);
+      })();
+    }
+  }, [chatId, isSidebarOpen, saveRename, propsChats.length]);
 
   const handlePreferenceChange = (
     category: ArrayKeys | NumberKeys,

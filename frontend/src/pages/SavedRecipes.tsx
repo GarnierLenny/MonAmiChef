@@ -119,7 +119,7 @@ export default function SavedRecipes() {
 
   if (isLoadingAuth) {
     return (
-      <div className="min-h-screen bg-background-dark-layer flex items-center justify-center">
+      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
@@ -131,7 +131,7 @@ export default function SavedRecipes() {
   if (!user) {
     return (
       <>
-        <div className="overflow-hidden bg-background-dark-layer flex items-center justify-center px-4">
+        <div className="overflow-hidden bg-orange-50 flex items-center justify-center px-4">
           <div className="text-center w-full max-w-2xl mx-auto">
             {/* Friendly illustration */}
             <div className="relative mb-12">
@@ -185,7 +185,7 @@ export default function SavedRecipes() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background-dark-layer flex items-center justify-center">
+      <div className="min-h-screen bg-orange-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your saved recipes...</p>
@@ -195,7 +195,7 @@ export default function SavedRecipes() {
   }
 
   return (
-    <div className="flex overflow-hidden bg-background-dark-layer flex-1">
+    <div className="flex overflow-hidden bg-orange-50 flex-1">
       <div className="w-screen mx-auto px-6 py-8">
         {savedRecipes.length === 0 ? (
           <div className="text-center py-16">

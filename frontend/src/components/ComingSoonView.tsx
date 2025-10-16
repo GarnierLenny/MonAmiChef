@@ -56,7 +56,7 @@ export default function ComingSoonView() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-purple-50">
+    <div className="min-h-screen bg-orange-50">
       <div className="max-w-6xl mx-auto px-6 py-12">
         {/* Hero Section */}
         <div className="text-center mb-16">

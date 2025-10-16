@@ -73,6 +73,7 @@ function App() {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [isLoadingAuth, setIsLoadingAuth] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [chats, setChats] = useState<any[]>([]);
 
   const subscription = useSubscription(session);
 
@@ -89,7 +90,34 @@ function App() {
 
   const resetChats = useCallback(() => {
     setChatResetKey((k) => k + 1); // remount ChatPage
+    setChats([]); // clear chats
   }, []);
+
+  // Load chats from the API
+  useEffect(() => {
+    const loadChats = async () => {
+      try {
+        const { apiFetch } = await import("./lib/apiClient");
+        const result = await apiFetch("/chat/conversations", {
+          auth: "optional",
+        });
+        const tmpChats: any[] = [];
+        result.forEach((chat: any) => {
+          tmpChats.push({
+            title: chat.title,
+            id: chat.id,
+            timestamp: chat.created_at,
+          });
+        });
+        setChats(tmpChats);
+      } catch (error) {
+        console.error("Failed to load chats:", error);
+      }
+    };
+
+    loadChats();
+    // Reload chats when auth state changes or chat reset happens
+  }, [session, chatResetKey]);
 
   // Handle canceled checkout
   useEffect(() => {
@@ -254,7 +282,7 @@ function App() {
 
   if (isLoadingAuth) {
     return (
-      <div className="flex items-center justify-center mobile-viewport bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
+      <div className="flex items-center justify-center mobile-viewport bg-orange-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-500 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading...</p>
@@ -269,7 +297,7 @@ function App() {
       <CanonicalUrl />
       <RedirectHandler />
       <OrganizationStructuredData />
-      <div className="flex flex-col mobile-viewport overflow-hidden bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
+      <div className="flex flex-col mobile-viewport overflow-hidden bg-orange-50">
         {!isRecipePage && !isChatPage && (
           <MobileTopBar
             onMenuClick={() => setIsMobileSidebarOpen(true)}
@@ -310,6 +338,8 @@ function App() {
                     user={user}
                     onAuthClick={() => setIsAuthModalOpen(true)}
                     onSignOut={handleSignOut}
+                    chats={chats}
+                    setChats={setChats}
                   />
                 </ComponentErrorBoundary>
               }
@@ -319,7 +349,7 @@ function App() {
             <Route
               path="/calories"
               element={
-                <div className="mobile-viewport bg-background-dark-layer w-screen overflow-y-auto">
+                <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
                   <SEOHead
                     title="Calorie Calculator & BMI Tool - Mon Ami Chef"
                     description="Calculate your daily calorie needs, BMI, and macronutrient requirements. Get personalized nutrition recommendations for your health and fitness goals."
@@ -362,20 +392,7 @@ function App() {
             />
             <Route
               path="/dashboard"
-              element={
-                <div className="mobile-viewport bg-background-dark-layer w-screen overflow-y-auto">
-                  <SEOHead
-                    title="Cooking Dashboard - Mon Ami Chef"
-                    description="View your cooking stats, saved recipes, and meal planning progress. Track your culinary journey with detailed insights and analytics."
-                    keywords="cooking dashboard, recipe stats, meal planning dashboard, cooking progress, recipe analytics"
-                  />
-                  <Dashboard
-                    currentSubView="overview"
-                    user={user}
-                    session={session}
-                  />
-                </div>
-              }
+              element={<Navigate to="/profile" replace />}
             />
             <Route
               path="/meal-plan-chat"
@@ -441,7 +458,7 @@ function App() {
             <Route
               path="/recipes/saved"
               element={
-                <div className="mobile-viewport bg-background-dark-layer w-screen overflow-y-auto">
+                <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
                   <SEOHead
                     title="Saved Recipes Collection - Mon Ami Chef"
                     description="Access your personal collection of saved recipes. View, organize, and manage all your favorite AI-generated recipes in one place."
@@ -475,8 +492,11 @@ function App() {
             setIsAuthModalOpen(true);
           }}
           onSignOut={handleSignOut}
-          chats={[]}
-          onNewChat={() => navigate("/")}
+          chats={chats}
+          onNewChat={() => {
+            clearConversationParam();
+            setIsMobileSidebarOpen(false);
+          }}
           handleDropdownAction={() => {}}
           activeDropdown={null}
           setActiveDropdown={() => {}}

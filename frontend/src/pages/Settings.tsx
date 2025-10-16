@@ -63,7 +63,7 @@ const Settings = ({ onPricingClick }: SettingsProps) => {
   const isUsingBrowserDefault = i18n.language === browserLang;
 
   return (
-    <div className="min-h-screen w-screen overflow-y-hidden bg-background-dark-layer pt-4">
+    <div className="min-h-screen w-screen overflow-y-hidden bg-orange-50 pt-4">
       <main className="container mx-auto px-4">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Settings Cards */}
