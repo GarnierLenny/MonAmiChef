@@ -49,7 +49,7 @@ export default function PricingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50">
+    <div className="min-h-screen bg-orange-50">
       {showCanceledMessage && (
         <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 max-w-md w-full mx-4">
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 shadow-lg">

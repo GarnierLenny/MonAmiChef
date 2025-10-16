@@ -15,7 +15,7 @@ const NotFoundPage = () => {
   }, []);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 px-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-orange-50 px-4">
       <div className="text-center space-y-6 max-w-md">
         <div className="space-y-2">
           <h1 className="text-6xl font-bold text-orange-600">404</h1>

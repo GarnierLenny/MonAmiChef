@@ -835,7 +835,7 @@ export default function MealPlanPage({
   // Show loading state
   if (isLoading) {
     return (
-      <div className="flex mobile-viewport w-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 items-center justify-center">
+      <div className="flex mobile-viewport w-screen bg-orange-50 items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-gray-600">Loading meal plans...</p>
@@ -850,7 +850,7 @@ export default function MealPlanPage({
   }
 
   return (
-    <div className="flex mobile-viewport bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 overflow-hidden">
+    <div className="flex mobile-viewport bg-orange-50 overflow-hidden">
       {/* Error Message */}
       {error && (
         <div className="absolute top-4 right-4 z-50 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg">
@@ -994,7 +994,7 @@ export default function MealPlanPage({
       </div>
 
       {/* Mobile Layout */}
-      <div className="md:hidden mobile-viewport w-full flex flex-col bg-gray-50 overflow-hidden">
+      <div className="md:hidden mobile-viewport w-full flex flex-col bg-orange-50 overflow-hidden">
         <NewMobileMealLayout
           currentWeek={currentWeek}
           currentDayIndex={currentDayIndex}

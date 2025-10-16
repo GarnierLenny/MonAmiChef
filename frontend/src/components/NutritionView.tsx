@@ -668,309 +668,348 @@ export default function NutritionView({
   };
 
   const renderBMICalculator = () => (
-    <div className="mobile-viewport overflow-y-auto">
-      {/* Mobile-First Calculator Form */}
-      <div className="p-4 space-y-4">
-        {/* Personal Information Card */}
-        <div className="bg-white rounded-lg p-4 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Personal Information
-          </h3>
-
-          {/* Measurement System */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Measurement System
-            </label>
-            <div className="flex rounded-lg overflow-hidden border border-gray-300">
-              <button
-                onClick={() => {
-                  handleInputChange("heightUnit", "cm");
-                  handleInputChange("weightUnit", "kg");
-                }}
-                className={`flex-1 py-2 px-4 text-sm font-medium transition-colors ${
-                  bmiData.heightUnit === "cm" && bmiData.weightUnit === "kg"
-                    ? "bg-orange-500 text-white"
-                    : "bg-gray-50 text-gray-700"
-                }`}
-              >
-                Metric (kg/cm)
-              </button>
-              <button
-                onClick={() => {
-                  handleInputChange("heightUnit", "ft");
-                  handleInputChange("weightUnit", "lbs");
-                }}
-                className={`flex-1 py-2 px-4 text-sm font-medium transition-colors ${
-                  bmiData.heightUnit === "ft" && bmiData.weightUnit === "lbs"
-                    ? "bg-orange-500 text-white"
-                    : "bg-gray-50 text-gray-700"
-                }`}
-              >
-                Imperial (lbs/ft)
-              </button>
+    <div className="flex flex-col h-screen bg-gradient-to-br from-orange-50 via-orange-50 to-amber-50">
+      <div className="flex-1 overflow-y-auto no-scrollbar">
+        <div className="w-full p-6 sm:p-8 lg:p-12 max-w-7xl mx-auto space-y-8 lg:space-y-10">
+          {/* Header Section */}
+          <div className="bg-white rounded-2xl p-6 sm:p-8 lg:p-10 shadow-md border border-orange-100">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
+                <Calculator className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-1">
+                  Calorie Calculator
+                </h1>
+                <p className="text-neutral-500 text-sm sm:text-base">
+                  Calculate your personalized daily calorie needs
+                </p>
+              </div>
             </div>
           </div>
 
-          {/* Age and Gender */}
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Age
-              </label>
-              <input
-                type="number"
-                value={bmiData.age}
-                onChange={(e) =>
-                  handleInputChange("age", Number(e.target.value))
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-                min="10"
-                max="100"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Gender
-              </label>
-              <select
-                value={bmiData.gender}
-                onChange={(e) => handleInputChange("gender", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent appearance-none bg-white"
-              >
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-              </select>
-            </div>
-          </div>
+          {/* Personal Information Card */}
+          <div className="bg-white rounded-2xl p-6 sm:p-8 lg:p-10 shadow-md border border-orange-100">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+              Personal Information
+            </h3>
 
-          {/* Height and Weight */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Height ({bmiData.heightUnit})
+            {/* Measurement System */}
+            <div className="mb-8">
+              <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-4">
+                Measurement System
               </label>
-              <input
-                type="number"
-                value={bmiData.height}
-                onChange={(e) =>
-                  handleInputChange("height", Number(e.target.value))
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              />
+              <div className="grid grid-cols-2 gap-4">
+                <button
+                  onClick={() => {
+                    handleInputChange("heightUnit", "cm");
+                    handleInputChange("weightUnit", "kg");
+                  }}
+                  className={`py-4 px-6 text-base font-semibold rounded-xl transition-all duration-200 ${
+                    bmiData.heightUnit === "cm" && bmiData.weightUnit === "kg"
+                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg"
+                      : "bg-gray-50 text-gray-700 border-2 border-gray-200 hover:border-orange-300 hover:bg-orange-50"
+                  }`}
+                >
+                  Metric (kg/cm)
+                </button>
+                <button
+                  onClick={() => {
+                    handleInputChange("heightUnit", "ft");
+                    handleInputChange("weightUnit", "lbs");
+                  }}
+                  className={`py-4 px-6 text-base font-semibold rounded-xl transition-all duration-200 ${
+                    bmiData.heightUnit === "ft" && bmiData.weightUnit === "lbs"
+                      ? "bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg"
+                      : "bg-gray-50 text-gray-700 border-2 border-gray-200 hover:border-orange-300 hover:bg-orange-50"
+                  }`}
+                >
+                  Imperial (lbs/ft)
+                </button>
+              </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Weight ({bmiData.weightUnit})
-              </label>
-              <input
-                type="number"
-                value={bmiData.weight}
-                onChange={(e) =>
-                  handleInputChange("weight", Number(e.target.value))
-                }
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
-              />
-            </div>
-          </div>
-        </div>
 
-        {/* Activity Level Card */}
-        <div className="bg-white rounded-lg p-4 shadow-sm">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Activity Level
-          </h3>
-          <div className="space-y-3">
-            {activityLevels.map((level) => (
-              <label
-                key={level.id}
-                className={`flex items-start p-3 rounded-lg cursor-pointer transition-colors ${
-                  bmiData.activityLevel === level.id
-                    ? "bg-orange-50 border border-orange-200"
-                    : "bg-gray-50 border border-gray-200"
-                }`}
-              >
+            {/* Age and Gender */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-8">
+              <div>
+                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-3">
+                  Age <span className="text-neutral-400 font-normal">(years)</span>
+                </label>
                 <input
-                  type="radio"
-                  name="activityLevel"
-                  value={level.id}
-                  checked={bmiData.activityLevel === level.id}
+                  type="number"
+                  value={bmiData.age}
                   onChange={(e) =>
-                    handleInputChange("activityLevel", e.target.value)
+                    handleInputChange("age", Number(e.target.value))
                   }
-                  className="mt-1 mr-3 text-orange-600 focus:ring-orange-500"
+                  className="w-full h-14 px-5 text-lg font-medium border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                  min="10"
+                  max="100"
                 />
-                <div className="flex-1">
-                  <div className="font-medium text-gray-900">{level.label}</div>
-                  <div className="text-sm text-gray-600 mt-1">
-                    {level.description}
+              </div>
+              <div>
+                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-3">
+                  Gender
+                </label>
+                <select
+                  value={bmiData.gender}
+                  onChange={(e) => handleInputChange("gender", e.target.value)}
+                  className="w-full h-14 px-5 text-lg font-medium border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 appearance-none bg-white transition-all"
+                >
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Height and Weight */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-3">
+                  Height <span className="text-neutral-400 font-normal">({bmiData.heightUnit})</span>
+                </label>
+                <input
+                  type="number"
+                  value={bmiData.height}
+                  onChange={(e) =>
+                    handleInputChange("height", Number(e.target.value))
+                  }
+                  className="w-full h-14 px-5 text-lg font-medium border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                />
+              </div>
+              <div>
+                <label className="block text-sm sm:text-base font-semibold text-gray-700 mb-3">
+                  Weight <span className="text-neutral-400 font-normal">({bmiData.weightUnit})</span>
+                </label>
+                <input
+                  type="number"
+                  value={bmiData.weight}
+                  onChange={(e) =>
+                    handleInputChange("weight", Number(e.target.value))
+                  }
+                  className="w-full h-14 px-5 text-lg font-medium border-2 border-gray-300 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Activity Level Card */}
+          <div className="bg-white rounded-2xl p-6 sm:p-8 lg:p-10 shadow-md border border-orange-100">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full bg-orange-500"></div>
+              Activity Level
+            </h3>
+            <div className="space-y-4">
+              {activityLevels.map((level) => (
+                <label
+                  key={level.id}
+                  className={`flex items-start p-5 sm:p-6 rounded-xl cursor-pointer transition-all duration-200 ${
+                    bmiData.activityLevel === level.id
+                      ? "bg-gradient-to-r from-orange-50 to-amber-50 border-2 border-orange-300 shadow-sm"
+                      : "bg-gray-50 border-2 border-gray-200 hover:border-orange-200 hover:bg-orange-50/30"
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="activityLevel"
+                    value={level.id}
+                    checked={bmiData.activityLevel === level.id}
+                    onChange={(e) =>
+                      handleInputChange("activityLevel", e.target.value)
+                    }
+                    className="mt-1 mr-4 w-5 h-5 text-orange-600 focus:ring-orange-500"
+                  />
+                  <div className="flex-1">
+                    <div className="font-bold text-base sm:text-lg text-gray-900">{level.label}</div>
+                    <div className="text-sm sm:text-base text-gray-600 mt-1.5">
+                      {level.description}
+                    </div>
+                  </div>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* Calculate Button */}
+          <button
+            onClick={calculateBMI}
+            className="w-full h-16 sm:h-18 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-lg sm:text-xl font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[1.02] flex items-center justify-center gap-3"
+          >
+            <Calculator className="w-6 h-6" />
+            Calculate My Calories
+          </button>
+
+          {/* Results Section */}
+          {calculatedData && (
+            <div
+              ref={resultsRef}
+              className="w-full space-y-8 lg:space-y-10"
+            >
+              {/* Results Header */}
+              <div className="bg-white rounded-2xl p-6 sm:p-8 lg:p-10 shadow-md border border-green-100">
+                <div className="flex items-center gap-4 mb-2">
+                  <div className="w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center shadow-lg">
+                    <Target className="w-7 h-7 text-white" />
+                  </div>
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                    Your Personalized Results
+                  </h2>
+                </div>
+                <p className="text-neutral-500 text-sm sm:text-base ml-[4.5rem]">
+                  Based on your information and activity level
+                </p>
+              </div>
+
+              {/* Key Metrics Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 lg:gap-6">
+                <div className="bg-gradient-to-br from-orange-100 to-pink-100 p-6 sm:p-8 rounded-2xl text-center border-2 border-orange-200 shadow-md hover:shadow-lg transition-all duration-200">
+                  <div className="text-4xl sm:text-5xl font-bold text-orange-600 mb-3">
+                    {calculatedData.bmi}
+                  </div>
+                  <div className="text-base sm:text-lg font-bold text-gray-800 mb-2">
+                    BMI Score
+                  </div>
+                  <div className="text-sm sm:text-base text-gray-700 font-medium mb-3">
+                    {calculatedData.bmiCategory}
+                  </div>
+                  <div className="text-xs sm:text-sm text-gray-500 pt-3 border-t border-orange-200">
+                    {formatHeight(
+                      convertHeight(bmiData.height, bmiData.heightUnit),
+                      bmiData.heightUnit,
+                    )}{" "}
+                    •{" "}
+                    {formatWeight(
+                      convertWeight(bmiData.weight, bmiData.weightUnit),
+                      bmiData.weightUnit,
+                    )}
                   </div>
                 </div>
-              </label>
-            ))}
-          </div>
-        </div>
 
-        {/* Calculate Button */}
-        <button
-          onClick={calculateBMI}
-          className="w-full py-4 mb-8 bg-green-500 text-white text-lg font-semibold rounded-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
-        >
-          <Calculator className="w-5 h-5" />
-          Calculate My Calories
-        </button>
-      </div>
-
-      {/* Results Section */}
-      {calculatedData && (
-        <div
-          ref={resultsRef}
-          className="bg-white p-8 rounded-xl shadow-lg border border-gray-200"
-        >
-          <div className="flex items-center space-x-3 mb-6">
-            <Target className="w-6 h-6 text-green-600" />
-            <h3 className="text-xl font-bold text-gray-900">
-              Your Personalized Results
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-gradient-to-br from-orange-100 to-pink-100 p-6 rounded-xl text-center">
-              <div className="text-3xl font-bold text-orange-600 mb-2">
-                {calculatedData.bmi}
-              </div>
-              <div className="text-sm font-medium text-gray-700 mb-1">
-                BMI Score
-              </div>
-              <div className="text-xs text-gray-600">
-                {calculatedData.bmiCategory}
-              </div>
-              <div className="text-xs text-gray-500 mt-2">
-                {formatHeight(
-                  convertHeight(bmiData.height, bmiData.heightUnit),
-                  bmiData.heightUnit,
-                )}{" "}
-                •{" "}
-                {formatWeight(
-                  convertWeight(bmiData.weight, bmiData.weightUnit),
-                  bmiData.weightUnit,
-                )}
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-blue-100 to-cyan-100 p-6 rounded-xl text-center">
-              <div className="text-3xl font-bold text-blue-600 mb-2">
-                {calculatedData.bmr}
-              </div>
-              <div className="text-sm font-medium text-gray-700 mb-1">BMR</div>
-              <div className="text-xs text-gray-600">Calories at rest</div>
-              <div className="text-xs text-gray-500 mt-2">
-                {bmiData.gender === "male" ? "Male" : "Female"} • {bmiData.age}{" "}
-                years
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-green-100 to-emerald-100 p-6 rounded-xl text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">
-                {calculatedData.dailyCalories}
-              </div>
-              <div className="text-sm font-medium text-gray-700 mb-1">
-                Daily Calories
-              </div>
-              <div className="text-xs text-gray-600">To maintain weight</div>
-              <div className="text-xs text-gray-500 mt-2">
-                {
-                  activityLevels.find(
-                    (level) => level.id === bmiData.activityLevel,
-                  )?.label
-                }
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-br from-purple-100 to-pink-100 p-6 rounded-xl">
-              <div className="text-sm font-medium text-gray-700 mb-3">
-                Weight Goals
-              </div>
-              <div className="space-y-2 text-xs text-gray-600">
-                <div className="flex justify-between">
-                  <span>Lose 1 lb/week:</span>
-                  <span className="font-semibold">
-                    {calculatedData.dailyCalories - 500}
-                  </span>
+                <div className="bg-gradient-to-br from-blue-100 to-cyan-100 p-6 sm:p-8 rounded-2xl text-center border-2 border-blue-200 shadow-md hover:shadow-lg transition-all duration-200">
+                  <div className="text-4xl sm:text-5xl font-bold text-blue-600 mb-3">
+                    {calculatedData.bmr}
+                  </div>
+                  <div className="text-base sm:text-lg font-bold text-gray-800 mb-2">
+                    BMR
+                  </div>
+                  <div className="text-sm sm:text-base text-gray-700 font-medium mb-3">
+                    Calories at rest
+                  </div>
+                  <div className="text-xs sm:text-sm text-gray-500 pt-3 border-t border-blue-200">
+                    {bmiData.gender === "male" ? "Male" : "Female"} • {bmiData.age}{" "}
+                    years
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span>Gain 1 lb/week:</span>
-                  <span className="font-semibold">
-                    {calculatedData.dailyCalories + 500}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* Daily Macro Recommendations */}
-          <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border border-green-200 mb-6">
-            <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-              <Target className="w-5 h-5 mr-2 text-green-600" />
-              Recommended Daily Macros
-            </h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white p-4 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">
-                    Protein
-                  </span>
-                  <span className="text-xs text-gray-500">25%</span>
+                <div className="bg-gradient-to-br from-green-100 to-emerald-100 p-6 sm:p-8 rounded-2xl text-center border-2 border-green-200 shadow-md hover:shadow-lg transition-all duration-200">
+                  <div className="text-4xl sm:text-5xl font-bold text-green-600 mb-3">
+                    {calculatedData.dailyCalories}
+                  </div>
+                  <div className="text-base sm:text-lg font-bold text-gray-800 mb-2">
+                    Daily Calories
+                  </div>
+                  <div className="text-sm sm:text-base text-gray-700 font-medium mb-3">
+                    To maintain weight
+                  </div>
+                  <div className="text-xs sm:text-sm text-gray-500 pt-3 border-t border-green-200">
+                    {
+                      activityLevels.find(
+                        (level) => level.id === bmiData.activityLevel,
+                      )?.label
+                    }
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-orange-600 mb-1">
-                  {calculatedData.macros.protein}g
-                </div>
-                <div className="text-xs text-gray-600">
-                  {Math.round(calculatedData.macros.protein * 4)} calories
+
+                <div className="bg-gradient-to-br from-purple-100 to-pink-100 p-6 sm:p-8 rounded-2xl border-2 border-purple-200 shadow-md hover:shadow-lg transition-all duration-200">
+                  <div className="text-base sm:text-lg font-bold text-gray-800 mb-4">
+                    Weight Goals
+                  </div>
+                  <div className="space-y-3 text-sm sm:text-base text-gray-700">
+                    <div className="flex justify-between items-center">
+                      <span>Lose 1 lb/week:</span>
+                      <span className="font-bold text-red-600">
+                        {calculatedData.dailyCalories - 500}
+                      </span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span>Gain 1 lb/week:</span>
+                      <span className="font-bold text-blue-600">
+                        {calculatedData.dailyCalories + 500}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div className="bg-white p-4 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">
-                    Carbohydrates
-                  </span>
-                  <span className="text-xs text-gray-500">45%</span>
+              {/* Daily Macro Recommendations */}
+              <div className="bg-white rounded-2xl p-6 sm:p-8 lg:p-10 shadow-md border border-green-100">
+                <h4 className="text-lg sm:text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                  <div className="w-2 h-2 rounded-full bg-green-500"></div>
+                  Recommended Daily Macros
+                </h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 mb-6">
+                  <div className="bg-gradient-to-br from-orange-50 to-red-50 p-6 rounded-xl border-2 border-orange-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-base sm:text-lg font-bold text-gray-800">
+                        Protein
+                      </span>
+                      <span className="text-sm sm:text-base text-gray-500 bg-white px-3 py-1 rounded-full font-semibold">
+                        25%
+                      </span>
+                    </div>
+                    <div className="text-3xl sm:text-4xl font-bold text-orange-600 mb-2">
+                      {calculatedData.macros.protein}g
+                    </div>
+                    <div className="text-sm sm:text-base text-gray-600">
+                      {Math.round(calculatedData.macros.protein * 4)} calories
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-xl border-2 border-green-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-base sm:text-lg font-bold text-gray-800">
+                        Carbohydrates
+                      </span>
+                      <span className="text-sm sm:text-base text-gray-500 bg-white px-3 py-1 rounded-full font-semibold">
+                        45%
+                      </span>
+                    </div>
+                    <div className="text-3xl sm:text-4xl font-bold text-green-600 mb-2">
+                      {calculatedData.macros.carbs}g
+                    </div>
+                    <div className="text-sm sm:text-base text-gray-600">
+                      {Math.round(calculatedData.macros.carbs * 4)} calories
+                    </div>
+                  </div>
+
+                  <div className="bg-gradient-to-br from-amber-50 to-yellow-50 p-6 rounded-xl border-2 border-amber-200 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-base sm:text-lg font-bold text-gray-800">
+                        Fats
+                      </span>
+                      <span className="text-sm sm:text-base text-gray-500 bg-white px-3 py-1 rounded-full font-semibold">
+                        30%
+                      </span>
+                    </div>
+                    <div className="text-3xl sm:text-4xl font-bold text-amber-600 mb-2">
+                      {calculatedData.macros.fat}g
+                    </div>
+                    <div className="text-sm sm:text-base text-gray-600">
+                      {Math.round(calculatedData.macros.fat * 9)} calories
+                    </div>
+                  </div>
                 </div>
-                <div className="text-2xl font-bold text-green-600 mb-1">
-                  {calculatedData.macros.carbs}g
-                </div>
-                <div className="text-xs text-gray-600">
-                  {Math.round(calculatedData.macros.carbs * 4)} calories
+                <div className="bg-gradient-to-r from-blue-50 to-cyan-50 p-5 sm:p-6 rounded-xl border border-blue-200">
+                  <p className="text-sm sm:text-base text-blue-900 leading-relaxed">
+                    <strong className="font-bold">Tip:</strong> These macros are based on a balanced diet
+                    approach (25% protein, 45% carbs, 30% fat). Adjust based on your
+                    specific goals and dietary preferences.
+                  </p>
                 </div>
               </div>
 
-              <div className="bg-white p-4 rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-sm font-medium text-gray-700">
-                    Fats
-                  </span>
-                  <span className="text-xs text-gray-500">30%</span>
-                </div>
-                <div className="text-2xl font-bold text-amber-600 mb-1">
-                  {calculatedData.macros.fat}g
-                </div>
-                <div className="text-xs text-gray-600">
-                  {Math.round(calculatedData.macros.fat * 9)} calories
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-800">
-                <strong>Tip:</strong> These macros are based on a balanced diet
-                approach (25% protein, 45% carbs, 30% fat). Adjust based on your
-                specific goals and dietary preferences.
-              </p>
-            </div>
-          </div>
-
-          {/* Weight Goals Section */}
-          <div className="bg-gradient-to-br from-purple-50 to-indigo-50 p-6 rounded-xl border border-purple-200 mb-6">
+              {/* Weight Goals Section */}
+              <div className="bg-gradient-to-br from-purple-50 to-indigo-50 p-6 rounded-xl border border-purple-200 mb-6">
             <h4 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
               <Weight className="w-5 h-5 mr-2 text-purple-600" />
               Weight Goals & Calorie Targets (
@@ -1454,17 +1493,19 @@ export default function NutritionView({
                   provider before starting any weight management program.
                 </p>
               </div>
+              </div>
+              </div>
+              <div className="mt-6 p-4 bg-gradient-to-r from-orange-50 to-pink-50 rounded-lg border border-orange-200">
+                <div className="text-sm text-gray-700">
+                  <strong>Note:</strong> These calculations are estimates based on
+                  standard formulas. For personalized nutrition advice, consult with
+                  a healthcare professional or registered dietitian.
+                </div>
+              </div>
             </div>
-          </div>
-          <div className="mt-6 p-4 bg-gradient-to-r from-orange-50 to-pink-50 rounded-lg border border-orange-200">
-            <div className="text-sm text-gray-700">
-              <strong>Note:</strong> These calculations are estimates based on
-              standard formulas. For personalized nutrition advice, consult with
-              a healthcare professional or registered dietitian.
-            </div>
-          </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 

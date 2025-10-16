@@ -88,10 +88,10 @@ export default function UserProfile({ user }: UserProfileProps) {
   }
 
   return (
-    <div className="mobile-viewport bg-background-dark-layer w-screen overflow-y-auto">
+    <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
       <div className="relative">
         {/* Profile section */}
-        <div className="px-6 pb-6 bg-background-dark-layer relative">
+        <div className="px-6 pb-6 bg-orange-50 relative">
           <div className="flex justify-center mt-4 mb-4">
             <div className="bg-orange-500 p-4 rounded-full shadow-lg">
               <User className="w-8 h-8 text-white" />

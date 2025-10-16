@@ -118,7 +118,7 @@ export default function Dashboard({ session }: DashboardProps) {
   // Early return for non-authenticated users
   if (!session) {
     return (
-      <div className="mobile-viewport bg-background-dark-layer w-screen overflow-y-auto">
+      <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
         <div className="flex items-center justify-center min-h-[80vh] p-4">
           <div className="max-w-md text-center">
             {/* Icon */}
@@ -194,7 +194,7 @@ export default function Dashboard({ session }: DashboardProps) {
 
   if (loading) {
     return (
-      <div className="mobile-viewport bg-background-dark-layer w-screen overflow-y-auto">
+      <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
         <div className="p-4 text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your health data...</p>
@@ -205,7 +205,7 @@ export default function Dashboard({ session }: DashboardProps) {
 
   if (error) {
     return (
-      <div className="mobile-viewport bg-background-dark-layer w-screen overflow-y-auto">
+      <div className="mobile-viewport bg-orange-50 w-screen overflow-y-auto">
         <div className="p-4 text-center">
           <p className="text-red-600 mb-4">{error}</p>
           <button
