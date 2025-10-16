@@ -315,6 +315,10 @@ function App() {
               subscriptionPlan={getSubscriptionPlanName()}
               onAuthClick={() => setIsAuthModalOpen(true)}
               onPricingClick={() => setIsPricingModalOpen(true)}
+              onNewChat={() => {
+                clearConversationParam();
+                navigate("/");
+              }}
             />
           </div>
         )}
@@ -419,7 +423,10 @@ function App() {
                     description="Your smart grocery list from your meal plan. Add custom items and check off ingredients while shopping."
                     keywords="grocery list, shopping list, meal plan groceries, ingredient list, smart shopping"
                   />
-                  <GroceryListPage />
+                  <GroceryListPage
+                    onSignUp={() => setIsAuthModalOpen(true)}
+                    onSignIn={() => setIsAuthModalOpen(true)}
+                  />
                 </ComponentErrorBoundary>
               }
             />

@@ -92,6 +92,7 @@ export function NavigationSidebar({
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
 
   const handleNavigation = (path: string) => {
+    console.log("Navigating to:", path);
     navigate(path);
     onClose();
   };
@@ -249,7 +250,7 @@ export function NavigationSidebar({
               <button
                 onClick={() => {
                   onNewChat();
-                  onClose();
+                  handleNavigation("/");
                 }}
                 className="w-full flex items-center justify-start gap-3 px-4 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 text-sm font-semibold relative overflow-hidden group"
               >
@@ -498,23 +499,14 @@ export function NavigationSidebar({
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: 10 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute bottom-full left-0 right-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
+                      className="absolute bottom-full left-0 right-0 mb-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-40"
                     >
                       <button
-                        onClick={() => {
-                          handleNavigation("/profile");
+                        onClick={(e) => {
+                          console.log("Settings button clicked!");
+                          e.stopPropagation();
                           setIsProfileDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors text-sm"
-                      >
-                        <User className="h-4 w-4" />
-                        {t("navigation.profile")}
-                      </button>
-                      <div className="border-t border-gray-200" />
-                      <button
-                        onClick={() => {
                           handleNavigation("/settings");
-                          setIsProfileDropdownOpen(false);
                         }}
                         className="w-full flex items-center gap-3 px-4 py-2.5 text-left text-gray-700 hover:bg-gray-50 transition-colors text-sm"
                       >

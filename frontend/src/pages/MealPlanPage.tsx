@@ -837,8 +837,12 @@ export default function MealPlanPage({
     return (
       <div className="flex mobile-viewport w-screen bg-orange-50 items-center justify-center">
         <div className="text-center">
-          <div className="w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-gray-600">Loading meal plans...</p>
+          <div className="relative">
+            <div className="w-12 h-12 border-4 border-orange-200 rounded-full mx-auto mb-4" />
+            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-12 h-12 border-4 border-transparent border-t-orange-500 rounded-full animate-spin" />
+          </div>
+          <p className="text-gray-700 font-medium">Loading meal plans...</p>
+          <p className="text-gray-500 text-sm mt-1">Preparing your weekly menu</p>
         </div>
       </div>
     );
@@ -853,14 +857,14 @@ export default function MealPlanPage({
     <div className="flex mobile-viewport bg-orange-50 overflow-hidden">
       {/* Error Message */}
       {error && (
-        <div className="absolute top-4 right-4 z-50 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg">
-          <div className="flex items-center gap-2">
-            <span>{error}</span>
+        <div className="absolute top-4 right-4 z-50 bg-gradient-to-r from-red-500 to-red-600 text-white px-5 py-3 rounded-xl shadow-lg border border-red-400/20 backdrop-blur-sm">
+          <div className="flex items-center gap-3">
+            <span className="font-medium">{error}</span>
             <button
               onClick={() => setError(null)}
-              className="text-white hover:text-gray-200"
+              className="text-white hover:text-red-100 hover:bg-white/20 rounded-full p-1 transition-colors"
             >
-              ×
+              <X className="w-4 h-4" />
             </button>
           </div>
         </div>
@@ -875,7 +879,7 @@ export default function MealPlanPage({
         </div>
       )}
       {/* Desktop Meal Plan Grid */}
-      <div className="hidden md:flex w-full flex-col overflow-hidden">
+      <div className="hidden md:flex w-full flex-col overflow-hidden bg-orange-50">
         {/* Today's Progress Card - Desktop */}
         <div className="px-6 pb-4 pt-6">
           <ProgressCard
@@ -907,7 +911,7 @@ export default function MealPlanPage({
         {selectedMeals.size > 0 && (
           <>
             {/* Desktop Selected Meal Tags */}
-            <div className="px-6 py-3 border-t border-gray-200 bg-white">
+            <div className="px-6 py-4 border-t border-orange-200/50 bg-gradient-to-r from-orange-50/50 to-transparent">
               <div className="flex items-center justify-between">
                 <div className="flex flex-wrap gap-2">
                   {Array.from(selectedMeals).map((mealKey, index) => {
@@ -917,15 +921,15 @@ export default function MealPlanPage({
 
                     // Vary colors for different tags
                     const colors = [
-                      "bg-orange-100 text-orange-700",
-                      "bg-green-100 text-green-700",
-                      "bg-blue-100 text-blue-700",
+                      "bg-orange-100 text-orange-700 border-orange-200",
+                      "bg-green-100 text-green-700 border-green-200",
+                      "bg-blue-100 text-blue-700 border-blue-200",
                     ];
 
                     return (
                       <div
                         key={mealKey}
-                        className={`inline-flex items-center space-x-2 px-3 py-1 rounded-full text-sm font-medium border border-current/20 ${colors[index % colors.length]}`}
+                        className={`inline-flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold shadow-sm hover:shadow-md transition-all duration-200 border ${colors[index % colors.length]}`}
                       >
                         <span>{slotName}</span>
                         <button
@@ -933,7 +937,7 @@ export default function MealPlanPage({
                             const [day, slot] = mealKey.split("-");
                             handleMealSelection(day, slot as MealSlot);
                           }}
-                          className="h-auto p-0.5 hover:bg-current/20 rounded-full transition-colors"
+                          className="h-auto p-1 hover:bg-current/20 rounded-full transition-colors"
                         >
                           <X className="w-3 h-3" />
                         </button>
@@ -943,7 +947,7 @@ export default function MealPlanPage({
                 </div>
                 <button
                   onClick={clearSelectedMeals}
-                  className="text-xs text-gray-500 hover:text-red-600 transition-colors"
+                  className="text-sm font-medium text-gray-600 hover:text-red-600 transition-colors px-3 py-1 rounded-lg hover:bg-red-50"
                 >
                   Clear all
                 </button>
@@ -951,7 +955,7 @@ export default function MealPlanPage({
             </div>
 
             {/* Desktop Input Bar */}
-            <div className="border-t border-gray-200 bg-white">
+            <div className="border-t border-orange-200/50 bg-gradient-to-r from-orange-50/30 to-transparent">
               <ChatInput
                 inputValue={inputValue}
                 onInputChange={setInputValue}
@@ -986,7 +990,7 @@ export default function MealPlanPage({
                 isGenerating={isGenerating}
                 placeholder="Veggie high protein"
                 canSend={inputValue.trim() !== "" || selectedMeals.size > 0}
-                className="p-6 bg-white"
+                className="p-6"
               />
             </div>
           </>

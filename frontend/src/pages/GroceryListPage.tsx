@@ -29,8 +29,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { GuestGroceryListCTA } from "@/components/grocery-list/GuestGroceryListCTA";
 
-export default function GroceryListPage() {
+interface GroceryListPageProps {
+  onSignUp?: () => void;
+  onSignIn?: () => void;
+}
+
+export default function GroceryListPage({ onSignUp, onSignIn }: GroceryListPageProps = {}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -38,6 +44,7 @@ export default function GroceryListPage() {
   const [groceryList, setGroceryList] = useState<GroceryList | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUnauthenticated, setIsUnauthenticated] = useState(false);
 
   // Checked ingredients (persisted to localStorage)
   const [checkedIngredients, setCheckedIngredients] = useState<Set<string>>(
@@ -140,11 +147,19 @@ export default function GroceryListPage() {
     try {
       setIsLoading(true);
       setError(null);
+      setIsUnauthenticated(false);
       const list = await groceryListApi.getGroceryList();
       setGroceryList(list);
     } catch (err: any) {
       console.error("Failed to load grocery list:", err);
-      setError(err.message || "Failed to load grocery list");
+
+      // Check if this is an authentication error
+      if (err.status === 401 || err.message?.includes("authentication") || err.message?.includes("Unauthorized")) {
+        setIsUnauthenticated(true);
+        setError(null); // Clear error since we're showing auth gate instead
+      } else {
+        setError(err.message || "Failed to load grocery list");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -440,6 +455,11 @@ export default function GroceryListPage() {
         </div>
       </div>
     );
+  }
+
+  // Guest auth gate - show before error state
+  if (isUnauthenticated) {
+    return <GuestGroceryListCTA onSignUp={onSignUp} onSignIn={onSignIn} />;
   }
 
   // Error state

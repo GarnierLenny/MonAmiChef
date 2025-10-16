@@ -14,6 +14,8 @@ import {
   Heart,
   History,
   Settings2,
+  Plus,
+  Sparkles,
 } from "lucide-react";
 
 interface NavbarProps {
@@ -26,6 +28,7 @@ interface NavbarProps {
   onPricingClick: () => void;
   onToggleChatHistory?: () => void;
   onTogglePreferences?: () => void;
+  onNewChat?: () => void;
 }
 
 export default function Navbar({
@@ -36,6 +39,7 @@ export default function Navbar({
   subscriptionPlan,
   onAuthClick,
   onPricingClick,
+  onNewChat,
 }: NavbarProps) {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
@@ -174,8 +178,20 @@ export default function Navbar({
             })}
           </div>
 
+          {/* New Chat Button */}
+          {onNewChat && (
+            <button
+              onClick={onNewChat}
+              className="flex items-center space-x-2 bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white px-4 py-2 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              <Plus className="w-5 h-5" />
+              <span className="hidden lg:inline font-medium">New Chat</span>
+              <Sparkles className="w-4 h-4 hidden lg:inline" />
+            </button>
+          )}
+
           {/* User Profile / Auth */}
-          <div className="ml-8 flex items-center space-x-3">
+          <div className="ml-4 flex items-center space-x-3">
             {user ? (
               <>
                 {/* Subscription Badge - Clickable */}
