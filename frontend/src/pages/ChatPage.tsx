@@ -24,16 +24,6 @@ const MAX_CHARACTERS = 150;
 
 const cookies = new Cookies(null, { path: "/" });
 
-const initialAIText = (max: number): string =>
-  `Hi, I’m your AI Chef! Tell me what ingredients you’ve got, and I’ll cook up a recipe just for you.`;
-
-const buildAiGreeting = (): ChatMessage => ({
-  id: "initial",
-  role: "model",
-  text: initialAIText(MAX_CHARACTERS),
-  timestamp: new Date(),
-});
-
 interface ChatPageProps {
   user?: { id: string; email: string; name: string } | null;
   onAuthClick?: () => void;
@@ -42,7 +32,7 @@ interface ChatPageProps {
 
 function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
   const [chats, setChats] = useState<ChatItem[]>([]);
-  const [messages, setMessages] = useState<ChatMessage[]>([buildAiGreeting()]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [inputValue, setInputValue] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const navigate = useNavigate();
@@ -209,9 +199,9 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
 
   // Load current chat messages
   useEffect(() => {
-    // New chat: keep greeting
+    // New chat: clear messages
     if (!chatId) {
-      setMessages([buildAiGreeting()]);
+      setMessages([]);
       clearAllPreferences();
       return;
     }
@@ -238,9 +228,7 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
         if (latestChatIdRef.current !== startedFor) return;
 
         const msgs = result?.messages ?? [];
-        setMessages(
-          Array.isArray(msgs) && msgs.length ? msgs : [buildAiGreeting()],
-        );
+        setMessages(Array.isArray(msgs) ? msgs : []);
       } catch (err: any) {
         if (err.name !== "AbortError") {
           // Only log; keep previous messages to avoid flash
@@ -346,7 +334,7 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
 
   const handleNewChat = () => {
     clearChatParam(false);
-    setMessages([buildAiGreeting()]);
+    setMessages([]);
     setInputValue("");
   };
 
@@ -442,6 +430,7 @@ function ChatPage({ user, onAuthClick, onSignOut }: ChatPageProps = {}) {
                 inputRef={inputRef}
                 user={user}
                 onAuthClick={onAuthClick}
+                onOpenPreferences={() => setIsChatSidebarOpen(true)}
               />
             </div>
           </div>

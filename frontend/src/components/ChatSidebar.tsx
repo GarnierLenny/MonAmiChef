@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import { Send, PanelLeft, ChefHat } from "lucide-react";
+import { Send, PanelLeft } from "lucide-react";
 import { Preferences } from "@/types/types";
 import PreferencesSidebar from "./PreferenceSidebar";
 
@@ -31,31 +31,13 @@ export function ChatSidebar({
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent side="right" className="w-72 p-0 bg-orange-50 border-l border-orange-200/50 flex flex-col h-full">
-        {/* Orange to Pink Gradient Header */}
-        <div className="flex items-center justify-between px-4 py-4 bg-gradient-to-r from-orange-600 via-orange-500 to-pink-500 shadow-md relative overflow-hidden">
-          {/* Animated background */}
-          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
-
-          <div className="flex items-center gap-3 relative z-10">
-            <div className="p-1.5 bg-white/20 backdrop-blur-sm rounded-lg">
-              <ChefHat className="h-6 w-6 text-white drop-shadow-lg" />
-            </div>
-            <span className="font-bold text-white text-lg drop-shadow-md">Preferences</span>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-lg hover:bg-white/20 text-white transition-all duration-200 hover:scale-110 relative z-10"
-          >
-            <PanelLeft className="h-5 w-5 drop-shadow" />
-          </button>
-        </div>
-
         {/* Content */}
         <div className="flex-1 overflow-hidden p-0 relative">
           <PreferencesSidebar
             preferences={preferences}
             onPreferenceChange={onPreferenceChange}
             clearAllPreferences={clearAllPreferences}
+            onClose={onClose}
           />
 
           {/* Mobile Preferences Submit Button */}
