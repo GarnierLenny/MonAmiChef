@@ -24,6 +24,7 @@ interface ChatInputProps {
   onRemoveTag?: (category: string, value: string | number) => void;
   onClearAllTags?: () => void;
   className?: string;
+  helperText?: string; // Keep for backward compatibility with ChatPage
 }
 
 export const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
@@ -42,6 +43,7 @@ export const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
       onRemoveTag,
       onClearAllTags,
       className,
+      helperText,
     },
     ref,
   ) => {
@@ -103,6 +105,13 @@ export const ChatInput = React.forwardRef<HTMLDivElement, ChatInputProps>(
               />
             </Button>
           </form>
+
+          {/* Helper Text */}
+          {helperText && (
+            <p className="text-xs text-gray-500 mt-1.5 px-3 animate-in fade-in-0 slide-in-from-bottom-1 duration-200">
+              {helperText}
+            </p>
+          )}
         </div>
       </div>
     );

@@ -8,10 +8,7 @@ import {
   Sun,
   Moon,
   CheckSquare,
-  User,
-  Clock,
   Zap,
-  X,
 } from "lucide-react";
 import { getGradeStyles } from "./utils";
 import type { Meal, MealSlot } from "./constants";
@@ -68,124 +65,115 @@ export const SimpleMealCard = ({
 
   return (
     <div
-      className={`bg-background rounded-xl min-w-[280px] w-[280px] h-[300px] border-0 shadow-xl/5 p-6 flex flex-col space-y-2 relative transition-all duration-300 ${
+      className={`bg-background rounded-xl w-full min-h-[160px] flex-1 border-2 shadow-sm p-4 flex flex-col space-y-2 relative transition-all duration-300 ${
         isSelected
           ? "border-orange-500 bg-orange-50 shadow-md animate-in fade-in-0 zoom-in-95"
-          : "border-gray-200 shadow-xs hover:border-gray-300"
+          : "border-gray-200 hover:border-gray-300"
       }`}
+      onClick={onMealSelection}
     >
-      {/* Meal Type Header */}
-      <div className="flex items-center gap-2">
-        {getMealIcon()}
-        <h3 className="text-foreground-muted uppercase tracking-wide text-xs">
-          {mealSlot}
-        </h3>
+      {/* Meal Type Header with Selection Indicator */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          {getMealIcon()}
+          <h3 className="text-foreground-muted uppercase tracking-wide text-xs font-medium">
+            {mealSlot}
+          </h3>
+        </div>
+        {/* Selection Checkmark Badge */}
+        {isSelected && (
+          <div className="w-6 h-6 rounded-full bg-orange-500 flex items-center justify-center animate-in zoom-in-50 duration-200">
+            <CheckSquare className="w-4 h-4 text-white" />
+          </div>
+        )}
       </div>
 
       {/* Meal Content or Empty State */}
       {meal ? (
-        <div
-          className="space-y-2 mt-2.5 cursor-pointer flex-1 flex flex-col"
-          onClick={onCardClick}
-        >
+        <div className="flex-1 flex flex-col justify-between">
           {/* Recipe Title */}
-          <div className="flex items-start mb-3 justify-between">
-            <h4 className="font-semibold text-sm flex-1">{meal.title}</h4>
+          <div className="flex items-start justify-between gap-2 mb-2">
+            <h4 className="font-semibold text-base flex-1 line-clamp-2">
+              {meal.title}
+            </h4>
+            <div
+              className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold flex-shrink-0 ${getGradeStyles(meal.grade)}`}
+            >
+              {meal.grade}
+            </div>
           </div>
 
-          {/* Servings and Time */}
-          <div className="flex items-center gap-2 text-gray-600">
-            <div className="flex items-center gap-1 text-foreground-muted">
-              <User className="w-3.5 h-3.5" />
-              <span className="text-xs">{meal.servings}</span>
-            </div>
-            <span className="text-foreground-muted">•</span>
-            <div className="flex items-center gap-1 text-foreground-muted">
-              <Clock className="w-3.5 h-3.5" />
-              <span className="text-xs">{meal.cookingTime} min</span>
-            </div>
-            <span className="text-foreground-muted">•</span>
-            <div className="flex items-center gap-1">
+          {/* Bottom Row: Calories and Macros */}
+          <div className="flex items-center justify-between">
+            {/* Calories */}
+            <div className="flex items-center gap-1.5">
               <Zap className="w-3.5 h-3.5 text-orange-500" />
-              <span className="text-xs text-orange-500">
-                {meal.calories} cal
+              <span className="text-xs font-bold text-gray-900">
+                {meal.calories} <span className="text-[10px] font-normal text-gray-600">cal</span>
               </span>
             </div>
-          </div>
 
-          {/* Macros */}
-          <div className="flex justify-between mt-4 mb-4 items-end -ml-2">
-            <div className="flex flex-wrap gap-2 items-center max-w-[180px]">
-              {[
-                { label: "Proteins", value: meal.macros.protein },
-                { label: "Carbs", value: meal.macros.carbs },
-                { label: "Fibers", value: meal.macros.fat },
-              ].map((macro) => (
-                <Badge
-                  key={macro.label}
-                  className="text-[10px] shadow-[inset_0_2px_2px_rgba(0,0,0,0.2)] bg-background-light text-black font-medium px-2.5 py-1.5 h-auto whitespace-nowrap"
-                >
-                  <span className="flex items-center">
-                    {macro.label} {macro.value}g
-                  </span>
-                </Badge>
-              ))}
-            </div>
-            <div className="flex flex-col h-full items-center justify-center gap-1">
-              <span className="text-[8px] text-foreground-muted uppercase tracking-wide">
-                Score
-              </span>
-              <div
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0 ${getGradeStyles(meal.grade)}`}
-              >
-                {meal.grade}
-              </div>
+            {/* Macros */}
+            <div className="flex items-center gap-1">
+              <Badge className="bg-green-500 text-white text-[10px] font-medium px-1.5 py-0">
+                P {meal.macros.protein}
+              </Badge>
+              <Badge className="bg-blue-500 text-white text-[10px] font-medium px-1.5 py-0">
+                C {meal.macros.carbs}
+              </Badge>
+              <Badge className="bg-amber-500 text-white text-[10px] font-medium px-1.5 py-0">
+                F {meal.macros.fat}
+              </Badge>
             </div>
           </div>
         </div>
       ) : (
-        <div className="flex-1 grow flex flex-col gap-[4px] items-center justify-center">
-          <p className="text-foreground-muted text-sm">No meal selected</p>
-          <p className="text-foreground-muted text-xs">
-            Choose from saved or generate new
+        <div className="flex-1 flex flex-col items-center justify-center gap-2">
+          <div className="w-12 h-12 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center">
+            {getMealIcon()}
+          </div>
+          <p className="text-sm font-medium text-gray-700">
+            Tap to generate {mealSlot}
           </p>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs text-orange-600 border-orange-300 hover:bg-orange-50"
+            onClick={(e) => {
+              e.stopPropagation();
+              onSaved();
+            }}
+          >
+            <BookmarkIcon className="w-3 h-3 mr-1" />
+            Or pick saved
+          </Button>
         </div>
       )}
 
-      {/* Action Buttons - Always show */}
-      <div className="flex gap-[6px] mt-auto w-full">
-        <Button
-          variant="outline"
-          className="flex-1 w-1/2 flex shadow-sm/10 items-center justify-center bg-white border border-gray-300 gap-2 py-2 text-gray-700 hover:bg-gray-50"
-          onClick={onSaved}
-          disabled={isGenerating}
-        >
-          <BookmarkIcon className="w-4 h-4" />
-          <span className="text-sm font-medium">Saved</span>
-        </Button>
-
-        <Button
-          className={`flex-1 w-1/2 flex items-center justify-center gap-2 py-2 active:scale-95 transition-transform ${
-            isSelected
-              ? "bg-gray-500 text-white hover:bg-gray-800"
-              : "bg-orange-500 text-white hover:bg-orange-600"
-          }`}
-          onClick={onMealSelection}
-          disabled={isGenerating}
-        >
-          {isSelected ? (
-            <>
-              <X className="w-4 h-4" />
-              <span className="text-sm font-medium">Unselect</span>
-            </>
-          ) : (
-            <>
-              <CheckSquare className="w-4 h-4" />
-              <span className="text-sm font-medium">Select</span>
-            </>
-          )}
-        </Button>
-      </div>
+      {/* Long Press Action Menu Hint */}
+      {meal && (
+        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 rounded-full"
+            onClick={(e) => {
+              e.stopPropagation();
+              onCardClick?.();
+            }}
+          >
+            <svg
+              className="w-4 h-4 text-gray-400"
+              fill="currentColor"
+              viewBox="0 0 16 16"
+            >
+              <circle cx="8" cy="3" r="1.5" />
+              <circle cx="8" cy="8" r="1.5" />
+              <circle cx="8" cy="13" r="1.5" />
+            </svg>
+          </Button>
+        </div>
+      )}
 
       {/* Loading Overlay */}
       {isCurrentlyGenerating && (

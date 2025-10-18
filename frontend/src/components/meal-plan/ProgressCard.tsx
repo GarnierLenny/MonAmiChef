@@ -82,40 +82,57 @@ export const ProgressCard = ({
 
   // If no goals are set, show CTA (Call-To-Action) card
   if (!hasGoals) {
-    return (
+    return isMobile ? (
+      // Ultra-compact mobile banner - enhanced visibility while staying compact
+      <div
+        className="flex items-center justify-between gap-2 px-3 py-2 bg-gradient-to-r from-orange-100 to-pink-100 border-2 border-orange-400/60 rounded-lg cursor-pointer hover:from-orange-200 hover:to-pink-200 hover:border-orange-500/80 transition-all duration-200 active:scale-[0.98] shadow-sm hover:shadow-md"
+        onClick={() => (window.location.href = "/calories")}
+      >
+        {/* Left: Icon + Text */}
+        <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="bg-white/80 p-0.5 rounded-md shadow-sm">
+            <Target className="text-orange-600 w-3.5 h-3.5 flex-shrink-0" />
+          </div>
+          <span className="text-[11px] font-semibold text-gray-800 truncate">
+            {t("mealPlan.trackNutritionProgress")}
+          </span>
+        </div>
+
+        {/* Right: Minimal CTA with pill background */}
+        <div className="flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-orange-500 to-pink-500 rounded-full text-white shadow-sm flex-shrink-0">
+          <span className="text-[11px] font-bold whitespace-nowrap">
+            {t("mealPlan.setGoals")}
+          </span>
+          <ChevronRight className="w-3 h-3" />
+        </div>
+      </div>
+    ) : (
+      // Desktop version - keep original Card layout
       <Card
-        className={`border border-orange-200/50 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 bg-white/80 backdrop-blur-sm hover:scale-[1.01] shadow-sm ${
-          isMobile ? "border-2" : ""
-        }`}
+        className="border border-orange-200/50 rounded-xl cursor-pointer hover:shadow-lg transition-all duration-200 bg-white/80 backdrop-blur-sm hover:scale-[1.01] shadow-sm"
         onClick={() => (window.location.href = "/calories")}
       >
         <CardContent className="px-4">
           {/* Header with title and target icon */}
           <div className="flex items-center justify-between mb-4">
-            <h2
-              className={`font-bold text-gray-900 ${isMobile ? "text-sm" : "text-lg"}`}
-            >
-              {t('mealPlan.setYourGoals')}
+            <h2 className="font-bold text-gray-900 text-lg">
+              {t("mealPlan.setYourGoals")}
             </h2>
             <div className="bg-gradient-to-br from-orange-100 to-orange-50 p-2 rounded-lg">
-              <Target
-                className={`text-orange-600 ${isMobile ? "w-5 h-5" : "w-6 h-6"}`}
-              />
+              <Target className="text-orange-600 w-6 h-6" />
             </div>
           </div>
 
           {/* Description and CTA button */}
           <div className="flex items-center justify-between">
-            <p
-              className={`text-gray-600 flex-1 font-medium ${isMobile ? "text-xs" : "text-sm"}`}
-            >
-              {t('mealPlan.trackNutritionProgress')}
+            <p className="text-gray-600 flex-1 font-medium text-sm">
+              {t("mealPlan.trackNutritionProgress")}
             </p>
 
             {/* Gradient button with calculator icon */}
             <div className="inline-flex items-center gap-1.5 py-2 px-4 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-600 hover:to-pink-600 text-white rounded-lg text-xs font-semibold ml-3 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-105 active:scale-95">
               <Calculator className="w-3.5 h-3.5" />
-              {isMobile ? t('mealPlan.setGoals') : t('mealPlan.calculate')}
+              {t("mealPlan.calculate")}
             </div>
           </div>
         </CardContent>
@@ -124,45 +141,54 @@ export const ProgressCard = ({
   }
 
   // Main progress card - shows calories consumed vs goal
-  return (
+  return isMobile ? (
+    // Ultra-compact mobile version (single line, 32px height)
+    <div
+      className="flex items-center gap-2 rounded-lg border border-orange-100/50 px-3 py-1.5 cursor-pointer transition-all duration-200 active:scale-[0.99]"
+      onClick={onDetailsClick}
+    >
+      <span className="text-xs font-bold text-green-600 whitespace-nowrap">
+        {dayProgress.calories.used}
+      </span>
+      <div className="flex-1 min-w-0">
+        <Progress
+          value={Math.min(dayProgress.calories.percentage, 100)}
+          className="h-1.5"
+        />
+      </div>
+      <span className="text-xs font-semibold text-gray-500 whitespace-nowrap">
+        {dayProgress.calories.goal} {t("mealPlan.cal")}
+      </span>
+      <ChevronRight className="w-3.5 h-3.5 text-gray-400 flex-shrink-0" />
+    </div>
+  ) : (
+    // Desktop version - keep full Card layout
     <Card
-      className={`rounded-xl border border-orange-100/50 py-[4px] bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-lg cursor-pointer transition-all duration-200 hover:scale-[1.01]`}
+      className="rounded-xl border border-orange-100/50 py-[4px] bg-white/80 backdrop-blur-sm shadow-sm hover:shadow-lg cursor-pointer transition-all duration-200 hover:scale-[1.01]"
       onClick={onDetailsClick}
     >
       <CardContent className="px-2">
         <div className="flex items-center justify-between">
-          {/* Left side - Current calories consumed (green to indicate progress) */}
           <div className="text-left">
             <CountUp
               end={dayProgress.calories.used}
               duration={600}
-              suffix={` ${t('mealPlan.cal')}`}
+              suffix={` ${t("mealPlan.cal")}`}
               className="text-sm font-bold text-green-600"
             />
           </div>
-
-          {/* Center - Visual progress bar showing percentage of goal reached */}
           <div className="flex-1 mx-6">
-            <Progress
-              value={Math.min(dayProgress.calories.percentage, 100)}
-              // Note: Progress bar capped at 100% even if exceeded
-            />
+            <Progress value={Math.min(dayProgress.calories.percentage, 100)} />
           </div>
-
-          {/* Right side - Goal calories (gray to indicate target) */}
           <div className="text-right">
             <CountUp
               end={dayProgress.calories.goal}
               duration={600}
-              suffix={` ${t('mealPlan.cal')}`}
+              suffix={` ${t("mealPlan.cal")}`}
               className="text-sm font-semibold text-gray-600"
             />
           </div>
-
-          {/* Chevron icon to indicate card is clickable for more details */}
-          <ChevronRight
-            className={`text-gray-400 ml-4 transition-transform group-hover:translate-x-1 ${isMobile ? "w-4 h-4" : "w-5 h-5"}`}
-          />
+          <ChevronRight className="text-gray-400 ml-4 transition-transform group-hover:translate-x-1 w-5 h-5" />
         </div>
       </CardContent>
     </Card>
