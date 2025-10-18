@@ -55,15 +55,29 @@ export function ProblemSection() {
             return (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 30 }}
+                initial={{ opacity: 0, y: 20 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow"
+                transition={{
+                  duration: 0.4,
+                  delay: index * 0.08,
+                  ease: [0.25, 0.1, 0.25, 1]
+                }}
+                className="bg-white rounded-2xl p-8 shadow-lg border border-gray-200 hover:shadow-xl transition-shadow overflow-hidden"
               >
                 <div className="mb-6">
-                  <div className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center">
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={inView ? { scale: 1 } : {}}
+                    transition={{
+                      type: "spring",
+                      stiffness: 300,
+                      damping: 20,
+                      delay: index * 0.08 + 0.15
+                    }}
+                    className="w-16 h-16 bg-gray-100 rounded-2xl flex items-center justify-center"
+                  >
                     <Icon className={`w-8 h-8 ${problem.color}`} />
-                  </div>
+                  </motion.div>
                 </div>
                 <h3 className="text-xl font-bold text-gray-900 mb-3">
                   {problem.title}

@@ -24,10 +24,10 @@ const getFeatures = (t: any) => [
     visual: (
       <div className="bg-white/50 rounded-xl p-4 backdrop-blur-sm">
         <div className="flex gap-2 mb-3">
-          <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center flex-shrink-0">
             <MessageSquare className="w-4 h-4 text-white" />
           </div>
-          <div className="flex-1 bg-white rounded-lg p-2 text-sm text-gray-700">
+          <div className="flex-1 bg-white rounded-lg p-2 text-sm text-gray-700 font-normal">
             Quick pasta recipe
           </div>
         </div>
@@ -35,7 +35,7 @@ const getFeatures = (t: any) => [
           <div className="w-8 h-8 bg-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
             <Sparkles className="w-4 h-4 text-white" />
           </div>
-          <div className="bg-orange-50 rounded-lg p-3 text-xs text-gray-600">
+          <div className="bg-orange-50 rounded-lg p-3 text-sm text-gray-600 font-normal">
             🍝 Creamy Garlic Parmesan...
           </div>
         </div>
@@ -207,15 +207,29 @@ function FeatureCard({ feature, index, inView }: { feature: any; index: number; 
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 30 }}
+      initial={{ opacity: 0, y: 20 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      className={`bg-gradient-to-br ${feature.gradient} rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 group h-full flex flex-col`}
+      transition={{
+        duration: 0.4,
+        delay: index * 0.05,
+        ease: [0.25, 0.1, 0.25, 1]
+      }}
+      className={`bg-gradient-to-br ${feature.gradient} rounded-2xl p-6 shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 group h-full flex flex-col overflow-hidden`}
     >
       <div className="flex items-start justify-between mb-4">
-        <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform">
+        <motion.div
+          initial={{ scale: 0.8, opacity: 0 }}
+          animate={inView ? { scale: 1, opacity: 1 } : {}}
+          transition={{
+            type: "spring",
+            stiffness: 300,
+            damping: 20,
+            delay: index * 0.05 + 0.1
+          }}
+          className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-sm group-hover:scale-110 transition-transform"
+        >
           <Icon className="w-6 h-6 text-white" />
-        </div>
+        </motion.div>
         <Sparkles className="w-5 h-5 text-white/60" />
       </div>
 

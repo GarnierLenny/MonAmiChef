@@ -36,13 +36,14 @@ export function HeroSection() {
 
       {/* Floating Food Emoji Decorations */}
       <motion.div
-        className="absolute top-20 left-10 text-6xl opacity-20"
+        className="absolute top-20 left-10 text-6xl"
         animate={{
           y: [0, -20, 0],
-          rotate: [0, 10, 0]
+          rotate: [0, 10, 0],
+          opacity: [0.15, 0.25, 0.15]
         }}
         transition={{
-          duration: 4,
+          duration: 3,
           repeat: Infinity,
           ease: "easeInOut"
         }}
@@ -50,13 +51,14 @@ export function HeroSection() {
         🍅
       </motion.div>
       <motion.div
-        className="absolute top-40 right-20 text-5xl opacity-20"
+        className="absolute top-40 right-20 text-5xl"
         animate={{
           y: [0, 20, 0],
-          rotate: [0, -10, 0]
+          rotate: [0, -10, 0],
+          opacity: [0.15, 0.25, 0.15]
         }}
         transition={{
-          duration: 5,
+          duration: 3.5,
           repeat: Infinity,
           ease: "easeInOut",
           delay: 0.5
@@ -65,13 +67,14 @@ export function HeroSection() {
         🥗
       </motion.div>
       <motion.div
-        className="absolute bottom-40 left-20 text-7xl opacity-20"
+        className="absolute bottom-40 left-20 text-7xl"
         animate={{
           y: [0, -15, 0],
-          rotate: [0, 15, 0]
+          rotate: [0, 15, 0],
+          opacity: [0.15, 0.25, 0.15]
         }}
         transition={{
-          duration: 4.5,
+          duration: 3.2,
           repeat: Infinity,
           ease: "easeInOut",
           delay: 1
@@ -80,19 +83,182 @@ export function HeroSection() {
         🥘
       </motion.div>
       <motion.div
-        className="absolute bottom-20 right-10 text-5xl opacity-20"
+        className="absolute bottom-20 right-10 text-5xl"
         animate={{
           y: [0, 25, 0],
-          rotate: [0, -15, 0]
+          rotate: [0, -15, 0],
+          opacity: [0.15, 0.25, 0.15]
         }}
         transition={{
-          duration: 5.5,
+          duration: 3.8,
           repeat: Infinity,
           ease: "easeInOut",
           delay: 1.5
         }}
       >
         🍳
+      </motion.div>
+
+      {/* Additional Food Emojis */}
+      <motion.div
+        className="absolute top-32 left-1/4 text-4xl"
+        animate={{
+          y: [0, -18, 0],
+          rotate: [0, 12, 0],
+          opacity: [0.1, 0.2, 0.1]
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 0.3
+        }}
+      >
+        🍕
+      </motion.div>
+      <motion.div
+        className="absolute top-1/3 right-1/4 text-5xl"
+        animate={{
+          y: [0, 22, 0],
+          rotate: [0, -8, 0],
+          opacity: [0.1, 0.2, 0.1]
+        }}
+        transition={{
+          duration: 3.5,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 0.8
+        }}
+      >
+        🍝
+      </motion.div>
+      <motion.div
+        className="absolute bottom-1/3 left-1/3 text-6xl"
+        animate={{
+          y: [0, -20, 0],
+          rotate: [0, 10, 0],
+          opacity: [0.1, 0.2, 0.1]
+        }}
+        transition={{
+          duration: 3.2,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1.2
+        }}
+      >
+        🥑
+      </motion.div>
+      <motion.div
+        className="absolute bottom-32 right-1/3 text-4xl"
+        animate={{
+          y: [0, 15, 0],
+          rotate: [0, -12, 0],
+          opacity: [0.1, 0.2, 0.1]
+        }}
+        transition={{
+          duration: 3.6,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1.8
+        }}
+      >
+        🍜
+      </motion.div>
+      <motion.div
+        className="absolute top-1/4 right-12 text-5xl"
+        animate={{
+          y: [0, -25, 0],
+          rotate: [0, 8, 0],
+          opacity: [0.1, 0.2, 0.1]
+        }}
+        transition={{
+          duration: 4.2,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 0.6
+        }}
+      >
+        🥐
+      </motion.div>
+      <motion.div
+        className="absolute bottom-1/4 left-16 text-4xl"
+        animate={{
+          y: [0, 20, 0],
+          rotate: [0, -10, 0],
+          opacity: [0.1, 0.2, 0.1]
+        }}
+        transition={{
+          duration: 3.4,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1.4
+        }}
+      >
+        🍇
+      </motion.div>
+      <motion.div
+        className="absolute top-2/3 left-12 text-5xl"
+        animate={{
+          y: [0, -22, 0],
+          rotate: [0, 14, 0],
+          opacity: [0.1, 0.2, 0.1]
+        }}
+        transition={{
+          duration: 3.8,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 2
+        }}
+      >
+        🥦
+      </motion.div>
+      <motion.div
+        className="absolute top-1/2 right-16 text-4xl"
+        animate={{
+          y: [0, 18, 0],
+          rotate: [0, -11, 0],
+          opacity: [0.1, 0.2, 0.1]
+        }}
+        transition={{
+          duration: 3.2,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 0.9
+        }}
+      >
+        🍓
+      </motion.div>
+      <motion.div
+        className="absolute top-3/4 left-1/4 text-5xl"
+        animate={{
+          y: [0, -16, 0],
+          rotate: [0, 9, 0],
+          opacity: [0.1, 0.2, 0.1]
+        }}
+        transition={{
+          duration: 4,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 1.6
+        }}
+      >
+        🥕
+      </motion.div>
+      <motion.div
+        className="absolute bottom-1/2 right-1/4 text-4xl"
+        animate={{
+          y: [0, 24, 0],
+          rotate: [0, -13, 0],
+          opacity: [0.1, 0.2, 0.1]
+        }}
+        transition={{
+          duration: 3.6,
+          repeat: Infinity,
+          ease: "easeInOut",
+          delay: 2.2
+        }}
+      >
+        🌮
       </motion.div>
 
       {/* Content */}

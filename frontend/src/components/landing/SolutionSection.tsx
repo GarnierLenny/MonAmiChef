@@ -64,17 +64,31 @@ export function SolutionSection() {
               return (
                 <div key={index} className="relative">
                   <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={inView ? { opacity: 1, y: 0 } : {}}
-                    transition={{ duration: 0.6, delay: step.delay }}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={inView ? { opacity: 1, x: 0 } : {}}
+                    transition={{
+                      duration: 0.5,
+                      delay: index * 0.12,
+                      ease: [0.25, 0.1, 0.25, 1]
+                    }}
                     className="relative"
                   >
                     {/* Card with integrated step number badge */}
-                    <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-8 h-full border border-orange-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative">
+                    <div className="bg-gradient-to-br from-orange-50 to-pink-50 rounded-2xl p-8 h-full border border-orange-100 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 relative overflow-hidden">
                       {/* Step Number Badge - Top Right Corner */}
-                      <div className="absolute -top-3 -right-3 w-10 h-10 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg ring-4 ring-white">
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={inView ? { scale: 1 } : {}}
+                        transition={{
+                          type: "spring",
+                          stiffness: 300,
+                          damping: 20,
+                          delay: index * 0.12 + 0.2
+                        }}
+                        className="absolute -top-3 -right-3 w-10 h-10 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg shadow-lg ring-4 ring-white"
+                      >
                         {index + 1}
-                      </div>
+                      </motion.div>
 
                       <div className="mb-6">
                         <div
