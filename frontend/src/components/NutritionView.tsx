@@ -672,16 +672,16 @@ export default function NutritionView({
       <div className="flex-1 overflow-y-auto no-scrollbar">
         <div className="w-full p-6 sm:p-8 lg:p-12 max-w-7xl mx-auto space-y-8 lg:space-y-10">
           {/* Header Section */}
-          <div className="bg-white rounded-2xl p-6 sm:p-8 lg:p-10 shadow-md border border-orange-100">
-            <div className="flex items-center gap-4 mb-4">
-              <div className="w-14 h-14 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center shadow-lg">
-                <Calculator className="w-7 h-7 text-white" />
+          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-orange-100">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center shadow-md">
+                <Calculator className="w-5 h-5 text-white" />
               </div>
               <div>
-                <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-1">
+                <h1 className="text-xl sm:text-2xl font-bold text-neutral-900 mb-0.5">
                   Calorie Calculator
                 </h1>
-                <p className="text-neutral-500 text-sm sm:text-base">
+                <p className="text-neutral-500 text-xs sm:text-sm">
                   Calculate your personalized daily calorie needs
                 </p>
               </div>
@@ -689,7 +689,7 @@ export default function NutritionView({
           </div>
 
           {/* Personal Information Card */}
-          <div className="bg-white rounded-2xl p-6 sm:p-8 lg:p-10 shadow-md border border-orange-100">
+          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm border border-orange-100">
             <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
               <div className="w-2 h-2 rounded-full bg-orange-500"></div>
               Personal Information

@@ -90,7 +90,6 @@ export const NewMobileMealLayout = ({
     day: string;
     slot: MealSlot;
   } | null>(null);
-  const [isClosing, setIsClosing] = useState(false);
   const [shouldShake, setShouldShake] = useState(false);
   const [hideBadge, setHideBadge] = useState(false);
   const prevSelectedMealsSize = useRef(selectedMeals.size);
@@ -98,16 +97,17 @@ export const NewMobileMealLayout = ({
   const weekStart = startOfWeek(currentWeek, { weekStartsOn: 1 });
   const currentDay = DAYS_OF_WEEK[currentDayIndex];
 
-  // Detect when going from 1 selected meal to 0 to trigger closing animation
+  // Swipe gesture support
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  // Minimum swipe distance (in px) to trigger navigation
+  const minSwipeDistance = 50;
+
+  // Reset badge visibility when all meals deselected
   useEffect(() => {
     if (prevSelectedMealsSize.current > 0 && selectedMeals.size === 0) {
-      setIsClosing(true);
-      setHideBadge(false); // Reset badge visibility when all meals deselected
-      // Reset closing state after animation completes
-      const timer = setTimeout(() => {
-        setIsClosing(false);
-      }, 300);
-      return () => clearTimeout(timer);
+      setHideBadge(false);
     }
     prevSelectedMealsSize.current = selectedMeals.size;
   }, [selectedMeals.size]);
@@ -157,25 +157,32 @@ export const NewMobileMealLayout = ({
     onSavedMeals?.(currentDay, mealSlot);
   };
 
-  // Convert selected meals to tags format
-  const mealTags = Array.from(selectedMeals).map((mealKey, index) => {
-    const [day, slot] = mealKey.split("-");
-    const slotName = slot.charAt(0).toUpperCase() + slot.slice(1);
+  // Generate dynamic placeholder based on selected meals
+  const getDynamicPlaceholder = () => {
+    // Extract meal types from selected meals (only current day)
+    const selectedSlots = Array.from(selectedMeals)
+      .filter((key) => key.startsWith(currentDay))
+      .map((key) => key.split("-")[1] as MealSlot)
+      .sort((a, b) => MEAL_SLOTS.indexOf(a) - MEAL_SLOTS.indexOf(b));
 
-    // Vary colors for different tags
-    const colors = [
-      "bg-orange-100 text-orange-700",
-      "bg-green-100 text-green-700",
-      "bg-blue-100 text-blue-700",
-    ];
+    if (selectedSlots.length === 0) {
+      return "Veggie and high protein";
+    }
 
-    return {
-      category: "meal",
-      value: mealKey,
-      label: slotName,
-      color: colors[index % colors.length],
-    };
-  });
+    // Capitalize first letter of each meal type
+    const formattedSlots = selectedSlots.map(
+      (slot) => slot.charAt(0).toUpperCase() + slot.slice(1),
+    );
+
+    if (formattedSlots.length === 1) {
+      return `Generate ${formattedSlots[0]}`;
+    } else if (formattedSlots.length === 2) {
+      return `Generate ${formattedSlots.join(" and ")}`;
+    } else {
+      const last = formattedSlots.pop();
+      return `Generate ${formattedSlots.join(", ")} and ${last}`;
+    }
+  };
 
   const handleDateSelect = (date: Date) => {
     // Calculate the week that contains the selected date (start from Monday)
@@ -268,25 +275,54 @@ export const NewMobileMealLayout = ({
     }
   };
 
+  // Handle touch events for swipe gestures
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && currentDayIndex < 6) {
+      // Swipe left = next day
+      handleNextDay();
+    }
+    if (isRightSwipe && currentDayIndex > 0) {
+      // Swipe right = previous day
+      handlePreviousDay();
+    }
+  };
+
   return (
     <div className="flex flex-col h-full w-screen pb-18 bg-orange-50 overflow-hidden">
-      {/* Day Navigation */}
-      <div className="px-4 mt-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center shadow-sm bg-white rounded-full justify-between flex-1 px-2 border border-orange-100/50">
+      {/* Day Navigation - Compact */}
+      <div className="px-4 mt-2">
+        {/* Date Navigation Row */}
+        <div className="flex items-center justify-between gap-2">
+          {/* Navigation arrows + Date display */}
+          <div className="flex items-center flex-1 bg-white rounded-xl shadow-sm border border-orange-100/50 px-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={handlePreviousDay}
               disabled={currentDayIndex === 0}
-              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors shrink-0"
             >
-              <ChevronLeft className="w-3 h-3 text-gray-600" />
+              <ChevronLeft className="w-4 h-4 text-gray-600" />
             </Button>
 
-            <div className="text-center">
-              <div className="font-medium text-gray-900 text-sm">
-                {format(addDays(weekStart, currentDayIndex), "EEEE, MMM d")}
+            <div className="flex-1 text-center px-1.5">
+              <div className="font-semibold text-gray-900 text-sm leading-tight">
+                {format(addDays(weekStart, currentDayIndex), "EEE, MMM d")}
               </div>
             </div>
 
@@ -295,67 +331,104 @@ export const NewMobileMealLayout = ({
               size="sm"
               onClick={handleNextDay}
               disabled={currentDayIndex === 6}
-              className="p-1 hover:bg-gray-100 rounded-full transition-colors"
+              className="p-1 hover:bg-gray-100 rounded-full transition-colors shrink-0"
             >
-              <ChevronRight className="w-3 h-3 text-gray-600" />
+              <ChevronRight className="w-4 h-4 text-gray-600" />
             </Button>
           </div>
 
+          {/* Calendar button */}
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setIsCalendarOpen(true)}
-            className="p-2.5 bg-white hover:bg-orange-50 shadow-sm rounded-full transition-colors ml-2 border border-orange-100/50"
+            className="p-2 bg-white hover:bg-orange-50 shadow-sm rounded-xl transition-colors border border-orange-100/50 shrink-0"
           >
-            <Calendar className="w-5 h-5 text-gray-600" />
-          </Button>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={handleGroceryListClick}
-            className={`p-2.5 shadow-sm rounded-full transition-all duration-500 ml-2 bg-white hover:bg-orange-50 border border-orange-100/50 relative ${shouldShake ? "animate-shake" : ""}`}
-          >
-            <ShoppingCart
-              className={`w-5 h-5 transition-colors duration-500 ${
-                hasSelectedMealsWithData() ? "text-orange-600" : "text-neutral-400"
-              }`}
-            />
-            {hasNewMealsToAdd() && !hideBadge && (
-              <span className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full border-2 border-white shadow-md animate-pop-in" />
-            )}
+            <Calendar className="w-4 h-4 text-gray-600" />
           </Button>
         </div>
+
+        {/* Week Progress Dots - Compact */}
+        <div className="flex items-center justify-center gap-1 mt-1.5">
+          {DAYS_OF_WEEK.map((day, index) => {
+            const dayMeals = mealPlan[day];
+            const filledSlotsCount = dayMeals
+              ? Object.keys(dayMeals).length
+              : 0;
+            const isCurrentDay = index === currentDayIndex;
+            const hasMeals = filledSlotsCount > 0;
+
+            return (
+              <button
+                key={day}
+                onClick={() => setCurrentDayIndex(index)}
+                className="group relative"
+              >
+                <div
+                  className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                    isCurrentDay
+                      ? "w-5 bg-orange-500"
+                      : hasMeals
+                        ? "bg-orange-300 hover:bg-orange-400"
+                        : "bg-gray-200 hover:bg-gray-300"
+                  }`}
+                />
+                {/* Tooltip on hover */}
+                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 px-1.5 py-0.5 bg-gray-900 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none">
+                  {format(addDays(weekStart, index), "EEE")}
+                  {hasMeals && ` (${filledSlotsCount})`}
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Shopping Cart Bar - Only visible when meals are selected */}
+        {hasSelectedMealsWithData() && (
+          <div className="mt-2 animate-slide-in">
+            <button
+              onClick={handleGroceryListClick}
+              className={`w-full bg-white hover:bg-orange-50 rounded-xl shadow-sm border border-orange-100/50 px-3 py-2 flex items-center justify-between transition-all duration-300 group ${shouldShake ? "animate-shake" : ""}`}
+            >
+              <div className="flex items-center gap-2">
+                <div className="relative">
+                  <ShoppingCart className="w-4 h-4 text-orange-600" />
+                  {hasNewMealsToAdd() && !hideBadge && (
+                    <span className="absolute -top-1 -right-1 w-2 h-2 bg-gradient-to-br from-orange-500 to-pink-500 rounded-full border border-white shadow-md animate-pop-in" />
+                  )}
+                </div>
+                <div className="text-left">
+                  <div className="text-xs font-medium text-gray-900">
+                    Add to Grocery List ({selectedMeals.size})
+                  </div>
+                </div>
+              </div>
+              <ChevronRight className="w-3.5 h-3.5 text-gray-400 group-hover:text-orange-600 transition-colors" />
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Progress Card */}
-      <div className="px-4 pt-[18px] pb-2 mb-2">
-        <ProgressCard
-          mealPlan={mealPlan}
-          currentDay={currentDay}
-          onDetailsClick={onProgressDetailsClick}
-          isMobile
-          userGoals={userGoals}
-          selectedMeals={selectedMeals}
-        />
-      </div>
-
-      <div className="flex mx-4.5 mt-1 justify-between">
-        <p className="text-sm text-neutral-700">{t("mealPlan.yourMeals")}</p>
+      {/* Your Meals Header */}
+      <div className="flex mx-4 mt-2 pb-2 justify-between items-center">
+        <p className="text-xs font-medium text-neutral-600">
+          {t("mealPlan.yourMeals")}
+        </p>
         <button
           onClick={handleSelectAll}
-          className="flex items-center gap-1.5 cursor-pointer hover:opacity-80 transition-opacity"
+          className="flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity"
         >
           {areAllCurrentDayMealsSelected() ? (
             <>
-              <X className="h-4 w-4 text-danger-500" />
-              <p className="text-sm text-danger-500">
+              <X className="h-3.5 w-3.5 text-danger-500" />
+              <p className="text-xs text-danger-500">
                 {t("mealPlan.deselectAll")}
               </p>
             </>
           ) : (
             <>
-              <CheckCheck className="h-4 w-4 text-neutral-700" />
-              <p className="text-sm text-neutral-700">
+              <CheckCheck className="h-3.5 w-3.5 text-neutral-700" />
+              <p className="text-xs text-neutral-700">
                 {t("mealPlan.selectAll")}
               </p>
             </>
@@ -363,88 +436,67 @@ export const NewMobileMealLayout = ({
         </button>
       </div>
 
-      {/* Meal Cards */}
-      <div className="flex flex-row px-4 pt-4 mb-4 pb-10 items-center gap-[16px] overflow-y-auto no-scrollbar">
-        {MEAL_SLOTS.map((mealSlot) => {
-          const meal = mealPlan[currentDay]?.[mealSlot];
-          const slotKey = `${currentDay}-${mealSlot}`;
-          const isSlotGenerating = generatingSlots.has(slotKey);
+      {/* Scrollable Content Area - Contains Progress Card and Meal Cards */}
+      <div
+        className="flex flex-col flex-1 min-h-0 overflow-y-auto"
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+      >
+        {/* Progress Card - Now scrollable */}
+        <div className="px-4 pb-1">
+          <ProgressCard
+            mealPlan={mealPlan}
+            currentDay={currentDay}
+            onDetailsClick={onProgressDetailsClick}
+            isMobile
+            userGoals={userGoals}
+            selectedMeals={selectedMeals}
+          />
+        </div>
 
-          return (
-            <SimpleMealCard
-              key={mealSlot}
-              mealSlot={mealSlot}
-              meal={meal}
-              onGenerate={() => onSlotClick(currentDay, mealSlot)}
-              onSaved={() => handleSavedMeals(mealSlot)}
-              onCardClick={() =>
-                meal && setSelectedMealSlot({ day: currentDay, slot: mealSlot })
-              }
-              isGenerating={!meal && isSlotGenerating}
-              isRegenerating={meal && isSlotGenerating}
-              isSelected={selectedMeals.has(slotKey)}
-              onMealSelection={() => onMealSelection?.(currentDay, mealSlot)}
-            />
-          );
-        })}
+        {/* Meal Cards - Vertical Stack */}
+        <div className="flex flex-col px-4 pt-2 pb-4 gap-3.5">
+          {MEAL_SLOTS.map((mealSlot) => {
+            const meal = mealPlan[currentDay]?.[mealSlot];
+            const slotKey = `${currentDay}-${mealSlot}`;
+            const isSlotGenerating = generatingSlots.has(slotKey);
+
+            return (
+              <SimpleMealCard
+                key={mealSlot}
+                mealSlot={mealSlot}
+                meal={meal}
+                onGenerate={() => onSlotClick(currentDay, mealSlot)}
+                onSaved={() => handleSavedMeals(mealSlot)}
+                onCardClick={() =>
+                  meal &&
+                  setSelectedMealSlot({ day: currentDay, slot: mealSlot })
+                }
+                isGenerating={!meal && isSlotGenerating}
+                isRegenerating={meal && isSlotGenerating}
+                isSelected={selectedMeals.has(slotKey)}
+                onMealSelection={() => onMealSelection?.(currentDay, mealSlot)}
+              />
+            );
+          })}
+        </div>
       </div>
 
-      {/* Spacer to push input to bottom */}
-      <div className="flex-1" />
-
-      {/* Fixed container to prevent layout shift */}
-      <div className="relative h-0">
-        {/* Selected Meal Tags and Input Bar - Show when meals are selected */}
-        {(selectedMeals.size > 0 || isClosing) && (
-          <div
-            className={`absolute bottom-0 left-0 right-0 ${isClosing ? "animate-slide-down" : "animate-slide-up"}`}
-          >
-            {/* Selected Meal Tags */}
-            <div className="px-4">
-              <div className="flex items-center justify-between">
-                <div className="flex flex-wrap gap-2">
-                  {mealTags.map((tag, index) => (
-                    <div
-                      key={index}
-                      className={`inline-flex items-center space-x-2 px-3 rounded-full text-sm font-medium border border-current/20 ${tag.color}`}
-                    >
-                      <span>{tag.label}</span>
-                      <button
-                        onClick={() => {
-                          const [day, slot] = tag.value.split("-");
-                          onMealSelection?.(day, slot as MealSlot);
-                        }}
-                        className="h-auto p-0.5 hover:bg-current/20 rounded-full transition-colors"
-                      >
-                        <X className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-                {onClearSelectedMeals && (
-                  <button
-                    onClick={onClearSelectedMeals}
-                    className="text-xs text-gray-500 hover:text-red-600 transition-colors"
-                  >
-                    Clear all
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Input Bar */}
-            <ChatInput
-              inputValue={inputValue}
-              onInputChange={setInputValue}
-              onSubmit={onSubmit}
-              isGenerating={isGenerating}
-              placeholder="Veggie and high protein"
-              canSend={inputValue.trim() !== "" || selectedMeals.size > 0}
-              className="px-4 py-0 mt-[4px] pb-safe meal-plan-input"
-            />
-          </div>
-        )}
-      </div>
+      {/* Input Bar - Only visible when meals are selected */}
+      {selectedMeals.size > 0 && (
+        <div className="animate-slide-up">
+          <ChatInput
+            inputValue={inputValue}
+            onInputChange={setInputValue}
+            onSubmit={onSubmit}
+            isGenerating={isGenerating}
+            placeholder={getDynamicPlaceholder()}
+            canSend={inputValue.trim() !== "" || selectedMeals.size > 0}
+            className="px-4 py-0 mt-[4px] pb-safe meal-plan-input"
+          />
+        </div>
+      )}
 
       {/* Calendar Modal */}
       <CalendarModal
