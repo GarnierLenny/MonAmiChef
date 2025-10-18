@@ -154,14 +154,40 @@ export class ChatController extends Controller {
       let modelResponse: string;
       let title: string | undefined;
 
-      try {
-        const chat = ai.chats.create({
-          model: GEMINI_MODEL,
-          history: [],
-          config: { systemInstruction: fullSystemInstruction },
+      // Generate AI response with timeout and retry
+      const generateResponseWithTimeout = async (retryCount = 0): Promise<any> => {
+        const timeoutMs = 25000; // 25 second timeout
+        const maxRetries = 2;
+
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
         });
 
-        const response = await chat.sendMessage({ message: rawInput });
+        try {
+          const chat = ai.chats.create({
+            model: GEMINI_MODEL,
+            history: [],
+            config: { systemInstruction: fullSystemInstruction },
+          });
+
+          const aiPromise = chat.sendMessage({ message: rawInput });
+          const response = await Promise.race([aiPromise, timeoutPromise]);
+          return response;
+        } catch (error) {
+          console.warn(`AI request attempt ${retryCount + 1} failed:`, error);
+
+          if (retryCount < maxRetries && (error instanceof Error && (error.message === 'Request timeout' || (error as any).code === 'DEADLINE_EXCEEDED'))) {
+            console.log(`Retrying AI request (attempt ${retryCount + 2}/${maxRetries + 1})...`);
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+            return generateResponseWithTimeout(retryCount + 1);
+          }
+
+          throw error;
+        }
+      };
+
+      try {
+        const response = await generateResponseWithTimeout();
         modelResponse = response.text ?? "Failed to retrieve model response";
 
         // Generate title with timeout and fallback
@@ -299,37 +325,61 @@ export class ChatController extends Controller {
 
       // Generate AI response
       let modelResponse: string;
-      try {
-        let fullSystemInstruction = geminiCookAssistantPrompt;
-        if (hasPrefs) {
-          fullSystemInstruction += `\n\nUser Preferences:\n${preferencesSummary}`;
-        }
 
-        // Add goal context for authenticated users
-        if (owner && !owner.isGuest && owner.userId) {
-          const goalService = new GoalAwareMealService();
-          try {
-            const goalContext = await goalService.getGoalContext(owner.userId, "");
-            if (goalContext.hasGoals && goalContext.goalMessage) {
-              fullSystemInstruction += `\n\nUSER GOALS: ${goalContext.goalMessage}`;
-            }
-          } catch (error) {
-            console.warn('Failed to get goal context for chat:', error);
+      let fullSystemInstruction = geminiCookAssistantPrompt;
+      if (hasPrefs) {
+        fullSystemInstruction += `\n\nUser Preferences:\n${preferencesSummary}`;
+      }
+
+      // Add goal context for authenticated users
+      if (owner && !owner.isGuest && owner.userId) {
+        const goalService = new GoalAwareMealService();
+        try {
+          const goalContext = await goalService.getGoalContext(owner.userId, "");
+          if (goalContext.hasGoals && goalContext.goalMessage) {
+            fullSystemInstruction += `\n\nUSER GOALS: ${goalContext.goalMessage}`;
           }
+        } catch (error) {
+          console.warn('Failed to get goal context for chat:', error);
         }
+      }
 
-        const chat = ai.chats.create({
-          model: GEMINI_MODEL,
-          history: conversationHistory,
-          config: {
-            systemInstruction: fullSystemInstruction,
-          },
+      // Generate AI response with timeout and retry
+      const generateResponseWithTimeout = async (retryCount = 0): Promise<any> => {
+        const timeoutMs = 25000; // 25 second timeout
+        const maxRetries = 2;
+
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
         });
 
-        const response = await chat.sendMessage({
-          message: rawInput,
-        });
+        try {
+          const chat = ai.chats.create({
+            model: GEMINI_MODEL,
+            history: conversationHistory,
+            config: {
+              systemInstruction: fullSystemInstruction,
+            },
+          });
 
+          const aiPromise = chat.sendMessage({ message: rawInput });
+          const response = await Promise.race([aiPromise, timeoutPromise]);
+          return response;
+        } catch (error) {
+          console.warn(`AI request attempt ${retryCount + 1} failed:`, error);
+
+          if (retryCount < maxRetries && (error instanceof Error && (error.message === 'Request timeout' || (error as any).code === 'DEADLINE_EXCEEDED'))) {
+            console.log(`Retrying AI request (attempt ${retryCount + 2}/${maxRetries + 1})...`);
+            await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+            return generateResponseWithTimeout(retryCount + 1);
+          }
+
+          throw error;
+        }
+      };
+
+      try {
+        const response = await generateResponseWithTimeout();
         modelResponse = response.text ?? "Failed to retrieve model response";
       } catch (aiError) {
         console.error("AI service error:", aiError);
