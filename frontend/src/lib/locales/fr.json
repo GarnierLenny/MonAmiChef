@@ -201,5 +201,157 @@
       "spices": "Épices et Assaisonnements",
       "other": "Autre"
     }
+  },
+  "landing": {
+    "hero": {
+      "badge": "Assistant Culinaire propulsé par l'IA",
+      "title": "Votre Chef Personnel",
+      "titleContinued": "Propulsé par l'IA",
+      "subtitle": "De \"Qu'est-ce qu'on mange?\" à des plans de repas en quelques secondes.",
+      "subtitleContinued": "Cuisinez plus intelligemment avec des recettes personnalisées par IA.",
+      "ctaPrimary": "Commencer Gratuitement",
+      "ctaSecondary": "Découvrir Comment",
+      "socialProof": "Rejoignez 10 000+ cuisiniers • Aucune carte bancaire requise"
+    },
+    "problem": {
+      "title": "Ça Vous Dit Quelque Chose?",
+      "subtitle": "Cuisiner devrait être agréable, pas stressant. Pourtant ces défis reviennent sans cesse:",
+      "endless": {
+        "title": "Planification Interminable",
+        "description": "Passer des heures chaque semaine à planifier les repas et chercher des recettes"
+      },
+      "foodWaste": {
+        "title": "Gaspillage Alimentaire",
+        "description": "Jeter des courses inutilisées à cause d'une mauvaise planification"
+      },
+      "recipeFatigue": {
+        "title": "Fatigue des Recettes",
+        "description": "Manger les mêmes repas en boucle parce que vous manquez d'idées"
+      }
+    },
+    "solution": {
+      "title": "Rencontrez Votre Sous-Chef IA",
+      "subtitle": "Transformez votre routine culinaire en trois étapes simples",
+      "step1": {
+        "title": "Discutez avec l'IA",
+        "description": "Dites à Mon Ami Chef ce que vous voulez cuisiner. Conversation naturelle, compréhension instantanée."
+      },
+      "step2": {
+        "title": "Obtenez Votre Plan",
+        "description": "Recevez des recettes personnalisées et des plans de repas complets en quelques secondes."
+      },
+      "step3": {
+        "title": "Faites Vos Courses et Cuisinez",
+        "description": "Listes de courses générées automatiquement par catégorie. Tout ce dont vous avez besoin, rien de superflu."
+      },
+      "demoUser": "J'ai besoin d'un dîner végétarien sain pour 4 personnes avec les ingrédients que j'ai déjà",
+      "demoAiTitle": "Pâtes aux Pois Chiches Méditerranéennes",
+      "demoAiResponse": "Parfait! Voici une délicieuse recette utilisant des tomates cerises, des pois chiches et des pâtes. Riche en protéines et prête en 25 minutes!"
+    },
+    "features": {
+      "title": "Tout Ce Dont Vous Avez Besoin Pour Mieux Cuisiner",
+      "subtitle": "Des fonctionnalités puissantes conçues pour rendre la cuisine facile et agréable",
+      "aiRecipe": {
+        "title": "Générateur de Recettes IA",
+        "description": "Discutez naturellement avec l'IA pour obtenir des recettes personnalisées instantanément. Pas de recherche, pas de défilement."
+      },
+      "mealPlanner": {
+        "title": "Planificateur Hebdomadaire",
+        "description": "Plans de repas complets générés en quelques secondes. Petit-déjeuner, déjeuner, dîner - tout planifié pour vous."
+      },
+      "groceryList": {
+        "title": "Listes de Courses Intelligentes",
+        "description": "Listes de courses générées automatiquement par catégorie. N'oubliez jamais un ingrédient."
+      },
+      "nutrition": {
+        "title": "Suivi Nutritionnel",
+        "description": "Suivez les calories, les macros et atteignez vos objectifs santé avec des insights intelligents."
+      },
+      "tools": {
+        "title": "Outils de Cuisine",
+        "description": "Minuteurs multiples, convertisseurs d'unités et assistants de cuisine."
+      },
+      "collection": {
+        "title": "Collection de Recettes",
+        "description": "Sauvegardez vos favoris et créez votre livre de recettes personnel."
+      }
+    },
+    "testimonials": {
+      "title": "Adoré par les Cuisiniers du Monde Entier",
+      "subtitle": "Rejoignez des milliers de personnes qui ont transformé leur cuisine",
+      "busyMom": {
+        "quote": "Mon Ami Chef a changé la donne pour notre famille. Fini le stress du 'qu'est-ce qu'on mange'!",
+        "name": "Sarah M.",
+        "role": "Maman Occupée de 3 Enfants"
+      },
+      "homeCook": {
+        "quote": "J'ai économisé tellement d'argent et réduit le gaspillage alimentaire. Les listes de courses sont incroyablement intelligentes.",
+        "name": "Jacques T.",
+        "role": "Cuisinier Amateur"
+      },
+      "fitness": {
+        "quote": "Parfait pour atteindre mes objectifs de macros. Le suivi nutritionnel est précis et facile à utiliser.",
+        "name": "Émilie R.",
+        "role": "Passionnée de Fitness"
+      },
+      "beginner": {
+        "quote": "Même en tant que débutant, je cuisine des plats dignes d'un restaurant. L'IA me guide à chaque étape.",
+        "name": "Michel K.",
+        "role": "Débutant en Cuisine"
+      },
+      "vegetarian": {
+        "quote": "Trouver des recettes végétariennes n'a jamais été aussi facile. L'IA comprend exactement ce dont j'ai besoin!",
+        "name": "Lisa P.",
+        "role": "Cuisinière Végétarienne"
+      },
+      "mealPrep": {
+        "quote": "La préparation des repas du dimanche est maintenant sans effort. Je planifie toute ma semaine en moins de 5 minutes.",
+        "name": "David H.",
+        "role": "Pro de la Préparation"
+      },
+      "stats": {
+        "activeUsers": "Utilisateurs Actifs",
+        "recipesGenerated": "Recettes Générées",
+        "userRating": "Note des Utilisateurs",
+        "wouldRecommend": "Recommanderaient"
+      }
+    },
+    "finalCta": {
+      "badge": "Commencez Votre Aventure Culinaire Aujourd'hui",
+      "title": "Prêt à Transformer",
+      "titleContinued": "Votre Cuisine?",
+      "subtitle": "Rejoignez des milliers de cuisiniers qui ont dit adieu au stress de la planification des repas",
+      "benefits": {
+        "noCard": "Aucune carte bancaire requise",
+        "freePlan": "Plan gratuit pour toujours",
+        "unlimited": "Génération de recettes illimitée",
+        "cancel": "Annulez à tout moment"
+      },
+      "cta": "Commencer Gratuitement",
+      "reassurance": "Configuration en 30 secondes • Aucune carte bancaire requise",
+      "socialProof": "cuisiniers satisfaits",
+      "rating": "note"
+    },
+    "footer": {
+      "tagline": "Votre chef personnel propulsé par l'IA. Transformez votre cuisine avec des recettes personnalisées, des plans de repas et des listes de courses intelligentes.",
+      "product": "Produit",
+      "company": "Entreprise",
+      "resources": "Ressources",
+      "legal": "Légal",
+      "features": "Fonctionnalités",
+      "pricing": "Tarifs",
+      "faq": "FAQ",
+      "about": "À Propos",
+      "blog": "Blog",
+      "contact": "Contact",
+      "privacy": "Politique de Confidentialité",
+      "terms": "Conditions d'Utilisation",
+      "cookies": "Politique des Cookies",
+      "recipeGenerator": "Générateur de Recettes",
+      "mealPlanner": "Planificateur de Repas",
+      "copyright": "Mon Ami Chef. Tous droits réservés.",
+      "madeWith": "Fait avec",
+      "forCooks": "pour les cuisiniers du monde entier"
+    }
   }
 }

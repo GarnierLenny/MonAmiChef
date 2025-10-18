@@ -201,5 +201,157 @@
       "spices": "Spices & Seasonings",
       "other": "Other"
     }
+  },
+  "landing": {
+    "hero": {
+      "badge": "AI-Powered Cooking Assistant",
+      "title": "Your AI-Powered",
+      "titleContinued": "Personal Chef",
+      "subtitle": "From \"What's for dinner?\" to meal plans in seconds.",
+      "subtitleContinued": "Cook smarter with AI-generated recipes tailored to you.",
+      "ctaPrimary": "Start Cooking Free",
+      "ctaSecondary": "See How It Works",
+      "socialProof": "Join 10,000+ home cooks • No credit card required"
+    },
+    "problem": {
+      "title": "Sound Familiar?",
+      "subtitle": "Cooking should be enjoyable, not stressful. Yet these challenges keep appearing:",
+      "endless": {
+        "title": "Endless Meal Planning",
+        "description": "Spending hours every week planning meals and searching for recipes"
+      },
+      "foodWaste": {
+        "title": "Food Waste",
+        "description": "Throwing away unused groceries because of poor planning"
+      },
+      "recipeFatigue": {
+        "title": "Recipe Fatigue",
+        "description": "Eating the same meals on repeat because you're out of ideas"
+      }
+    },
+    "solution": {
+      "title": "Meet Your AI Sous Chef",
+      "subtitle": "Transform your cooking routine in three simple steps",
+      "step1": {
+        "title": "Chat with AI",
+        "description": "Tell Mon Ami Chef what you want to cook. Natural conversation, instant understanding."
+      },
+      "step2": {
+        "title": "Get Your Plan",
+        "description": "Receive personalized recipes and complete weekly meal plans in seconds."
+      },
+      "step3": {
+        "title": "Shop & Cook",
+        "description": "Auto-generated grocery lists organized by category. Everything you need, nothing you don't."
+      },
+      "demoUser": "I need a healthy vegetarian dinner for 4 people with ingredients I already have",
+      "demoAiTitle": "Mediterranean Chickpea Pasta",
+      "demoAiResponse": "Perfect! Here's a delicious recipe using cherry tomatoes, chickpeas, and pasta. High in protein and ready in 25 minutes!"
+    },
+    "features": {
+      "title": "Everything You Need to Cook Better",
+      "subtitle": "Powerful features designed to make cooking effortless and enjoyable",
+      "aiRecipe": {
+        "title": "AI Recipe Generator",
+        "description": "Chat naturally with AI to get personalized recipes instantly. No searching, no scrolling."
+      },
+      "mealPlanner": {
+        "title": "Weekly Meal Planner",
+        "description": "Complete meal plans generated in seconds. Breakfast, lunch, dinner - all planned for you."
+      },
+      "groceryList": {
+        "title": "Smart Grocery Lists",
+        "description": "Auto-generated shopping lists organized by category. Never forget an ingredient."
+      },
+      "nutrition": {
+        "title": "Nutrition Tracking",
+        "description": "Track calories, macros, and reach your health goals with intelligent insights."
+      },
+      "tools": {
+        "title": "Cooking Tools",
+        "description": "Multiple timers, unit converters, and kitchen helpers."
+      },
+      "collection": {
+        "title": "Recipe Collection",
+        "description": "Save favorites and build your personal cookbook."
+      }
+    },
+    "testimonials": {
+      "title": "Loved by Home Cooks Everywhere",
+      "subtitle": "Join thousands of people who've transformed their cooking",
+      "busyMom": {
+        "quote": "Mon Ami Chef has been a game-changer for our family. No more 'what's for dinner' stress!",
+        "name": "Sarah M.",
+        "role": "Busy Mom of 3"
+      },
+      "homeCook": {
+        "quote": "I've saved so much money and reduced food waste. The grocery lists are incredibly smart.",
+        "name": "James T.",
+        "role": "Home Cook"
+      },
+      "fitness": {
+        "quote": "Perfect for hitting my macro goals. The nutrition tracking is accurate and easy to use.",
+        "name": "Emily R.",
+        "role": "Fitness Enthusiast"
+      },
+      "beginner": {
+        "quote": "Even as a beginner, I'm cooking restaurant-quality meals. The AI guides me every step.",
+        "name": "Michael K.",
+        "role": "Cooking Beginner"
+      },
+      "vegetarian": {
+        "quote": "Finding vegetarian recipes has never been easier. It understands exactly what I need!",
+        "name": "Lisa P.",
+        "role": "Vegetarian Cook"
+      },
+      "mealPrep": {
+        "quote": "Sunday meal prep is now effortless. I plan my whole week in under 5 minutes.",
+        "name": "David H.",
+        "role": "Meal Prep Pro"
+      },
+      "stats": {
+        "activeUsers": "Active Users",
+        "recipesGenerated": "Recipes Generated",
+        "userRating": "User Rating",
+        "wouldRecommend": "Would Recommend"
+      }
+    },
+    "finalCta": {
+      "badge": "Start Your Cooking Journey Today",
+      "title": "Ready to Transform",
+      "titleContinued": "Your Cooking?",
+      "subtitle": "Join thousands of home cooks who've said goodbye to meal planning stress",
+      "benefits": {
+        "noCard": "No credit card required",
+        "freePlan": "Free forever plan",
+        "unlimited": "Unlimited recipe generation",
+        "cancel": "Cancel anytime"
+      },
+      "cta": "Get Started Free",
+      "reassurance": "Set up in 30 seconds • No credit card required",
+      "socialProof": "happy cooks",
+      "rating": "rating"
+    },
+    "footer": {
+      "tagline": "Your AI-powered personal chef. Transform your cooking with personalized recipes, meal plans, and smart grocery lists.",
+      "product": "Product",
+      "company": "Company",
+      "resources": "Resources",
+      "legal": "Legal",
+      "features": "Features",
+      "pricing": "Pricing",
+      "faq": "FAQ",
+      "about": "About",
+      "blog": "Blog",
+      "contact": "Contact",
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "cookies": "Cookie Policy",
+      "recipeGenerator": "Recipe Generator",
+      "mealPlanner": "Meal Planner",
+      "copyright": "Mon Ami Chef. All rights reserved.",
+      "madeWith": "Made with",
+      "forCooks": "for home cooks everywhere"
+    }
   }
 }
