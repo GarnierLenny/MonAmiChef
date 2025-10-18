@@ -30,6 +30,7 @@ import SavedRecipes from "./pages/SavedRecipes";
 import NotFoundPage from "./pages/NotFoundPage";
 import Settings from "./pages/Settings";
 import Palette from "./pages/Palette";
+import LandingPage from "./pages/LandingPage";
 import CanonicalUrl from "./components/CanonicalUrl";
 import RedirectHandler from "./components/RedirectHandler";
 import SEOHead from "./components/SEOHead";
@@ -56,7 +57,7 @@ function RequireAuth({
   session: Session | null;
   children: JSX.Element;
 }) {
-  return session ? children : <Navigate to="/" replace />;
+  return session ? children : <Navigate to="/chat" replace />;
 }
 
 function App() {
@@ -64,7 +65,8 @@ function App() {
   const location = useLocation();
   const { toast } = useToast();
   const isRecipePage = location.pathname.startsWith("/recipe/");
-  const isChatPage = location.pathname === "/";
+  const isLandingPage = location.pathname === "/";
+  const isChatPage = location.pathname === "/chat";
   const isMealPlanPage = location.pathname === "/meal-plan-chat";
 
   const [session, setSession] = useState<Session | null>(null);
@@ -84,7 +86,7 @@ function App() {
     const params = new URLSearchParams(location.search);
     if (params.has("c")) {
       params.delete("c");
-      navigate({ pathname: "/", search: params.toString() }, { replace: true });
+      navigate({ pathname: "/chat", search: params.toString() }, { replace: true });
     }
   }, [location.search, navigate]);
 
@@ -239,7 +241,7 @@ function App() {
   }, []);
 
   const handleViewChange = (view: string) => {
-    navigate(`/${view === "generator" ? "" : view}`);
+    navigate(`/${view === "generator" ? "chat" : view}`);
   };
 
   const handleAuthenticate = (u: User) => {
@@ -298,14 +300,14 @@ function App() {
       <RedirectHandler />
       <OrganizationStructuredData />
       <div className="flex flex-col mobile-viewport overflow-hidden bg-orange-50">
-        {!isRecipePage && !isChatPage && (
+        {!isRecipePage && !isChatPage && !isLandingPage && (
           <MobileTopBar
             onMenuClick={() => setIsMobileSidebarOpen(true)}
             title={getPageTitle()}
           />
         )}
 
-        {!isRecipePage && (
+        {!isRecipePage && !isLandingPage && (
           <div className="hidden md:block sticky top-0 z-50">
             <Navbar
               handleSignOut={handleSignOut}
@@ -317,24 +319,33 @@ function App() {
               onPricingClick={() => setIsPricingModalOpen(true)}
               onNewChat={() => {
                 clearConversationParam();
-                navigate("/");
+                navigate("/chat");
               }}
             />
           </div>
         )}
 
         <div
-          className={`flex ${isRecipePage ? "mobile-viewport" : "flex-1"} ${isChatPage || isMealPlanPage ? "overflow-hidden" : "overflow-y-auto"}`}
+          className={`flex ${isRecipePage ? "mobile-viewport" : "flex-1"} ${isChatPage || isMealPlanPage || isLandingPage ? "overflow-hidden" : "overflow-y-auto"}`}
         >
           <Routes>
             {/* Public routes */}
             <Route
               path="/"
               element={
+                <ComponentErrorBoundary componentName="LandingPage">
+                  <LandingPage />
+                </ComponentErrorBoundary>
+              }
+            />
+
+            <Route
+              path="/chat"
+              element={
                 <ComponentErrorBoundary componentName="ChatPage">
                   <SEOHead
-                    title="Mon Ami Chef - AI Recipe Generator & Cooking Assistant"
-                    description="Get personalized AI-generated recipes based on your ingredients, dietary preferences, and cooking style. Chat with your AI cooking assistant for instant meal ideas and cooking tips."
+                    title="AI Recipe Chat - Mon Ami Chef"
+                    description="Chat with your AI cooking assistant for instant recipe ideas and cooking tips. Get personalized AI-generated recipes based on your preferences."
                     keywords="AI recipe generator, cooking assistant, personalized recipes, meal ideas, ingredient-based recipes, AI cooking chat"
                   />
                   <ChatPage
