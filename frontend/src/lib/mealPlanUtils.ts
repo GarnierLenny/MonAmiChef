@@ -143,6 +143,11 @@ export function convertRecipeToMeal(recipe: Recipe): Meal {
   const emojiMatch = recipe.title.match(/([🍳🥣🍽️🥗🌯🍲🥪🍝🐟🍜🌮🍛🍕🥤🥑])/);
   const emoji = emojiMatch ? emojiMatch[1] : getDefaultEmojiForTags(recipe.tags);
 
+  // Validate nutrition data - if missing critical data, log warning
+  if (!nutrition || typeof nutrition.calories !== 'number' || nutrition.calories <= 0) {
+    console.warn(`Recipe ${recipe.id} missing valid nutrition data. This should not happen with the new validation.`, nutrition);
+  }
+
   // Use AI-provided nutrition rating, fallback to calculated grade
   let grade: "A" | "B" | "C" | "D" = nutrition?.rating || "B";
 
@@ -153,12 +158,14 @@ export function convertRecipeToMeal(recipe: Recipe): Meal {
     description: content.ingredients.slice(0, 3).join(', ') + (content.ingredients.length > 3 ? '...' : ''),
     servings: content.servings || 1,
     cookingTime: parseCookingTime(content.cookTime || content.totalTime) || 20,
-    calories: nutrition?.calories || 350,
+    // Nutrition should always be present now due to backend validation
+    // Only use fallback values as absolute last resort
+    calories: nutrition?.calories || 0,
     grade,
     macros: {
-      protein: nutrition?.protein || 15,
-      carbs: nutrition?.carbs || 30,
-      fat: nutrition?.fat || 10,
+      protein: nutrition?.protein || 0,
+      carbs: nutrition?.carbs || 0,
+      fat: nutrition?.fat || 0,
     },
   };
 }

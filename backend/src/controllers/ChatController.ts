@@ -741,17 +741,26 @@ export class ChatController extends Controller {
         ? `${goalContext.goalMessage} `
         : "";
 
-      const mealPrompt = `${goalInfo}Generate a calorie-rich, substantial ${body.mealType} recipe for 1 serving. ${dietaryInfo}${userPrefs}Create multiple dishes or components for this meal to increase calories (e.g., for breakfast: protein smoothie + avocado toast + nuts, for lunch: hearty salad + protein + healthy fats, etc.). Use calorie-dense ingredients like nuts, oils, cheese, proteins, whole grains. MANDATORY: Always set servings to 1 and create filling, high-calorie portions for ONE person. Make it nutritious and appropriate for ${body.mealType}. Provide a complete recipe with ingredients, instructions, tips, and nutrition info.`;
+      const mealPrompt = `${goalInfo}Generate a calorie-rich, substantial ${body.mealType} recipe for 1 serving. ${dietaryInfo}${userPrefs}Create multiple dishes or components for this meal to increase calories (e.g., for breakfast: protein smoothie + avocado toast + nuts, for lunch: hearty salad + protein + healthy fats, etc.). Use calorie-dense ingredients like nuts, oils, cheese, proteins, whole grains. MANDATORY: Always set servings to 1 and create filling, high-calorie portions for ONE person. Make it nutritious and appropriate for ${body.mealType}.
+
+CRITICAL NUTRITION REQUIREMENT: You MUST include a **Nutrition** section with EXACT calorie and macro information. Format it EXACTLY as:
+
+### Nutrition (per serving)
+**Total per serving:** [calories] cal, [protein]g protein, [carbs]g carbs, [fat]g fat
+
+Example: **Total per serving:** 650 cal, 35g protein, 48g carbs, 22g fat
+
+Without accurate nutrition data, the recipe cannot be saved. This is MANDATORY.`;
 
       console.log('=== DEBUG: Full prompt sent to AI ===');
       console.log('Goal context:', goalContext);
       console.log('Final meal prompt:', mealPrompt);
       console.log('=== End DEBUG ===');
 
-      // Use Gemini to generate the recipe with timeout and retry
-      const generateRecipeWithTimeout = async (retryCount = 0): Promise<any> => {
+      // Use Gemini to generate the recipe with timeout and retry, including nutrition validation
+      const generateRecipeWithValidation = async (attemptCount = 0): Promise<any> => {
         const timeoutMs = 25000; // 25 second timeout
-        const maxRetries = 2;
+        const maxAttempts = 3; // Allow 3 total attempts
 
         const timeoutPromise = new Promise((_, reject) => {
           setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
@@ -770,32 +779,57 @@ export class ChatController extends Controller {
             message: mealPrompt,
           });
 
-          const response = await Promise.race([aiPromise, timeoutPromise]);
-          return response;
-        } catch (error) {
-          console.warn(`AI request attempt ${retryCount + 1} failed:`, error);
+          const response = await Promise.race([aiPromise, timeoutPromise]) as any;
+          const text = response.text;
 
-          if (retryCount < maxRetries && (error instanceof Error && (error.message === 'Request timeout' || (error as any).code === 'DEADLINE_EXCEEDED'))) {
-            console.log(`Retrying AI request (attempt ${retryCount + 2}/${maxRetries + 1})...`);
+          if (!text || text.trim().length === 0) {
+            throw new Error('AI service returned empty response');
+          }
+
+          // Parse the AI response to extract recipe components
+          const { parseRecipeFromAI } = require('../utils/recipeParser');
+          const parsedRecipe = parseRecipeFromAI(text);
+
+          // Validate nutrition data exists and has all required fields
+          const nutrition = parsedRecipe.nutrition;
+          if (!nutrition ||
+              typeof nutrition.calories !== 'number' ||
+              nutrition.calories <= 0 ||
+              typeof nutrition.protein !== 'number' ||
+              typeof nutrition.carbs !== 'number' ||
+              typeof nutrition.fat !== 'number') {
+
+            console.warn(`Attempt ${attemptCount + 1}: Missing or invalid nutrition data:`, nutrition);
+
+            if (attemptCount < maxAttempts - 1) {
+              console.log(`Retrying recipe generation due to missing nutrition (attempt ${attemptCount + 2}/${maxAttempts})...`);
+              await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+              return generateRecipeWithValidation(attemptCount + 1);
+            } else {
+              throw new Error('Failed to generate recipe with valid nutrition data after multiple attempts');
+            }
+          }
+
+          console.log(`Successfully parsed recipe with nutrition: ${nutrition.calories} cal`);
+          return parsedRecipe;
+
+        } catch (error) {
+          console.warn(`Recipe generation attempt ${attemptCount + 1} failed:`, error);
+
+          if (attemptCount < maxAttempts - 1 &&
+              (error instanceof Error &&
+               (error.message === 'Request timeout' ||
+                (error as any).code === 'DEADLINE_EXCEEDED'))) {
+            console.log(`Retrying due to timeout (attempt ${attemptCount + 2}/${maxAttempts})...`);
             await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
-            return generateRecipeWithTimeout(retryCount + 1);
+            return generateRecipeWithValidation(attemptCount + 1);
           }
 
           throw error;
         }
       };
 
-      const response = await generateRecipeWithTimeout();
-
-      const text = response.text;
-
-      if (!text || text.trim().length === 0) {
-        throw new ServiceUnavailableError("AI service returned empty response");
-      }
-
-      // Parse the AI response to extract recipe components
-      const { parseRecipeFromAI } = require('../utils/recipeParser');
-      const parsedRecipe = parseRecipeFromAI(text);
+      const parsedRecipe = await generateRecipeWithValidation();
 
       // Create recipe in database
       const recipe = await prisma.recipe.create({
