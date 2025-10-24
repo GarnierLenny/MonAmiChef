@@ -7,7 +7,10 @@ import ChatHistorySidebar from "../components/ChatHistorySidebar";
 import MobileTopBar from "../components/MobileTopBar";
 import NavigationSidebar from "../components/NavigationSidebar";
 import ChatSidebar from "../components/ChatSidebar";
+import WelcomeModal from "../components/onboarding/WelcomeModal";
 import { useIsMobile } from "../hooks/use-mobile";
+import { useOnboarding } from "../hooks/useOnboarding";
+import { useDriver } from "../hooks/useDriver";
 import Cookies from "universal-cookie";
 import { useSearchParams, useNavigate, useLocation } from "react-router-dom";
 import { createClient } from "@supabase/supabase-js";
@@ -70,6 +73,44 @@ function ChatPage({ user, onAuthClick, onSignOut, chats: propsChats = [], setCha
 
   const isMobile = useIsMobile();
   const chatId = searchParams.get("c");
+
+  // Onboarding hooks
+  const {
+    showWelcomeModal,
+    showTour,
+    setShowTour,
+    completeWelcomeModal,
+    completeTour,
+    skipTour,
+  } = useOnboarding();
+
+  const { startTour } = useDriver({
+    onComplete: completeTour,
+    onSkip: skipTour,
+    isMobile,
+  });
+
+  // Start tour when showTour becomes true
+  useEffect(() => {
+    if (showTour) {
+      startTour();
+      setShowTour(false); // Reset flag
+    }
+  }, [showTour, startTour, setShowTour]);
+
+  // Handler for welcome modal completion
+  const handleWelcomeComplete = (shouldStartTour: boolean) => {
+    completeWelcomeModal(shouldStartTour);
+  };
+
+  // Handler for example prompt clicks
+  const handlePromptClick = (prompt: string) => {
+    setInputValue(prompt);
+    // Focus input after a short delay
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100);
+  };
 
   // helpers to mutate ?c=
   const setChatParam = (id: string, replace = true) => {
@@ -362,6 +403,12 @@ function ChatPage({ user, onAuthClick, onSignOut, chats: propsChats = [], setCha
 
   return (
     <>
+      {/* Welcome Modal for first-time users */}
+      <WelcomeModal
+        open={showWelcomeModal}
+        onComplete={handleWelcomeComplete}
+      />
+
       {isMobile ? (
         <div className="flex flex-col mobile-viewport min-h-0 relative overflow-hidden">
             <MobileTopBar
@@ -437,6 +484,7 @@ function ChatPage({ user, onAuthClick, onSignOut, chats: propsChats = [], setCha
                 user={user}
                 onAuthClick={onAuthClick}
                 onOpenPreferences={() => setIsChatSidebarOpen(true)}
+                onPromptClick={handlePromptClick}
               />
             </div>
           </div>
@@ -484,6 +532,7 @@ function ChatPage({ user, onAuthClick, onSignOut, chats: propsChats = [], setCha
               inputRef={inputRef}
               user={user}
               onAuthClick={onAuthClick}
+              onPromptClick={handlePromptClick}
             />
           </div>
 

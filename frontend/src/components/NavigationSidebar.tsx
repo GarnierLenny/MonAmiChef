@@ -250,7 +250,7 @@ export function NavigationSidebar({
               <button
                 onClick={() => {
                   onNewChat();
-                  handleNavigation("/");
+                  handleNavigation("/chat");
                 }}
                 className="w-full flex items-center justify-start gap-3 px-4 py-3 bg-orange-500 text-white rounded-xl hover:bg-orange-600 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95 text-sm font-semibold relative overflow-hidden group"
               >
@@ -301,7 +301,7 @@ export function NavigationSidebar({
                       <div key={chat.id} className="group relative">
                         <Link
                           to={{
-                            pathname: "/",
+                            pathname: "/chat",
                             search: `?${params.toString()}`,
                           }}
                           onClick={onClose}

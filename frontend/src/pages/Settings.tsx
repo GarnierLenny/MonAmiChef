@@ -1,4 +1,5 @@
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -13,7 +14,10 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Languages } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Languages, GraduationCap, PlayCircle } from "lucide-react";
+import { resetOnboarding } from "../lib/onboarding-state";
+import { useToast } from "@/hooks/use-toast";
 
 interface SettingsProps {
   onPricingClick?: () => void;
@@ -21,9 +25,24 @@ interface SettingsProps {
 
 const Settings = ({ onPricingClick }: SettingsProps) => {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const handleLanguageChange = (language: string) => {
     i18n.changeLanguage(language);
+  };
+
+  const handleRestartTour = () => {
+    resetOnboarding();
+    toast({
+      title: "Tour Reset",
+      description: "The welcome tour will show again when you visit the chat page.",
+      duration: 3000,
+    });
+    // Navigate to chat to trigger tour
+    setTimeout(() => {
+      navigate("/chat");
+    }, 500);
   };
 
   // Get browser's preferred language for display
@@ -43,6 +62,39 @@ const Settings = ({ onPricingClick }: SettingsProps) => {
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Settings Cards */}
           <div className="grid gap-6">
+            {/* Help & Onboarding */}
+            <Card className="bg-white/80 backdrop-blur-sm border border-orange-200 shadow-lg">
+              <CardHeader>
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                    <GraduationCap className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-gray-900">
+                      Help & Onboarding
+                    </CardTitle>
+                    <CardDescription>
+                      Learn how to use MonAmiChef with our interactive tour
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="space-y-4">
+                  <p className="text-sm text-gray-600">
+                    New to MonAmiChef? Take our quick guided tour to discover all the features and get started with AI-powered cooking!
+                  </p>
+                  <Button
+                    onClick={handleRestartTour}
+                    className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+                  >
+                    <PlayCircle className="w-4 h-4 mr-2" />
+                    Restart Product Tour
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Language Settings */}
             <Card className="bg-white/80 backdrop-blur-sm border border-orange-200 shadow-lg">
               <CardHeader>

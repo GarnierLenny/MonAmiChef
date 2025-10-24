@@ -1,5 +1,5 @@
 import { useLayoutEffect, useEffect, useRef, useState } from "react";
-import { Loader2, Sparkles, X, Heart } from "lucide-react";
+import { Loader2, Sparkles, Heart } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
@@ -45,6 +45,7 @@ interface ChatInterfaceProps {
   user?: { id: string; email: string; name: string } | null;
   onAuthClick?: () => void;
   onOpenPreferences?: () => void;
+  onPromptClick?: (prompt: string) => void;
 }
 
 export default function ChatInterface({
@@ -64,6 +65,7 @@ export default function ChatInterface({
   user,
   onAuthClick,
   onOpenPreferences,
+  onPromptClick,
 }: ChatInterfaceProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -251,7 +253,7 @@ export default function ChatInterface({
         {/* Show placeholder when no messages, otherwise show messages */}
         {!hasMessages ? (
           <div className="flex-1 flex items-center justify-center w-full">
-            <ChatPlaceholder />
+            <ChatPlaceholder onPromptClick={onPromptClick} />
           </div>
         ) : (
           <div
