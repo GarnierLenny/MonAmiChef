@@ -35,8 +35,8 @@ const Settings = ({ onPricingClick }: SettingsProps) => {
   const handleRestartTour = () => {
     resetOnboarding();
     toast({
-      title: "Tour Reset",
-      description: "The welcome tour will show again when you visit the chat page.",
+      title: t("settings.tourReset"),
+      description: t("settings.tourResetDescription"),
       duration: 3000,
     });
     // Navigate to chat to trigger tour
@@ -71,10 +71,10 @@ const Settings = ({ onPricingClick }: SettingsProps) => {
                   </div>
                   <div>
                     <CardTitle className="text-gray-900">
-                      Help & Onboarding
+                      {t("settings.helpOnboarding")}
                     </CardTitle>
                     <CardDescription>
-                      Learn how to use MonAmiChef with our interactive tour
+                      {t("settings.helpOnboardingDescription")}
                     </CardDescription>
                   </div>
                 </div>
@@ -82,14 +82,14 @@ const Settings = ({ onPricingClick }: SettingsProps) => {
               <CardContent className="pt-0">
                 <div className="space-y-4">
                   <p className="text-sm text-gray-600">
-                    New to MonAmiChef? Take our quick guided tour to discover all the features and get started with AI-powered cooking!
+                    {t("settings.newToMonAmiChef")}
                   </p>
                   <Button
                     onClick={handleRestartTour}
                     className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
                   >
                     <PlayCircle className="w-4 h-4 mr-2" />
-                    Restart Product Tour
+                    {t("settings.restartProductTour")}
                   </Button>
                 </div>
               </CardContent>

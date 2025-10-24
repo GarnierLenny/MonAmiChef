@@ -9,6 +9,7 @@ import {
 } from '../ui/dialog';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 interface WelcomeModalProps {
   open: boolean;
@@ -25,48 +26,50 @@ interface Slide {
   iconColor: string;
 }
 
-const slides: Slide[] = [
-  {
-    id: 1,
-    title: 'Welcome to MonAmiChef! 👋',
-    description: 'Your AI-powered cooking companion that helps you discover recipes, plan meals, and make cooking delightful.',
-    icon: <Sparkles className="w-full h-full" />,
-    gradient: 'from-orange-500 via-orange-400 to-orange-300',
-    iconBg: 'bg-white shadow-md',
-    iconColor: 'text-orange-600',
-  },
-  {
-    id: 2,
-    title: 'Chat with AI Chef 💬',
-    description: 'Simply tell me what you\'re craving or what ingredients you have. I\'ll suggest personalized recipes instantly.',
-    icon: <Sparkles className="w-full h-full animate-pulse" />,
-    gradient: 'from-orange-600 via-orange-500 to-orange-400',
-    iconBg: 'bg-white shadow-md',
-    iconColor: 'text-orange-700',
-  },
-  {
-    id: 3,
-    title: 'Weekly Meal Plans 📅',
-    description: 'Generate complete meal plans for your week in seconds. No more "what\'s for dinner?" stress!',
-    icon: <Calendar className="w-full h-full" />,
-    gradient: 'from-amber-500 via-orange-500 to-orange-400',
-    iconBg: 'bg-white shadow-md',
-    iconColor: 'text-orange-600',
-  },
-  {
-    id: 4,
-    title: 'Smart Grocery Lists 🛒',
-    description: 'Automatically get organized grocery lists from your meal plans. Never forget an ingredient again!',
-    icon: <ShoppingCart className="w-full h-full" />,
-    gradient: 'from-orange-600 via-orange-500 to-orange-500',
-    iconBg: 'bg-white shadow-lg',
-    iconColor: 'text-orange-800',
-  },
-];
-
 export default function WelcomeModal({ open, onComplete }: WelcomeModalProps) {
+  const { t } = useTranslation();
   const [currentSlide, setCurrentSlide] = useState(0);
   const prefersReducedMotion = useReducedMotion();
+
+  const slides: Slide[] = [
+    {
+      id: 1,
+      title: t('onboarding.welcomeModal.slide1.title'),
+      description: t('onboarding.welcomeModal.slide1.description'),
+      icon: <Sparkles className="w-full h-full" />,
+      gradient: 'from-orange-500 via-orange-400 to-orange-300',
+      iconBg: 'bg-white shadow-md',
+      iconColor: 'text-orange-600',
+    },
+    {
+      id: 2,
+      title: t('onboarding.welcomeModal.slide2.title'),
+      description: t('onboarding.welcomeModal.slide2.description'),
+      icon: <Sparkles className="w-full h-full animate-pulse" />,
+      gradient: 'from-orange-600 via-orange-500 to-orange-400',
+      iconBg: 'bg-white shadow-md',
+      iconColor: 'text-orange-700',
+    },
+    {
+      id: 3,
+      title: t('onboarding.welcomeModal.slide3.title'),
+      description: t('onboarding.welcomeModal.slide3.description'),
+      icon: <Calendar className="w-full h-full" />,
+      gradient: 'from-amber-500 via-orange-500 to-orange-400',
+      iconBg: 'bg-white shadow-md',
+      iconColor: 'text-orange-600',
+    },
+    {
+      id: 4,
+      title: t('onboarding.welcomeModal.slide4.title'),
+      description: t('onboarding.welcomeModal.slide4.description'),
+      icon: <ShoppingCart className="w-full h-full" />,
+      gradient: 'from-orange-600 via-orange-500 to-orange-500',
+      iconBg: 'bg-white shadow-lg',
+      iconColor: 'text-orange-800',
+    },
+  ];
+
   const isLastSlide = currentSlide === slides.length - 1;
 
   // Keyboard navigation
@@ -146,7 +149,7 @@ export default function WelcomeModal({ open, onComplete }: WelcomeModalProps) {
         <button
           onClick={handleSkip}
           className="absolute right-3 top-3 z-30 rounded-full p-2 bg-white/95 backdrop-blur-sm hover:bg-white shadow-md transition-all duration-200 hover:scale-105"
-          aria-label="Close onboarding and skip tour"
+          aria-label={t('onboarding.welcomeModal.closeAriaLabel')}
         >
           <X className="h-4 w-4 text-gray-600" />
         </button>
@@ -240,11 +243,11 @@ export default function WelcomeModal({ open, onComplete }: WelcomeModalProps) {
                   >
                     {isLastSlide ? (
                       <>
-                        Start Tour
+                        {t('onboarding.welcomeModal.startTour')}
                         <Sparkles className="w-4 h-4 ml-2" />
                       </>
                     ) : (
-                      'Next'
+                      t('onboarding.welcomeModal.next')
                     )}
                   </Button>
 
@@ -263,7 +266,7 @@ export default function WelcomeModal({ open, onComplete }: WelcomeModalProps) {
                       onClick={handleSkip}
                       className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
                     >
-                      Skip
+                      {t('onboarding.welcomeModal.skip')}
                     </button>
                   </div>
                 </div>
@@ -275,7 +278,7 @@ export default function WelcomeModal({ open, onComplete }: WelcomeModalProps) {
                       onClick={handleSkip}
                       className="text-sm text-gray-500 hover:text-gray-700 underline decoration-gray-400 underline-offset-4 transition-all"
                     >
-                      Or explore on my own
+                      {t('onboarding.welcomeModal.exploreOnOwn')}
                     </button>
                   </div>
                 )}

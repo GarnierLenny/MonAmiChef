@@ -167,7 +167,88 @@
     "accountSettings": "Account Settings",
     "accountDescription": "Manage your profile and account preferences (Coming Soon)",
     "notifications": "Notifications",
-    "notificationsDescription": "Configure your notification preferences (Coming Soon)"
+    "notificationsDescription": "Configure your notification preferences (Coming Soon)",
+    "helpOnboarding": "Help & Onboarding",
+    "helpOnboardingDescription": "Learn how to use MonAmiChef with our interactive tour",
+    "newToMonAmiChef": "New to MonAmiChef? Take our quick guided tour to discover all the features and get started with AI-powered cooking!",
+    "restartProductTour": "Restart Product Tour",
+    "tourReset": "Tour Reset",
+    "tourResetDescription": "The welcome tour will show again when you visit the chat page."
+  },
+  "onboarding": {
+    "welcomeModal": {
+      "slide1": {
+        "title": "Welcome to MonAmiChef! 👋",
+        "description": "Your AI-powered cooking companion that helps you discover recipes, plan meals, and make cooking delightful."
+      },
+      "slide2": {
+        "title": "Chat with AI Chef 💬",
+        "description": "Simply tell me what you're craving or what ingredients you have. I'll suggest personalized recipes instantly."
+      },
+      "slide3": {
+        "title": "Weekly Meal Plans 📅",
+        "description": "Generate complete meal plans for your week in seconds. No more \"what's for dinner?\" stress!"
+      },
+      "slide4": {
+        "title": "Smart Grocery Lists 🛒",
+        "description": "Automatically get organized grocery lists from your meal plans. Never forget an ingredient again!"
+      },
+      "next": "Next",
+      "skip": "Skip",
+      "startTour": "Start Tour",
+      "exploreOnOwn": "Or explore on my own",
+      "closeAriaLabel": "Close onboarding and skip tour"
+    },
+    "tour": {
+      "step1": {
+        "title": "Start a Conversation",
+        "description": "Tell me what you're craving or what ingredients you have. Try asking: \"Quick dinner for 2\" or \"What can I make with chicken?\""
+      },
+      "step2": {
+        "title": "Customize Your Recipes",
+        "description": "Filter recipes by cuisine, cooking time, skill level, dietary preferences, and more. Make every recipe perfect for you!"
+      },
+      "step3": {
+        "title": "Weekly Meal Planning",
+        "description": "Generate complete meal plans for your week in seconds. Click here to start planning!"
+      },
+      "step4": {
+        "title": "Smart Grocery Lists",
+        "description": "Automatically generate organized grocery lists from your meal plans. Never forget an ingredient!"
+      },
+      "step5": {
+        "title": "Conversation History",
+        "description": "All your conversations are automatically saved here. Rename, delete, or continue any chat anytime."
+      },
+      "nextBtn": "Next →",
+      "prevBtn": "← Previous",
+      "doneBtn": "Done! 🎉",
+      "progress": "{{current}} of {{total}}"
+    },
+    "mobileTour": {
+      "step1": {
+        "title": "Start Chatting",
+        "description": "Ask me anything about cooking! Try: \"Easy pasta recipes\" or \"Healthy dinner ideas\""
+      },
+      "step2": {
+        "title": "Set Your Preferences",
+        "description": "Tap the settings icon to customize recipes by cuisine, time, and dietary needs."
+      },
+      "step3": {
+        "title": "Explore Features",
+        "description": "Open the menu to access meal planning, grocery lists, and saved recipes."
+      }
+    },
+    "examplePrompts": {
+      "title": "Try asking me...",
+      "subtitle": "or type your own question below",
+      "quickDinner": "Quick dinner for 2",
+      "healthyVegetarian": "Healthy vegetarian recipes",
+      "chickenRecipes": "What can I make with chicken?",
+      "easyPasta": "Easy pasta dishes",
+      "spicyAsian": "Spicy Asian cuisine",
+      "familyMeals": "Family meal ideas"
+    }
   },
   "groceryList": {
     "title": "Grocery List",

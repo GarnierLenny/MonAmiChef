@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { driver, type DriveStep, type Driver } from 'driver.js';
 import 'driver.js/dist/driver.css';
-import { driverTheme, tourSteps, mobileTourSteps } from '../lib/driver-config';
+import { getDriverTheme, getTourSteps, getMobileTourSteps } from '../lib/driver-config';
 import { markTourCompleted, markTourSkipped } from '../lib/onboarding-state';
 
 interface UseDriverOptions {
@@ -31,7 +31,7 @@ export function useDriver(options: UseDriverOptions = {}) {
    */
   const startTour = useCallback(() => {
     // Choose steps based on device
-    const steps = isMobile ? mobileTourSteps : tourSteps;
+    const steps = isMobile ? getMobileTourSteps() : getTourSteps();
 
     // Destroy existing driver if any
     if (driverRef.current) {
@@ -40,7 +40,7 @@ export function useDriver(options: UseDriverOptions = {}) {
 
     // Create new driver instance
     const driverObj = driver({
-      ...driverTheme,
+      ...getDriverTheme(),
       steps,
       onDestroyed: (element, step, options) => {
         const currentStep = options.state?.activeIndex ?? 0;
@@ -122,7 +122,7 @@ export function useDriver(options: UseDriverOptions = {}) {
     }
 
     const driverObj = driver({
-      ...driverTheme,
+      ...getDriverTheme(),
       showButtons: ['close'],
       showProgress: false,
       steps: [step],

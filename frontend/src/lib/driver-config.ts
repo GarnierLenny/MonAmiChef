@@ -1,9 +1,10 @@
 import { DriveStep, Config } from "driver.js";
+import i18n from "@/i18n";
 
 /**
  * Driver.js theme configuration matching MonAmiChef brand
  */
-export const driverTheme: Partial<Config> = {
+export const getDriverTheme = (): Partial<Config> => ({
   showProgress: true,
   showButtons: ["next", "previous", "close"],
   allowClose: true,
@@ -24,25 +25,24 @@ export const driverTheme: Partial<Config> = {
   animate: true,
 
   // Button text customization
-  nextBtnText: "Next →",
-  prevBtnText: "← Previous",
-  doneBtnText: "Done! 🎉",
+  nextBtnText: i18n.t('onboarding.tour.nextBtn'),
+  prevBtnText: i18n.t('onboarding.tour.prevBtn'),
+  doneBtnText: i18n.t('onboarding.tour.doneBtn'),
 
   // Styling
   popoverClass: "monamichef-driver-popover",
-  progressText: "{{current}} of {{total}}",
-};
+  progressText: i18n.t('onboarding.tour.progress'),
+});
 
 /**
  * Tour steps for the guided onboarding
  */
-export const tourSteps: DriveStep[] = [
+export const getTourSteps = (): DriveStep[] => [
   {
     element: ".chat-input-container",
     popover: {
-      title: "Start a Conversation",
-      description:
-        'Tell me what you\'re craving or what ingredients you have. Try asking: "Quick dinner for 2" or "What can I make with chicken?"',
+      title: i18n.t('onboarding.tour.step1.title'),
+      description: i18n.t('onboarding.tour.step1.description'),
       side: "top",
       align: "center",
     },
@@ -50,9 +50,8 @@ export const tourSteps: DriveStep[] = [
   {
     element: ".preferences-sidebar, [data-preferences-button]",
     popover: {
-      title: "Customize Your Recipes",
-      description:
-        "Filter recipes by cuisine, cooking time, skill level, dietary preferences, and more. Make every recipe perfect for you!",
+      title: i18n.t('onboarding.tour.step2.title'),
+      description: i18n.t('onboarding.tour.step2.description'),
       side: "right",
       align: "start",
     },
@@ -60,9 +59,8 @@ export const tourSteps: DriveStep[] = [
   {
     element: '[href="/meal-plan-chat"], [data-meal-plan-link]',
     popover: {
-      title: "Weekly Meal Planning",
-      description:
-        "Generate complete meal plans for your week in seconds. Click here to start planning!",
+      title: i18n.t('onboarding.tour.step3.title'),
+      description: i18n.t('onboarding.tour.step3.description'),
       side: "bottom",
       align: "center",
     },
@@ -70,9 +68,8 @@ export const tourSteps: DriveStep[] = [
   {
     element: '[href="/grocery-list"], [data-grocery-list-link]',
     popover: {
-      title: "Smart Grocery Lists",
-      description:
-        "Automatically generate organized grocery lists from your meal plans. Never forget an ingredient!",
+      title: i18n.t('onboarding.tour.step4.title'),
+      description: i18n.t('onboarding.tour.step4.description'),
       side: "bottom",
       align: "center",
     },
@@ -80,9 +77,8 @@ export const tourSteps: DriveStep[] = [
   {
     element: ".chat-history-sidebar, [data-chat-history]",
     popover: {
-      title: "Conversation History",
-      description:
-        "All your conversations are automatically saved here. Rename, delete, or continue any chat anytime.",
+      title: i18n.t('onboarding.tour.step5.title'),
+      description: i18n.t('onboarding.tour.step5.description'),
       side: "left",
       align: "start",
     },
@@ -92,13 +88,12 @@ export const tourSteps: DriveStep[] = [
 /**
  * Alternative tour steps for mobile view
  */
-export const mobileTourSteps: DriveStep[] = [
+export const getMobileTourSteps = (): DriveStep[] => [
   {
     element: ".chat-input-container",
     popover: {
-      title: "Start Chatting",
-      description:
-        'Ask me anything about cooking! Try: "Easy pasta recipes" or "Healthy dinner ideas"',
+      title: i18n.t('onboarding.mobileTour.step1.title'),
+      description: i18n.t('onboarding.mobileTour.step1.description'),
       side: "top",
       align: "center",
     },
@@ -106,9 +101,8 @@ export const mobileTourSteps: DriveStep[] = [
   {
     element: "[data-preferences-button], .mobile-preferences-button",
     popover: {
-      title: "Set Your Preferences",
-      description:
-        "Tap the settings icon to customize recipes by cuisine, time, and dietary needs.",
+      title: i18n.t('onboarding.mobileTour.step2.title'),
+      description: i18n.t('onboarding.mobileTour.step2.description'),
       side: "bottom",
       align: "center",
     },
@@ -116,9 +110,8 @@ export const mobileTourSteps: DriveStep[] = [
   {
     element: "[data-mobile-menu], .mobile-menu-button",
     popover: {
-      title: "Explore Features",
-      description:
-        "Open the menu to access meal planning, grocery lists, and saved recipes.",
+      title: i18n.t('onboarding.mobileTour.step3.title'),
+      description: i18n.t('onboarding.mobileTour.step3.description'),
       side: "bottom",
       align: "start",
     },

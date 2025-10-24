@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { useTranslation } from 'react-i18next';
 
 interface ExamplePrompt {
   icon: string;
@@ -11,14 +12,6 @@ interface ExamplePromptsProps {
   mini?: boolean;
 }
 
-const prompts: ExamplePrompt[] = [
-  { icon: '⚡', text: 'Quick dinner for 2', category: 'fast' },
-  { icon: '🥗', text: 'Healthy vegetarian recipes', category: 'healthy' },
-  { icon: '🍗', text: 'What can I make with chicken?', category: 'ingredient' },
-  { icon: '🍝', text: 'Easy pasta dishes', category: 'easy' },
-  { icon: '🌶️', text: 'Spicy Asian cuisine', category: 'cuisine' },
-  { icon: '🥘', text: 'Family meal ideas', category: 'family' },
-];
 
 const categoryColors: Record<ExamplePrompt['category'], string> = {
   fast: 'from-orange-100 to-orange-50 hover:from-orange-200 hover:to-orange-100 border-orange-200',
@@ -30,6 +23,17 @@ const categoryColors: Record<ExamplePrompt['category'], string> = {
 };
 
 export default function ExamplePrompts({ onPromptClick, mini = false }: ExamplePromptsProps) {
+  const { t } = useTranslation();
+
+  const prompts: ExamplePrompt[] = [
+    { icon: '⚡', text: t('onboarding.examplePrompts.quickDinner'), category: 'fast' },
+    { icon: '🥗', text: t('onboarding.examplePrompts.healthyVegetarian'), category: 'healthy' },
+    { icon: '🍗', text: t('onboarding.examplePrompts.chickenRecipes'), category: 'ingredient' },
+    { icon: '🍝', text: t('onboarding.examplePrompts.easyPasta'), category: 'easy' },
+    { icon: '🌶️', text: t('onboarding.examplePrompts.spicyAsian'), category: 'cuisine' },
+    { icon: '🥘', text: t('onboarding.examplePrompts.familyMeals'), category: 'family' },
+  ];
+
   // Always show only 4 prompts
   const displayPrompts = mini ? prompts.slice(0, 3) : prompts.slice(0, 4);
 
@@ -38,7 +42,7 @@ export default function ExamplePrompts({ onPromptClick, mini = false }: ExampleP
       {!mini && (
         <div className="text-center">
           <h3 className="text-base md:text-lg font-semibold text-gray-700 mb-1">
-            Try asking me...
+            {t('onboarding.examplePrompts.title')}
           </h3>
         </div>
       )}
@@ -78,7 +82,7 @@ export default function ExamplePrompts({ onPromptClick, mini = false }: ExampleP
 
       {!mini && (
         <p className="text-center text-xs text-gray-400 pt-1">
-          or type your own question below
+          {t('onboarding.examplePrompts.subtitle')}
         </p>
       )}
     </div>
