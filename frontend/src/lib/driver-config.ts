@@ -1,5 +1,5 @@
 import { DriveStep, Config } from "driver.js";
-import i18n from "@/i18n";
+import i18n from "./i18n";
 
 /**
  * Driver.js theme configuration matching MonAmiChef brand
