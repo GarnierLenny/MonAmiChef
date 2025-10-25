@@ -6,6 +6,7 @@ import cors from "cors";
 import { PrismaClient } from "@prisma/client";
 import cookieParser from "cookie-parser";
 import { performanceMonitor } from "./middlewares/performanceMonitor";
+import multer from "multer";
 
 dotenv.config();
 
@@ -79,6 +80,18 @@ app.use(
 // ── BODY PARSERS + ROUTES ────────────────────────────────────────────────────
 app.use(urlencoded({ extended: true }));
 app.use(json());
+
+// ── MULTER FOR FILE UPLOADS ──────────────────────────────────────────────────
+// Configure multer for audio file uploads (store in memory for processing)
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 20 * 1024 * 1024, // 20MB limit
+  },
+});
+
+// Export upload for TSOA
+export { upload };
 
 RegisterRoutes(app);
 

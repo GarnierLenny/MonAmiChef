@@ -5,6 +5,7 @@ A modern, AI-powered meal planning application that helps you discover recipes, 
 ## ✨ Features
 
 - **AI Chat Assistant**: Get personalized recipe recommendations and cooking advice
+- **Speech-to-Text**: Voice input with real-time waveform visualization (supports English, French, and more)
 - **Smart Meal Planning**: Plan your meals with AI-powered suggestions
 - **Recipe Discovery**: Explore a vast collection of recipes tailored to your preferences
 - **Nutrition Tracking**: Monitor nutritional information for your meals
@@ -25,7 +26,8 @@ A modern, AI-powered meal planning application that helps you discover recipes, 
 - **TSOA** for type-safe API routes and OpenAPI generation
 - **Prisma ORM** for database operations
 - **PostgreSQL** database
-- **Google GenAI** for AI chat functionality
+- **Google Gemini AI** for chat and speech-to-text functionality
+- **Web Audio API** for real-time voice visualization
 
 ## 🏗️ Project Structure
 
