@@ -12,6 +12,7 @@ import {
   SuccessResponse,
   Request,
   Response,
+  UploadedFile,
 } from "tsoa";
 import { GoogleGenAI } from "@google/genai";
 import {
@@ -855,6 +856,99 @@ Without accurate nutrition data, the recipe cannot be saved. This is MANDATORY.`
       };
     } catch (error) {
       console.error("Error generating meal recipe:", error);
+      const errorResponse = handleControllerError(error, request.path);
+      this.setStatus(errorResponse.statusCode);
+      throw new APIError(errorResponse.statusCode, errorResponse.message);
+    }
+  }
+
+  /**
+   * Transcribe audio to text using Gemini
+   */
+  @Post("transcribe")
+  @Security("optionalAuth")
+  @Response<ErrorResponse>(400, "Bad Request")
+  @Response<ErrorResponse>(500, "Internal Server Error")
+  @Response<ErrorResponse>(503, "Service Unavailable")
+  public async transcribeAudio(
+    @Request() request: express.Request,
+    @UploadedFile() audio: Express.Multer.File,
+  ): Promise<{ text: string }> {
+    try {
+      // Validate file
+      if (!audio) {
+        throw new ValidationError("Audio file is required");
+      }
+
+      // Check file size (20MB limit for inline audio)
+      const maxSize = 20 * 1024 * 1024; // 20MB
+      if (audio.size > maxSize) {
+        throw new ValidationError("Audio file is too large (max 20MB)");
+      }
+
+      // Validate MIME type
+      const allowedMimeTypes = [
+        'audio/webm',
+        'audio/wav',
+        'audio/mp3',
+        'audio/mpeg',
+        'audio/aiff',
+        'audio/aac',
+        'audio/ogg',
+        'audio/flac',
+      ];
+
+      if (!allowedMimeTypes.includes(audio.mimetype)) {
+        throw new ValidationError(
+          `Unsupported audio format: ${audio.mimetype}. Supported formats: WAV, MP3, WEBM, AIFF, AAC, OGG, FLAC`
+        );
+      }
+
+      // Convert buffer to base64
+      const base64Audio = audio.buffer.toString('base64');
+
+      // Determine MIME type - normalize webm to standard MIME type
+      let mimeType = audio.mimetype;
+      if (mimeType === 'audio/webm') {
+        mimeType = 'audio/webm';
+      }
+
+      try {
+        // Use Gemini to transcribe audio
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: [
+            "Transcribe the speech in this audio file. Automatically detect the language (English, French, or any other language) and transcribe it accurately in that language. Return ONLY the transcribed text without any additional commentary, translation, or formatting. Keep the original language of the speech.",
+            {
+              inlineData: {
+                mimeType: mimeType,
+                data: base64Audio,
+              },
+            },
+          ],
+        });
+
+        const transcribedText = response.text?.trim() || "";
+
+        if (!transcribedText) {
+          throw new Error("No transcription returned from AI");
+        }
+
+        return { text: transcribedText };
+      } catch (aiError) {
+        console.error("AI transcription error:", aiError);
+        throw new ServiceUnavailableError(
+          "Speech transcription service is temporarily unavailable. Please try again."
+        );
+      }
+    } catch (error) {
+      console.error("Error transcribing audio:", error);
+
+      if (error instanceof APIError) {
+        this.setStatus(error.statusCode);
+        throw error;
+      }
+
       const errorResponse = handleControllerError(error, request.path);
       this.setStatus(errorResponse.statusCode);
       throw new APIError(errorResponse.statusCode, errorResponse.message);
