@@ -167,7 +167,88 @@
     "accountSettings": "Paramètres du compte",
     "accountDescription": "Gérez votre profil et vos préférences de compte (Bientôt disponible)",
     "notifications": "Notifications",
-    "notificationsDescription": "Configurez vos préférences de notification (Bientôt disponible)"
+    "notificationsDescription": "Configurez vos préférences de notification (Bientôt disponible)",
+    "helpOnboarding": "Aide & Intégration",
+    "helpOnboardingDescription": "Apprenez à utiliser MonAmiChef avec notre visite interactive",
+    "newToMonAmiChef": "Nouveau sur MonAmiChef ? Suivez notre visite guidée rapide pour découvrir toutes les fonctionnalités et commencer à cuisiner avec l'IA !",
+    "restartProductTour": "Redémarrer la Visite",
+    "tourReset": "Visite Réinitialisée",
+    "tourResetDescription": "La visite de bienvenue s'affichera à nouveau lorsque vous visiterez la page de chat."
+  },
+  "onboarding": {
+    "welcomeModal": {
+      "slide1": {
+        "title": "Bienvenue sur MonAmiChef ! 👋",
+        "description": "Votre compagnon culinaire propulsé par l'IA qui vous aide à découvrir des recettes, planifier vos repas et rendre la cuisine agréable."
+      },
+      "slide2": {
+        "title": "Discutez avec le Chef IA 💬",
+        "description": "Dites-moi simplement ce dont vous avez envie ou quels ingrédients vous avez. Je vous suggérerai des recettes personnalisées instantanément."
+      },
+      "slide3": {
+        "title": "Plans de Repas Hebdomadaires 📅",
+        "description": "Générez des plans de repas complets pour votre semaine en quelques secondes. Fini le stress du \"qu'est-ce qu'on mange?\" !"
+      },
+      "slide4": {
+        "title": "Listes de Courses Intelligentes 🛒",
+        "description": "Obtenez automatiquement des listes de courses organisées à partir de vos plans de repas. N'oubliez plus jamais un ingrédient !"
+      },
+      "next": "Suivant",
+      "skip": "Passer",
+      "startTour": "Démarrer la Visite",
+      "exploreOnOwn": "Ou explorer par moi-même",
+      "closeAriaLabel": "Fermer l'intégration et passer la visite"
+    },
+    "tour": {
+      "step1": {
+        "title": "Commencer une Conversation",
+        "description": "Dites-moi ce dont vous avez envie ou quels ingrédients vous avez. Essayez : \"Dîner rapide pour 2\" ou \"Que puis-je faire avec du poulet ?\""
+      },
+      "step2": {
+        "title": "Personnalisez Vos Recettes",
+        "description": "Filtrez les recettes par cuisine, temps de cuisson, niveau de compétence, préférences alimentaires, et plus encore. Rendez chaque recette parfaite pour vous !"
+      },
+      "step3": {
+        "title": "Planification Hebdomadaire",
+        "description": "Générez des plans de repas complets pour votre semaine en quelques secondes. Cliquez ici pour commencer à planifier !"
+      },
+      "step4": {
+        "title": "Listes de Courses Intelligentes",
+        "description": "Générez automatiquement des listes de courses organisées à partir de vos plans de repas. N'oubliez plus jamais un ingrédient !"
+      },
+      "step5": {
+        "title": "Historique des Conversations",
+        "description": "Toutes vos conversations sont automatiquement sauvegardées ici. Renommez, supprimez ou continuez n'importe quelle discussion à tout moment."
+      },
+      "nextBtn": "Suivant →",
+      "prevBtn": "← Précédent",
+      "doneBtn": "Terminé ! 🎉",
+      "progress": "{{current}} sur {{total}}"
+    },
+    "mobileTour": {
+      "step1": {
+        "title": "Commencer à Discuter",
+        "description": "Posez-moi n'importe quelle question sur la cuisine ! Essayez : \"Recettes de pâtes faciles\" ou \"Idées de dîner sain\""
+      },
+      "step2": {
+        "title": "Définir Vos Préférences",
+        "description": "Appuyez sur l'icône des paramètres pour personnaliser les recettes par cuisine, temps et besoins alimentaires."
+      },
+      "step3": {
+        "title": "Explorer les Fonctionnalités",
+        "description": "Ouvrez le menu pour accéder à la planification des repas, aux listes de courses et aux recettes sauvegardées."
+      }
+    },
+    "examplePrompts": {
+      "title": "Essayez de me demander...",
+      "subtitle": "ou tapez votre propre question ci-dessous",
+      "quickDinner": "Dîner rapide pour 2",
+      "healthyVegetarian": "Recettes végétariennes saines",
+      "chickenRecipes": "Que puis-je faire avec du poulet ?",
+      "easyPasta": "Plats de pâtes faciles",
+      "spicyAsian": "Cuisine asiatique épicée",
+      "familyMeals": "Idées de repas familiaux"
+    }
   },
   "groceryList": {
     "title": "Liste de courses",

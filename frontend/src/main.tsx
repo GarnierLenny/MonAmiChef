@@ -3,6 +3,7 @@ import { BrowserRouter } from "react-router-dom";
 import App from "./App.tsx";
 import DesktopComingSoon from "./components/DesktopComingSoon.tsx";
 import "./styles/index.css";
+import "./styles/driver-custom.css";
 import "./lib/i18n";
 import { PostHogProvider } from "posthog-js/react";
 import * as Sentry from "@sentry/react";

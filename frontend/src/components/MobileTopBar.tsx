@@ -25,7 +25,8 @@ export function MobileTopBar({
             variant="ghost"
             size="icon"
             onClick={onMenuClick}
-            className="text-foreground hover:bg-accent/50 transition-colors rounded-xl h-9 w-9"
+            data-mobile-menu
+            className="text-foreground hover:bg-accent/50 transition-colors rounded-xl h-9 w-9 mobile-menu-button"
           >
             <Menu className="h-5 w-5" />
             <span className="sr-only">Open menu</span>
@@ -44,7 +45,8 @@ export function MobileTopBar({
               variant="ghost"
               size="icon"
               onClick={onRightIconClick}
-              className="text-foreground hover:bg-accent/50 transition-colors rounded-xl h-9 w-9"
+              data-preferences-button
+              className="text-foreground hover:bg-accent/50 transition-colors rounded-xl h-9 w-9 mobile-preferences-button"
             >
               {rightIcon}
             </Button>
