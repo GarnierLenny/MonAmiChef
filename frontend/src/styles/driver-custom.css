@@ -47,25 +47,32 @@
 .driver-popover-next-btn,
 .driver-popover-prev-btn,
 .driver-popover-close-btn {
-  padding: 0.6875rem 1.5rem;
+  padding: 1.15rem 1.5rem !important;
   border-radius: 8px !important;
-  font-weight: 500;
-  font-size: 0.875rem;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  border: none;
-  cursor: pointer;
-  letter-spacing: 0.01em;
+  font-weight: 500 !important;
+  font-size: 0.95rem !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  border: none !important;
+  cursor: pointer !important;
+  letter-spacing: 0.01em !important;
 }
 
-/* Next/Done button - Orange gradient, premium feel */
+/* Next/Done button - Orange primary color */
 .driver-popover-next-btn {
-  background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+  background: hsl(28, 100%, 52%) !important;
   color: #ffffff !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12) !important;
+  text-shadow: none !important;
+}
+
+.driver-popover-next-btn::before,
+.driver-popover-next-btn::after {
+  content: none !important;
+  display: none !important;
 }
 
 .driver-popover-next-btn:hover {
-  background: linear-gradient(135deg, #ea580c 0%, #c2410c 100%) !important;
+  background: hsl(26, 98%, 44%) !important;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15) !important;
   transform: translateY(-1px) !important;
 }
@@ -81,6 +88,13 @@
   color: #262626 !important;
   border: 1.5px solid #e5e5e5 !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+  text-shadow: none !important;
+}
+
+.driver-popover-prev-btn::before,
+.driver-popover-prev-btn::after {
+  content: none !important;
+  display: none !important;
 }
 
 .driver-popover-prev-btn:hover {
@@ -137,7 +151,7 @@
 
 /* Use ::before pseudo-element for subtle black glow effect */
 .driver-active-element::before {
-  content: '' !important;
+  content: "" !important;
   position: absolute !important;
   inset: -10px !important;
   border-radius: 14px !important;
@@ -169,8 +183,8 @@
 
   .driver-popover-next-btn,
   .driver-popover-prev-btn {
-    padding: 0.625rem 1.25rem;
-    font-size: 0.8125rem;
+    padding: 0.65rem 0.85rem !important;
+    font-size: 0.85rem !important;
   }
 
   .driver-popover-footer {
@@ -201,7 +215,8 @@
 
 /* Sophisticated breathing glow - elegant black shadow pulse */
 @keyframes driver-gentle-glow {
-  0%, 100% {
+  0%,
+  100% {
     box-shadow:
       0 0 24px rgba(0, 0, 0, 0.15),
       0 0 48px rgba(0, 0, 0, 0.08),
@@ -218,8 +233,7 @@
 /* Initial shimmer effect - draws attention with subtle black glow */
 @keyframes driver-shimmer {
   0% {
-    box-shadow:
-      0 0 0 rgba(0, 0, 0, 0);
+    box-shadow: 0 0 0 rgba(0, 0, 0, 0);
   }
   50% {
     box-shadow:
