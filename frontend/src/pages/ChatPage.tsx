@@ -1,5 +1,6 @@
 // src/pages/ChatPage.tsx
 import { useState, useEffect, useMemo, useRef, useCallback } from "react";
+import { useTranslation } from "react-i18next";
 import type { Preferences, ChatItem, ChatMessage } from "../types/types";
 import PreferencesSidebar from "../components/PreferenceSidebar";
 import ChatInterface from "../components/ChatInterface";
@@ -44,6 +45,7 @@ function ChatPage({ user, onAuthClick, onSignOut, chats: propsChats = [], setCha
   const [isGenerating, setIsGenerating] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+  const { t } = useTranslation();
   const [preferences, setPreferences] = useState<Preferences>({
     mealType: [],
     mealOccasion: [],
@@ -317,7 +319,7 @@ function ChatPage({ user, onAuthClick, onSignOut, chats: propsChats = [], setCha
     if (!hasSelectedPreferences) return;
 
     // Submit with a default message when only preferences are selected
-    const defaultMessage = "Generate a recipe based on my preferences";
+    const defaultMessage = t('chat.defaultPreferenceMessage');
     await handleSubmitMessage(defaultMessage);
   };
 
@@ -370,7 +372,7 @@ function ChatPage({ user, onAuthClick, onSignOut, chats: propsChats = [], setCha
         {
           id: `error-${Date.now()}`,
           role: "model",
-          text: "Oops, something went wrong.",
+          text: t('chat.errorMessage'),
           timestamp: new Date(),
         },
       ]);

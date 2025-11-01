@@ -1,12 +1,14 @@
 import { useLayoutEffect, useEffect, useRef, useState } from "react";
-import { Loader2, Sparkles, Heart } from "lucide-react";
+import { Loader2, Sparkles, Heart, ShoppingCart } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkBreaks from "remark-breaks";
 import { useLocation } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { ChatMessage } from "../types/types";
 import { parseRecipeFromText } from "../utils/recipeParser";
 import { recipeService } from "../services/recipeService";
+import { groceryListApi } from "../lib/api/groceryListApi";
 import { useToast } from "@/hooks/use-toast";
 import { ChatInput } from "@/components/ui/chat-input";
 import ChatPlaceholder from "./ChatPlaceholder";
@@ -72,7 +74,10 @@ export default function ChatInterface({
   const location = useLocation();
   const [savedRecipes, setSavedRecipes] = useState<Set<string>>(new Set());
   const [savingRecipes, setSavingRecipes] = useState<Set<string>>(new Set());
+  const [addedToGrocery, setAddedToGrocery] = useState<Set<string>>(new Set());
+  const [addingToGrocery, setAddingToGrocery] = useState<Set<string>>(new Set());
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   // Get all selected preference tags for display
   const getSelectedTags = () => {
@@ -166,7 +171,7 @@ export default function ChatInterface({
     if (!user) {
       // Show registration prompt for guest users with toast
       toast({
-        title: "Sign up to save recipes",
+        title: t('chat.signUpToSave'),
         description:
           "Recipe saving is only available for registered users. Sign up to start saving your favorite recipes!",
         duration: 5000,
@@ -200,21 +205,142 @@ export default function ChatInterface({
       if (result.is_saved) {
         setSavedRecipes((prev) => new Set([...prev, messageId]));
         toast({
-          title: "Recipe saved!",
-          description: "Your recipe has been added to your saved recipes.",
+          title: t('chat.recipeSaved'),
+          description: t('chat.recipeSavedDescription'),
           duration: 3000,
         });
       }
     } catch (error) {
       console.error("Failed to save recipe:", error);
       toast({
-        title: "Failed to save recipe",
-        description: "Something went wrong. Please try again.",
+        title: t('chat.failedToSave'),
+        description: t('chat.failedToSaveDescription'),
         variant: "destructive",
         duration: 4000,
       });
     } finally {
       setSavingRecipes((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(messageId);
+        return newSet;
+      });
+    }
+  };
+
+  const handleAddToGroceryList = async (messageText: string, messageId?: string) => {
+    if (!messageId) return;
+
+    // Check if user is authenticated
+    if (!user) {
+      toast({
+        title: t('chat.signUpForGrocery'),
+        description:
+          "Grocery list is only available for registered users. Sign up to start organizing your shopping!",
+        duration: 5000,
+      });
+
+      if (onAuthClick) {
+        onAuthClick();
+      }
+      return;
+    }
+
+    // Parse the message text to see if it contains a recipe
+    const parsedRecipe = parseRecipeFromText(messageText);
+    if (!parsedRecipe || !parsedRecipe.content.ingredients) {
+      toast({
+        title: t('chat.noIngredients'),
+        description: t('chat.noIngredientsDescription'),
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+
+    setAddingToGrocery((prev) => new Set([...prev, messageId]));
+
+    try {
+      console.log("Adding recipe to grocery list:", parsedRecipe.title);
+
+      // Step 1: Create/save the recipe (similar to handleSaveRecipe)
+      const recipe = await recipeService.createRecipe({
+        title: parsedRecipe.title,
+        content_json: parsedRecipe.content,
+        nutrition: parsedRecipe.nutrition,
+        tags: parsedRecipe.tags,
+      });
+
+      console.log("Recipe created:", recipe.id);
+
+      // Step 2: Get current week's meal plan or create a "Quick Add" meal plan
+      const { mealPlanApi } = await import("@/lib/api/mealPlanApi");
+
+      // Get user's meal plans
+      const mealPlans = await mealPlanApi.getUserMealPlans();
+
+      // Find current week's meal plan or create one
+      let currentPlan = mealPlans.find(plan => {
+        const planDate = new Date(plan.weekStartDate);
+        const now = new Date();
+        const weekStart = new Date(now);
+        weekStart.setDate(now.getDate() - now.getDay()); // Start of this week
+        return planDate.toDateString() === weekStart.toDateString();
+      });
+
+      if (!currentPlan) {
+        // Create a new meal plan for this week
+        const weekStart = new Date();
+        weekStart.setDate(weekStart.getDate() - weekStart.getDay());
+        currentPlan = await mealPlanApi.createMealPlan({
+          weekStartDate: weekStart.toISOString(),
+          title: t('chat.quickAddRecipes'),
+          generationMethod: "manual",
+        });
+      }
+
+      console.log("Using meal plan:", currentPlan.id);
+
+      // Step 3: Add the recipe to the meal plan as a snack for today
+      const today = new Date().getDay();
+      await mealPlanApi.addMealPlanItem(currentPlan.id, {
+        day: today,
+        mealSlot: "snack",
+        recipeId: recipe.id,
+      });
+
+      // Step 4: Get the updated meal plan with the new item
+      const updatedPlan = await mealPlanApi.getMealPlan(currentPlan.id);
+
+      // Find the meal plan item we just created
+      const newItem = updatedPlan.items?.find(
+        item => item.day === today && item.mealSlot === "snack" && item.recipeId === recipe.id
+      );
+
+      if (!newItem) {
+        throw new Error("Failed to create meal plan item");
+      }
+
+      console.log("Meal plan item created:", newItem.id);
+
+      // Step 5: Add to grocery list using the same method as meal planning
+      await groceryListApi.addMeals([newItem.id]);
+
+      setAddedToGrocery((prev) => new Set([...prev, messageId]));
+      toast({
+        title: t('chat.addedToGrocery'),
+        description: `${parsedRecipe.title} ingredients have been added to your shopping list.`,
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error("Failed to add to grocery list:", error);
+      toast({
+        title: "Failed to add to grocery list",
+        description: error instanceof Error ? error.message : "Something went wrong. Please try again.",
+        variant: "destructive",
+        duration: 4000,
+      });
+    } finally {
+      setAddingToGrocery((prev) => {
         const newSet = new Set(prev);
         newSet.delete(messageId);
         return newSet;
@@ -231,6 +357,58 @@ export default function ChatInterface({
       });
     }
   };
+
+  // Check grocery list and saved recipes on mount and when messages change to update button states
+  useEffect(() => {
+    const checkRecipeStates = async () => {
+      if (!user) return;
+
+      try {
+        // Check grocery list
+        const groceryList = await groceryListApi.getGroceryList();
+        const recipeTitlesInGrocery = new Set<string>(
+          groceryList.meals.map(meal => meal.recipe.title.toLowerCase().trim())
+        );
+
+        // Check saved recipes
+        const savedRecipesList = await recipeService.getSavedRecipes();
+        const savedRecipeTitles = new Set<string>(
+          savedRecipesList.map(saved => saved.recipe.title.toLowerCase().trim())
+        );
+
+        // Check each message to see if its recipe is in the grocery list or saved
+        const newAddedToGrocery = new Set<string>();
+        const newSavedRecipes = new Set<string>();
+
+        messages.forEach((message, index) => {
+          const messageId = message.id ?? `${index}-${message.role}`;
+          const parsedRecipe = message.role === "model" && parseRecipeFromText(message.text);
+
+          if (parsedRecipe) {
+            const recipeTitle = parsedRecipe.title.toLowerCase().trim();
+
+            // Check if in grocery list
+            if (recipeTitlesInGrocery.has(recipeTitle)) {
+              newAddedToGrocery.add(messageId);
+            }
+
+            // Check if saved
+            if (savedRecipeTitles.has(recipeTitle)) {
+              newSavedRecipes.add(messageId);
+            }
+          }
+        });
+
+        setAddedToGrocery(newAddedToGrocery);
+        setSavedRecipes(newSavedRecipes);
+      } catch (error) {
+        // Silently fail - not critical if we can't check recipe states
+        console.debug("Could not check recipe states:", error);
+      }
+    };
+
+    checkRecipeStates();
+  }, [user, messages]);
 
   // Scroll to bottom after messages change
   useLayoutEffect(() => {
@@ -269,6 +447,8 @@ export default function ChatInterface({
                 message.role === "model" && parseRecipeFromText(message.text);
               const isSaved = savedRecipes.has(messageId);
               const isSaving = savingRecipes.has(messageId);
+              const isAddedToGrocery = addedToGrocery.has(messageId);
+              const isAddingToGrocery = addingToGrocery.has(messageId);
               const isLastMessage = index === messages.length - 1;
 
               return (
@@ -360,40 +540,76 @@ export default function ChatInterface({
                           {message.text}
                         </ReactMarkdown>
 
-                        {/* Save Recipe Button with enhanced styling */}
+                        {/* Recipe Action Buttons */}
                         {isRecipe && (
                           <div className="mt-4 pt-4 border-t border-gray-200/80">
-                            <button
-                              onClick={() =>
-                                handleSaveRecipe(message.text, messageId)
-                              }
-                              disabled={isSaving || isSaved}
-                              className={`group flex items-center justify-center space-x-2.5 px-5 py-2.5 md:px-6 md:py-3 rounded-xl text-sm md:text-base font-semibold transition-all duration-300 ${
-                                isSaved
-                                  ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 cursor-default shadow-sm"
-                                  : "bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 hover:from-orange-100 hover:to-orange-200 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm"
-                              } ${isSaving ? "opacity-70 cursor-wait" : ""}`}
-                            >
-                              {isSaving ? (
-                                <>
-                                  <Loader2 className="w-5 h-5 animate-spin" />
-                                  <span>Saving Recipe...</span>
-                                </>
-                              ) : (
-                                <>
-                                  <Heart
-                                    className={`w-5 h-5 transition-all duration-300 ${
-                                      isSaved
-                                        ? "fill-green-600 text-green-600 scale-110"
-                                        : "group-hover:scale-110 group-hover:fill-orange-300"
-                                    }`}
-                                  />
-                                  <span>
-                                    {isSaved ? "Recipe Saved" : "Save Recipe"}
-                                  </span>
-                                </>
-                              )}
-                            </button>
+                            <div className="flex flex-col sm:flex-row gap-3">
+                              {/* Save Recipe Button */}
+                              <button
+                                onClick={() =>
+                                  handleSaveRecipe(message.text, messageId)
+                                }
+                                disabled={isSaving || isSaved}
+                                className={`group flex-1 flex items-center justify-center space-x-2.5 px-5 py-2.5 md:px-6 md:py-3 rounded-xl text-sm md:text-base font-semibold transition-all duration-300 ${
+                                  isSaved
+                                    ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 cursor-default shadow-sm"
+                                    : "bg-gradient-to-r from-orange-50 to-orange-100 text-orange-700 hover:from-orange-100 hover:to-orange-200 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm"
+                                } ${isSaving ? "opacity-70 cursor-wait" : ""}`}
+                              >
+                                {isSaving ? (
+                                  <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <span>Saving Recipe...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Heart
+                                      className={`w-5 h-5 transition-all duration-300 ${
+                                        isSaved
+                                          ? "fill-green-600 text-green-600 scale-110"
+                                          : "group-hover:scale-110 group-hover:fill-orange-300"
+                                      }`}
+                                    />
+                                    <span>
+                                      {isSaved ? t('chat.recipeSavedStatus') : t('chat.saveRecipe')}
+                                    </span>
+                                  </>
+                                )}
+                              </button>
+
+                              {/* Add to Grocery List Button */}
+                              <button
+                                onClick={() =>
+                                  handleAddToGroceryList(message.text, messageId)
+                                }
+                                disabled={isAddingToGrocery || isAddedToGrocery}
+                                className={`group flex-1 flex items-center justify-center space-x-2.5 px-5 py-2.5 md:px-6 md:py-3 rounded-xl text-sm md:text-base font-semibold transition-all duration-300 ${
+                                  isAddedToGrocery
+                                    ? "bg-gradient-to-r from-green-50 to-emerald-50 text-green-700 cursor-default shadow-sm"
+                                    : "bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 hover:from-blue-100 hover:to-blue-200 hover:shadow-md hover:scale-[1.02] active:scale-[0.98] cursor-pointer shadow-sm"
+                                } ${isAddingToGrocery ? "opacity-70 cursor-wait" : ""}`}
+                              >
+                                {isAddingToGrocery ? (
+                                  <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <span>Adding...</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <ShoppingCart
+                                      className={`w-5 h-5 transition-all duration-300 ${
+                                        isAddedToGrocery
+                                          ? "fill-green-600 text-green-600 scale-110"
+                                          : "group-hover:scale-110"
+                                      }`}
+                                    />
+                                    <span>
+                                      {isAddedToGrocery ? t('chat.addedToGroceryList') : t('chat.addToGroceryList')}
+                                    </span>
+                                  </>
+                                )}
+                              </button>
+                            </div>
                           </div>
                         )}
                       </div>

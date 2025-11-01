@@ -9,6 +9,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Link, useLocation, useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import type { ChatItem } from "../types/types";
 import { formatTimestamp } from "../utils/format_timestamp.utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -57,6 +58,7 @@ export default function ChatHistorySidebar({
   const [searchParams] = useSearchParams();
   const currentId = searchParams.get("c");
   const isMobile = useIsMobile();
+  const { t } = useTranslation();
 
   const toggleDropdown = (chatId: string) => {
     setActiveDropdown(activeDropdown === chatId ? null : chatId);
@@ -83,10 +85,10 @@ export default function ChatHistorySidebar({
             </div>
             <div>
               <h2 className="text-lg font-semibold text-gray-900">
-                Chat History
+                {t('chatHistory.title')}
               </h2>
               <p className="text-sm text-orange-700">
-                Your recent conversations
+                {t('chatHistory.recentConversations')}
               </p>
             </div>
           </div>
@@ -164,7 +166,7 @@ export default function ChatHistorySidebar({
                     >
                       <div className="flex-1 min-w-0 pr-2">
                         <h4 className="text-sm font-medium text-gray-900 truncate group-hover:text-orange-800 transition-colors">
-                          {chat.title || "Untitled"}
+                          {chat.title || t('chatHistory.untitled')}
                         </h4>
                         <p className="text-xs text-orange-600 mt-1">
                           {formatTimestamp(new Date(chat.timestamp)) ??
@@ -283,7 +285,7 @@ export default function ChatHistorySidebar({
                 }
               }}
               className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-              placeholder="Enter a new title"
+              placeholder={t('chatHistory.enterNewTitle')}
             />
             <div className="mt-4 flex justify-end gap-2">
               <button

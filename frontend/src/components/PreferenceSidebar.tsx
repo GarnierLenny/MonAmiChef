@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   Beef,
   Wheat,
@@ -74,6 +75,7 @@ export default function PreferenceSidebar({
 }: PreferenceSidebarProps) {
   const [searchParams] = useSearchParams();
   const chatId = searchParams.get("c");
+  const { t } = useTranslation();
 
   // Define limits for each section
   const sectionLimits = {
@@ -125,74 +127,74 @@ export default function PreferenceSidebar({
   const nutritionOptions = [
     {
       id: "high-protein",
-      label: "High Protein",
+      label: t('preferences.nutrition.highProtein'),
       icon: Beef,
       color: "text-red-500",
     },
     {
       id: "high-fiber",
-      label: "High Fiber",
+      label: t('preferences.nutrition.highFiber'),
       icon: Apple,
       color: "text-green-500",
     },
     {
       id: "low-carb",
-      label: "Low Carb",
+      label: t('preferences.nutrition.lowCarb'),
       icon: Salad,
       color: "text-emerald-500",
     },
     {
       id: "balanced",
-      label: "Balanced",
+      label: t('preferences.nutrition.balanced'),
       icon: UtensilsCrossed,
       color: "text-blue-500",
     },
     {
       id: "high-carb",
-      label: "High Carb",
+      label: t('preferences.nutrition.highCarb'),
       icon: Wheat,
       color: "text-amber-500",
     },
-    { id: "low-fat", label: "Low Fat", icon: Fish, color: "text-cyan-500" },
+    { id: "low-fat", label: t('preferences.nutrition.lowFat'), icon: Fish, color: "text-cyan-500" },
     {
       id: "vegetarian",
-      label: "Vegetarian",
+      label: t('preferences.nutrition.vegetarian'),
       icon: Carrot,
       color: "text-orange-500",
     },
-    { id: "vegan", label: "Vegan", icon: Salad, color: "text-lime-500" },
+    { id: "vegan", label: t('preferences.nutrition.vegan'), icon: Salad, color: "text-lime-500" },
   ];
 
   const cuisineOptions = [
-    { id: "italian", label: "Italian", flag: "🇮🇹" },
-    { id: "mexican", label: "Mexican", flag: "🇲🇽" },
-    { id: "mediterranean", label: "Mediterranean", flag: "🇬🇷" },
-    { id: "american", label: "American", flag: "🇺🇸" },
-    { id: "french", label: "French", flag: "🇫🇷" },
-    { id: "indian", label: "Indian", flag: "🇮🇳" },
-    { id: "thai", label: "Thai", flag: "🇹🇭" },
-    { id: "chinese", label: "Chinese", flag: "🇨🇳" },
-    { id: "japanese", label: "Japanese", flag: "🇯🇵" },
-    { id: "middle-eastern", label: "Middle Eastern", flag: "🇱🇧" },
-    { id: "korean", label: "Korean", flag: "🇰🇷" },
-    { id: "african", label: "African", flag: "🌍" },
+    { id: "italian", label: t('preferences.cuisine.italian'), flag: "🇮🇹" },
+    { id: "mexican", label: t('preferences.cuisine.mexican'), flag: "🇲🇽" },
+    { id: "mediterranean", label: t('preferences.cuisine.mediterranean'), flag: "🇬🇷" },
+    { id: "american", label: t('preferences.cuisine.american'), flag: "🇺🇸" },
+    { id: "french", label: t('preferences.cuisine.french'), flag: "🇫🇷" },
+    { id: "indian", label: t('preferences.cuisine.indian'), flag: "🇮🇳" },
+    { id: "thai", label: t('preferences.cuisine.thai'), flag: "🇹🇭" },
+    { id: "chinese", label: t('preferences.cuisine.chinese'), flag: "🇨🇳" },
+    { id: "japanese", label: t('preferences.cuisine.japanese'), flag: "🇯🇵" },
+    { id: "middle-eastern", label: t('preferences.cuisine.middleEastern'), flag: "🇱🇧" },
+    { id: "korean", label: t('preferences.cuisine.korean'), flag: "🇰🇷" },
+    { id: "african", label: t('preferences.cuisine.african'), flag: "🌍" },
   ];
 
   const mealTypeOptions = [
     {
       id: "breakfast",
-      label: "Breakfast",
+      label: t('preferences.mealType.breakfast'),
       icon: Sunrise,
       color: "text-yellow-500",
     },
-    { id: "lunch", label: "Lunch", icon: Clock, color: "text-orange-500" },
-    { id: "dinner", label: "Dinner", icon: Moon, color: "text-purple-500" },
-    { id: "appetizer", label: "Appetizer", icon: Wine, color: "text-pink-500" },
-    { id: "dessert", label: "Dessert", icon: Cookie, color: "text-rose-500" },
-    { id: "snack", label: "Snack", icon: Sandwich, color: "text-amber-500" },
+    { id: "lunch", label: t('preferences.mealType.lunch'), icon: Clock, color: "text-orange-500" },
+    { id: "dinner", label: t('preferences.mealType.dinner'), icon: Moon, color: "text-purple-500" },
+    { id: "appetizer", label: t('preferences.mealType.appetizer'), icon: Wine, color: "text-pink-500" },
+    { id: "dessert", label: t('preferences.mealType.dessert'), icon: Cookie, color: "text-rose-500" },
+    { id: "snack", label: t('preferences.mealType.snack'), icon: Sandwich, color: "text-amber-500" },
     {
       id: "smoothie-drink",
-      label: "Smoothie/Drink",
+      label: t('preferences.mealType.smoothieDrink'),
       icon: Droplets,
       color: "text-blue-500",
     },
@@ -201,13 +203,13 @@ export default function PreferenceSidebar({
   const cookingTimeOptions = [
     {
       id: "under-15",
-      label: "Under 15 min",
+      label: t('preferences.cookingTime.under15'),
       icon: Zap,
       color: "text-yellow-500",
     },
     {
       id: "under-30",
-      label: "Under 30 min",
+      label: t('preferences.cookingTime.under30'),
       icon: Timer,
       color: "text-orange-500",
     },
@@ -219,23 +221,23 @@ export default function PreferenceSidebar({
     },
     {
       id: "slow-cook",
-      label: "Slow cook (over 1h)",
+      label: t('preferences.cookingTime.slowCook'),
       icon: Hourglass,
       color: "text-purple-500",
     },
   ];
 
   const skillLevelOptions = [
-    { id: "beginner", label: "Beginner", icon: Star, color: "text-green-500" },
+    { id: "beginner", label: t('preferences.skillLevel.beginner'), icon: Star, color: "text-green-500" },
     {
       id: "intermediate",
-      label: "Intermediate",
+      label: t('preferences.skillLevel.intermediate'),
       icon: Award,
       color: "text-yellow-500",
     },
     {
       id: "advanced",
-      label: "Advanced",
+      label: t('preferences.skillLevel.advanced'),
       icon: Crown,
       color: "text-purple-500",
     },
@@ -295,24 +297,24 @@ export default function PreferenceSidebar({
   const cookingEquipmentOptions = [
     {
       id: "oven",
-      label: "Oven",
+      label: t('preferences.equipment.oven'),
       icon: UtensilsCrossed,
       color: "text-orange-500",
     },
     {
       id: "stove-only",
-      label: "Stove only",
+      label: t('preferences.equipment.stove'),
       icon: Flame,
       color: "text-red-500",
     },
     {
       id: "microwave",
-      label: "Microwave",
+      label: t('preferences.equipment.microwave'),
       icon: Microwave,
       color: "text-blue-500",
     },
     { id: "blender", label: "Blender", icon: Droplets, color: "text-cyan-500" },
-    { id: "air-fryer", label: "Air fryer", icon: Wind, color: "text-gray-500" },
+    { id: "air-fryer", label: t('preferences.equipment.airFryer'), icon: Wind, color: "text-gray-500" },
   ];
 
   const spiceLevelOptions = [
@@ -322,49 +324,49 @@ export default function PreferenceSidebar({
       icon: Snowflake,
       color: "text-blue-500",
     },
-    { id: "light", label: "Light", icon: Sun, color: "text-yellow-500" },
+    { id: "light", label: t('preferences.spiceLevel.mild'), icon: Sun, color: "text-yellow-500" },
     {
       id: "medium",
-      label: "Medium",
+      label: t('preferences.spiceLevel.medium'),
       icon: Thermometer,
       color: "text-orange-500",
     },
-    { id: "strong", label: "Strong", icon: Flame, color: "text-red-500" },
-    { id: "very-hot", label: "Very hot", icon: Flame, color: "text-red-600" },
+    { id: "strong", label: t('preferences.spiceLevel.spicy'), icon: Flame, color: "text-red-500" },
+    { id: "very-hot", label: t('preferences.spiceLevel.extraSpicy'), icon: Flame, color: "text-red-600" },
   ];
 
   const meatOptions = [
-    { id: "chicken", label: "Chicken", icon: Bird, color: "text-yellow-600" },
-    { id: "beef", label: "Beef", icon: Beef, color: "text-red-600" },
-    { id: "pork", label: "Pork", icon: Beef, color: "text-pink-600" },
-    { id: "fish", label: "Fish", icon: Fish, color: "text-blue-500" },
-    { id: "seafood", label: "Seafood", icon: Shell, color: "text-cyan-500" },
-    { id: "lamb", label: "Lamb", icon: Beef, color: "text-purple-600" },
-    { id: "turkey", label: "Turkey", icon: Bird, color: "text-orange-600" },
+    { id: "chicken", label: t('preferences.meats.chicken'), icon: Bird, color: "text-yellow-600" },
+    { id: "beef", label: t('preferences.meats.beef'), icon: Beef, color: "text-red-600" },
+    { id: "pork", label: t('preferences.meats.pork'), icon: Beef, color: "text-pink-600" },
+    { id: "fish", label: t('preferences.meats.fish'), icon: Fish, color: "text-blue-500" },
+    { id: "seafood", label: t('preferences.meats.seafood'), icon: Shell, color: "text-cyan-500" },
+    { id: "lamb", label: t('preferences.meats.lamb'), icon: Beef, color: "text-purple-600" },
+    { id: "turkey", label: t('preferences.meats.turkey'), icon: Bird, color: "text-orange-600" },
     { id: "duck", label: "Duck", icon: Bird, color: "text-amber-600" },
   ];
 
   const vegetableOptions = [
-    { id: "tomatoes", label: "Tomatoes", icon: Cherry, color: "text-red-500" },
-    { id: "onions", label: "Onions", icon: Apple, color: "text-purple-500" },
-    { id: "carrots", label: "Carrots", icon: Carrot, color: "text-orange-500" },
+    { id: "tomatoes", label: t('preferences.vegetables.tomatoes'), icon: Cherry, color: "text-red-500" },
+    { id: "onions", label: t('preferences.vegetables.onions'), icon: Apple, color: "text-purple-500" },
+    { id: "carrots", label: t('preferences.vegetables.carrots'), icon: Carrot, color: "text-orange-500" },
     {
       id: "bell-peppers",
-      label: "Bell Peppers",
+      label: t('preferences.vegetables.peppers'),
       icon: Cherry,
       color: "text-green-500",
     },
-    { id: "broccoli", label: "Broccoli", icon: Leaf, color: "text-green-600" },
-    { id: "spinach", label: "Spinach", icon: Leaf, color: "text-emerald-500" },
+    { id: "broccoli", label: t('preferences.vegetables.broccoli'), icon: Leaf, color: "text-green-600" },
+    { id: "spinach", label: t('preferences.vegetables.spinach'), icon: Leaf, color: "text-emerald-500" },
     {
       id: "mushrooms",
-      label: "Mushrooms",
+      label: t('preferences.vegetables.mushrooms'),
       icon: Apple,
       color: "text-amber-600",
     },
     {
       id: "zucchini",
-      label: "Zucchini",
+      label: t('preferences.vegetables.zucchini'),
       icon: Carrot,
       color: "text-green-400",
     },

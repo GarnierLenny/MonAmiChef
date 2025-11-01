@@ -9,11 +9,11 @@ import {
   ChevronDown,
   ChevronRight,
   AlertTriangle,
-  Check,
   Plus,
   Package,
   Sparkles,
   ArrowRight,
+  Check,
 } from "lucide-react";
 import { groceryListApi, type GroceryList } from "@/lib/api/groceryListApi";
 import { Button } from "@/components/ui/button";
@@ -38,7 +38,11 @@ interface GroceryListPageProps {
   session?: Session | null;
 }
 
-export default function GroceryListPage({ onSignUp, onSignIn, session }: GroceryListPageProps = {}) {
+export default function GroceryListPage({
+  onSignUp,
+  onSignIn,
+  session,
+}: GroceryListPageProps = {}) {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -74,8 +78,8 @@ export default function GroceryListPage({ onSignUp, onSignIn, session }: Grocery
   // Show all categories toggle
   const [showAllCategories, setShowAllCategories] = useState(false);
 
-  // Meals section expanded state (expanded by default now)
-  const [mealsExpanded, setMealsExpanded] = useState(true);
+  // Meals section expanded state (collapsed by default)
+  const [mealsExpanded, setMealsExpanded] = useState(false);
 
   // Category-specific add item inputs
   const [categoryItemInputs, setCategoryItemInputs] = useState<
@@ -163,7 +167,11 @@ export default function GroceryListPage({ onSignUp, onSignIn, session }: Grocery
       console.error("Failed to load grocery list:", err);
 
       // Check if this is an authentication error
-      if (err.status === 401 || err.message?.includes("authentication") || err.message?.includes("Unauthorized")) {
+      if (
+        err.status === 401 ||
+        err.message?.includes("authentication") ||
+        err.message?.includes("Unauthorized")
+      ) {
         setIsUnauthenticated(true);
         setError(null); // Clear error since we're showing auth gate instead
       } else {
@@ -433,27 +441,6 @@ export default function GroceryListPage({ onSignUp, onSignIn, session }: Grocery
     });
   };
 
-  // Calculate completion stats
-  const getCompletionStats = () => {
-    if (!groceryList) return { total: 0, checked: 0, percentage: 0 };
-
-    const totalItems =
-      groceryList.aggregatedIngredients.reduce(
-        (sum, cat) => sum + cat.items.length,
-        0,
-      ) + groceryList.customItems.length;
-
-    const checkedCount =
-      checkedIngredients.size +
-      groceryList.customItems.filter((item) => item.checked).length;
-
-    return {
-      total: totalItems,
-      checked: checkedCount,
-      percentage: totalItems > 0 ? Math.round((checkedCount / totalItems) * 100) : 0,
-    };
-  };
-
   // Loading state
   if (isLoading) {
     return (
@@ -480,7 +467,10 @@ export default function GroceryListPage({ onSignUp, onSignIn, session }: Grocery
             <AlertTriangle className="w-8 h-8 text-red-600" />
           </div>
           <p className="text-danger-600 mb-4 font-medium">{error}</p>
-          <Button onClick={loadGroceryList} className="bg-orange-500 hover:bg-orange-600">
+          <Button
+            onClick={loadGroceryList}
+            className="bg-orange-500 hover:bg-orange-600"
+          >
             {t("common.retry")}
           </Button>
         </div>
@@ -492,12 +482,10 @@ export default function GroceryListPage({ onSignUp, onSignIn, session }: Grocery
     !groceryList ||
     (groceryList.meals.length === 0 && groceryList.customItems.length === 0);
 
-  const stats = getCompletionStats();
-
   return (
-    <div className="flex flex-col h-screen bg-gradient-to-br from-orange-50 via-orange-50 to-amber-50">
+    <div className="flex flex-col h-screen bg-gradient-to-br from-orange-50 flex-1 to-amber-50">
       <div className="flex-1 overflow-y-auto no-scrollbar">
-        <div className="w-full p-6 sm:p-8 lg:p-12 max-w-7xl mx-auto">
+        <div className="w-full max-w-7xl mx-auto px-3 py-6 sm:px-8 sm:py-8 lg:px-12 lg:py-12">
           {isEmpty ? (
             // Empty state - Enhanced with better visuals
             <div className="flex flex-col h-screen items-center justify-center pb-26 text-center px-4">
@@ -526,56 +514,6 @@ export default function GroceryListPage({ onSignUp, onSignIn, session }: Grocery
             </div>
           ) : (
             <div className="space-y-8 lg:space-y-10">
-              {/* Header with Progress */}
-              <div className="bg-white rounded-2xl p-6 sm:p-8 lg:p-10 shadow-md border border-orange-100">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 mb-6">
-                  <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-neutral-900 mb-2 flex items-center gap-3">
-                      <ShoppingCart className="w-7 h-7 text-orange-500" />
-                      {t("groceryList.title")}
-                    </h1>
-                    <p className="text-neutral-500 text-sm sm:text-base">
-                      {stats.total} items in your list
-                    </p>
-                  </div>
-                  <Button
-                    variant="outline"
-                    onClick={handleClearAll}
-                    className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
-                    disabled={stats.total === 0}
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    {t("groceryList.clearAll")}
-                  </Button>
-                </div>
-
-                {/* Progress Bar */}
-                {stats.total > 0 && (
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-sm sm:text-base">
-                      <span className="text-neutral-600 font-medium">
-                        Shopping Progress
-                      </span>
-                      <span className="text-orange-600 font-bold">
-                        {stats.checked} / {stats.total}
-                      </span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-3.5 overflow-hidden">
-                      <div
-                        className="bg-gradient-to-r from-orange-500 to-amber-500 h-3.5 rounded-full transition-all duration-500 ease-out"
-                        style={{ width: `${stats.percentage}%` }}
-                      />
-                    </div>
-                    {stats.percentage === 100 && (
-                      <p className="text-green-600 text-sm sm:text-base font-medium flex items-center gap-2 mt-4">
-                        <Check className="w-5 h-5" />
-                        All items collected!
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-
               {/* Meals Section */}
               {groceryList && groceryList.meals.length > 0 && (
                 <section>
@@ -597,7 +535,8 @@ export default function GroceryListPage({ onSignUp, onSignIn, session }: Grocery
                             {t("groceryList.mealsSection")}
                           </h2>
                           <p className="text-sm sm:text-base text-neutral-500">
-                            {groceryList.meals.length} meal{groceryList.meals.length !== 1 ? "s" : ""} added
+                            {groceryList.meals.length} meal
+                            {groceryList.meals.length !== 1 ? "s" : ""} added
                           </p>
                         </div>
                       </div>
@@ -634,7 +573,9 @@ export default function GroceryListPage({ onSignUp, onSignIn, session }: Grocery
                                       }
                                     </span>
                                     <span className="text-gray-400">•</span>
-                                    <span className="capitalize">{meal.mealSlot}</span>
+                                    <span className="capitalize">
+                                      {meal.mealSlot}
+                                    </span>
                                   </div>
                                 </div>
                                 <Button
@@ -699,65 +640,61 @@ export default function GroceryListPage({ onSignUp, onSignIn, session }: Grocery
                       return (
                         <div
                           key={category.category}
-                          className="bg-white rounded-2xl border-2 border-gray-200 overflow-hidden shadow-sm hover:shadow-lg hover:border-orange-200 transition-all duration-200"
+                          className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg hover:border-orange-200/60 transition-all duration-300"
                         >
                           <button
                             onClick={() => toggleCategory(category.category)}
-                            className={`w-full px-6 py-5 flex items-center justify-between transition-all duration-200 ${
+                            className={`w-full px-6 py-4.5 flex items-center justify-between group transition-all duration-300 ${
                               isExpanded
-                                ? `bg-gradient-to-r ${category.gradientColor} text-white`
-                                : `${category.bgColor} hover:bg-opacity-80`
+                                ? "bg-gradient-to-r from-orange-50/40 via-amber-50/30 to-orange-50/40"
+                                : "bg-white hover:bg-gradient-to-r hover:from-orange-50/25 hover:via-amber-50/20 hover:to-orange-50/25"
                             }`}
                           >
                             <div className="flex items-center gap-4">
                               <div
-                                className={`p-2 rounded-lg transition-colors ${
+                                className={`p-2 rounded-lg transition-all duration-300 ${
                                   isExpanded
-                                    ? "bg-white/20"
-                                    : "bg-white shadow-sm"
+                                    ? "bg-orange-100/80 shadow-sm"
+                                    : "bg-gray-100/50 group-hover:bg-orange-100/60"
                                 }`}
                               >
                                 {isExpanded ? (
-                                  <ChevronDown
-                                    className={`w-5 h-5 ${
-                                      isExpanded ? "text-white" : "text-gray-600"
-                                    }`}
-                                  />
+                                  <ChevronDown className="w-4 h-4 text-orange-600 transition-transform duration-300" />
                                 ) : (
-                                  <ChevronRight
-                                    className={`w-5 h-5 ${
-                                      isExpanded ? "text-white" : "text-gray-600"
-                                    }`}
-                                  />
+                                  <ChevronRight className="w-4 h-4 text-gray-500 group-hover:text-orange-500 transition-colors duration-300" />
                                 )}
                               </div>
-                              <span className="text-3xl sm:text-4xl">{category.emoji}</span>
+                              <span
+                                className={`text-2xl sm:text-[26px] transition-all duration-300 ${
+                                  isExpanded
+                                    ? "scale-110 opacity-95"
+                                    : "opacity-75 group-hover:opacity-90 group-hover:scale-105"
+                                }`}
+                              >
+                                {category.emoji}
+                              </span>
                               <div className="text-left">
                                 <span
-                                  className={`font-bold capitalize text-base sm:text-lg ${
-                                    isExpanded ? "text-white" : "text-neutral-900"
+                                  className={`font-semibold capitalize text-sm sm:text-base tracking-tight transition-colors duration-300 ${
+                                    isExpanded
+                                      ? "text-neutral-900"
+                                      : "text-gray-700 group-hover:text-neutral-900"
                                   }`}
                                 >
                                   {t(
                                     `groceryList.categories.${category.category}`,
                                   )}
                                 </span>
-                                <div
-                                  className={`text-sm ${
-                                    isExpanded
-                                      ? "text-white/80"
-                                      : "text-neutral-500"
-                                  }`}
-                                >
+                                <div className="text-xs text-gray-500 mt-0.5 font-medium">
                                   {itemCount} item{itemCount !== 1 ? "s" : ""}
                                 </div>
                               </div>
                             </div>
                             <div
-                              className={`px-3.5 py-1.5 rounded-full text-sm font-bold ${
+                              className={`min-w-[2.5rem] h-7 px-3 flex items-center justify-center rounded-full text-xs font-bold transition-all duration-300 ${
                                 isExpanded
-                                  ? "bg-white/20 text-white"
-                                  : "bg-white shadow-sm text-neutral-700"
+                                  ? "bg-gradient-to-br from-orange-500 to-orange-600 text-white shadow-md shadow-orange-500/25"
+                                  : "bg-gray-100 text-gray-600 group-hover:bg-orange-100 group-hover:text-orange-700"
                               }`}
                             >
                               {itemCount}
@@ -765,7 +702,7 @@ export default function GroceryListPage({ onSignUp, onSignIn, session }: Grocery
                           </button>
 
                           {isExpanded && (
-                            <div className="p-6 sm:p-7 lg:p-8 space-y-4 bg-gradient-to-br from-white to-gray-50/50">
+                            <div className="p-5 sm:p-6 space-y-3 bg-white border-t border-gray-100">
                               {/* Recipe ingredients from meals */}
                               {category.items.map((ingredient, idx) => {
                                 const ingredientKey = `${category.category}-${idx}`;
@@ -924,7 +861,9 @@ export default function GroceryListPage({ onSignUp, onSignIn, session }: Grocery
                                       <Button
                                         type="button"
                                         onClick={() =>
-                                          handleAddCategoryItem(category.category)
+                                          handleAddCategoryItem(
+                                            category.category,
+                                          )
                                         }
                                         disabled={
                                           !categoryItemInputs[
@@ -961,7 +900,10 @@ export default function GroceryListPage({ onSignUp, onSignIn, session }: Grocery
                                     className="w-full h-12 border-dashed border-2 border-orange-300 text-orange-600 hover:bg-orange-50 hover:border-orange-400 transition-all duration-200"
                                   >
                                     <Plus className="w-5 h-5 mr-2" />
-                                    Add item to {t(`groceryList.categories.${category.category}`)}
+                                    Add item to{" "}
+                                    {t(
+                                      `groceryList.categories.${category.category}`,
+                                    )}
                                   </Button>
                                 )}
                               </div>

@@ -142,7 +142,111 @@
     "send": "Envoyer",
     "thinking": "Réflexion...",
     "error": "Désolé, je n'ai pas pu traiter votre demande. Veuillez réessayer.",
-    "welcomeMessage": "Bonjour ! Je suis votre assistant chef personnel. Comment puis-je vous aider aujourd'hui ?"
+    "welcomeMessage": "Bonjour ! Je suis votre assistant chef personnel. Comment puis-je vous aider aujourd'hui ?",
+    "defaultPreferenceMessage": "Générer une recette selon mes préférences",
+    "errorMessage": "Oups, quelque chose s'est mal passé.",
+    "signUpToSave": "Inscrivez-vous pour sauvegarder les recettes",
+    "recipeSaved": "Recette sauvegardée !",
+    "recipeSavedDescription": "Votre recette a été ajoutée à vos recettes sauvegardées.",
+    "failedToSave": "Échec de la sauvegarde",
+    "failedToSaveDescription": "Une erreur s'est produite. Veuillez réessayer.",
+    "signUpForGrocery": "Inscrivez-vous pour ajouter à la liste de courses",
+    "noIngredients": "Aucun ingrédient trouvé",
+    "noIngredientsDescription": "Cette recette n'a pas de liste d'ingrédients valide.",
+    "quickAddRecipes": "Ajout Rapide de Recettes",
+    "addedToGrocery": "Ajouté à la liste de courses !",
+    "saveRecipe": "Sauvegarder la recette",
+    "recipeSavedStatus": "Recette sauvegardée",
+    "addToGroceryList": "Ajouter à la liste de courses",
+    "addedToGroceryList": "Ajouté à la liste",
+    "generating": "Génération en cours"
+  },
+  "chatHistory": {
+    "title": "Historique des conversations",
+    "recentConversations": "Vos conversations récentes",
+    "untitled": "Sans titre",
+    "enterNewTitle": "Entrez un nouveau titre"
+  },
+  "preferences": {
+    "nutrition": {
+      "highProtein": "Riche en protéines",
+      "highFiber": "Riche en fibres",
+      "lowCarb": "Faible en glucides",
+      "balanced": "Équilibré",
+      "highCarb": "Riche en glucides",
+      "lowFat": "Faible en gras",
+      "vegetarian": "Végétarien",
+      "vegan": "Végétalien"
+    },
+    "cuisine": {
+      "italian": "Italienne",
+      "mexican": "Mexicaine",
+      "mediterranean": "Méditerranéenne",
+      "american": "Américaine",
+      "french": "Française",
+      "indian": "Indienne",
+      "thai": "Thaïlandaise",
+      "chinese": "Chinoise",
+      "japanese": "Japonaise",
+      "middleEastern": "Moyen-Orient",
+      "korean": "Coréenne",
+      "african": "Africaine"
+    },
+    "mealType": {
+      "breakfast": "Petit-déjeuner",
+      "lunch": "Déjeuner",
+      "dinner": "Dîner",
+      "appetizer": "Entrée",
+      "dessert": "Dessert",
+      "snack": "Collation",
+      "smoothieDrink": "Smoothie/Boisson"
+    },
+    "cookingTime": {
+      "under15": "Moins de 15 min",
+      "under30": "Moins de 30 min",
+      "slowCook": "Cuisson lente (plus d'1h)"
+    },
+    "skillLevel": {
+      "beginner": "Débutant",
+      "intermediate": "Intermédiaire",
+      "advanced": "Avancé"
+    },
+    "spiceLevel": {
+      "mild": "Doux",
+      "medium": "Moyen",
+      "spicy": "Épicé",
+      "extraSpicy": "Très épicé"
+    },
+    "meats": {
+      "chicken": "Poulet",
+      "beef": "Bœuf",
+      "pork": "Porc",
+      "fish": "Poisson",
+      "seafood": "Fruits de mer",
+      "turkey": "Dinde",
+      "lamb": "Agneau"
+    },
+    "vegetables": {
+      "tomatoes": "Tomates",
+      "onions": "Oignons",
+      "peppers": "Poivrons",
+      "mushrooms": "Champignons",
+      "spinach": "Épinards",
+      "broccoli": "Brocoli",
+      "carrots": "Carottes",
+      "zucchini": "Courgettes"
+    },
+    "equipment": {
+      "oven": "Four",
+      "stove": "Cuisinière",
+      "airFryer": "Friteuse à air",
+      "slowCooker": "Mijoteuse",
+      "instantPot": "Autocuiseur",
+      "grill": "Gril",
+      "microwave": "Micro-ondes"
+    },
+    "signInToSave": "Connectez-vous pour sauvegarder vos plans de repas et synchroniser sur tous vos appareils",
+    "guestPlanningCta": "Planifiez votre semaine avec des recettes générées par IA. Connectez-vous pour sauvegarder vos plans et synchroniser sur tous vos appareils."
   },
   "auth": {
     "signIn": "Se connecter",
@@ -258,7 +362,7 @@
     "emptyState": "Votre liste de courses est vide",
     "emptyStateCta": "Ajoutez des repas de votre plan de repas pour générer votre liste de courses",
     "goToMealPlan": "Aller au plan de repas",
-    "mealsSection": "De votre plan de repas",
+    "mealsSection": "Repas",
     "ingredientsSection": "Ingrédients",
     "customItemsSection": "Articles supplémentaires",
     "addItem": "Ajouter",
@@ -436,3 +540,4 @@
     }
   }
 }
+

@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -38,6 +39,7 @@ export const SimpleMealCard = ({
   onMealSelection,
 }: SimpleMealCardProps) => {
   const isCurrentlyGenerating = isGenerating || isRegenerating;
+  const { t } = useTranslation();
 
   // Random words state for Claude-like dynamic text (only for loading)
   const [loadingData, setLoadingData] = useState(getRandomLoadingText());
@@ -180,7 +182,7 @@ export const SimpleMealCard = ({
         <div className="absolute inset-0 bg-white/90 rounded-xl flex flex-col items-center justify-center z-10">
           <Loader2 className="w-8 h-8 animate-spin text-orange-500 mb-2" />
           <p className="text-sm text-gray-600 font-medium">
-            Generating{" "}
+            {t('chat.generating')}{" "}
             <span className="relative inline-block">
               <span className="bg-gradient-to-r from-orange-500 via-red-500 to-pink-500 bg-clip-text text-transparent font-bold animate-pulse">
                 {loadingData.adjective}
