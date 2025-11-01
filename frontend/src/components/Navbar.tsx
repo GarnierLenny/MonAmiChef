@@ -1,22 +1,26 @@
-import { useState } from "react";
 import {
   ChefHat,
   Calculator,
   Timer,
   CalendarDays,
-  Compass,
   Bookmark,
-  Zap,
   User,
   Crown,
   LogIn,
   LogOut,
-  Heart,
-  History,
-  Settings2,
   Plus,
   Sparkles,
+  ChevronDown,
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
 
 interface NavbarProps {
   handleSignOut: () => void;
@@ -41,11 +45,6 @@ export default function Navbar({
   onPricingClick,
   onNewChat,
 }: NavbarProps) {
-  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-
-  const toggleDropdown = (dropdown: string) => {
-    setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
-  };
 
   const navItems = [
     {
@@ -110,84 +109,76 @@ export default function Navbar({
               const isActive = currentView === item.id;
               const hasDropdown = item.dropdown && item.dropdown.length > 0;
 
-              return (
-                <div key={item.id} className="relative">
-                  <button
-                    onClick={() => {
-                      if (hasDropdown) {
-                        toggleDropdown(item.id);
-                      } else {
-                        onViewChange(item.id);
-                        setActiveDropdown(null);
-                      }
-                    }}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-xl transition-all duration-200 ${
-                      isActive
-                        ? "bg-orange-100 text-orange-700 shadow-md"
-                        : "text-gray-700 hover:text-orange-700 hover:bg-orange-50"
-                    }`}
-                  >
-                    <Icon className="w-5 h-5" />
-                    <span className="hidden md:inline font-medium">
-                      {item.label}
-                    </span>
-                    {hasDropdown && (
-                      <svg
-                        className={`w-4 h-4 transition-transform duration-200 ${
-                          activeDropdown === item.id ? "rotate-180" : ""
+              if (hasDropdown) {
+                return (
+                  <DropdownMenu key={item.id}>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant={isActive ? "default" : "ghost"}
+                        className={`space-x-2 ${
+                          isActive
+                            ? "bg-orange-100 text-orange-700 hover:bg-orange-200"
+                            : "text-gray-700 hover:text-orange-700 hover:bg-orange-50"
                         }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
                       >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 9l-7 7-7-7"
-                        />
-                      </svg>
-                    )}
-                  </button>
-
-                  {/* Dropdown Menu */}
-                  {hasDropdown && activeDropdown === item.id && (
-                    <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50">
+                        <Icon className="w-5 h-5" />
+                        <span className="hidden md:inline font-medium">
+                          {item.label}
+                        </span>
+                        <ChevronDown className="w-4 h-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="start" className="w-64">
                       {item.dropdown?.map((dropdownItem) => {
                         const DropdownIcon = dropdownItem.icon;
                         return (
-                          <button
+                          <DropdownMenuItem
                             key={dropdownItem.id}
-                            onClick={() => {
-                              onViewChange(dropdownItem.id);
-                              setActiveDropdown(null);
-                            }}
-                            className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 hover:bg-orange-50 hover:text-orange-700 transition-colors"
+                            onClick={() => onViewChange(dropdownItem.id)}
+                            className="cursor-pointer"
                           >
-                            <DropdownIcon className="w-5 h-5 text-orange-500" />
+                            <DropdownIcon className="w-5 h-5 text-orange-500 mr-3" />
                             <span className="font-medium">
                               {dropdownItem.label}
                             </span>
-                          </button>
+                          </DropdownMenuItem>
                         );
                       })}
-                    </div>
-                  )}
-                </div>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                );
+              }
+
+              return (
+                <Button
+                  key={item.id}
+                  variant={isActive ? "default" : "ghost"}
+                  onClick={() => onViewChange(item.id)}
+                  className={`space-x-2 ${
+                    isActive
+                      ? "bg-orange-100 text-orange-700 hover:bg-orange-200"
+                      : "text-gray-700 hover:text-orange-700 hover:bg-orange-50"
+                  }`}
+                >
+                  <Icon className="w-5 h-5" />
+                  <span className="hidden md:inline font-medium">
+                    {item.label}
+                  </span>
+                </Button>
               );
             })}
           </div>
 
           {/* New Chat Button */}
           {onNewChat && (
-            <button
+            <Button
               onClick={onNewChat}
-              className="flex items-center space-x-2 bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white px-4 py-2 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
+              className="bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white shadow-md hover:shadow-lg"
             >
               <Plus className="w-5 h-5" />
               <span className="hidden lg:inline font-medium">New Chat</span>
-              <Sparkles className="w-4 h-4 hidden lg:inline" />
-            </button>
+              <Sparkles className="w-4 h-4 hidden lg:inline ml-2" />
+            </Button>
           )}
 
           {/* User Profile / Auth */}
@@ -195,96 +186,63 @@ export default function Navbar({
             {user ? (
               <>
                 {/* Subscription Badge - Clickable */}
-                <button
+                <Badge
                   onClick={onPricingClick}
-                  className="hidden sm:flex items-center space-x-2 bg-orange-100 px-3 py-1 rounded-lg hover:bg-orange-200 transition-colors cursor-pointer"
+                  className="hidden sm:flex items-center space-x-2 bg-orange-100 hover:bg-orange-200 text-orange-700 cursor-pointer"
                 >
                   <Crown className="w-4 h-4 text-yellow-600" />
-                  <span className="text-sm font-medium text-orange-700">
-                    {subscriptionPlan}
-                  </span>
-                </button>
+                  <span className="text-sm font-medium">{subscriptionPlan}</span>
+                </Badge>
 
                 {/* User Menu */}
-                <div className="relative">
-                  <button
-                    onClick={() => toggleDropdown("user")}
-                    className="flex items-center space-x-2 bg-gray-100 p-2 rounded-xl text-gray-700 hover:bg-gray-200 transition-colors"
-                  >
-                    <User className="w-5 h-5" />
-                    <span className="hidden sm:inline font-medium">
-                      {user.name}
-                    </span>
-                    <svg
-                      className={`w-4 h-4 transition-transform duration-200 ${
-                        activeDropdown === "user" ? "rotate-180" : ""
-                      }`}
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="space-x-2">
+                      <User className="w-5 h-5" />
+                      <span className="hidden sm:inline font-medium">
+                        {user.name}
+                      </span>
+                      <ChevronDown className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem
+                      onClick={() => onViewChange("profile")}
+                      className="cursor-pointer"
                     >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 9l-7 7-7-7"
-                      />
-                    </svg>
-                  </button>
-
-                  {activeDropdown === "user" && (
-                    <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-200 py-2 z-50">
-                      <button
-                        onClick={() => {
-                          onViewChange("profile");
-                          setActiveDropdown(null);
-                        }}
-                        className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        <User className="w-5 h-5 text-gray-500" />
-                        <span>Profile</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          onPricingClick();
-                          setActiveDropdown(null);
-                        }}
-                        className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        <Crown className="w-5 h-5 text-orange-500" />
-                        <span>Upgrade Plan</span>
-                      </button>
-                      <button
-                        onClick={handleSignOut}
-                        className="w-full flex items-center space-x-3 px-4 py-3 text-left text-gray-700 hover:bg-gray-50 transition-colors"
-                      >
-                        <LogOut className="w-5 h-5 text-red-500" />
-                        <span className="text-red-500">Sign out</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
+                      <User className="w-5 h-5 text-gray-500 mr-3" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={onPricingClick}
+                      className="cursor-pointer"
+                    >
+                      <Crown className="w-5 h-5 text-orange-500 mr-3" />
+                      <span>Upgrade Plan</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={handleSignOut}
+                      className="cursor-pointer text-red-500 focus:text-red-500"
+                    >
+                      <LogOut className="w-5 h-5 mr-3" />
+                      <span>Sign out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             ) : (
-              <button
+              <Button
                 onClick={onAuthClick}
-                className="flex items-center space-x-2 bg-orange-500 px-4 py-2 rounded-xl text-white hover:bg-orange-600 transition-colors"
+                className="bg-orange-500 hover:bg-orange-600 text-white space-x-2"
               >
                 <LogIn className="w-5 h-5" />
                 <span className="font-medium">Login</span>
-              </button>
+              </Button>
             )}
           </div>
         </div>
       </div>
-
-      {/* Backdrop for closing dropdowns */}
-      {activeDropdown && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setActiveDropdown(null)}
-        />
-      )}
     </nav>
   );
 }

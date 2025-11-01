@@ -1,6 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
 import {
-  X,
   Mail,
   Lock,
   User as UserIcon,
@@ -11,6 +10,17 @@ import {
 } from "lucide-react";
 import { supabase } from "../lib/supabase";
 import { User } from "../types/types";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
 
 // Google icon component
 const GoogleIcon = () => (
@@ -65,14 +75,13 @@ export default function AuthModal({
     setAuthMode(authModeParam);
   }, [authModeParam]);
 
-  if (!isOpen) return null;
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     setMessage(null);
 
     try {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
@@ -84,10 +93,10 @@ export default function AuthModal({
         setIsLoading(false);
       }
       // Note: If successful, user will be redirected to Google, then back to our callback
-    } catch (error: any) {
+    } catch (error: unknown) {
       setMessage({
         type: "error",
-        text: error.message || "An unexpected error occurred",
+        text: error instanceof Error ? error.message : "An unexpected error occurred",
       });
       setIsLoading(false);
     }
@@ -143,10 +152,10 @@ export default function AuthModal({
           onClose();
         }
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       setMessage({
         type: "error",
-        text: error.message || "An unexpected error occurred",
+        text: error instanceof Error ? error.message : "An unexpected error occurred",
       });
     } finally {
       setIsLoading(false);
@@ -154,50 +163,40 @@ export default function AuthModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-background/20 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="bg-card/95 backdrop-blur-sm border border-border/50 rounded-3xl max-w-md w-full p-8 shadow-2xl animate-scale-in">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="text-2xl font-bold text-foreground">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-md p-8">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold">
             {isLogin ? "Welcome Back" : "Create Account"}
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-foreground-muted hover:text-foreground transition-colors rounded-full p-1 hover:bg-muted"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+          </DialogTitle>
+        </DialogHeader>
 
         {message && (
-          <div
-            className={`mb-6 p-4 rounded-xl flex items-center space-x-3 ${
-              message.type === "error"
-                ? "bg-destructive/10 text-destructive border border-destructive/20"
-                : "bg-green-500/10 text-green-600 border border-green-500/20"
-            }`}
+          <Alert
+            variant={message.type === "error" ? "destructive" : "default"}
+            className={`mb-6 ${message.type === "success" ? "bg-green-500/10 text-green-600 border-green-500/20" : ""}`}
           >
             {message.type === "error" ? (
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
+              <AlertCircle className="w-5 h-5" />
             ) : (
-              <CheckCircle className="w-5 h-5 flex-shrink-0" />
+              <CheckCircle className="w-5 h-5" />
             )}
-            <span className="text-sm font-medium">{message.text}</span>
-          </div>
+            <AlertDescription>{message.text}</AlertDescription>
+          </Alert>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {!isLogin && (
-            <div>
-              <label className="block text-sm font-medium text-foreground mb-2">
-                Full Name
-              </label>
+            <div className="space-y-2">
+              <Label htmlFor="name">Full Name</Label>
               <div className="relative">
-                <UserIcon className="w-5 h-5 text-foreground-muted absolute left-4 top-1/2 -translate-y-1/2" />
-                <input
+                <UserIcon className="w-5 h-5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+                <Input
+                  id="name"
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder-foreground-muted"
+                  className="pl-10"
                   placeholder="Enter your full name"
                   required
                 />
@@ -205,104 +204,103 @@ export default function AuthModal({
             </div>
           )}
 
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Email Address
-            </label>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email Address</Label>
             <div className="relative">
-              <Mail className="w-5 h-5 text-foreground-muted absolute left-4 top-1/2 -translate-y-1/2" />
-              <input
+              <Mail className="w-5 h-5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+              <Input
+                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder-foreground-muted"
+                className="pl-10"
                 placeholder="Enter your email"
                 required
               />
             </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Password
-            </label>
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
             <div className="relative">
-              <Lock className="w-5 h-5 text-foreground-muted absolute left-4 top-1/2 -translate-y-1/2" />
-              <input
+              <Lock className="w-5 h-5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+              <Input
+                id="password"
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full pl-12 pr-12 py-3 bg-background border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all placeholder-foreground-muted"
+                className="pl-10 pr-10"
                 placeholder="Enter your password"
                 required
                 minLength={6}
               />
-              <button
+              <Button
                 type="button"
+                variant="ghost"
+                size="icon"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground-muted hover:text-foreground transition-colors"
+                className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
               >
                 {showPassword ? (
                   <EyeOff className="w-5 h-5" />
                 ) : (
                   <Eye className="w-5 h-5" />
                 )}
-              </button>
+              </Button>
             </div>
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={isLoading}
-            className="w-full py-3 bg-orange-500 text-primary-foreground rounded-xl font-semibold hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 mt-8"
+            className="w-full bg-orange-500 hover:bg-orange-600 mt-8"
           >
             {isLoading
               ? "Please wait..."
               : isLogin
                 ? "Sign In"
                 : "Create Account"}
-          </button>
+          </Button>
         </form>
 
         <div className="my-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-border" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-foreground-muted">
-                Or continue with
-              </span>
-            </div>
+          <Separator />
+          <div className="relative flex justify-center text-xs uppercase -mt-3">
+            <span className="bg-card px-2 text-muted-foreground">
+              Or continue with
+            </span>
           </div>
         </div>
 
-        <button
+        <Button
           onClick={handleGoogleSignIn}
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-white text-gray-700 border border-gray-300 rounded-xl font-semibold hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-sm"
+          variant="outline"
+          className="w-full gap-3"
         >
           <GoogleIcon />
           <span>{isLogin ? "Sign in with Google" : "Sign up with Google"}</span>
-        </button>
+        </Button>
 
         <div className="mt-8 text-center">
-          <p className="text-foreground-muted">
+          <p className="text-muted-foreground">
             {isLogin ? "Don't have an account?" : "Already have an account?"}
-            <button
+            <Button
+              type="button"
+              variant="link"
               onClick={() => {
                 const newAuthMode = authMode === "login" ? "register" : "login";
 
                 setAuthMode(newAuthMode);
                 setMessage(null);
               }}
-              className="ml-2 text-primary hover:text-primary/80 font-semibold transition-colors"
+              className="ml-2 text-primary hover:text-primary/80 font-semibold p-0 h-auto"
             >
               {isLogin ? "Sign up" : "Sign in"}
-            </button>
+            </Button>
           </p>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
