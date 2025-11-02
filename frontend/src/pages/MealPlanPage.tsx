@@ -886,7 +886,7 @@ export default function MealPlanPage({
           <div className="flex items-center gap-4">
             <div className="flex-1">
               <p className="text-sm font-medium">
-                Sign in to save your meal plans and sync across devices
+                {t('preferences.signInToSave')}
               </p>
             </div>
             <button

@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Calendar, Sparkles } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 interface GuestMealPlanningCTAProps {
   onSignUp?: () => void;
@@ -7,6 +8,8 @@ interface GuestMealPlanningCTAProps {
 }
 
 export function GuestMealPlanningCTA({ onSignUp, onSignIn }: GuestMealPlanningCTAProps) {
+  const { t } = useTranslation();
+
   return (
     <div className="flex mobile-viewport w-screen bg-gradient-to-br from-orange-50 via-orange-25 to-pink-50 items-center justify-center p-4">
       <div className="max-w-md w-full p-6 sm:p-8 text-center">
@@ -27,7 +30,7 @@ export function GuestMealPlanningCTA({ onSignUp, onSignIn }: GuestMealPlanningCT
 
         {/* Description */}
         <p className="text-sm sm:text-base text-gray-600 mb-6">
-          Plan your week with AI-powered recipes. Sign in to save plans and sync across devices.
+          {t('preferences.guestPlanningCta')}
         </p>
 
         {/* CTA Buttons */}

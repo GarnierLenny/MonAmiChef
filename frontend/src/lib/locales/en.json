@@ -142,7 +142,111 @@
     "send": "Send",
     "thinking": "Thinking...",
     "error": "Sorry, I couldn't process your request. Please try again.",
-    "welcomeMessage": "Hello! I'm your personal chef assistant. How can I help you today?"
+    "welcomeMessage": "Hello! I'm your personal chef assistant. How can I help you today?",
+    "defaultPreferenceMessage": "Generate a recipe based on my preferences",
+    "errorMessage": "Oops, something went wrong.",
+    "signUpToSave": "Sign up to save recipes",
+    "recipeSaved": "Recipe saved!",
+    "recipeSavedDescription": "Your recipe has been added to your saved recipes.",
+    "failedToSave": "Failed to save recipe",
+    "failedToSaveDescription": "Something went wrong. Please try again.",
+    "signUpForGrocery": "Sign up to add to grocery list",
+    "noIngredients": "No ingredients found",
+    "noIngredientsDescription": "This recipe doesn't have a valid ingredient list.",
+    "quickAddRecipes": "Quick Add Recipes",
+    "addedToGrocery": "Added to grocery list!",
+    "saveRecipe": "Save Recipe",
+    "recipeSavedStatus": "Recipe Saved",
+    "addToGroceryList": "Add to Grocery List",
+    "addedToGroceryList": "Added to List",
+    "generating": "Generating"
+  },
+  "chatHistory": {
+    "title": "Chat History",
+    "recentConversations": "Your recent conversations",
+    "untitled": "Untitled",
+    "enterNewTitle": "Enter a new title"
+  },
+  "preferences": {
+    "nutrition": {
+      "highProtein": "High Protein",
+      "highFiber": "High Fiber",
+      "lowCarb": "Low Carb",
+      "balanced": "Balanced",
+      "highCarb": "High Carb",
+      "lowFat": "Low Fat",
+      "vegetarian": "Vegetarian",
+      "vegan": "Vegan"
+    },
+    "cuisine": {
+      "italian": "Italian",
+      "mexican": "Mexican",
+      "mediterranean": "Mediterranean",
+      "american": "American",
+      "french": "French",
+      "indian": "Indian",
+      "thai": "Thai",
+      "chinese": "Chinese",
+      "japanese": "Japanese",
+      "middleEastern": "Middle Eastern",
+      "korean": "Korean",
+      "african": "African"
+    },
+    "mealType": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "appetizer": "Appetizer",
+      "dessert": "Dessert",
+      "snack": "Snack",
+      "smoothieDrink": "Smoothie/Drink"
+    },
+    "cookingTime": {
+      "under15": "Under 15 min",
+      "under30": "Under 30 min",
+      "slowCook": "Slow cook (over 1h)"
+    },
+    "skillLevel": {
+      "beginner": "Beginner",
+      "intermediate": "Intermediate",
+      "advanced": "Advanced"
+    },
+    "spiceLevel": {
+      "mild": "Mild",
+      "medium": "Medium",
+      "spicy": "Spicy",
+      "extraSpicy": "Extra Spicy"
+    },
+    "meats": {
+      "chicken": "Chicken",
+      "beef": "Beef",
+      "pork": "Pork",
+      "fish": "Fish",
+      "seafood": "Seafood",
+      "turkey": "Turkey",
+      "lamb": "Lamb"
+    },
+    "vegetables": {
+      "tomatoes": "Tomatoes",
+      "onions": "Onions",
+      "peppers": "Peppers",
+      "mushrooms": "Mushrooms",
+      "spinach": "Spinach",
+      "broccoli": "Broccoli",
+      "carrots": "Carrots",
+      "zucchini": "Zucchini"
+    },
+    "equipment": {
+      "oven": "Oven",
+      "stove": "Stove",
+      "airFryer": "Air Fryer",
+      "slowCooker": "Slow Cooker",
+      "instantPot": "Instant Pot",
+      "grill": "Grill",
+      "microwave": "Microwave"
+    },
+    "signInToSave": "Sign in to save your meal plans and sync across devices",
+    "guestPlanningCta": "Plan your week with AI-powered recipes. Sign in to save plans and sync across devices."
   },
   "auth": {
     "signIn": "Sign In",
@@ -258,7 +362,7 @@
     "emptyState": "Your grocery list is empty",
     "emptyStateCta": "Add meals from your meal plan to generate your grocery list",
     "goToMealPlan": "Go to Meal Plan",
-    "mealsSection": "From Your Meal Plan",
+    "mealsSection": "Meals",
     "ingredientsSection": "Ingredients",
     "customItemsSection": "Additional Items",
     "addItem": "Add",
@@ -436,3 +540,4 @@
     }
   }
 }
+
