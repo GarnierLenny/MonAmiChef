@@ -7,15 +7,15 @@ import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { HealthModule } from './health/health.module';
 
+// Feature modules
+import { UserHealthModule } from './user-health/user-health.module';
+import { GroceryListModule } from './grocery-list/grocery-list.module';
+import { MealPlanModule } from './meal-plan/meal-plan.module';
+import { ChatModule } from './chat/chat.module';
+import { RecipeModule } from './recipe/recipe.module';
+
 // Interceptors
 import { PerformanceInterceptor } from './common/interceptors/performance.interceptor';
-
-// TODO: Import these modules once controllers are migrated
-// import { ChatModule } from './chat/chat.module';
-// import { RecipeModule } from './recipe/recipe.module';
-// import { MealPlanModule } from './meal-plan/meal-plan.module';
-// import { GroceryListModule } from './grocery-list/grocery-list.module';
-// import { UserHealthModule } from './user-health/user-health.module';
 
 @Module({
   imports: [
@@ -30,12 +30,12 @@ import { PerformanceInterceptor } from './common/interceptors/performance.interc
     AuthModule,
     HealthModule,
 
-    // Feature modules - TODO: Uncomment after migration
-    // ChatModule,
-    // RecipeModule,
-    // MealPlanModule,
-    // GroceryListModule,
-    // UserHealthModule,
+    // Feature modules
+    UserHealthModule,
+    GroceryListModule,
+    MealPlanModule,
+    ChatModule,
+    RecipeModule,
   ],
   providers: [
     // Global performance monitoring
