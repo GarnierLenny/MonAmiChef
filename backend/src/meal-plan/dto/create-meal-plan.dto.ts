@@ -1,28 +1,15 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsEnum } from 'class-validator';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export class CreateMealPlanDto {
-  @ApiProperty({
-    description: 'Week start date in ISO format',
-    example: '2025-01-06',
-  })
-  @IsString()
-  weekStartDate!: string;
+// Define Zod schema for creating a meal plan
+const CreateMealPlanSchema = z.object({
+  weekStartDate: z.string(),
+  title: z.string().optional(),
+  generationMethod: z.enum(['manual', 'ai_generated', 'ai_assisted']).optional(),
+});
 
-  @ApiPropertyOptional({
-    description: 'Title of the meal plan',
-    example: 'My Weekly Meal Plan',
-  })
-  @IsOptional()
-  @IsString()
-  title?: string;
+// Create DTO class from schema
+export class CreateMealPlanDto extends createZodDto(CreateMealPlanSchema) {}
 
-  @ApiPropertyOptional({
-    description: 'Method used to generate the meal plan',
-    enum: ['manual', 'ai_generated', 'ai_assisted'],
-    example: 'manual',
-  })
-  @IsOptional()
-  @IsEnum(['manual', 'ai_generated', 'ai_assisted'])
-  generationMethod?: 'manual' | 'ai_generated' | 'ai_assisted';
-}
+// Export inferred type
+export type CreateMealPlan = z.infer<typeof CreateMealPlanSchema>;

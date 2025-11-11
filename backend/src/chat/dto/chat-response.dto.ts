@@ -1,16 +1,14 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export class ChatResponseDto {
-  @ApiProperty({
-    description: 'AI assistant reply',
-    example: 'Here is a delicious pasta recipe...',
-  })
-  reply!: string;
+// Define Zod schema for chat response
+const ChatResponseSchema = z.object({
+  reply: z.string(),
+  conversationId: z.string().nullable(),
+});
 
-  @ApiProperty({
-    description: 'Conversation ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-    nullable: true,
-  })
-  conversationId!: string | null;
-}
+// Create DTO class from schema
+export class ChatResponseDto extends createZodDto(ChatResponseSchema) {}
+
+// Export inferred type
+export type ChatResponse = z.infer<typeof ChatResponseSchema>;

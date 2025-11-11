@@ -1,97 +1,43 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsArray, IsOptional, ValidateNested } from 'class-validator';
-import { Type } from 'class-transformer';
-import { RecipeContent, RecipeNutrition } from '../../types/RecipeTypes';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export class RecipeContentDto implements RecipeContent {
-  @ApiProperty({ description: 'Recipe title' })
-  @IsString()
-  title!: string;
+// Define Zod schema for recipe content
+const RecipeContentSchema = z.object({
+  title: z.string(),
+  ingredients: z.array(z.string()),
+  instructions: z.array(z.string()),
+  tips: z.array(z.string()).optional(),
+  servings: z.number().optional(),
+  prepTime: z.string().optional(),
+  cookTime: z.string().optional(),
+  totalTime: z.string().optional(),
+});
 
-  @ApiProperty({ description: 'List of ingredients', type: [String] })
-  @IsArray()
-  @IsString({ each: true })
-  ingredients!: string[];
+// Define Zod schema for recipe nutrition
+const RecipeNutritionSchema = z.object({
+  calories: z.number().optional(),
+  protein: z.number().optional(),
+  carbs: z.number().optional(),
+  fat: z.number().optional(),
+  fiber: z.number().optional(),
+  sugar: z.number().optional(),
+  rating: z.enum(['A', 'B', 'C', 'D']).optional(),
+});
 
-  @ApiProperty({ description: 'List of cooking instructions', type: [String] })
-  @IsArray()
-  @IsString({ each: true })
-  instructions!: string[];
+// Define Zod schema for create recipe request
+const CreateRecipeSchema = z.object({
+  title: z.string(),
+  content_json: RecipeContentSchema,
+  nutrition: RecipeNutritionSchema.optional(),
+  tags: z.array(z.string()),
+});
 
-  @ApiProperty({ description: 'Optional cooking tips', type: [String], required: false })
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  tips?: string[];
+// Create DTO classes from schemas
+export class RecipeContentDto extends createZodDto(RecipeContentSchema) {}
+export class RecipeNutritionDto extends createZodDto(RecipeNutritionSchema) {}
+export class CreateRecipeDto extends createZodDto(CreateRecipeSchema) {}
 
-  @ApiProperty({ description: 'Number of servings', required: false })
-  @IsOptional()
-  servings?: number;
-
-  @ApiProperty({ description: 'Preparation time', required: false })
-  @IsOptional()
-  @IsString()
-  prepTime?: string;
-
-  @ApiProperty({ description: 'Cooking time', required: false })
-  @IsOptional()
-  @IsString()
-  cookTime?: string;
-
-  @ApiProperty({ description: 'Total time', required: false })
-  @IsOptional()
-  @IsString()
-  totalTime?: string;
-}
-
-export class RecipeNutritionDto implements RecipeNutrition {
-  @ApiProperty({ description: 'Calories', required: false })
-  @IsOptional()
-  calories?: number;
-
-  @ApiProperty({ description: 'Protein in grams', required: false })
-  @IsOptional()
-  protein?: number;
-
-  @ApiProperty({ description: 'Carbohydrates in grams', required: false })
-  @IsOptional()
-  carbs?: number;
-
-  @ApiProperty({ description: 'Fat in grams', required: false })
-  @IsOptional()
-  fat?: number;
-
-  @ApiProperty({ description: 'Fiber in grams', required: false })
-  @IsOptional()
-  fiber?: number;
-
-  @ApiProperty({ description: 'Sugar in grams', required: false })
-  @IsOptional()
-  sugar?: number;
-
-  @ApiProperty({ description: 'Nutrition rating', enum: ['A', 'B', 'C', 'D'], required: false })
-  @IsOptional()
-  rating?: 'A' | 'B' | 'C' | 'D';
-}
-
-export class CreateRecipeDto {
-  @ApiProperty({ description: 'Recipe title' })
-  @IsString()
-  title!: string;
-
-  @ApiProperty({ description: 'Recipe content in JSON format', type: RecipeContentDto })
-  @ValidateNested()
-  @Type(() => RecipeContentDto)
-  content_json!: RecipeContent;
-
-  @ApiProperty({ description: 'Nutrition information', type: RecipeNutritionDto, required: false })
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => RecipeNutritionDto)
-  nutrition?: RecipeNutrition;
-
-  @ApiProperty({ description: 'Recipe tags', type: [String] })
-  @IsArray()
-  @IsString({ each: true })
-  tags!: string[];
-}
+// Export inferred types
+export type RecipeContent = z.infer<typeof RecipeContentSchema>;
+export type RecipeNutrition = z.infer<typeof RecipeNutritionSchema>;
+export type CreateRecipe = z.infer<typeof CreateRecipeSchema>;

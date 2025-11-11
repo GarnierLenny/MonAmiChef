@@ -11,6 +11,7 @@
     "start:debug": "tsx --inspect src/main.ts",
     "start:prod": "node dist/src/main.js",
     "build": "npx prisma generate && tsc",
+    "typecheck": "tsc --noEmit",
     "tsoa:gen": "tsoa routes && tsoa spec",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -71,7 +72,7 @@
     "@tsoa/runtime": "^6.6.0",
     "@types/express": "^5.0.3",
     "@types/multer": "^2.0.0",
-    "@types/node": "^24.1.0",
+    "@types/node": "^24.10.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
     "cookie-parser": "^1.4.7",
@@ -80,6 +81,7 @@
     "express": "^4.21.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
+    "nestjs-zod": "^5.0.1",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "prisma": "^6.15.0",
@@ -88,7 +90,7 @@
     "swagger-ui-express": "^5.0.1",
     "ts-node": "^10.9.2",
     "tsoa": "^6.6.0",
-    "zod": "^4.1.11"
+    "zod": "^4.1.12"
   },
   "devDependencies": {
     "@types/cookie-parser": "^1.4.9",

@@ -28,5 +28,5 @@ module.exports = {
   testTimeout: 30000,
   verbose: true,
   // Run tests serially for e2e tests to avoid conflicts
-  maxWorkers: process.env.TEST_SERIAL ? 1 : undefined,
+  ...(process.env.TEST_SERIAL && { maxWorkers: 1 }),
 };

@@ -1,46 +1,25 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export class RecipeResponseDto {
-  @ApiProperty({
-    description: 'Recipe ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  id!: string;
+// Define Zod schema for recipe response (within generate meal response)
+const RecipeResponseSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  content_json: z.any(),
+  nutrition: z.any(),
+  tags: z.array(z.string()),
+  created_at: z.string(),
+});
 
-  @ApiProperty({
-    description: 'Recipe title',
-    example: 'Grilled Salmon with Quinoa',
-  })
-  title!: string;
+// Define Zod schema for generate meal recipe response
+const GenerateMealRecipeResponseSchema = z.object({
+  recipe: RecipeResponseSchema,
+});
 
-  @ApiProperty({
-    description: 'Recipe content in JSON format',
-  })
-  content_json!: any;
+// Create DTO classes from schemas
+export class RecipeResponseDto extends createZodDto(RecipeResponseSchema) {}
+export class GenerateMealRecipeResponseDto extends createZodDto(GenerateMealRecipeResponseSchema) {}
 
-  @ApiProperty({
-    description: 'Nutrition information',
-  })
-  nutrition!: any;
-
-  @ApiProperty({
-    description: 'Recipe tags',
-    type: [String],
-    example: ['dinner', 'healthy', 'high-protein'],
-  })
-  tags!: string[];
-
-  @ApiProperty({
-    description: 'Creation timestamp',
-    example: '2025-11-11T10:30:00.000Z',
-  })
-  created_at!: string;
-}
-
-export class GenerateMealRecipeResponseDto {
-  @ApiProperty({
-    description: 'Generated recipe',
-    type: RecipeResponseDto,
-  })
-  recipe!: RecipeResponseDto;
-}
+// Export inferred types
+export type RecipeResponse = z.infer<typeof RecipeResponseSchema>;
+export type GenerateMealRecipeResponse = z.infer<typeof GenerateMealRecipeResponseSchema>;

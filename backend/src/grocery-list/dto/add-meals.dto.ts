@@ -1,14 +1,13 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, ArrayNotEmpty, IsString } from 'class-validator';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export class AddMealsDto {
-  @ApiProperty({
-    description: 'Array of meal plan item IDs to add to grocery list',
-    type: [String],
-    example: ['uuid-1', 'uuid-2'],
-  })
-  @IsArray()
-  @ArrayNotEmpty()
-  @IsString({ each: true })
-  mealPlanItemIds!: string[];
-}
+// Define Zod schema for adding meals to grocery list
+const AddMealsSchema = z.object({
+  mealPlanItemIds: z.array(z.string()).min(1),
+});
+
+// Create DTO class from schema
+export class AddMealsDto extends createZodDto(AddMealsSchema) {}
+
+// Export inferred type
+export type AddMeals = z.infer<typeof AddMealsSchema>;

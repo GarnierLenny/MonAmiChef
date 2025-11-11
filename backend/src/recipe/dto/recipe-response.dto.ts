@@ -1,49 +1,65 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { RecipeContent, RecipeNutrition } from '../../types/RecipeTypes';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export class RecipeResponseDto {
-  @ApiProperty({ description: 'Recipe ID' })
-  id!: string;
+// Import schemas from create-recipe.dto
+const RecipeContentSchema = z.object({
+  title: z.string(),
+  ingredients: z.array(z.string()),
+  instructions: z.array(z.string()),
+  tips: z.array(z.string()).optional(),
+  servings: z.number().optional(),
+  prepTime: z.string().optional(),
+  cookTime: z.string().optional(),
+  totalTime: z.string().optional(),
+});
 
-  @ApiProperty({ description: 'Recipe title' })
-  title!: string;
+const RecipeNutritionSchema = z.object({
+  calories: z.number().optional(),
+  protein: z.number().optional(),
+  carbs: z.number().optional(),
+  fat: z.number().optional(),
+  fiber: z.number().optional(),
+  sugar: z.number().optional(),
+  rating: z.enum(['A', 'B', 'C', 'D']).optional(),
+});
 
-  @ApiProperty({ description: 'Recipe content in JSON format' })
-  content_json!: RecipeContent;
+// Define Zod schema for recipe response
+const RecipeResponseSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  content_json: RecipeContentSchema,
+  nutrition: RecipeNutritionSchema.optional(),
+  tags: z.array(z.string()),
+  created_at: z.string(),
+  is_saved: z.boolean().optional(),
+});
 
-  @ApiProperty({ description: 'Nutrition information', required: false })
-  nutrition?: RecipeNutrition;
+// Define Zod schema for saved recipe response
+const SavedRecipeResponseSchema = z.object({
+  id: z.string(),
+  recipe: RecipeResponseSchema,
+  created_at: z.string(),
+});
 
-  @ApiProperty({ description: 'Recipe tags', type: [String] })
-  tags!: string[];
+// Define Zod schema for save recipe response
+const SaveRecipeResponseSchema = z.object({
+  success: z.boolean(),
+  is_saved: z.boolean(),
+});
 
-  @ApiProperty({ description: 'Creation timestamp' })
-  created_at!: string;
+// Define Zod schema for unsave recipe response
+const UnsaveRecipeResponseSchema = z.object({
+  success: z.boolean(),
+});
 
-  @ApiProperty({ description: 'Whether the recipe is saved by current user', required: false })
-  is_saved?: boolean;
-}
+// Create DTO classes from schemas
+export class RecipeResponseDto extends createZodDto(RecipeResponseSchema) {}
+export class SavedRecipeResponseDto extends createZodDto(SavedRecipeResponseSchema) {}
+export class SaveRecipeResponseDto extends createZodDto(SaveRecipeResponseSchema) {}
+export class UnsaveRecipeResponseDto extends createZodDto(UnsaveRecipeResponseSchema) {}
 
-export class SavedRecipeResponseDto {
-  @ApiProperty({ description: 'Saved recipe ID' })
-  id!: string;
-
-  @ApiProperty({ description: 'Recipe details', type: RecipeResponseDto })
-  recipe!: RecipeResponseDto;
-
-  @ApiProperty({ description: 'Saved timestamp' })
-  created_at!: string;
-}
-
-export class SaveRecipeResponseDto {
-  @ApiProperty({ description: 'Whether the operation was successful' })
-  success!: boolean;
-
-  @ApiProperty({ description: 'Current saved state of the recipe' })
-  is_saved!: boolean;
-}
-
-export class UnsaveRecipeResponseDto {
-  @ApiProperty({ description: 'Whether the operation was successful' })
-  success!: boolean;
-}
+// Export inferred types
+export type RecipeResponse = z.infer<typeof RecipeResponseSchema>;
+export type SavedRecipeResponse = z.infer<typeof SavedRecipeResponseSchema>;
+export type SaveRecipeResponse = z.infer<typeof SaveRecipeResponseSchema>;
+export type UnsaveRecipeResponse = z.infer<typeof UnsaveRecipeResponseSchema>;

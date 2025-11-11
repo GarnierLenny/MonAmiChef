@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
-import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import { ZodValidationPipe } from 'nestjs-zod';
 import { AppModule } from './app.module';
 import cookieParser from 'cookie-parser';
 
@@ -59,14 +59,8 @@ async function bootstrap() {
   // Cookie parser
   app.use(cookieParser());
 
-  // Global validation pipe
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      forbidNonWhitelisted: true,
-      transform: true,
-    }),
-  );
+  // Global Zod validation pipe
+  app.useGlobalPipes(new ZodValidationPipe());
 
   // Swagger/OpenAPI documentation
   const config = new DocumentBuilder()

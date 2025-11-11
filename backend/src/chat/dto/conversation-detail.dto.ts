@@ -1,42 +1,24 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export class MessageDto {
-  @ApiProperty({
-    description: 'Message role',
-    enum: ['user', 'model'],
-    example: 'user',
-  })
-  role!: 'user' | 'model';
+// Define Zod schema for message
+const MessageSchema = z.object({
+  role: z.enum(['user', 'model']),
+  text: z.string(),
+});
 
-  @ApiProperty({
-    description: 'Message text',
-    example: 'I want to cook pasta tonight',
-  })
-  text!: string;
-}
+// Define Zod schema for conversation detail
+const ConversationDetailSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  created_at: z.string(), // ISO 8601 date string
+  messages: z.array(MessageSchema),
+});
 
-export class ConversationDetailDto {
-  @ApiProperty({
-    description: 'Conversation ID',
-    example: '123e4567-e89b-12d3-a456-426614174000',
-  })
-  id!: string;
+// Create DTO classes from schemas
+export class MessageDto extends createZodDto(MessageSchema) {}
+export class ConversationDetailDto extends createZodDto(ConversationDetailSchema) {}
 
-  @ApiProperty({
-    description: 'Conversation title',
-    example: 'My favorite pasta recipe',
-  })
-  title!: string;
-
-  @ApiProperty({
-    description: 'Creation timestamp',
-    example: '2025-11-11T10:30:00.000Z',
-  })
-  created_at!: Date;
-
-  @ApiProperty({
-    description: 'List of messages in the conversation',
-    type: [MessageDto],
-  })
-  messages!: MessageDto[];
-}
+// Export inferred types
+export type Message = z.infer<typeof MessageSchema>;
+export type ConversationDetail = z.infer<typeof ConversationDetailSchema>;

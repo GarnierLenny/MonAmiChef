@@ -1,28 +1,15 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export class AddCustomItemDto {
-  @ApiProperty({
-    description: 'Name of the custom grocery item',
-    example: 'Olive oil',
-  })
-  @IsString()
-  @IsNotEmpty()
-  name!: string;
+// Define Zod schema for adding a custom grocery item
+const AddCustomItemSchema = z.object({
+  name: z.string().min(1),
+  quantity: z.string().optional(),
+  category: z.string().optional(),
+});
 
-  @ApiPropertyOptional({
-    description: 'Quantity of the item',
-    example: '2 bottles',
-  })
-  @IsString()
-  @IsOptional()
-  quantity?: string;
+// Create DTO class from schema
+export class AddCustomItemDto extends createZodDto(AddCustomItemSchema) {}
 
-  @ApiPropertyOptional({
-    description: 'Category of the item',
-    example: 'other',
-  })
-  @IsString()
-  @IsOptional()
-  category?: string;
-}
+// Export inferred type
+export type AddCustomItem = z.infer<typeof AddCustomItemSchema>;

@@ -1,37 +1,27 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsOptional, IsEnum, IsObject } from 'class-validator';
-import { AIPreferences } from '../../types/MealPlanTypes';
+import { z } from 'zod';
+import { createZodDto } from 'nestjs-zod';
 
-export class UpdateMealPlanDto {
-  @ApiPropertyOptional({
-    description: 'Title of the meal plan',
-    example: 'My Weekly Meal Plan',
-  })
-  @IsOptional()
-  @IsString()
-  title?: string;
+// Define Zod schema for AI preferences
+const AIPreferencesSchema = z.object({
+  dietary_restrictions: z.array(z.string()).optional(),
+  cuisine_preferences: z.array(z.string()).optional(),
+  cooking_time_max: z.string().optional(),
+  budget_range: z.enum(['low', 'moderate', 'high']).optional(),
+  servings: z.number().optional(),
+  avoid_ingredients: z.array(z.string()).optional(),
+});
 
-  @ApiPropertyOptional({
-    description: 'Prompt used for AI generation',
-    example: 'Create healthy meals for weight loss',
-  })
-  @IsOptional()
-  @IsString()
-  generationPrompt?: string;
+// Define Zod schema for updating a meal plan
+const UpdateMealPlanSchema = z.object({
+  title: z.string().optional(),
+  generationPrompt: z.string().optional(),
+  generationMethod: z.enum(['manual', 'ai_generated', 'ai_assisted']).optional(),
+  aiPreferences: AIPreferencesSchema.optional(),
+});
 
-  @ApiPropertyOptional({
-    description: 'Method used to generate the meal plan',
-    enum: ['manual', 'ai_generated', 'ai_assisted'],
-    example: 'manual',
-  })
-  @IsOptional()
-  @IsEnum(['manual', 'ai_generated', 'ai_assisted'])
-  generationMethod?: 'manual' | 'ai_generated' | 'ai_assisted';
+// Create DTO class from schema
+export class UpdateMealPlanDto extends createZodDto(UpdateMealPlanSchema) {}
 
-  @ApiPropertyOptional({
-    description: 'AI preferences for meal generation',
-  })
-  @IsOptional()
-  @IsObject()
-  aiPreferences?: AIPreferences;
-}
+// Export inferred types
+export type AIPreferences = z.infer<typeof AIPreferencesSchema>;
+export type UpdateMealPlan = z.infer<typeof UpdateMealPlanSchema>;
