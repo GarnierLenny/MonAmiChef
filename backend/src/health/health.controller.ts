@@ -1,12 +1,8 @@
-import {
-  Controller,
-  Get,
-  Route,
-  Tags,
-  Security,
-} from "tsoa";
-import { prisma } from "../app";
-import { getPerformanceStats } from "../middlewares/performanceMonitor";
+import { Controller, Get, UseGuards } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { PrismaService } from '../prisma/prisma.service';
+import { JwtOptionalAuthGuard } from '../auth/guards/jwt-optional-auth.guard';
+import { getPerformanceStats } from '../common/interceptors/performance.interceptor';
 
 interface HealthStatus {
   status: 'healthy' | 'unhealthy';
@@ -41,20 +37,24 @@ interface DatabaseStats {
   };
 }
 
-@Route("health")
-@Tags("Health")
-export class HealthController extends Controller {
+@ApiTags('Health')
+@Controller('health')
+export class HealthController {
+  constructor(private readonly prisma: PrismaService) {}
+
   /**
    * Basic health check endpoint
    */
-  @Get("")
-  public async getHealth(): Promise<HealthStatus> {
+  @Get()
+  @ApiOperation({ summary: 'Health check' })
+  @ApiResponse({ status: 200, description: 'Service is healthy' })
+  async getHealth(): Promise<HealthStatus> {
     const startTime = Date.now();
     let dbConnected = false;
     let dbResponseTime: number | undefined;
 
     try {
-      await prisma.$queryRaw`SELECT 1`;
+      await this.prisma.$queryRaw`SELECT 1`;
       dbConnected = true;
       dbResponseTime = Date.now() - startTime;
     } catch (error) {
@@ -85,13 +85,16 @@ export class HealthController extends Controller {
   /**
    * Detailed performance metrics (admin only in production)
    */
-  @Get("metrics")
-  @Security("optionalAuth")
-  public async getMetrics() {
+  @Get('metrics')
+  @UseGuards(JwtOptionalAuthGuard)
+  @ApiOperation({ summary: 'Get performance metrics' })
+  @ApiResponse({ status: 200, description: 'Performance metrics retrieved' })
+  @ApiResponse({ status: 403, description: 'Metrics not available in production' })
+  async getMetrics() {
     // In production, you might want to restrict this to admin users
-    const isDev = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
+    const isDev =
+      process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
     if (!isDev) {
-      this.setStatus(403);
       return { error: 'Metrics endpoint not available in production' };
     }
 
@@ -101,12 +104,15 @@ export class HealthController extends Controller {
   /**
    * Database statistics
    */
-  @Get("stats")
-  @Security("optionalAuth")
-  public async getDatabaseStats(): Promise<DatabaseStats> {
-    const isDev = process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
+  @Get('stats')
+  @UseGuards(JwtOptionalAuthGuard)
+  @ApiOperation({ summary: 'Get database statistics' })
+  @ApiResponse({ status: 200, description: 'Database statistics retrieved' })
+  @ApiResponse({ status: 403, description: 'Stats not available in production' })
+  async getDatabaseStats(): Promise<DatabaseStats> {
+    const isDev =
+      process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test';
     if (!isDev) {
-      this.setStatus(403);
       return {
         guests: { total: 0, converted: 0, active: 0 },
         profiles: { total: 0 },
@@ -123,18 +129,18 @@ export class HealthController extends Controller {
       guestConversations,
       userConversations,
     ] = await Promise.all([
-      prisma.guest.count(),
-      prisma.guest.count({ where: { converted_to_profile: true } }),
-      prisma.guest.count({
+      this.prisma.guest.count(),
+      this.prisma.guest.count({ where: { converted_to_profile: true } }),
+      this.prisma.guest.count({
         where: {
           converted_to_profile: false,
           Conversation: { some: {} },
         },
       }),
-      prisma.profile.count(),
-      prisma.conversation.count(),
-      prisma.conversation.count({ where: { owner_guest_id: { not: null } } }),
-      prisma.conversation.count({ where: { owner_profile_id: { not: null } } }),
+      this.prisma.profile.count(),
+      this.prisma.conversation.count(),
+      this.prisma.conversation.count({ where: { owner_guest_id: { not: null } } }),
+      this.prisma.conversation.count({ where: { owner_profile_id: { not: null } } }),
     ]);
 
     return {

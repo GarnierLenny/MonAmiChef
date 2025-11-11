@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES2022",                 // ES2021 or newer
-    "lib": ["ES2022"],                  // include ES2021+ so Promise.any is typed
+    "target": "ES2022",
+    "lib": ["ES2022"],
     "module": "commonjs",
     "outDir": "dist",
     "rootDir": ".",
@@ -9,6 +9,18 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
-  }
+    "emitDecoratorMetadata": true,
+    "declaration": true,
+    "removeComments": true,
+    "allowSyntheticDefaultImports": true,
+    "sourceMap": true,
+    "incremental": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "strictBindCallApply": true,
+    "forceConsistentCasingInFileNames": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src/**/*", "prisma/**/*"],
+  "exclude": ["node_modules", "dist", "tests"]
 }
