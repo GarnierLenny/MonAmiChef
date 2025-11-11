@@ -19,22 +19,24 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
-import { PrismaService } from '../prisma/prisma.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { AuthUser } from '../auth/strategies/jwt.strategy';
-import { resolveOptimizedOwner, ownerWhereOptimized } from '../common/utils/owner.util';
-import { LogMetricDto } from './dto/log-metric.dto';
-import { UpdateGoalsDto } from './dto/update-goals.dto';
-import { GetMetricsQueryDto } from './dto/get-metrics-query.dto';
-import { HealthMetric, UserGoals, DashboardData } from '../types/UserHealthTypes';
-import { UserHealthService } from './user-health.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { AuthUser } from '../../auth/strategies/jwt.strategy';
+import { resolveOptimizedOwner } from '../../common/utils/owner.util';
+import { UserHealthRepository } from '../repositories/user-health.repository';
+import { UserHealthService } from '../services/user-health.service';
+import { LogMetricDto } from '../dto/log-metric.dto';
+import { UpdateGoalsDto } from '../dto/update-goals.dto';
+import { GetMetricsQueryDto } from '../dto/get-metrics-query.dto';
+import { HealthMetric, UserGoals, DashboardData } from '../../types/UserHealthTypes';
 
 @ApiTags('User Health')
 @Controller('user-health')
 export class UserHealthController {
   constructor(
     private readonly prisma: PrismaService,
+    private readonly userHealthRepository: UserHealthRepository,
     private readonly userHealthService: UserHealthService,
   ) {}
 
@@ -83,11 +85,11 @@ export class UserHealthController {
       if (query.endDate) whereClause.recorded_at.lte = new Date(query.endDate);
     }
 
-    const metrics = await this.prisma.healthMetric.findMany({
-      where: whereClause,
-      orderBy: { recorded_at: 'desc' },
-      take: query.limit || 100,
-    });
+    const metrics = await this.userHealthRepository.findHealthMetrics(
+      whereClause,
+      { recorded_at: 'desc' },
+      query.limit || 100,
+    );
 
     return metrics.map((metric) => ({
       id: metric.id,
@@ -130,32 +132,25 @@ export class UserHealthController {
     const recordedAt = body.recorded_at ? new Date(body.recorded_at) : new Date();
 
     // Check if metric already exists for this date
-    const existingMetric = await this.prisma.healthMetric.findFirst({
-      where: {
-        profile_id: userId,
-        recorded_at: recordedAt,
-      },
-    });
+    const existingMetric = await this.userHealthRepository.findHealthMetricByProfileAndDate(
+      userId,
+      recordedAt,
+    );
 
     let metric;
     if (existingMetric) {
       // Update existing metric
-      metric = await this.prisma.healthMetric.update({
-        where: { id: existingMetric.id },
-        data: {
-          weight: body.weight,
-          body_fat: body.body_fat,
-        },
+      metric = await this.userHealthRepository.updateHealthMetric(existingMetric.id, {
+        weight: body.weight,
+        body_fat: body.body_fat,
       });
     } else {
       // Create new metric
-      metric = await this.prisma.healthMetric.create({
-        data: {
-          profile_id: userId,
-          weight: body.weight,
-          body_fat: body.body_fat,
-          recorded_at: recordedAt,
-        },
+      metric = await this.userHealthRepository.createHealthMetric({
+        profile_id: userId,
+        weight: body.weight,
+        body_fat: body.body_fat,
+        recorded_at: recordedAt,
       });
     }
 
@@ -185,9 +180,7 @@ export class UserHealthController {
       throw new HttpException('User not authenticated', HttpStatus.UNAUTHORIZED);
     }
 
-    const goals = await this.prisma.userGoals.findUnique({
-      where: { profile_id: userId },
-    });
+    const goals = await this.userHealthRepository.findUserGoals(userId);
 
     if (!goals) return null;
 
@@ -224,14 +217,7 @@ export class UserHealthController {
       throw new HttpException('User not authenticated', HttpStatus.UNAUTHORIZED);
     }
 
-    const goals = await this.prisma.userGoals.upsert({
-      where: { profile_id: userId },
-      update: body,
-      create: {
-        profile_id: userId,
-        ...body,
-      },
-    });
+    const goals = await this.userHealthRepository.upsertUserGoals(userId, body);
 
     return {
       id: goals.id,
@@ -264,28 +250,26 @@ export class UserHealthController {
     }
 
     // Get latest health metrics
-    const latestMetrics = await this.prisma.healthMetric.findMany({
-      where: { profile_id: userId },
-      orderBy: { recorded_at: 'desc' },
-      take: 2,
-    });
+    const latestMetrics = await this.userHealthRepository.findHealthMetrics(
+      { profile_id: userId },
+      { recorded_at: 'desc' },
+      2,
+    );
 
     // Get historical data for charts (last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    const historicalMetrics = await this.prisma.healthMetric.findMany({
-      where: {
+    const historicalMetrics = await this.userHealthRepository.findHealthMetrics(
+      {
         profile_id: userId,
         recorded_at: { gte: thirtyDaysAgo },
       },
-      orderBy: { recorded_at: 'asc' },
-    });
+      { recorded_at: 'asc' },
+    );
 
     // Get user goals
-    const goals = await this.prisma.userGoals.findUnique({
-      where: { profile_id: userId },
-    });
+    const goals = await this.userHealthRepository.findUserGoals(userId);
 
     // Calculate current stats and changes
     const currentStats: DashboardData['currentStats'] = {};

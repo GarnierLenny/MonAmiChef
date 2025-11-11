@@ -1,17 +1,17 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { GoogleGenAI } from '@google/genai';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from '../prisma/prisma.service';
-import { GoalAwareMealService } from '../services/GoalAwareMealService';
-import { buildPreferenceSummary } from '../utils/buildPreferenceSummary';
-import { parseRecipeFromAI } from '../utils/recipeParser';
-import { Owner, ownerWhereOptimized } from '../common/utils/owner.util';
+import { ChatRepository } from '../repositories/chat.repository';
+import { GoalAwareMealService } from '../../meal-plan/services/goal-aware-meal.service';
+import { buildPreferenceSummary } from '../../utils/buildPreferenceSummary';
+import { parseRecipeFromAI } from '../../utils/recipeParser';
+import { Owner, ownerWhereOptimized } from '../../common/utils/owner.util';
 import {
   ChatRequest,
   ChatResponse,
   UserModelMessage,
   Preferences,
-} from '../types/ChatTypes';
+} from '../../types/ChatTypes';
 
 const GEMINI_MODEL = 'gemini-2.5-flash';
 
@@ -54,11 +54,12 @@ const geminiCookAssistantPrompt = `
 @Injectable()
 export class ChatService {
   private ai: GoogleGenAI;
-  private goalService: GoalAwareMealService;
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly chatRepository: ChatRepository,
+    private readonly goalService: GoalAwareMealService,
+  ) {
     this.ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
-    this.goalService = new GoalAwareMealService();
   }
 
   /**
@@ -216,11 +217,9 @@ export class ChatService {
 
     // Save to database
     try {
-      const conversation = await this.prisma.conversation.create({
-        data: {
-          title: title ?? modelResponse.substring(0, 30) + '...',
-          ...ownerWhereOptimized(owner),
-        },
+      const conversation = await this.chatRepository.createConversation({
+        title: title ?? modelResponse.substring(0, 30) + '...',
+        ...ownerWhereOptimized(owner),
       });
 
       const userModelConversation: UserModelMessage[] = [
@@ -228,15 +227,13 @@ export class ChatService {
         { role: 'model', parts: [{ text: modelResponse }] },
       ];
 
-      await this.prisma.chatMessage.create({
-        data: {
-          conversation_id: conversation.id,
-          history: userModelConversation as unknown as Prisma.InputJsonValue,
-          messages: [
-            { role: 'user', text: rawInput },
-            { role: 'model', text: modelResponse },
-          ],
-        },
+      await this.chatRepository.createChatMessage({
+        conversation_id: conversation.id,
+        history: userModelConversation as unknown as Prisma.InputJsonValue,
+        messages: [
+          { role: 'user', text: rawInput },
+          { role: 'model', text: modelResponse },
+        ],
       });
 
       return { reply: modelResponse, conversationId: conversation.id };
@@ -283,12 +280,10 @@ export class ChatService {
 
     try {
       // Verify conversation exists and belongs to user
-      const conversation = await this.prisma.conversation.findFirst({
-        where: {
-          id: conversationId,
-          ...ownerWhereOptimized(owner),
-        },
-      });
+      const conversation = await this.chatRepository.findConversationById(
+        conversationId,
+        ownerWhereOptimized(owner),
+      );
 
       if (!conversation) {
         throw new HttpException(
@@ -297,15 +292,7 @@ export class ChatService {
         );
       }
 
-      const messagesQuery = await this.prisma.chatMessage.findFirst({
-        where: {
-          conversation_id: conversationId,
-        },
-        select: {
-          messages: true,
-          history: true,
-        },
-      });
+      const messagesQuery = await this.chatRepository.findChatMessage(conversationId);
 
       if (messagesQuery) {
         if (Array.isArray(messagesQuery.history)) {
@@ -368,18 +355,13 @@ export class ChatService {
 
       const updatedMessages = [userMessage, modelMessage];
 
-      await this.prisma.chatMessage.update({
-        where: {
-          conversation_id: conversationId,
-        },
-        data: {
-          history: updatedMessages as unknown as Prisma.InputJsonValue,
-          messages: [
-            ...conversationMessages,
-            { role: 'user', text: rawInput },
-            { role: 'model', text: modelResponse },
-          ],
-        },
+      await this.chatRepository.updateChatMessage(conversationId, {
+        history: updatedMessages as unknown as Prisma.InputJsonValue,
+        messages: [
+          ...conversationMessages,
+          { role: 'user', text: rawInput },
+          { role: 'model', text: modelResponse },
+        ],
       });
 
       return { reply: modelResponse, conversationId };
@@ -397,21 +379,9 @@ export class ChatService {
    */
   async getUserConversations(owner: Owner): Promise<any[]> {
     try {
-      const conversations = await this.prisma.conversation.findMany({
-        where: {
-          ...ownerWhereOptimized(owner),
-        },
-        select: {
-          id: true,
-          created_at: true,
-          title: true,
-        },
-        orderBy: {
-          created_at: 'desc',
-        },
-        take: 100, // Limit to prevent performance issues
-      });
-
+      const conversations = await this.chatRepository.findUserConversations(
+        ownerWhereOptimized(owner),
+      );
       return conversations;
     } catch (error) {
       console.error('Error fetching conversations:', error);
@@ -454,15 +424,11 @@ export class ChatService {
     }
 
     try {
-      const renamed = await this.prisma.conversation.update({
-        where: {
-          id: conversationId,
-          ...ownerWhereOptimized(owner),
-        },
-        data: {
-          title: trimmedTitle,
-        },
-      });
+      const renamed = await this.chatRepository.updateConversation(
+        conversationId,
+        ownerWhereOptimized(owner),
+        { title: trimmedTitle },
+      );
       return renamed;
     } catch (prismaError: any) {
       if (prismaError.code === 'P2025') {
@@ -490,12 +456,10 @@ export class ChatService {
     }
 
     // Verify conversation exists and belongs to user
-    const conversation = await this.prisma.conversation.findFirst({
-      where: {
-        id: conversationId,
-        ...ownerWhereOptimized(owner),
-      },
-    });
+    const conversation = await this.chatRepository.findConversationById(
+      conversationId,
+      ownerWhereOptimized(owner),
+    );
 
     if (!conversation) {
       throw new HttpException(
@@ -505,22 +469,7 @@ export class ChatService {
     }
 
     try {
-      // Delete in transaction for data integrity
-      await this.prisma.$transaction(async (tx) => {
-        // Delete messages first (foreign key constraint)
-        await tx.chatMessage.deleteMany({
-          where: {
-            conversation_id: conversationId,
-          },
-        });
-
-        // Then delete conversation
-        await tx.conversation.delete({
-          where: {
-            id: conversationId,
-          },
-        });
-      });
+      await this.chatRepository.deleteConversationWithMessages(conversationId);
     } catch (deleteError) {
       console.error('Error deleting conversation:', deleteError);
       throw new HttpException(
@@ -545,26 +494,10 @@ export class ChatService {
     }
 
     try {
-      const chat = await this.prisma.conversation.findFirst({
-        where: {
-          id: conversationId,
-          ...ownerWhereOptimized(owner),
-        },
-        select: {
-          id: true,
-          created_at: true,
-          title: true,
-          ChatMessage: {
-            select: {
-              messages: true,
-              created_at: true,
-            },
-          },
-        },
-        orderBy: {
-          created_at: 'asc',
-        },
-      });
+      const chat = await this.chatRepository.findConversationWithMessages(
+        conversationId,
+        ownerWhereOptimized(owner),
+      );
 
       if (!chat) {
         throw new HttpException(
@@ -577,7 +510,7 @@ export class ChatService {
         id: chat.id,
         title: chat.title,
         created_at: chat.created_at,
-        messages: chat.ChatMessage?.messages ?? [],
+        messages: chat.ChatMessage && chat.ChatMessage.length > 0 ? chat.ChatMessage[0].messages : [],
       };
     } catch (error) {
       if (error instanceof HttpException) {
@@ -654,13 +587,11 @@ Without accurate nutrition data, the recipe cannot be saved. This is MANDATORY.`
     const parsedRecipe = await this.generateRecipeWithValidation(mealPrompt);
 
     // Create recipe in database
-    const recipe = await this.prisma.recipe.create({
-      data: {
-        title: parsedRecipe.title,
-        content_json: parsedRecipe.content_json as any,
-        nutrition: parsedRecipe.nutrition as any,
-        tags: parsedRecipe.tags,
-      },
+    const recipe = await this.chatRepository.createRecipe({
+      title: parsedRecipe.title,
+      content_json: parsedRecipe.content_json,
+      nutrition: parsedRecipe.nutrition,
+      tags: parsedRecipe.tags,
     });
 
     return {

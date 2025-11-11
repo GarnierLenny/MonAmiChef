@@ -20,22 +20,25 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Request, Response } from 'express';
-import { PrismaService } from '../prisma/prisma.service';
-import { JwtOptionalAuthGuard } from '../auth/guards/jwt-optional-auth.guard';
-import { resolveOptimizedOwner, ownerWhereOptimized } from '../common/utils/owner.util';
-import { groceryListService } from '../services/GroceryListService';
-import { AddMealsDto } from './dto/add-meals.dto';
-import { AddCustomItemDto } from './dto/add-custom-item.dto';
-import { UpdateCustomItemDto } from './dto/update-custom-item.dto';
+import { PrismaService } from '../../prisma/prisma.service';
+import { JwtOptionalAuthGuard } from '../../auth/guards/jwt-optional-auth.guard';
+import { resolveOptimizedOwner } from '../../common/utils/owner.util';
+import { GroceryListService } from '../services/grocery-list.service';
+import { AddMealsDto } from '../dto/add-meals.dto';
+import { AddCustomItemDto } from '../dto/add-custom-item.dto';
+import { UpdateCustomItemDto } from '../dto/update-custom-item.dto';
 import type {
   GroceryListResponse,
   CustomGroceryItemResponse,
-} from '../types/groceryList';
+} from '../../types/groceryList';
 
 @ApiTags('Grocery List')
 @Controller('grocery-list')
 export class GroceryListController {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly groceryListService: GroceryListService,
+  ) {}
 
   /**
    * Get the user's grocery list (creates one if it doesn't exist)
@@ -64,7 +67,7 @@ export class GroceryListController {
       );
     }
 
-    return groceryListService.getOrCreateGroceryList(owner.userId);
+    return this.groceryListService.getOrCreateGroceryList(owner.userId);
   }
 
   /**
@@ -107,7 +110,7 @@ export class GroceryListController {
       );
     }
 
-    return groceryListService.addMeals(owner.userId, body);
+    return this.groceryListService.addMeals(owner.userId, body);
   }
 
   /**
@@ -139,7 +142,7 @@ export class GroceryListController {
       );
     }
 
-    await groceryListService.removeMeal(owner.userId, mealPlanItemId);
+    await this.groceryListService.removeMeal(owner.userId, mealPlanItemId);
   }
 
   /**
@@ -176,13 +179,10 @@ export class GroceryListController {
     }
 
     if (!body.name || body.name.trim() === '') {
-      throw new HttpException(
-        'Item name is required',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new HttpException('Item name is required', HttpStatus.BAD_REQUEST);
     }
 
-    return groceryListService.addCustomItem(owner.userId, body);
+    return this.groceryListService.addCustomItem(owner.userId, body);
   }
 
   /**
@@ -220,10 +220,17 @@ export class GroceryListController {
     }
 
     try {
-      return await groceryListService.updateCustomItem(owner.userId, itemId, body);
+      return await this.groceryListService.updateCustomItem(
+        owner.userId,
+        itemId,
+        body,
+      );
     } catch (error) {
       if (error instanceof Error) {
-        if (error.message === 'Grocery list not found' || error.message === 'Custom item not found') {
+        if (
+          error.message === 'Grocery list not found' ||
+          error.message === 'Custom item not found'
+        ) {
           throw new HttpException(error.message, HttpStatus.NOT_FOUND);
         }
       }
@@ -263,7 +270,7 @@ export class GroceryListController {
       );
     }
 
-    await groceryListService.deleteCustomItem(owner.userId, itemId);
+    await this.groceryListService.deleteCustomItem(owner.userId, itemId);
   }
 
   /**
@@ -294,6 +301,6 @@ export class GroceryListController {
       );
     }
 
-    await groceryListService.clearGroceryList(owner.userId);
+    await this.groceryListService.clearGroceryList(owner.userId);
   }
 }

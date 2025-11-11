@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { UserHealthRepository } from '../repositories/user-health.repository';
 
 export interface MacroNutrition {
   protein: number;
@@ -15,7 +15,7 @@ export interface DayMacros {
 
 @Injectable()
 export class UserHealthService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly userHealthRepository: UserHealthRepository) {}
 
   /**
    * Calculate today's macros from user's meal plan
@@ -27,31 +27,22 @@ export class UserHealthService {
 
     try {
       // Find user's meal plan for this week
-      const mealPlan = await this.prisma.mealPlan.findFirst({
-        where: {
-          userId: userId,
-          weekStartDate: weekStart,
-        },
-        include: {
-          items: {
-            where: {
-              day: dayOfWeek,
-            },
-            include: {
-              recipe: true,
-            },
-          },
-        },
-      });
+      const mealPlan = await this.userHealthRepository.findMealPlanForWeek(
+        userId,
+        weekStart,
+      );
 
       if (!mealPlan || !mealPlan.items.length) {
         return { protein: 0, carbs: 0, fat: 0, calories: 0 };
       }
 
+      // Filter items for today
+      const todayItems = mealPlan.items.filter((item) => item.day === dayOfWeek);
+
       // Sum nutrition from all recipes for today
       const totalMacros = { protein: 0, carbs: 0, fat: 0, calories: 0 };
 
-      for (const item of mealPlan.items) {
+      for (const item of todayItems) {
         if (item.recipe && item.recipe.nutrition) {
           const nutrition = this.parseNutrition(item.recipe.nutrition);
           if (nutrition) {
@@ -79,19 +70,10 @@ export class UserHealthService {
 
     try {
       // Find user's meal plan for this week
-      const mealPlan = await this.prisma.mealPlan.findFirst({
-        where: {
-          userId: userId,
-          weekStartDate: weekStart,
-        },
-        include: {
-          items: {
-            include: {
-              recipe: true,
-            },
-          },
-        },
-      });
+      const mealPlan = await this.userHealthRepository.findMealPlanForWeek(
+        userId,
+        weekStart,
+      );
 
       const weekMacros: DayMacros[] = [];
       const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];

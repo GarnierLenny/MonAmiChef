@@ -24,22 +24,22 @@ import {
 } from '@nestjs/swagger';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
-import { ChatService } from './chat.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { JwtOptionalAuthGuard } from '../auth/guards/jwt-optional-auth.guard';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
-import { AuthUser } from '../auth/strategies/jwt.strategy';
-import { resolveOptimizedOwner } from '../common/utils/owner.util';
+import { ChatService } from '../services/chat.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { JwtOptionalAuthGuard } from '../../auth/guards/jwt-optional-auth.guard';
+import { CurrentUser } from '../../auth/decorators/current-user.decorator';
+import { AuthUser } from '../../auth/strategies/jwt.strategy';
+import { resolveOptimizedOwner } from '../../common/utils/owner.util';
 
 // DTOs
-import { ChatRequestDto } from './dto/chat-request.dto';
-import { ChatResponseDto } from './dto/chat-response.dto';
-import { RenameChatRequestDto } from './dto/rename-chat-request.dto';
-import { GenerateMealRecipeRequestDto } from './dto/generate-meal-recipe-request.dto';
-import { GenerateMealRecipeResponseDto } from './dto/generate-meal-recipe-response.dto';
-import { TranscribeResponseDto } from './dto/transcribe-response.dto';
-import { ConversationListItemDto } from './dto/conversation-list-item.dto';
-import { ConversationDetailDto } from './dto/conversation-detail.dto';
+import { ChatRequestDto } from '../dto/chat-request.dto';
+import { ChatResponseDto } from '../dto/chat-response.dto';
+import { RenameChatRequestDto } from '../dto/rename-chat-request.dto';
+import { GenerateMealRecipeRequestDto } from '../dto/generate-meal-recipe-request.dto';
+import { GenerateMealRecipeResponseDto } from '../dto/generate-meal-recipe-response.dto';
+import { TranscribeResponseDto } from '../dto/transcribe-response.dto';
+import { ConversationListItemDto } from '../dto/conversation-list-item.dto';
+import { ConversationDetailDto } from '../dto/conversation-detail.dto';
 
 @ApiTags('Chat')
 @Controller('chat')
