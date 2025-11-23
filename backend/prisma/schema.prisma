@@ -114,8 +114,9 @@ model MealPlanItem {
   createdAt  DateTime @default(now()) @map("created_at")
 
   // Relations
-  mealPlan MealPlan @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
-  recipe   Recipe?  @relation(fields: [recipeId], references: [id])
+  mealPlan     MealPlan      @relation(fields: [mealPlanId], references: [id], onDelete: Cascade)
+  recipe       Recipe?       @relation(fields: [recipeId], references: [id])
+  groceryMeals GroceryMeal[]
 
   // One row per (plan, day, meal)
   @@unique([mealPlanId, day, mealSlot], map: "meal_plan_day_slot_unique")
@@ -171,7 +172,8 @@ model GroceryMeal {
   mealSlot       MealSlot @map("meal_slot")
   addedAt        DateTime @default(now()) @map("added_at")
 
-  list GroceryList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  list         GroceryList  @relation(fields: [listId], references: [id], onDelete: Cascade)
+  mealPlanItem MealPlanItem @relation(fields: [mealPlanItemId], references: [id], onDelete: Cascade)
 
   @@unique([listId, mealPlanItemId], map: "grocery_meal_list_item_unique")
   @@index([listId])

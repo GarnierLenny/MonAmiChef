@@ -67,7 +67,15 @@ export class GroceryListController {
       );
     }
 
-    return this.groceryListService.getOrCreateGroceryList(owner.userId);
+    try {
+      return await this.groceryListService.getOrCreateGroceryList(owner.userId);
+    } catch (error) {
+      console.error('Error getting grocery list:', error);
+      throw new HttpException(
+        'Failed to retrieve grocery list',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   /**

@@ -508,6 +508,7 @@ function ChatPage({ user, onAuthClick, onSignOut, chats: propsChats = [], setCha
                 onAuthClick={onAuthClick}
                 onOpenPreferences={() => setIsChatSidebarOpen(true)}
                 onPromptClick={handlePromptClick}
+                isLoadingChat={isLoadingChat}
               />
             </div>
           </div>
@@ -556,6 +557,7 @@ function ChatPage({ user, onAuthClick, onSignOut, chats: propsChats = [], setCha
               user={user}
               onAuthClick={onAuthClick}
               onPromptClick={handlePromptClick}
+              isLoadingChat={isLoadingChat}
             />
           </div>
 

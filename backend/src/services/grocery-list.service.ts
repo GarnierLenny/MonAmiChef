@@ -18,58 +18,86 @@ export class GroceryListService {
    * Get or create a grocery list for a user (singleton pattern)
    */
   async getOrCreateGroceryList(userId: string): Promise<GroceryListResponse> {
-    let groceryList = await this.groceryListRepository.findByUserId(userId);
+    try {
+      let groceryList = await this.groceryListRepository.findByUserId(userId);
 
-    if (!groceryList) {
-      groceryList = await this.groceryListRepository.create(userId);
-    }
+      if (!groceryList) {
+        groceryList = await this.groceryListRepository.create(userId);
+      }
 
-    // Fetch recipes for all meals
-    const mealPlanItemIds = groceryList.meals.map((m) => m.mealPlanItemId);
-    const mealPlanItems = await this.groceryListRepository.findMealPlanItemsWithRecipes(
-      mealPlanItemIds,
-    );
+      // Fetch recipes for all meals (only if there are meals)
+      const mealPlanItemIds = groceryList.meals?.map((m) => m.mealPlanItemId) || [];
+      const mealPlanItems = mealPlanItemIds.length > 0
+        ? await this.groceryListRepository.findMealPlanItemsWithRecipes(mealPlanItemIds)
+        : [];
 
-    // Map meals with recipe data
-    const mealsWithRecipes = groceryList.meals.map((meal) => {
-      const mealPlanItem = mealPlanItems.find((mpi) => mpi.id === meal.mealPlanItemId);
-      const recipe = mealPlanItem?.recipe;
+      // Create a map for faster lookup
+      const mealPlanItemMap = new Map(mealPlanItems.map((item) => [item.id, item]));
+
+      // Map meals with recipe data, filtering out meals with missing MealPlanItems
+      const mealsWithRecipes = groceryList.meals
+        .map((meal) => {
+          const mealPlanItem = mealPlanItemMap.get(meal.mealPlanItemId);
+
+          // Skip meals where the MealPlanItem no longer exists
+          if (!mealPlanItem) {
+            console.warn(`GroceryMeal ${meal.id} references non-existent MealPlanItem ${meal.mealPlanItemId}`);
+            return null;
+          }
+
+          const recipe = mealPlanItem.recipe;
+
+          // Extract ingredients safely
+          let ingredients: string[] = [];
+          try {
+            if (recipe?.content_json) {
+              const contentJson = recipe.content_json as any;
+              if (contentJson.ingredients && Array.isArray(contentJson.ingredients)) {
+                ingredients = contentJson.ingredients;
+              }
+            }
+          } catch (error) {
+            console.error(`Error parsing ingredients for recipe ${recipe?.id}:`, error);
+          }
+
+          return {
+            id: meal.id,
+            mealPlanItemId: meal.mealPlanItemId,
+            day: meal.day,
+            mealSlot: meal.mealSlot,
+            recipe: {
+              id: recipe?.id || '',
+              title: recipe?.title || 'Unknown Recipe',
+              ingredients,
+            },
+            addedAt: meal.addedAt,
+          };
+        })
+        .filter((meal) => meal !== null) as any[];
+
+      // Aggregate ingredients by category
+      const aggregatedIngredients = this.aggregateIngredients(mealsWithRecipes);
 
       return {
-        id: meal.id,
-        mealPlanItemId: meal.mealPlanItemId,
-        day: meal.day,
-        mealSlot: meal.mealSlot,
-        recipe: {
-          id: recipe?.id || '',
-          title: recipe?.title || 'Unknown Recipe',
-          ingredients: recipe?.content_json
-            ? ((recipe.content_json as any).ingredients as string[]) || []
-            : [],
-        },
-        addedAt: meal.addedAt,
+        id: groceryList.id,
+        userId: groceryList.userId,
+        meals: mealsWithRecipes,
+        customItems: groceryList.customItems?.map((item) => ({
+          id: item.id,
+          name: item.name,
+          quantity: item.quantity || undefined,
+          category: item.category || undefined,
+          checked: item.checked,
+          createdAt: item.createdAt,
+        })) || [],
+        aggregatedIngredients,
+        createdAt: groceryList.createdAt,
+        updatedAt: groceryList.updatedAt,
       };
-    });
-
-    // Aggregate ingredients by category
-    const aggregatedIngredients = this.aggregateIngredients(mealsWithRecipes);
-
-    return {
-      id: groceryList.id,
-      userId: groceryList.userId,
-      meals: mealsWithRecipes,
-      customItems: groceryList.customItems.map((item) => ({
-        id: item.id,
-        name: item.name,
-        quantity: item.quantity || undefined,
-        category: item.category || undefined,
-        checked: item.checked,
-        createdAt: item.createdAt,
-      })),
-      aggregatedIngredients,
-      createdAt: groceryList.createdAt,
-      updatedAt: groceryList.updatedAt,
-    };
+    } catch (error) {
+      console.error('Error in getOrCreateGroceryList:', error);
+      throw error;
+    }
   }
 
   /**
@@ -223,28 +251,53 @@ export class GroceryListService {
   private aggregateIngredients(meals: any[]): CategoryIngredients[] {
     const ingredientMap = new Map<string, AggregatedIngredient>();
 
-    // Extract and parse all ingredients
-    for (const meal of meals) {
-      for (const ingredient of meal.recipe.ingredients) {
-        const parsed = this.parseIngredient(ingredient);
-        const key = parsed.name.toLowerCase();
+    try {
+      // Extract and parse all ingredients
+      for (const meal of meals) {
+        // Safety check: ensure recipe and ingredients exist
+        if (!meal?.recipe?.ingredients || !Array.isArray(meal.recipe.ingredients)) {
+          continue;
+        }
 
-        if (ingredientMap.has(key)) {
-          // Ingredient already exists, merge quantities
-          const existing = ingredientMap.get(key)!;
-          existing.quantity = this.mergeQuantities(existing.quantity, parsed.quantity);
-          existing.recipeIds.push(meal.recipe.id);
-          existing.recipes.push(meal.recipe.title);
-        } else {
-          // New ingredient
-          ingredientMap.set(key, {
-            name: parsed.name,
-            quantity: parsed.quantity,
-            recipeIds: [meal.recipe.id],
-            recipes: [meal.recipe.title],
-          });
+        for (const ingredient of meal.recipe.ingredients) {
+          // Skip null, undefined, or empty ingredients
+          if (!ingredient || typeof ingredient !== 'string') {
+            continue;
+          }
+
+          try {
+            const parsed = this.parseIngredient(ingredient);
+            const key = parsed.name.toLowerCase();
+
+            if (ingredientMap.has(key)) {
+              // Ingredient already exists, merge quantities
+              const existing = ingredientMap.get(key)!;
+              existing.quantity = this.mergeQuantities(existing.quantity, parsed.quantity);
+              if (meal.recipe.id && !existing.recipeIds.includes(meal.recipe.id)) {
+                existing.recipeIds.push(meal.recipe.id);
+              }
+              if (meal.recipe.title && !existing.recipes.includes(meal.recipe.title)) {
+                existing.recipes.push(meal.recipe.title);
+              }
+            } else {
+              // New ingredient
+              ingredientMap.set(key, {
+                name: parsed.name,
+                quantity: parsed.quantity,
+                recipeIds: meal.recipe.id ? [meal.recipe.id] : [],
+                recipes: meal.recipe.title ? [meal.recipe.title] : [],
+              });
+            }
+          } catch (error) {
+            console.error(`Error parsing ingredient "${ingredient}":`, error);
+            // Continue with next ingredient
+          }
         }
       }
+    } catch (error) {
+      console.error('Error aggregating ingredients:', error);
+      // Return empty array on error to prevent complete failure
+      return [];
     }
 
     // Group by category
