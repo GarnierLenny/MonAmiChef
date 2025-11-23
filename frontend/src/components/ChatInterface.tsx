@@ -48,6 +48,7 @@ interface ChatInterfaceProps {
   onAuthClick?: () => void;
   onOpenPreferences?: () => void;
   onPromptClick?: (prompt: string) => void;
+  isLoadingChat?: boolean;
 }
 
 export default function ChatInterface({
@@ -68,6 +69,7 @@ export default function ChatInterface({
   onAuthClick,
   onOpenPreferences,
   onPromptClick,
+  isLoadingChat = false,
 }: ChatInterfaceProps) {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
@@ -425,11 +427,14 @@ export default function ChatInterface({
 
   const hasMessages = messages.length > 0;
 
+  // Show placeholder only when there are no messages AND we're not currently loading a chat
+  const showPlaceholder = !hasMessages && !isLoadingChat;
+
   return (
     <div className="flex-1 flex flex-col bg-orange-50 h-full overflow-hidden w-screen">
       <div className="flex-1 flex flex-col min-h-0">
-        {/* Show placeholder when no messages, otherwise show messages */}
-        {!hasMessages ? (
+        {/* Show placeholder when no messages and not loading, otherwise show messages */}
+        {showPlaceholder ? (
           <div className="flex-1 flex items-center justify-center w-full">
             <ChatPlaceholder onPromptClick={onPromptClick} />
           </div>
