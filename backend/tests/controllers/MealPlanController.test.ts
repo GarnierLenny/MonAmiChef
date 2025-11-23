@@ -7,8 +7,8 @@ function uuidv4() {
     return v.toString(16);
   });
 }
-import { app } from '../../src/app';
-import { prisma } from '../../src/app';
+import { app } from '../test-prisma';
+import { prisma } from '../test-prisma';
 import {
   createTestUser,
   createTestGuest,

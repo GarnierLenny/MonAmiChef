@@ -60,6 +60,7 @@ function ChatPage({ user, onAuthClick, onSignOut, chats: propsChats = [], setCha
     servings: null,
   });
   const latestChatIdRef = useRef<string | null>(null);
+  const justCreatedChatRef = useRef<string | null>(null); // Track newly created chats to avoid refetching
   const [isLoadingChat, setIsLoadingChat] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -255,6 +256,13 @@ function ChatPage({ user, onAuthClick, onSignOut, chats: propsChats = [], setCha
       return;
     }
 
+    // Skip fetching if this chat was just created in this session
+    if (justCreatedChatRef.current === chatId) {
+      justCreatedChatRef.current = null; // Reset flag
+      latestChatIdRef.current = chatId;
+      return;
+    }
+
     // Mark this fetch as the latest
     latestChatIdRef.current = chatId;
 
@@ -277,7 +285,18 @@ function ChatPage({ user, onAuthClick, onSignOut, chats: propsChats = [], setCha
         if (latestChatIdRef.current !== startedFor) return;
 
         const msgs = result?.messages ?? [];
-        setMessages(Array.isArray(msgs) ? msgs : []);
+
+        // Transform backend messages to include required frontend properties
+        const transformedMessages = Array.isArray(msgs)
+          ? msgs.map((msg: any, index: number) => ({
+              id: msg.id ?? `${msg.role}-${index}-${Date.now()}`,
+              text: msg.text ?? "",
+              role: msg.role as "user" | "model",
+              timestamp: msg.timestamp ? new Date(msg.timestamp) : new Date(),
+            }))
+          : [];
+
+        setMessages(transformedMessages);
       } catch (err: any) {
         if (err.name !== "AbortError") {
           // Only log; keep previous messages to avoid flash
@@ -361,6 +380,8 @@ function ChatPage({ user, onAuthClick, onSignOut, chats: propsChats = [], setCha
       ]);
 
       if (!chatId && res.conversationId) {
+        // Mark this chat as just created to prevent immediate refetch
+        justCreatedChatRef.current = res.conversationId;
         setChatParam(res.conversationId, true);
       }
 
