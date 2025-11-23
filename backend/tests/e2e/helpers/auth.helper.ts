@@ -1,4 +1,4 @@
-import { prisma } from '../../../src/app';
+import { prisma } from '../../test-prisma';
 import { randomUUID } from 'crypto';
 
 /**

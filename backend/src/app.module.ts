@@ -3,19 +3,19 @@ import { ConfigModule } from '@nestjs/config';
 import { APP_INTERCEPTOR } from '@nestjs/core';
 
 // Core modules
-import { PrismaModule } from './prisma/prisma.module';
-import { AuthModule } from './auth/auth.module';
-import { HealthModule } from './health/health.module';
+import { PrismaModule } from './modules/prisma.module';
+import { AuthModule } from './modules/auth.module';
+import { HealthModule } from './modules/health.module';
 
 // Feature modules
-import { UserHealthModule } from './user-health/user-health.module';
-import { GroceryListModule } from './grocery-list/grocery-list.module';
-import { MealPlanModule } from './meal-plan/meal-plan.module';
-import { ChatModule } from './chat/chat.module';
-import { RecipeModule } from './recipe/recipe.module';
+import { UserHealthModule } from './modules/user-health.module';
+import { GroceryListModule } from './modules/grocery-list.module';
+import { MealPlanModule } from './modules/meal-plan.module';
+import { ChatModule } from './modules/chat.module';
+import { RecipeModule } from './modules/recipe.module';
 
 // Interceptors
-import { PerformanceInterceptor } from './common/interceptors/performance.interceptor';
+import { PerformanceInterceptor } from './interceptors/performance.interceptor';
 
 @Module({
   imports: [

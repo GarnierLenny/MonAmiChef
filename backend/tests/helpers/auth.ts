@@ -5,7 +5,7 @@ function uuidv4() {
     return v.toString(16);
   });
 }
-import { prisma } from '../../src/app';
+import { prisma } from '../test-prisma';
 
 export interface TestUser {
   id: string;

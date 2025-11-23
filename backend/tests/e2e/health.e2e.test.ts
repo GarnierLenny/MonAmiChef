@@ -1,16 +1,20 @@
 import request from 'supertest';
-import { app } from '../../src/app';
+import { getTestServer, closeTestApp } from '../test-app';
 import { createTestUser, cleanupTestUser } from './helpers/auth.helper';
+
+let app: any;
 
 describe('HealthController E2E Tests', () => {
   let testUser: Awaited<ReturnType<typeof createTestUser>>;
 
   beforeAll(async () => {
+    app = await getTestServer();
     testUser = await createTestUser();
   });
 
   afterAll(async () => {
     await cleanupTestUser(testUser.profile.id);
+    await closeTestApp();
   });
 
   describe('GET /health', () => {

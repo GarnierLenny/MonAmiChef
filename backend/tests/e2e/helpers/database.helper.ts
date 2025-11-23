@@ -1,4 +1,4 @@
-import { prisma } from '../../../src/app';
+import { prisma } from '../../test-prisma';
 
 /**
  * Clean up all test data from the database

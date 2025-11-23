@@ -1,4 +1,4 @@
-import { prisma } from '../src/app';
+import { prisma } from './test-prisma';
 
 // Mock authentication before importing anything else
 jest.mock('../src/authentication', () => {
